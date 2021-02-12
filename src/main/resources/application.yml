@@ -1,0 +1,42 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: codex-feasibility-gui-backend
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/certs
+      client:
+        registration:
+          userStoreClient:
+            authorization-grant-type: client_credentials
+            client-id: codexFeasibilityGuiBackend
+            client-secret: bc1843c0-3c57-4c2c-9b40-ac38e6dd545e
+        provider:
+          userStoreClient:
+            token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
+
+swagger:
+  oauth2:
+    token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
+    auth-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/auth
+    client-name: codexFeasibilityGuiBackendWebapp
+    client-secret: codexFeasibilityGuiBackendWebapp
+
+userstore:
+  url: ${keycloak.url}/auth/admin/realms/Num
+
+keycloak:
+  url: http://localhost:8080
+
+logging:
+  level:
+    de.numcodex: trace
+    org.springframework.web: trace
+
+cors:
+  allowedOrigins:
+    - "*"
+
