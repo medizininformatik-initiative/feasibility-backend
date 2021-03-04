@@ -1,8 +1,8 @@
 package de.numcodex.feasibility_gui_backend.api;
 
 
-import de.numcodex.feasibility_gui_backend.model.CategoryEntry;
-import de.numcodex.feasibility_gui_backend.model.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.model.ui.CategoryEntry;
+import de.numcodex.feasibility_gui_backend.model.ui.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.service.TerminologyService;
 import java.util.List;
 import java.util.UUID;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
@@ -31,18 +32,18 @@ public class TerminologyRestController {
     this.terminologyService = terminologyService;
   }
 
-  @GetMapping(path = {"nodeId"})
-  public TerminologyEntry getEntry(@PathVariable("nodeId") UUID nodeId) {
+  @GetMapping("entries/{nodeId}")
+  public TerminologyEntry getEntry(@PathVariable UUID nodeId) {
     return terminologyService.getEntry(nodeId);
   }
 
-  @GetMapping
+  @GetMapping("root-entries")
   public List<CategoryEntry> getCategories() {
     return terminologyService.getCategories();
   }
 
-  @GetMapping(path = {"query"})
-  public List<TerminologyEntry> queryEntries(@PathVariable("query") String query) {
+  @GetMapping("selectable-entries")
+  public List<TerminologyEntry> queryEntries(@RequestParam("query") String query) {
     return terminologyService.queryEntries(query);
   }
 }

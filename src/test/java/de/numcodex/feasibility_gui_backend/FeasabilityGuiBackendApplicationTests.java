@@ -4,7 +4,8 @@ import QueryBuilderMoc.QueryBuilderCQL;
 import QueryBuilderMoc.QueryBuilderFHIR;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.model.QueryDefinition;
+import de.numcodex.feasibility_gui_backend.model.query.QueryDefinition;
+import de.numcodex.feasibility_gui_backend.model.ui.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.service.QueryBuilderService;
 import java.net.URI;
 import java.net.URL;
@@ -35,4 +36,19 @@ class FeasibilityGuiBackendApplicationTests {
     Assertions.assertEquals("FHIRQuery", queryService.getQueryContent(fhirBuilder));
     Assertions.assertEquals("CQLQuery", queryService.getQueryContent(cqlBuilder));
   }
+
+
+  @Test
+  public void terminologyEntryFromJson() throws Exception {
+    var objectMapper = new ObjectMapper();
+
+    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+    TerminologyEntry demographics = objectMapper.readValue(
+        new URL("file:src/test/resources/Demographie.json"),
+        TerminologyEntry.class);
+
+    System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(demographics));
+  }
+
 }

@@ -1,8 +1,8 @@
 package de.numcodex.feasibility_gui_backend.api;
 
-import de.numcodex.feasibility_gui_backend.model.QueryDefinition;
-import de.numcodex.feasibility_gui_backend.model.QueryResult;
-import de.numcodex.feasibility_gui_backend.model.ResultLocation;
+import de.numcodex.feasibility_gui_backend.model.query.QueryDefinition;
+import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
+import de.numcodex.feasibility_gui_backend.model.query.ResultLocation;
 import de.numcodex.feasibility_gui_backend.service.QueryBuilderService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

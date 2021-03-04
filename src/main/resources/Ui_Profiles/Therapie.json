@@ -1,0 +1,290 @@
+{
+    "children": [
+        {
+            "children": [],
+            "display": "Dialyse / H\u00e4mofiltration",
+            "id": "95f56548-4c5c-4540-900b-8a4e8dceb38f",
+            "leaf": true,
+            "selectable": true,
+            "termCode": {
+                "code": "108241001",
+                "display": "dialyse (verrichting)",
+                "system": "http://snomed.info/sct"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": [
+                {
+                    "allowedUnits": [],
+                    "precision": 1,
+                    "selectableConcepts": [
+                        {
+                            "code": "preparation",
+                            "display": "Vorbereitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "in-progress",
+                            "display": "in Bearbeitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "not-done",
+                            "display": "nicht Durchgef\u00fchrt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "on-hold",
+                            "display": "in Wartestellung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "stopped",
+                            "display": "gestoppt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "completed",
+                            "display": "abgeschlossen",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "entered-in-error",
+                            "display": "fehlerhafte Eingabe",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "unknown",
+                            "display": "Unbekannt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        }
+                    ],
+                    "type": "concept"
+                }
+            ]
+        },
+        {
+            "children": [],
+            "display": "Apherese",
+            "id": "dd0e08a7-e87c-429b-b0e3-9cfc1a33d2c0",
+            "leaf": true,
+            "selectable": true,
+            "termCode": {
+                "code": "127788007",
+                "display": "Apheresis (procedure)",
+                "system": "http://snomed.info/sct"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": [
+                {
+                    "allowedUnits": [],
+                    "precision": 1,
+                    "selectableConcepts": [
+                        {
+                            "code": "preparation",
+                            "display": "Vorbereitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "in-progress",
+                            "display": "in Bearbeitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "not-done",
+                            "display": "nicht Durchgef\u00fchrt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "on-hold",
+                            "display": "in Wartestellung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "stopped",
+                            "display": "gestoppt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "completed",
+                            "display": "abgeschlossen",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "entered-in-error",
+                            "display": "fehlerhafte Eingabe",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "unknown",
+                            "display": "Unbekannt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        }
+                    ],
+                    "type": "concept"
+                }
+            ]
+        },
+        {
+            "children": [],
+            "display": "Bauchlage",
+            "id": "cf586f83-7a9b-4786-8ee2-e37484b3337b",
+            "leaf": true,
+            "selectable": true,
+            "termCode": {
+                "code": "431182000",
+                "display": "pati\u00ebnt in buikligging plaatsen (verrichting)",
+                "system": "http://snomed.info/sct"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": [
+                {
+                    "allowedUnits": [],
+                    "precision": 1,
+                    "selectableConcepts": [
+                        {
+                            "code": "preparation",
+                            "display": "Vorbereitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "in-progress",
+                            "display": "in Bearbeitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "not-done",
+                            "display": "nicht Durchgef\u00fchrt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "on-hold",
+                            "display": "in Wartestellung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "stopped",
+                            "display": "gestoppt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "completed",
+                            "display": "abgeschlossen",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "entered-in-error",
+                            "display": "fehlerhafte Eingabe",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "unknown",
+                            "display": "Unbekannt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        }
+                    ],
+                    "type": "concept"
+                }
+            ]
+        },
+        {
+            "children": [],
+            "display": "ECMO-Therapie",
+            "id": "a4f0908f-4079-4e30-a8fe-959dc4b09a8d",
+            "leaf": true,
+            "selectable": true,
+            "termCode": {
+                "code": "233573008",
+                "display": "Extracorporeal membrane oxygenation (procedure)",
+                "system": "http://snomed.info/sct"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": [
+                {
+                    "allowedUnits": [],
+                    "precision": 1,
+                    "selectableConcepts": [
+                        {
+                            "code": "preparation",
+                            "display": "Vorbereitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "in-progress",
+                            "display": "in Bearbeitung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "not-done",
+                            "display": "nicht Durchgef\u00fchrt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "on-hold",
+                            "display": "in Wartestellung",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "stopped",
+                            "display": "gestoppt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "completed",
+                            "display": "abgeschlossen",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "entered-in-error",
+                            "display": "fehlerhafte Eingabe",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        },
+                        {
+                            "code": "unknown",
+                            "display": "Unbekannt",
+                            "system": "http://hl7.org/fhir/event-status",
+                            "version": "4.0.1"
+                        }
+                    ],
+                    "type": "concept"
+                }
+            ]
+        }
+    ],
+    "display": "Therapie",
+    "id": "b6b80217-a601-4bed-8f89-7f9d1be1aece",
+    "leaf": false,
+    "selectable": false,
+    "timeRestrictionAllowed": false,
+    "valueDefinitions": []
+}
