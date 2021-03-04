@@ -10,20 +10,18 @@ import lombok.Data;
 @Data
 public class ValueDefinition {
 
-  @JsonProperty("type")
+  @JsonProperty(value = "type", required = true)
   private ValueType type;
   @JsonProperty("selectableConcepts")
   private List<TermCode> selectableConcepts = new ArrayList<>();
   @JsonProperty("comparator")
   private Comparator comparator;
-  @JsonProperty("value")
-  private double value;
   @JsonProperty("allowedUnits")
   private List<Unit> allowedUnits = new ArrayList<>();
-  @JsonProperty("precision")
+  @JsonProperty(value = "precision", required = true, defaultValue = "0")
   private double precision;
-  @JsonProperty("min")
-  private double min;
-  @JsonProperty("max")
-  private double max;
+  @JsonProperty(value = "min")
+  private Double min;
+  @JsonProperty(value = "max")
+  private Double max;
 }
