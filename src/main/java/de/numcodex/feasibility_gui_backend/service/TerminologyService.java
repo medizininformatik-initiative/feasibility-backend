@@ -10,12 +10,14 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TerminologyService {
 
-  private static final String UI_PROFILES_PATH = "src/main/resources/Ui_Profiles";
+  private  String uiProfilePath;
   private static final List<String> SORTED_CATEGORIES = List.of("Anamnese / Risikofaktoren", "Demographie",
       "Laborwerte", "Therapie", "Andere");
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
@@ -23,7 +25,8 @@ public class TerminologyService {
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
-  public TerminologyService() {
+  public TerminologyService(@Value("${backend.ontology-folder}") String uiProfilePath) {
+    this.uiProfilePath = uiProfilePath;
     readInTerminologyEntries();
     generateTerminologyEntriesWithoutDirectChildren();
     generateSelectableEntriesByCategory();
@@ -37,7 +40,7 @@ public class TerminologyService {
       objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
       try {
         var terminology_entry = (objectMapper.readValue(
-            new URL("file:" + UI_PROFILES_PATH + "/" + filename),
+            new URL("file:" + uiProfilePath + "/" + filename),
             TerminologyEntry.class));
         terminologyEntries.put(terminology_entry.getId(), terminology_entry);
         categoryEntries.add(new CategoryEntry(terminology_entry.getId(),
@@ -55,8 +58,11 @@ public class TerminologyService {
   }
 
   private Set<String> getFilePathsUiProfiles() {
+    System.out.println("####################");
+    System.out.println(uiProfilePath);
+
     return Stream.of(
-        Objects.requireNonNull(new File(UI_PROFILES_PATH).listFiles()))
+        Objects.requireNonNull(new File(uiProfilePath).listFiles()))
         .filter(file -> !file.isDirectory())
         .map(File::getName)
         .collect(Collectors.toSet());

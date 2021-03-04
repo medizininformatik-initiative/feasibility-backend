@@ -1,0 +1,8 @@
+version: '3.7'
+services:
+  feasibility-gui-backend:
+    container_name: feasibility-gui-backend
+    build: .
+    ports:
+    - ${PORT_FEASIBILITY_GUI_BACKEND:-127.0.0.1:8090}:8090
+

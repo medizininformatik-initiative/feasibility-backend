@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 class FeasibilityGuiBackendApplicationTests {
 
-  @Test
+  //@Test
   public void fromJson() throws Exception {
     var objectMapper = new ObjectMapper();
 

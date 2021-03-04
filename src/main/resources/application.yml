@@ -18,6 +18,9 @@ spring:
           userStoreClient:
             token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
 
+backend:
+  ontology-folder: ontology/ui_profiles
+
 swagger:
   oauth2:
     token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
