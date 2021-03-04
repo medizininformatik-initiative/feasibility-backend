@@ -90,9 +90,6 @@ public class TerminologyService {
     }
   }
 
-
-
-
   //TODO: Unknown key!
   public TerminologyEntry getEntry(UUID nodeId) {
     return terminologyEntriesWithOnlyDirectChildren.get(nodeId);
