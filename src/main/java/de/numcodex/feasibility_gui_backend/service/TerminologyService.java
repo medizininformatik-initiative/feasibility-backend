@@ -4,19 +4,20 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.ui.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.model.ui.TerminologyEntry;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TerminologyService {
 
-  public static final String UI_PROFILES_PATH = "src/main/resources/Ui_Profiles";
+  private static final String UI_PROFILES_PATH = "src/main/resources/Ui_Profiles";
+  private static final List<String> SORTED_CATEGORIES = List.of("Anamnese / Risikofaktoren", "Demographie",
+      "Laborwerte", "Therapie", "Andere");
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
   private List<CategoryEntry> categoryEntries = new ArrayList<>();
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
@@ -96,6 +97,7 @@ public class TerminologyService {
   }
 
   public List<CategoryEntry> getCategories() {
+    categoryEntries.sort(Comparator.comparing(value -> SORTED_CATEGORIES.indexOf(value.getDisplay())));
     return categoryEntries;
   }
 
