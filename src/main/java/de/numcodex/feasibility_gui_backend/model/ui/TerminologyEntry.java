@@ -24,8 +24,8 @@ public class TerminologyEntry {
   private boolean selectable;
   @JsonProperty("timeRestrictionAllowed")
   private boolean timeRestrictionAllowed;
-  @JsonProperty("valueDefinition")
-  private List<ValueDefinition> valueDefinition = new ArrayList<>();
+  @JsonProperty("valueDefinitions")
+  private List<ValueDefinition> valueDefinitions = new ArrayList<>();
   @JsonProperty("display")
   private String display;
 
@@ -44,7 +44,7 @@ public class TerminologyEntry {
     terminologyEntry.leaf = other.leaf;
     terminologyEntry.selectable = other.selectable;
     terminologyEntry.timeRestrictionAllowed = other.timeRestrictionAllowed;
-    terminologyEntry.valueDefinition = other.valueDefinition;
+    terminologyEntry.valueDefinitions = other.valueDefinitions;
     terminologyEntry.display = other.display;
     return terminologyEntry;
   }

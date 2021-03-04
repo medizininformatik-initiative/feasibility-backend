@@ -4,20 +4,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.ui.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.model.ui.TerminologyEntry;
+import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.stereotype.Service;
 
 @Service
 public class TerminologyService {
@@ -42,7 +36,7 @@ public class TerminologyService {
       objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
       try {
         var terminology_entry = (objectMapper.readValue(
-            new URL(UI_PROFILES_PATH + "/" + filename),
+            new URL("file:" + UI_PROFILES_PATH + "/" + filename),
             TerminologyEntry.class));
         terminologyEntries.put(terminology_entry.getId(), terminology_entry);
         categoryEntries.add(new CategoryEntry(terminology_entry.getId(),

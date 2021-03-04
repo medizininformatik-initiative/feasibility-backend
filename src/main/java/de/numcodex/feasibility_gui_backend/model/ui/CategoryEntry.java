@@ -5,11 +5,11 @@ import java.util.UUID;
 
 public class CategoryEntry {
 
-  private final UUID entryId;
+  private final UUID catId;
   private final String display;
 
-  public CategoryEntry(@JsonProperty("id") UUID entryId, @JsonProperty("display") String display) {
-    this.entryId = entryId;
+  public CategoryEntry(@JsonProperty("catId") UUID catId, @JsonProperty("display") String display) {
+    this.catId = catId;
     this.display = display;
   }
 
@@ -17,7 +17,7 @@ public class CategoryEntry {
     return display;
   }
 
-  public UUID getEntryId() {
-    return entryId;
+  public UUID getCatId() {
+    return catId;
   }
 }
