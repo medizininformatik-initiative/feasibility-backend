@@ -6,12 +6,14 @@ import de.numcodex.feasibility_gui_backend.model.common.ValueDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.Data;
 
 @Data
 public class TerminologyEntry {
+
   @JsonProperty("children")
-  private List<TerminologyEntry> children;
+  private List<TerminologyEntry> children = new ArrayList<>();
   @JsonProperty("termCode")
   private TermCode termCode;
   @JsonProperty("id")
@@ -23,27 +25,28 @@ public class TerminologyEntry {
   @JsonProperty("timeRestrictionAllowed")
   private boolean timeRestrictionAllowed;
   @JsonProperty("valueDefinition")
-  private ValueDefinition valueDefinition;
+  private List<ValueDefinition> valueDefinition = new ArrayList<>();
   @JsonProperty("display")
   private String display;
 
-  public void copy(TerminologyEntry other)
-  {
-    children = new ArrayList<>();
-    // TODO: Works but can you do that more elegantly?
-    for(var child : other.getChildren())
-    {
-      var child_without_children = new TerminologyEntry();
-      child_without_children.copy(child);
-      child_without_children.getChildren().clear();
-      children.add(child_without_children);
-    }
-    termCode = other.termCode;
-    id = other.id;
-    leaf = other.leaf;
-    selectable = other.selectable;
-    timeRestrictionAllowed = other.timeRestrictionAllowed;
-    valueDefinition = other.valueDefinition;
-    display = other.display;
+  public static TerminologyEntry copyWithDirectChildren(TerminologyEntry other) {
+    var terminology_entry = copyWithoutChildren(other);
+    terminology_entry.children = other.children.stream().map(TerminologyEntry::copyWithoutChildren)
+        .collect(
+            Collectors.toList());
+    return terminology_entry;
   }
+
+  public static TerminologyEntry copyWithoutChildren(TerminologyEntry other) {
+    var terminologyEntry = new TerminologyEntry();
+    terminologyEntry.termCode = other.termCode;
+    terminologyEntry.id = other.id;
+    terminologyEntry.leaf = other.leaf;
+    terminologyEntry.selectable = other.selectable;
+    terminologyEntry.timeRestrictionAllowed = other.timeRestrictionAllowed;
+    terminologyEntry.valueDefinition = other.valueDefinition;
+    terminologyEntry.display = other.display;
+    return terminologyEntry;
+  }
+
 }

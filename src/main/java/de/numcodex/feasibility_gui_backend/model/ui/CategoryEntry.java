@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
 public class CategoryEntry {
+
   private final UUID entryId;
   private final String display;
 

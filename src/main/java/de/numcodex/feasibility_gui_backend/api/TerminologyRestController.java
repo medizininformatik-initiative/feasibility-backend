@@ -43,7 +43,8 @@ public class TerminologyRestController {
   }
 
   @GetMapping("selectable-entries")
-  public List<TerminologyEntry> queryEntries(@RequestParam("query") String query) {
-    return terminologyService.queryEntries(query);
+  public List<TerminologyEntry> getSelectableEntries(@RequestParam("query") String query,
+      @RequestParam(value = "categoryId", required = false) UUID categoryId) {
+    return terminologyService.getSelectableEntries(query, categoryId);
   }
 }

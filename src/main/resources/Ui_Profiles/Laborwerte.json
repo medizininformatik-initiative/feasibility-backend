@@ -1,701 +1,701 @@
 {
-    "children": [
+  "children": [
+    {
+      "children": [],
+      "display": "CRP",
+      "id": "0feaabac-d523-4287-a10a-a6f4b332cabb",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "48421-2",
+        "display": "C reactive protein [Mass/volume] in Capillary blood",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
         {
-            "children": [],
-            "display": "CRP",
-            "id": "0feaabac-d523-4287-a10a-a6f4b332cabb",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "48421-2",
-                "display": "C reactive protein [Mass/volume] in Capillary blood",
-                "system": "http://loinc.org"
+          "allowedUnits": [
+            {
+              "code": "mg/L",
+              "display": "mg/L"
             },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "mg/L",
-                            "display": "mg/L"
-                        },
-                        {
-                            "code": "nmol/L",
-                            "display": "nmol/L"
-                        },
-                        {
-                            "code": "mg/dL",
-                            "display": "mg/dL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Ferritin",
-            "id": "5d4c1e79-aaf1-4a84-baf6-e4c782a4d2e7",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "20567-4",
-                "display": "Ferritin [Mass/volume] in Serum or Plasma by Immunoassay",
-                "system": "http://loinc.org"
+            {
+              "code": "nmol/L",
+              "display": "nmol/L"
             },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "pmol/L",
-                            "display": "pmol/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Bilirubin",
-            "id": "59299e7f-04bb-4c28-9462-0d04543b592e",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "59828-4",
-                "display": "Bilirubin.total [Mass/volume] in Venous blood",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "mg/dL",
-                            "display": "mg/dL"
-                        },
-                        {
-                            "code": "umol/L",
-                            "display": "umol/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "D-dimer",
-            "id": "7246cadd-9f01-4fa4-ab53-c538e2d98854",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "48065-7",
-                "display": "Fibrin D-dimer FEU [Mass/volume] in Platelet poor plasma",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "ug/mL",
-                            "display": "ug/mL"
-                        },
-                        {
-                            "code": "ng/mL",
-                            "display": "ng/mL"
-                        },
-                        {
-                            "code": "{titer}",
-                            "display": "{titer}"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Gamma-GT",
-            "id": "241583d6-221a-4aee-9dab-b582563a7dc5",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "2325-9",
-                "display": "Gamma glutamyl transferase/Aspartate aminotransferase [Enzymatic activity ratio] in Serum or Plasma",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "U/L",
-                            "display": "U/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "GOT/AST",
-            "id": "3d582f9d-f824-4027-9aed-9cf304785abf",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "88112-8",
-                "display": "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma by No addition of P-5'-P",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "U/L",
-                            "display": "U/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "LDH",
-            "id": "b27c2d4d-2c5b-43d3-af7e-cde4f5a5bc43",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "2532-0",
-                "display": "Lactate dehydrogenase [Enzymatic activity/volume] in Serum or Plasma",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "U/L",
-                            "display": "U/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Kardiale Troponine",
-            "id": "c5a8f8ee-2570-4c72-80cb-e3d1f3b54e94",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "49563-0",
-                "display": "Troponin I.cardiac [Mass/volume] in Serum or Plasma by Detection limit <= 0.01 ng/mL",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "ug/L",
-                            "display": "ug/L"
-                        },
-                        {
-                            "code": "ng/L",
-                            "display": "ng/L"
-                        },
-                        {
-                            "code": "ng/mL",
-                            "display": "ng/mL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "H\u00e4moglobin",
-            "id": "fc5d51f7-24fc-4455-9a22-200ad9561c09",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "76769-9",
-                "display": "Hemoglobin [Mass/volume] in Venous blood by Oximetry",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "mmol/L",
-                            "display": "mmol/L"
-                        },
-                        {
-                            "code": "g/dL",
-                            "display": "g/dL"
-                        },
-                        {
-                            "code": "g/L",
-                            "display": "g/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Kreatinin",
-            "id": "e95c4f23-9215-46c8-b7c0-40c5342e2ac2",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "14682-9",
-                "display": "Creatinine [Moles/volume] in Serum or Plasma",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "umol/L",
-                            "display": "umol/L"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Laktat",
-            "id": "da2738c6-55c3-4c7f-8c7c-06ab08133f41",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "14118-4",
-                "display": "Lactate [Mass/volume] in Serum or Plasma",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "mmol/L",
-                            "display": "mmol/L"
-                        },
-                        {
-                            "code": "mg/dL",
-                            "display": "mg/dL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Leukozyten absolut",
-            "id": "e5762564-cbe6-4c71-8f4a-05b3d3a9966e",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "804-5",
-                "display": "Leukocytes [#/volume] in Blood by Manual count",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "10*3/uL",
-                            "display": "10*3/uL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Lymphozyten absolut",
-            "id": "b6c7d858-22b1-440f-bcc7-f9afbe9df82c",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "732-8",
-                "display": "Lymphocytes [#/volume] in Blood by Manual count",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "10*3/uL",
-                            "display": "10*3/uL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Neutrophile absolut",
-            "id": "9c21c1cc-8fc6-4966-9809-9c839365e488",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "753-4",
-                "display": "Neutrophils [#/volume] in Blood by Manual count",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "10*3/uL",
-                            "display": "10*3/uL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "PTT",
-            "id": "97f42d6d-fcbc-4a0c-8fd7-3474efdda5e5",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "16631-4",
-                "display": "aPTT in Blood by Coagulation 1:1 saline",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "s",
-                            "display": "s"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Thrombozyten absolut",
-            "id": "b7e08c69-8812-4a19-b681-2f2a145cd2d3",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "74775-8",
-                "display": "Platelets [#/volume] in Platelet rich plasma by Automated count",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "10*3/uL",
-                            "display": "10*3/uL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "INR",
-            "id": "e8a3cc11-83e6-46d1-b1c5-eaf9c144fcc0",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "6301-6",
-                "display": "INR in Platelet poor plasma by Coagulation assay",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "{INR}",
-                            "display": "{INR}"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Serum-Albumin",
-            "id": "ad36359d-a0ae-47bb-bedd-fa0df4c191ae",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "76631-1",
-                "display": "Albumin [Mass/volume] in Blood by Bromocresol purple (BCP) dye binding method",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "g/L",
-                            "display": "g/L"
-                        },
-                        {
-                            "code": "umol/L",
-                            "display": "umol/L"
-                        },
-                        {
-                            "code": "g/dL",
-                            "display": "g/dL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Antithrombin III",
-            "id": "ebf1153b-98a7-4aa1-a465-4b481a9b5b74",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "27811-9",
-                "display": "Antithrombin actual/normal in Platelet poor plasma by Chromogenic method",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "%",
-                            "display": "%"
-                        },
-                        {
-                            "code": "[IU]/mL",
-                            "display": "[IU]/mL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "PCT (Procalcitonin)",
-            "id": "55efe97d-40d0-4a01-9c3e-c0c92e21b076",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "75241-0",
-                "display": "Procalcitonin [Mass/volume] in Serum or Plasma by Immunoassay",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "ng/mL",
-                            "display": "ng/mL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Il-6 (Interleukin 6)",
-            "id": "89a76d2e-782b-4227-abba-c5a35c1a3e1a",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "44322-6",
-                "display": "Interleukin 6 [Presence] in Serum or Plasma",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "pg/mL",
-                            "display": "pg/mL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "NT-pro-BNP",
-            "id": "8333a730-e72d-4e07-ac56-11b5997f535e",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "83107-3",
-                "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma by Immunoassay",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "pg/mL",
-                            "display": "pg/mL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "Fibrinogen",
-            "id": "d889c388-64ad-4a1d-a814-6b4069fa5578",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "30902-1",
-                "display": "Fibrinogen [Mass/volume] in Platelet poor plasma by Heat denaturation",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [
-                        {
-                            "code": "g/L",
-                            "display": "g/L"
-                        },
-                        {
-                            "code": "mg/dL",
-                            "display": "mg/dL"
-                        }
-                    ],
-                    "precision": 1,
-                    "selectableConcepts": [],
-                    "type": "quantity"
-                }
-            ]
-        },
-        {
-            "children": [],
-            "display": "SARS-CoV-2-RT-PCR",
-            "id": "67b96a7b-49e5-4fd3-b4ef-37d305d814d7",
-            "leaf": true,
-            "selectable": true,
-            "termCode": {
-                "code": "94500-6",
-                "display": "SARS-CoV-2 (COVID-19) RNA [Presence] in Respiratory specimen by NAA with probe detection",
-                "system": "http://loinc.org"
-            },
-            "timeRestrictionAllowed": false,
-            "valueDefinitions": [
-                {
-                    "allowedUnits": [],
-                    "precision": 1,
-                    "selectableConcepts": [
-                        {
-                            "code": "260373001",
-                            "display": "Detected (qualifier value)",
-                            "system": "http://snomed.info/sct"
-                        },
-                        {
-                            "code": "260415000",
-                            "display": "Not detected (qualifier value)",
-                            "system": "http://snomed.info/sct"
-                        },
-                        {
-                            "code": "419984006",
-                            "display": "Inconclusive (qualifier value)",
-                            "system": "http://snomed.info/sct"
-                        }
-                    ],
-                    "type": "concept"
-                }
-            ]
+            {
+              "code": "mg/dL",
+              "display": "mg/dL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
         }
-    ],
-    "display": "Laborwerte",
-    "id": "3993af0c-6a66-4def-b7ae-ea12285f1b67",
-    "leaf": false,
-    "selectable": false,
-    "timeRestrictionAllowed": false,
-    "valueDefinitions": []
+      ]
+    },
+    {
+      "children": [],
+      "display": "Ferritin",
+      "id": "5d4c1e79-aaf1-4a84-baf6-e4c782a4d2e7",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "20567-4",
+        "display": "Ferritin [Mass/volume] in Serum or Plasma by Immunoassay",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "pmol/L",
+              "display": "pmol/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Bilirubin",
+      "id": "59299e7f-04bb-4c28-9462-0d04543b592e",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "59828-4",
+        "display": "Bilirubin.total [Mass/volume] in Venous blood",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "mg/dL",
+              "display": "mg/dL"
+            },
+            {
+              "code": "umol/L",
+              "display": "umol/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "D-dimer",
+      "id": "7246cadd-9f01-4fa4-ab53-c538e2d98854",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "48065-7",
+        "display": "Fibrin D-dimer FEU [Mass/volume] in Platelet poor plasma",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "ug/mL",
+              "display": "ug/mL"
+            },
+            {
+              "code": "ng/mL",
+              "display": "ng/mL"
+            },
+            {
+              "code": "{titer}",
+              "display": "{titer}"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Gamma-GT",
+      "id": "241583d6-221a-4aee-9dab-b582563a7dc5",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "2325-9",
+        "display": "Gamma glutamyl transferase/Aspartate aminotransferase [Enzymatic activity ratio] in Serum or Plasma",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "U/L",
+              "display": "U/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "GOT/AST",
+      "id": "3d582f9d-f824-4027-9aed-9cf304785abf",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "88112-8",
+        "display": "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma by No addition of P-5'-P",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "U/L",
+              "display": "U/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "LDH",
+      "id": "b27c2d4d-2c5b-43d3-af7e-cde4f5a5bc43",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "2532-0",
+        "display": "Lactate dehydrogenase [Enzymatic activity/volume] in Serum or Plasma",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "U/L",
+              "display": "U/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Kardiale Troponine",
+      "id": "c5a8f8ee-2570-4c72-80cb-e3d1f3b54e94",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "49563-0",
+        "display": "Troponin I.cardiac [Mass/volume] in Serum or Plasma by Detection limit <= 0.01 ng/mL",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "ug/L",
+              "display": "ug/L"
+            },
+            {
+              "code": "ng/L",
+              "display": "ng/L"
+            },
+            {
+              "code": "ng/mL",
+              "display": "ng/mL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "H\u00e4moglobin",
+      "id": "fc5d51f7-24fc-4455-9a22-200ad9561c09",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "76769-9",
+        "display": "Hemoglobin [Mass/volume] in Venous blood by Oximetry",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "mmol/L",
+              "display": "mmol/L"
+            },
+            {
+              "code": "g/dL",
+              "display": "g/dL"
+            },
+            {
+              "code": "g/L",
+              "display": "g/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Kreatinin",
+      "id": "e95c4f23-9215-46c8-b7c0-40c5342e2ac2",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "14682-9",
+        "display": "Creatinine [Moles/volume] in Serum or Plasma",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "umol/L",
+              "display": "umol/L"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Laktat",
+      "id": "da2738c6-55c3-4c7f-8c7c-06ab08133f41",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "14118-4",
+        "display": "Lactate [Mass/volume] in Serum or Plasma",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "mmol/L",
+              "display": "mmol/L"
+            },
+            {
+              "code": "mg/dL",
+              "display": "mg/dL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Leukozyten absolut",
+      "id": "e5762564-cbe6-4c71-8f4a-05b3d3a9966e",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "804-5",
+        "display": "Leukocytes [#/volume] in Blood by Manual count",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "10*3/uL",
+              "display": "10*3/uL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Lymphozyten absolut",
+      "id": "b6c7d858-22b1-440f-bcc7-f9afbe9df82c",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "732-8",
+        "display": "Lymphocytes [#/volume] in Blood by Manual count",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "10*3/uL",
+              "display": "10*3/uL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Neutrophile absolut",
+      "id": "9c21c1cc-8fc6-4966-9809-9c839365e488",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "753-4",
+        "display": "Neutrophils [#/volume] in Blood by Manual count",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "10*3/uL",
+              "display": "10*3/uL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "PTT",
+      "id": "97f42d6d-fcbc-4a0c-8fd7-3474efdda5e5",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "16631-4",
+        "display": "aPTT in Blood by Coagulation 1:1 saline",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "s",
+              "display": "s"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Thrombozyten absolut",
+      "id": "b7e08c69-8812-4a19-b681-2f2a145cd2d3",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "74775-8",
+        "display": "Platelets [#/volume] in Platelet rich plasma by Automated count",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "10*3/uL",
+              "display": "10*3/uL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "INR",
+      "id": "e8a3cc11-83e6-46d1-b1c5-eaf9c144fcc0",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "6301-6",
+        "display": "INR in Platelet poor plasma by Coagulation assay",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "{INR}",
+              "display": "{INR}"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Serum-Albumin",
+      "id": "ad36359d-a0ae-47bb-bedd-fa0df4c191ae",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "76631-1",
+        "display": "Albumin [Mass/volume] in Blood by Bromocresol purple (BCP) dye binding method",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "g/L",
+              "display": "g/L"
+            },
+            {
+              "code": "umol/L",
+              "display": "umol/L"
+            },
+            {
+              "code": "g/dL",
+              "display": "g/dL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Antithrombin III",
+      "id": "ebf1153b-98a7-4aa1-a465-4b481a9b5b74",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "27811-9",
+        "display": "Antithrombin actual/normal in Platelet poor plasma by Chromogenic method",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "%",
+              "display": "%"
+            },
+            {
+              "code": "[IU]/mL",
+              "display": "[IU]/mL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "PCT (Procalcitonin)",
+      "id": "55efe97d-40d0-4a01-9c3e-c0c92e21b076",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "75241-0",
+        "display": "Procalcitonin [Mass/volume] in Serum or Plasma by Immunoassay",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "ng/mL",
+              "display": "ng/mL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Il-6 (Interleukin 6)",
+      "id": "89a76d2e-782b-4227-abba-c5a35c1a3e1a",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "44322-6",
+        "display": "Interleukin 6 [Presence] in Serum or Plasma",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "pg/mL",
+              "display": "pg/mL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "NT-pro-BNP",
+      "id": "8333a730-e72d-4e07-ac56-11b5997f535e",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "83107-3",
+        "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma by Immunoassay",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "pg/mL",
+              "display": "pg/mL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "Fibrinogen",
+      "id": "d889c388-64ad-4a1d-a814-6b4069fa5578",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "30902-1",
+        "display": "Fibrinogen [Mass/volume] in Platelet poor plasma by Heat denaturation",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [
+            {
+              "code": "g/L",
+              "display": "g/L"
+            },
+            {
+              "code": "mg/dL",
+              "display": "mg/dL"
+            }
+          ],
+          "precision": 1,
+          "selectableConcepts": [],
+          "type": "quantity"
+        }
+      ]
+    },
+    {
+      "children": [],
+      "display": "SARS-CoV-2-RT-PCR",
+      "id": "67b96a7b-49e5-4fd3-b4ef-37d305d814d7",
+      "leaf": true,
+      "selectable": true,
+      "termCode": {
+        "code": "94500-6",
+        "display": "SARS-CoV-2 (COVID-19) RNA [Presence] in Respiratory specimen by NAA with probe detection",
+        "system": "http://loinc.org"
+      },
+      "timeRestrictionAllowed": false,
+      "valueDefinitions": [
+        {
+          "allowedUnits": [],
+          "precision": 1,
+          "selectableConcepts": [
+            {
+              "code": "260373001",
+              "display": "Detected (qualifier value)",
+              "system": "http://snomed.info/sct"
+            },
+            {
+              "code": "260415000",
+              "display": "Not detected (qualifier value)",
+              "system": "http://snomed.info/sct"
+            },
+            {
+              "code": "419984006",
+              "display": "Inconclusive (qualifier value)",
+              "system": "http://snomed.info/sct"
+            }
+          ],
+          "type": "concept"
+        }
+      ]
+    }
+  ],
+  "display": "Laborwerte",
+  "id": "3993af0c-6a66-4def-b7ae-ea12285f1b67",
+  "leaf": false,
+  "selectable": false,
+  "timeRestrictionAllowed": false,
+  "valueDefinitions": []
 }

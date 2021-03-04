@@ -48,7 +48,8 @@ class FeasibilityGuiBackendApplicationTests {
         new URL("file:src/test/resources/Demographie.json"),
         TerminologyEntry.class);
 
-    System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(demographics));
+    System.out
+        .println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(demographics));
   }
 
 }
