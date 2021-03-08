@@ -4,8 +4,6 @@ package de.numcodex.feasibility_gui_backend.api;
 import de.numcodex.feasibility_gui_backend.model.ui.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.model.ui.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.service.TerminologyService;
-import java.util.List;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
 
 /*
  Rest interface to get the terminology definitions from the UI backend which itself request the

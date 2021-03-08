@@ -26,7 +26,7 @@ de:
         security:
           certificate: ${DSF_SECURITY_CACERT}
           keystore:
-            p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}}
+            p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}
             password: ${DSF_SECURITY_KEYSTORE_PASSWORD}
         webservice:
           baseUrl: ${DSF_WEBSERVICE_BASE_URL}
