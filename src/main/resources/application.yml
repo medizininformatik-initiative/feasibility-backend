@@ -46,6 +46,10 @@ cors:
 de:
   num-codex:
     FeasibilityGuiBackend:
+      aktin:
+        broker:
+          baseUrl: ${AKTIN_BROKER_BASE_URL}
+          apiKey: ${AKTIN_BROKER_API_KEY}
       dsf:
         security:
           certificate: ${DSF_SECURITY_CACERT}
