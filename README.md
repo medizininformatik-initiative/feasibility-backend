@@ -1,5 +1,18 @@
 # CODEX Feasibility Backend
 
+## Running the AKTIN broker path
+
+In order to run the backend using the AKTIN broker path, the following environment variables need to be set:
+
+| EnvVar | Description | Example |
+|--------|-------------|---------|
+| AKTIN_BROKER_BASE_URL | Base URL for the AKTIN RESTful API | http://localhost:8080/broker/ |
+| AKTIN_BROKER_API_KEY | API key for the broker RESTful API with admin privileges  | xxxAdmin1234 |
+
+When using API-key authentication, please make sure that the broker server has a corresponding the
+corresponding API-key entry with `OU=admin` contained in the DN-string.
+
+
 ## Running the DSF Path
 
 In order to run the backend using the DSF path, the following environment variables need to be set:
