@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.PublishFailedException;
+import java.io.IOException;
+
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 
@@ -36,7 +37,7 @@ interface QueryManager {
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
      * @throws PublishFailedException If the query identified by the given query ID can not be published.
      */
-    void publishQuery(String queryId) throws QueryNotFoundException, PublishFailedException;
+    void publishQuery(String queryId) throws QueryNotFoundException, IOException;
 
     /**
      * Removes a query from being handled if there is any.

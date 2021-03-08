@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.PublishFailedException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -15,6 +14,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,11 +94,11 @@ public class DSFQueryManagerTest {
 
         when(fhirWebserviceClient.postBundle(any(Bundle.class))).thenThrow();
 
-        assertThrows(PublishFailedException.class, () -> queryHandler.publishQuery(queryId));
+        assertThrows(IOException.class, () -> queryHandler.publishQuery(queryId));
     }
 
     @Test
-    public void testPublishQuery() throws UnsupportedMediaTypeException, QueryNotFoundException, PublishFailedException {
+    public void testPublishQuery() throws UnsupportedMediaTypeException, QueryNotFoundException, IOException {
         String queryId = queryHandler.createQuery();
         queryHandler.addQueryDefinition(queryId, "text/cql", "");
         queryHandler.publishQuery(queryId);

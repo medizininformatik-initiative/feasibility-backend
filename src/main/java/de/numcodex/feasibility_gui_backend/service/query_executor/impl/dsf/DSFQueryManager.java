@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.PublishFailedException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -18,6 +17,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
@@ -107,7 +107,7 @@ class DSFQueryManager implements QueryManager {
     }
 
     @Override
-    public void publishQuery(String queryId) throws QueryNotFoundException, PublishFailedException {
+    public void publishQuery(String queryId) throws QueryNotFoundException, IOException {
         Bundle queryBundle = queryHeap.get(queryId);
         if (queryBundle == null) {
             throw new QueryNotFoundException(queryId);
@@ -119,7 +119,7 @@ class DSFQueryManager implements QueryManager {
         try {
             fhirWebserviceClient.postBundle(queryBundle);
         } catch (Exception e) {
-            throw new PublishFailedException(queryId, e);
+            throw new IOException("Unable to publish query with ID "+queryId, e);
         }
     }
 
