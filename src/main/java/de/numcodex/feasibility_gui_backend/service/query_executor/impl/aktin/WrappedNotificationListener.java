@@ -80,4 +80,5 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 		; // NOP
 	}
 
+	// TODO implement reconnect on close with updated broker-client dependency
 }
