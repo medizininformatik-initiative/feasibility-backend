@@ -14,6 +14,7 @@ import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Subscription;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,6 +81,7 @@ public class DSFSpringConfig {
     @Value("${de.num-codex.FeasibilityGuiBackend.dsf.organizationId}")
     private String organizationId;
 
+    @Qualifier("dsf")
     @Bean
     public BrokerClient dsfBrokerClient(QueryManager queryManager, QueryResultCollector queryResultCollector) {
         return new DSFBrokerClient(queryManager, queryResultCollector);

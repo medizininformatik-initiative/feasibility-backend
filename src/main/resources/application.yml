@@ -17,6 +17,29 @@ spring:
         provider:
           userStoreClient:
             token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
+  datasource:
+    url: jdbc:postgresql://localhost:5555/codex_ui?currentSchema=codex
+    username: postgres
+    password: password
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect=com:
+          jackis:
+            jsonintegration:
+              hibernate: CustomPostgreSQL95Dialect
+
+
+app:
+  # AKTIN or DSF or MOCK
+  broker-client: MOCK
+
 
 backend:
   ontology-folder: ontology/ui_profiles

@@ -12,3 +12,12 @@ In order to run the backend using the DSF path, the following environment variab
 | DSF_WEBSERVICE_BASE_URL | Base URL pointing to the local ZARS FHIR server. | `https://zars/fhir` |
 | DSF_WEBSOCKET_URL | URL pointing to the local ZARS FHIR server websocket endpoint. | `wss://zars/fhir/ws` |
 | DSF_ORGANIZATION_ID | Identifier for the local organization this backend is part of. | `MY ZARS` |
+
+
+# Database
+
+## Running database
+
+```
+docker run --name codex_ui -d -e POSTGRES_PASSWORD=password -e POSTGRES_DB=codex_ui -p 5555:5432 postgres:alpine
+```
