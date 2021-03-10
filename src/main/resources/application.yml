@@ -40,7 +40,6 @@ app:
   # AKTIN or DSF or MOCK
   broker-client: MOCK
 
-
 backend:
   ontology-folder: ontology/ui_profiles
 

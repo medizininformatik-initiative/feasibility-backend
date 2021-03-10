@@ -13,25 +13,5 @@ spring:
           userStoreClient:
             token-uri: ${KEYCLOAK_ENDPOINT}/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token
 
-backend:
-  ontology-folder: ontology/ui_profiles
-
 userstore:
   url: ${KEYCLOAK_ENDPOINT}/auth/admin/realms/${KEYCLOAK_REALM}
-
-de:
-  num-codex:
-    FeasibilityGuiBackend:
-      dsf:
-        security:
-          certificate: ${DSF_SECURITY_CACERT}
-          keystore:
-            p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}
-            password: ${DSF_SECURITY_KEYSTORE_PASSWORD}
-        webservice:
-          baseUrl: ${DSF_WEBSERVICE_BASE_URL}
-          readTimeout: 20000
-          connectTimeout: 2000
-        websocket:
-          url: ${DSF_WEBSOCKET_URL}
-        organizationId: ${DSF_ORGANIZATION_ID}

@@ -1,17 +1,19 @@
-package de.numcodex.feasibility_gui_backend.model.common;
+package de.numcodex.feasibility_gui_backend.model.ui;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.numcodex.feasibility_gui_backend.model.common.TermCode;
+import de.numcodex.feasibility_gui_backend.model.common.Unit;
 import de.numcodex.feasibility_gui_backend.model.query.Comparator;
-import de.numcodex.feasibility_gui_backend.model.ui.ValueType;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 
 @Data
 public class ValueDefinition {
 
   @JsonProperty(value = "type", required = true)
-  private ValueType type;
+  private ValueDefinitonType type;
   @JsonProperty("selectableConcepts")
   private List<TermCode> selectableConcepts = new ArrayList<>();
   @JsonProperty("comparator")

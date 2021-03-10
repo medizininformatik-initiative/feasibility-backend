@@ -43,7 +43,9 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
  */
-@Configuration
+// TODO: Fix to work without running ZARS
+//
+//       @Configuration
 public class DSFSpringConfig {
 
     private static final String QUERY_RESULT_SUBSCRIPTION_REASON = "Waiting for query results";
