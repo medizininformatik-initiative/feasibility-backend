@@ -13,5 +13,9 @@ spring:
           userStoreClient:
             token-uri: ${KEYCLOAK_ENDPOINT}/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token
 
+app:
+  # AKTIN or DSF or MOCK
+  broker-client: ${BROKER_CLIENT_TYPE}
+
 userstore:
   url: ${KEYCLOAK_ENDPOINT}/auth/admin/realms/${KEYCLOAK_REALM}

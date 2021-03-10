@@ -6,9 +6,10 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusLis
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+// TODO: Use interface Runnable instead of extending Thread
 class MockResultThread extends Thread {
 
-  private AtomicBoolean running = new AtomicBoolean(true);
+  private final AtomicBoolean running = new AtomicBoolean(true);
 
   private final String siteId;
   private final MockBrokerClient.MockQuery query;

@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MockBrokerClient implements BrokerClient {
@@ -21,9 +22,9 @@ public class MockBrokerClient implements BrokerClient {
   private static final String SITE_3_ID ="3";
   private static final String SITE_4_ID ="4";
 
-
   private final List<QueryStatusListener> listeners = new ArrayList<>();
   private final List<MockQuery> queries = new ArrayList<>();
+  // TODO: Thread handling should be refactored using Executor, Runnable ThreadPool
   private final List<MockResultThread> runningResultThreads = new ArrayList<>();
 
   @Override
@@ -57,12 +58,13 @@ public class MockBrokerClient implements BrokerClient {
   }
 
   @Override
-  public void closeQuery(String queryId) throws QueryNotFoundException {
-    var query = findQuery(queryId);
-
-    this.runningResultThreads.stream()
+  public void closeQuery(String queryId) {
+    var threadsToBeStopped = this.runningResultThreads.stream()
             .filter(thread -> thread.getQuery().getQueryId().equals(queryId))
-            .forEach(MockResultThread::stopMockThread);
+            .collect(Collectors.toList());
+    threadsToBeStopped.forEach(MockResultThread::stopMockThread);
+
+    this.runningResultThreads.removeAll(threadsToBeStopped);
   }
 
   @Override

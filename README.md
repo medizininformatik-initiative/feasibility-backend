@@ -1,6 +1,12 @@
 # CODEX Feasibility Backend
 
-## Running the DSF Path
+## Configuration
+
+| EnvVar | Description | Example |
+|--------|-------------|---------|
+|BROKER_CLIENT_TYPE|Selects the BorkerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `MOCK`| `DSF` |
+
+### Running the DSF Path
 
 In order to run the backend using the DSF path, the following environment variables need to be set:
 
@@ -30,4 +36,5 @@ docker-compose up -d
 ```
 GET http://localhost:8090/api/v1/terminology/root-entries
 ```
+
 Should reply with status 200 and a JSON object
