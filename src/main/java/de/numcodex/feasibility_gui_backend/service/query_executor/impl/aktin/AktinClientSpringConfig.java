@@ -36,7 +36,7 @@ public class AktinClientSpringConfig {
 
     @AllArgsConstructor
     private static class ApiKeyAuthFilter implements AuthFilter{
-    	private String key;
+    	final private String key;
 		@Override
 		public void addAuthentication(Builder builder) throws IOException {
 			builder.header("Authorization", "Bearer "+key);

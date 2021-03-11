@@ -18,8 +18,8 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class WrappedNotificationListener implements AdminNotificationListener{
-	private AktinBrokerClient client;
-	private QueryStatusListener delegate;
+	final private AktinBrokerClient client;
+	final private QueryStatusListener delegate;
 
 	@Override
 	public void onRequestCreated(int requestId) {

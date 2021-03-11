@@ -23,7 +23,7 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class AktinBrokerClient implements BrokerClient {
-	private BrokerAdmin2 delegate;
+	final private BrokerAdmin2 delegate;
 
 	@Override
 	public void addQueryStatusListener(QueryStatusListener queryStatusListener) throws IOException {
