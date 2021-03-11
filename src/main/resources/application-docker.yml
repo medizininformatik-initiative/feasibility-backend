@@ -19,3 +19,4 @@ app:
 
 userstore:
   url: ${KEYCLOAK_ENDPOINT}/auth/admin/realms/${KEYCLOAK_REALM}
+

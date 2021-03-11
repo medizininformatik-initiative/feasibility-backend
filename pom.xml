@@ -61,6 +61,14 @@
       <version>1.5.3</version>
     </dependency>
 
+
+    <dependency>
+      <groupId>org.aktin</groupId>
+      <artifactId>broker-client</artifactId>
+      <version>1.1</version>
+    </dependency>
+    
+
     <dependency>
       <groupId>org.highmed.dsf</groupId>
       <artifactId>dsf-fhir-webservice-client</artifactId>
