@@ -2,9 +2,9 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public final class DSFBrokerClient implements BrokerClient {
     }
 
     @Override
-    public void addQueryStatusListener(QueryStatusListener queryStatusListener) {
+    public void addQueryStatusListener(QueryStatusListener queryStatusListener) throws IOException {
         queryResultCollector.addResultListener(queryStatusListener);
     }
 

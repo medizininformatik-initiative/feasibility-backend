@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,9 @@ public class DSFQueryResultCollectorIT {
     @Mock
     private FhirWebserviceClient fhirClient;
 
+    @Mock
+    private FhirWebClientProvider fhirWebClientProvider;
+
     private WebsocketClientMock websocketClient;
     private QueryResultCollector resultCollector;
 
@@ -48,10 +52,10 @@ public class DSFQueryResultCollectorIT {
     public void setUp() {
         FhirContext fhirCtx = FhirContext.forR4();
         DSFQueryResultStore resultStore = new DSFQueryResultStore();
-        DSFQueryResultHandler resultHandler = new DSFQueryResultHandler(fhirClient);
+        DSFQueryResultHandler resultHandler = new DSFQueryResultHandler(fhirWebClientProvider);
 
         websocketClient = new WebsocketClientMock();
-        resultCollector = new DSFQueryResultCollector(resultStore, fhirCtx, websocketClient, resultHandler);
+        resultCollector = new DSFQueryResultCollector(resultStore, fhirCtx, fhirWebClientProvider, resultHandler);
     }
 
     private Task createTestTask(String queryId, String siteId, String measureReportReference, String profile) {
@@ -118,7 +122,7 @@ public class DSFQueryResultCollectorIT {
     }
 
     @Test
-    public void testRegisteredListenerGetsNotifiedOnUpdate() {
+    public void testRegisteredListenerGetsNotifiedOnUpdate() throws IOException, FhirWebClientProvisionException {
         String queryId = UUID.randomUUID().toString();
         String siteId = "DIC";
         String measureReportId = UUID.randomUUID().toString();
@@ -127,6 +131,8 @@ public class DSFQueryResultCollectorIT {
         int measureCount = 5;
         MeasureReport measureReport = createTestMeasureReport(measureCount);
 
+        when(fhirWebClientProvider.provideFhirWebsocketClient()).thenReturn(websocketClient);
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
         var actual = new Object() {
@@ -148,13 +154,15 @@ public class DSFQueryResultCollectorIT {
     }
 
     @Test
-    public void testResultFeasibilityIsPresentAfterListenerGetsNotifiedOnUpdate() {
+    public void testResultFeasibilityIsPresentAfterListenerGetsNotifiedOnUpdate() throws IOException, FhirWebClientProvisionException {
         String measureReportId = UUID.randomUUID().toString();
         Task task = createTestTask(UUID.randomUUID().toString(), "DIC", "MeasureReport/" + measureReportId, SINGLE_DIC_RESULT_PROFILE);
 
         int measureCount = 5;
         MeasureReport measureReport = createTestMeasureReport(measureCount);
 
+        when(fhirWebClientProvider.provideFhirWebsocketClient()).thenReturn(websocketClient);
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
         resultCollector.addResultListener((qId, cId, status) -> {
@@ -171,7 +179,7 @@ public class DSFQueryResultCollectorIT {
     }
 
     @Test
-    public void testSiteIdsArePresentAfterListenerGetsNotifiedOnUpdate() {
+    public void testSiteIdsArePresentAfterListenerGetsNotifiedOnUpdate() throws IOException, FhirWebClientProvisionException {
         String siteId = "DIC";
         String measureReportId = UUID.randomUUID().toString();
         Task task = createTestTask(UUID.randomUUID().toString(), siteId, "MeasureReport/" + measureReportId, SINGLE_DIC_RESULT_PROFILE);
@@ -179,6 +187,8 @@ public class DSFQueryResultCollectorIT {
         int measureCount = 5;
         MeasureReport measureReport = createTestMeasureReport(measureCount);
 
+        when(fhirWebClientProvider.provideFhirWebsocketClient()).thenReturn(websocketClient);
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
         resultCollector.addResultListener((qId, sId, status) -> {
@@ -195,10 +205,11 @@ public class DSFQueryResultCollectorIT {
     }
 
     @Test
-    public void testRegisteredListenersGetNotNotifiedOnIncomingTasksThatAreNoResults() {
+    public void testRegisteredListenersGetNotNotifiedOnIncomingTasksThatAreNoResults() throws IOException, FhirWebClientProvisionException {
         String measureReportId = UUID.randomUUID().toString();
         Task task = createTestTask(UUID.randomUUID().toString(), "DIC", "MeasureReport/" + measureReportId, "other-profile");
 
+        when(fhirWebClientProvider.provideFhirWebsocketClient()).thenReturn(websocketClient);
         resultCollector.addResultListener((qId, cId, status) -> fail());
 
         websocketClient.fakeIncomingMessage(task);
