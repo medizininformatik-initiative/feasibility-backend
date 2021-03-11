@@ -9,7 +9,7 @@ In order to run the backend using the AKTIN broker path, the following environme
 | AKTIN_BROKER_BASE_URL | Base URL for the AKTIN RESTful API | http://localhost:8080/broker/ |
 | AKTIN_BROKER_API_KEY | API key for the broker RESTful API with admin privileges  | xxxAdmin1234 |
 
-When using API-key authentication, please make sure that the broker server has a corresponding the
+When using API-key authentication, please make sure that the broker server has a
 corresponding API-key entry with `OU=admin` contained in the DN-string.
 
 
