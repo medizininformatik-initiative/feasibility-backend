@@ -1,6 +1,15 @@
 # CODEX Feasibility Backend
 
-## Running the AKTIN broker path
+
+
+## Configuration
+
+| EnvVar | Description | Example |
+|--------|-------------|---------|
+|BROKER_CLIENT_TYPE|Selects the BorkerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `MOCK`| `DSF` |
+
+
+### Running the AKTIN broker path
 
 In order to run the backend using the AKTIN broker path, the following environment variables need to be set:
 
@@ -13,7 +22,8 @@ When using API-key authentication, please make sure that the broker server has a
 corresponding API-key entry with `OU=admin` contained in the DN-string.
 
 
-## Running the DSF Path
+
+### Running the DSF Path
 
 In order to run the backend using the DSF path, the following environment variables need to be set:
 
@@ -25,3 +35,23 @@ In order to run the backend using the DSF path, the following environment variab
 | DSF_WEBSERVICE_BASE_URL | Base URL pointing to the local ZARS FHIR server. | `https://zars/fhir` |
 | DSF_WEBSOCKET_URL | URL pointing to the local ZARS FHIR server websocket endpoint. | `wss://zars/fhir/ws` |
 | DSF_ORGANIZATION_ID | Identifier for the local organization this backend is part of. | `MY ZARS` |
+
+## Starting with Docker
+
+### Create Docker image
+```
+mvn install
+docker build -t feasibility-gui-backend . 
+```
+
+### Start backend and database
+```
+docker-compose up -d
+```
+
+### Test if container is running properly
+```
+GET http://localhost:8090/api/v1/terminology/root-entries
+```
+
+Should reply with status 200 and a JSON object

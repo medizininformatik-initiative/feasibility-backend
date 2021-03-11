@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.model.ui;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
-import de.numcodex.feasibility_gui_backend.model.common.ValueDefinition;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
