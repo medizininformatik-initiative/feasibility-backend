@@ -46,27 +46,13 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 			return; // unsupported/unrecognized status
 		}
 		
-		switch( rs ) {
-		case completed:
-			dest = QueryStatus.COMPLETED;
-			break;
-		case processing:
-			dest = QueryStatus.EXECUTING;
-			break;
-		case queued:
-			dest = QueryStatus.QUEUED;
-			break;
-		case retrieved:
-			dest = QueryStatus.RETRIEVED;
-			break;
-		case expired:
-		case failed:
-		case rejected:
-		case interaction:
-		default:
-			dest = QueryStatus.FAILED;
-			break;			
-		}
+		dest = switch (rs) {
+			case completed -> QueryStatus.COMPLETED;
+			case processing -> QueryStatus.EXECUTING;
+			case queued -> QueryStatus.QUEUED;
+			case retrieved -> QueryStatus.RETRIEVED;
+			default -> QueryStatus.FAILED;
+		};
 		delegate.onClientUpdate(client.wrapQueryId(requestId), client.wrapSiteId(nodeId), dest);
 	}
 
