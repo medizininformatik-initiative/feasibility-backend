@@ -14,6 +14,7 @@ import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Subscription;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,9 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
  */
-@Configuration
+// TODO: Fix to work without running ZARS
+//
+//       @Configuration
 public class DSFSpringConfig {
 
     private static final String QUERY_RESULT_SUBSCRIPTION_REASON = "Waiting for query results";
@@ -80,6 +83,7 @@ public class DSFSpringConfig {
     @Value("${de.num-codex.FeasibilityGuiBackend.dsf.organizationId}")
     private String organizationId;
 
+    @Qualifier("dsf")
     @Bean
     public BrokerClient dsfBrokerClient(QueryManager queryManager, QueryResultCollector queryResultCollector) {
         return new DSFBrokerClient(queryManager, queryResultCollector);

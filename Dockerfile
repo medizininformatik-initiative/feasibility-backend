@@ -1,18 +1,16 @@
-FROM maven:3.6.3-openjdk-15 AS MAVEN_TOOL_CHAIN
-COPY pom.xml /tmp/
-COPY src /tmp/src/
-WORKDIR /tmp/
-RUN mvn package
-
 FROM openjdk:15
 
 WORKDIR /opt/codex-feasibility-backend
-COPY --from=MAVEN_TOOL_CHAIN /tmp/target/*.jar ./feasibility-gui-backend.jar
+COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology
 
 ARG VERSION=0.0.0
-ENV APP_VERSION=${VERSION} \
-    SPRING_PROFILES_ACTIVE="prod"
+ENV APP_VERSION=${VERSION}
+ENV SPRING_PROFILES_ACTIVE="docker"
+ENV FEASIBILITY_DATABASE_HOST="feasibility-network"
+ENV FEASIBILITY_DATABASE_PORT=5432
+ENV FEASIBILITY_DATABASE_USER=postgres
+ENV FEASIBILITY_DATABASE_PASSWORD=password
 
 ENTRYPOINT ["java","-jar","feasibility-gui-backend.jar"]
 
