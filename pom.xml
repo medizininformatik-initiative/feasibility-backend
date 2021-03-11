@@ -16,8 +16,6 @@
   <description>Backend of the Feasibility GUI</description>
   <properties>
     <java.version>15</java.version>
-    <maven.compiler.source>15</maven.compiler.source>
-    <maven.compiler.target>15</maven.compiler.target>
   </properties>
   <dependencies>
     <dependency>
