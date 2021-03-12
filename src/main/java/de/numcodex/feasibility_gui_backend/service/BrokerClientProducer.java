@@ -6,8 +6,10 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusLis
 import de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock.MockBrokerClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,19 +24,8 @@ public class BrokerClientProducer {
 
   private final ResultRepository resultRepository;
 
-/*
-  //TODO: integrate when DSFBrokerClient can be autowired safely
   @Autowired
-  @Qualifier("dsf")
-*/
-  private BrokerClient dsfBrokerClient;
-
-/*
-  //TODO: integrate when AktinBrokerClient can be autowired safely
-  @Autowired
-  @Qualifier("aktin")
-*/
-  private BrokerClient aktinBrokerClient;
+  private ApplicationContext ctx;
 
   public BrokerClientProducer(@Autowired ResultRepository resultRepository) {
     this.resultRepository = resultRepository;
@@ -44,11 +35,11 @@ public class BrokerClientProducer {
   @Bean
   public BrokerClient createBrokerClient(@Value("${app.broker-client}") String type) {
     if (StringUtils.equalsIgnoreCase(type, CLIENT_TYPE_DSF)) {
-      return dsfBrokerClient;
+      return BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
     }
 
     if (StringUtils.equalsIgnoreCase(type, CLIENT_TYPE_AKTIN)) {
-      return aktinBrokerClient;
+      return BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
     }
 
     if (StringUtils.equalsIgnoreCase(type, CLIENT_TYPE_MOCK)) {
