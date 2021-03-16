@@ -31,6 +31,9 @@ public class DSFQueryResultHandlerTest {
     @Mock
     FhirWebserviceClient client;
 
+    @Mock
+    FhirWebClientProvider fhirWebClientProvider;
+
     @InjectMocks
     DSFQueryResultHandler handler;
 
@@ -52,7 +55,7 @@ public class DSFQueryResultHandlerTest {
     }
 
     @Test
-    public void testOnResultButReferencedMeasureReportCanNotBeFetched() {
+    public void testOnResultButReferencedMeasureReportCanNotBeFetched() throws FhirWebClientProvisionException {
         Reference dicOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("DIC"));
         Reference zarsOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("ZARS"));
 
@@ -76,6 +79,7 @@ public class DSFQueryResultHandlerTest {
                                 .setCode("measure-report-reference")))
                 .setValue(new Reference().setReference("MeasureReport/dfd68241-224d-4fd8-bd1a-7675682fa608"));
 
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(client);
         Exception e = new RuntimeException("cannot fetch measure report");
         when(client.read(MeasureReport.class, "dfd68241-224d-4fd8-bd1a-7675682fa608")).thenThrow(e);
 
@@ -84,7 +88,7 @@ public class DSFQueryResultHandlerTest {
     }
 
     @Test
-    public void testOnResult() {
+    public void testOnResult() throws FhirWebClientProvisionException {
         Reference dicOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("DIC"));
         Reference zarsOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("ZARS"));
 
@@ -121,6 +125,7 @@ public class DSFQueryResultHandlerTest {
                                 .setCode("initial-population")))
                 .setCount(10);
 
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(client);
         when(client.read(MeasureReport.class, "dfd68241-224d-4fd8-bd1a-7675682fa608")).thenReturn(report);
 
         Optional<DSFQueryResult> dsfQueryResult = handler.onResult(task);

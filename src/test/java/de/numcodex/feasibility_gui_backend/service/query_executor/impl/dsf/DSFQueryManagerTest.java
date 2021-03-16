@@ -36,12 +36,15 @@ public class DSFQueryManagerTest {
     @Mock
     private FhirWebserviceClient fhirWebserviceClient;
 
+    @Mock
+    private FhirWebClientProvider fhirWebClientProvider;
+
     private DSFQueryManager queryHandler;
     private String unknownQueryId;
 
     @BeforeEach
     public void setUp() {
-        this.queryHandler = new DSFQueryManager(fhirWebserviceClient, ORGANIZATION);
+        this.queryHandler = new DSFQueryManager(fhirWebClientProvider, ORGANIZATION);
         this.unknownQueryId = UUID.randomUUID().toString();
     }
 
@@ -98,9 +101,11 @@ public class DSFQueryManagerTest {
     }
 
     @Test
-    public void testPublishQuery() throws UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+    public void testPublishQuery() throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, FhirWebClientProvisionException {
         String queryId = queryHandler.createQuery();
         queryHandler.addQueryDefinition(queryId, "text/cql", "");
+
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirWebserviceClient);
         queryHandler.publishQuery(queryId);
 
         verify(fhirWebserviceClient).postBundle(bundleCaptor.capture());

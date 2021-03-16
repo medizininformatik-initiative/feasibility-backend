@@ -26,15 +26,17 @@ class DSFQueryResultHandler {
     private static final String CODE_SYSTEM_MEASURE_POPULATION = "http://terminology.hl7.org/CodeSystem/measure-population";
     private static final String CODE_SYSTEM_MEASURE_POPULATION_VALUE_INITIAL_POPULATION = "initial-population";
 
-    private final FhirWebserviceClient client;
+    private final FhirWebClientProvider fhirWebClientProvider;
+    private FhirWebserviceClient fhirWebserviceClient;
 
     /**
      * Creates a new {@link DSFQueryResultHandler} instance for processing FHIR Task resources.
      *
-     * @param client FHIR webservice client for resolving references within a FHIR Task.
+     * @param fhirWebClientProvider Provider capable of providing a FHIR webservice client for communicating with a
+     *                              FHIR server via HTTP.
      */
-    public DSFQueryResultHandler(FhirWebserviceClient client) {
-        this.client = client;
+    public DSFQueryResultHandler(FhirWebClientProvider fhirWebClientProvider) {
+        this.fhirWebClientProvider = fhirWebClientProvider;
     }
 
     /**
@@ -122,8 +124,11 @@ class DSFQueryResultHandler {
      * @param measureReportId Identifies the measure report that shall be fetched.
      * @return The fetched measure report.
      */
-    private MeasureReport fetchMeasureReport(String measureReportId) {
-        return client.read(MeasureReport.class, measureReportId);
+    private MeasureReport fetchMeasureReport(String measureReportId) throws FhirWebClientProvisionException {
+        if (fhirWebserviceClient == null) {
+            fhirWebserviceClient = fhirWebClientProvider.provideFhirWebserviceClient();
+        }
+        return fhirWebserviceClient.read(MeasureReport.class, measureReportId);
     }
 
     /**

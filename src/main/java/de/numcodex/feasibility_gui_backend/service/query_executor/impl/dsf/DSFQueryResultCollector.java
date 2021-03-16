@@ -2,13 +2,14 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.DomainResource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ class DSFQueryResultCollector implements QueryResultCollector {
 
     private final QueryResultStore store;
     private final FhirContext fhirContext;
-    private final WebsocketClient fhirWebsocketClient;
+    private final FhirWebClientProvider fhirWebClientProvider;
     private final DSFQueryResultHandler resultHandler;
     private final List<QueryStatusListener> listeners;
     private boolean websocketConnectionEstablished;
@@ -30,23 +31,25 @@ class DSFQueryResultCollector implements QueryResultCollector {
     /**
      * Creates a new {@link DSFQueryResultCollector}.
      *
-     * @param store               Storage facility for storing collected results.
-     * @param fhirContext         The FHIR context used for communication purposes with the FHIR server results are
-     *                            gathered from.
-     * @param fhirWebsocketClient Client able to connect to a FHIR server using a websocket for receiving query results.
-     * @param resultHandler       Handler able to process query results received from the FHIR server.
+     * @param store                 Storage facility for storing collected results.
+     * @param fhirContext           The FHIR context used for communication purposes with the FHIR server results are
+     *                              gathered from.
+     * @param fhirWebClientProvider Provider capable of providing a websocket client.
+     * @param resultHandler         Handler able to process query results received from the FHIR server.
      */
-    public DSFQueryResultCollector(QueryResultStore store, FhirContext fhirContext, WebsocketClient fhirWebsocketClient, DSFQueryResultHandler resultHandler) {
+    public DSFQueryResultCollector(QueryResultStore store, FhirContext fhirContext,
+                                   FhirWebClientProvider fhirWebClientProvider, DSFQueryResultHandler resultHandler) {
         this.store = store;
         this.fhirContext = fhirContext;
-        this.fhirWebsocketClient = fhirWebsocketClient;
+        this.fhirWebClientProvider = fhirWebClientProvider;
         this.resultHandler = resultHandler;
         this.websocketConnectionEstablished = false;
         this.listeners = new ArrayList<>();
     }
 
-    private void listenForQueryResults() {
+    private void listenForQueryResults() throws FhirWebClientProvisionException {
         if (!websocketConnectionEstablished) {
+            WebsocketClient fhirWebsocketClient = fhirWebClientProvider.provideFhirWebsocketClient();
             fhirWebsocketClient.setDomainResourceHandler(this::setUpQueryResultHandler, this::setUpResourceParser);
 
             fhirWebsocketClient.connect();
@@ -74,9 +77,14 @@ class DSFQueryResultCollector implements QueryResultCollector {
     }
 
     @Override
-    public void addResultListener(QueryStatusListener listener) {
+    public void addResultListener(QueryStatusListener listener) throws IOException {
         listeners.add(listener);
-        listenForQueryResults();
+        try {
+            listenForQueryResults();
+        } catch (FhirWebClientProvisionException e) {
+            listeners.remove(listener);
+            throw new IOException("failed to establish websocket connection to listen for results", e);
+        }
     }
 
     @Override

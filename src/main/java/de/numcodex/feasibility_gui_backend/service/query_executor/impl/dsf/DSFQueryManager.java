@@ -64,18 +64,19 @@ class DSFQueryManager implements QueryManager {
     private static final String CODE_SYSTEM_MEASURE_POPULATION = "http://terminology.hl7.org/CodeSystem/measure-population";
     private static final String CODE_SYSTEM_MEASURE_POPULATION_VALUE_INITIAL_POPULATION = "initial-population";
 
-    private final FhirWebserviceClient fhirWebserviceClient;
+    private final FhirWebClientProvider fhirWebClientProvider;
     private final String organizationId;
     private final Map<String, Bundle> queryHeap;
+    private FhirWebserviceClient fhirWebserviceClient;
 
     /**
      * Creates a new {@link DSFQueryManager} instance.
      *
-     * @param fhirWebserviceClient Client able to communicate with a FHIR server for publishing queries.
-     * @param organizationId       Identifies the local FHIR server instance (ZARS) that queries get published to.
+     * @param fhirWebClientProvider Provider capable of providing a client to communicate with a FHIR server via HTTP.
+     * @param organizationId        Identifies the local FHIR server instance (ZARS) that queries get published to.
      */
-    DSFQueryManager(FhirWebserviceClient fhirWebserviceClient, String organizationId) {
-        this.fhirWebserviceClient = fhirWebserviceClient;
+    DSFQueryManager(FhirWebClientProvider fhirWebClientProvider, String organizationId) {
+        this.fhirWebClientProvider = fhirWebClientProvider;
         this.organizationId = organizationId;
         this.queryHeap = new HashMap<>();
     }
@@ -89,7 +90,8 @@ class DSFQueryManager implements QueryManager {
     }
 
     @Override
-    public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException, UnsupportedMediaTypeException {
+    public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
+            UnsupportedMediaTypeException {
         Bundle queryBundle = queryHeap.get(queryId);
         if (queryBundle == null) {
             throw new QueryNotFoundException(queryId);
@@ -116,10 +118,18 @@ class DSFQueryManager implements QueryManager {
             throw new IllegalStateException("Query with ID '" + queryId + "' does not contain query definition yet.");
         }
 
+        if (fhirWebserviceClient == null) {
+            try {
+                fhirWebserviceClient = fhirWebClientProvider.provideFhirWebserviceClient();
+            } catch (Exception e) {
+                throw new IOException("could not provide fhir webservice client", e);
+            }
+        }
+
         try {
             fhirWebserviceClient.postBundle(queryBundle);
         } catch (Exception e) {
-            throw new IOException("Unable to publish query with ID "+queryId, e);
+            throw new IOException("Unable to publish query with ID " + queryId, e);
         }
     }
 
