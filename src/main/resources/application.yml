@@ -19,8 +19,8 @@ spring:
             token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
   datasource:
     url: jdbc:postgresql://localhost:5555/codex_ui?currentSchema=codex
-    username: postgres
-    password: password
+    username: codex-postgres
+    password: codex-password
     driverClassName: org.postgresql.Driver
 
   jpa:
