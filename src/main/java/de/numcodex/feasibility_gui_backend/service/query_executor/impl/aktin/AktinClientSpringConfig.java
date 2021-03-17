@@ -2,21 +2,23 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import lombok.AllArgsConstructor;
+import org.aktin.broker.client2.AuthFilter;
+import org.aktin.broker.client2.BrokerAdmin2;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.WebSocket.Builder;
 
-import org.aktin.broker.client2.AuthFilter;
-import org.aktin.broker.client2.BrokerAdmin2;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 
 /**
  * Spring configuration for providing a {@link AktinBrokerClient} instance.
  */
+@Lazy
 @Configuration
 public class AktinClientSpringConfig {
 
@@ -26,7 +28,7 @@ public class AktinClientSpringConfig {
     @Value("${de.num-codex.FeasibilityGuiBackend.aktin.broker.apiKey}")
     private String brokerApiKey;
 
-    
+    @Qualifier("aktin")
     @Bean
     public BrokerClient aktinBrokerClient() {
     	BrokerAdmin2 client = new BrokerAdmin2(URI.create(brokerBaseUrl));

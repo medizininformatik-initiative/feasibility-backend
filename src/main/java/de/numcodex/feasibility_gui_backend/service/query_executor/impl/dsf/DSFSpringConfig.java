@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
  */
+@Lazy
 @Configuration
 public class DSFSpringConfig {
 
@@ -74,7 +76,6 @@ public class DSFSpringConfig {
     FhirSecurityContextProvider fhirSecurityContextProvider() {
         return new DSFFhirSecurityContextProvider(keyStoreFile, keyStorePassword, certificateFile);
     }
-
 
     @Bean
     FhirWebClientProvider fhirWebClientProvider(FhirContext fhirContext, FhirSecurityContextProvider securityContextProvider) {

@@ -11,9 +11,9 @@ import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
+import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListenerImpl;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +29,29 @@ public class QueryHandlerService {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String UNKNOWN_SITE = "Unbekannter Standort";
 
-  @Autowired private QueryRepository queryRepository;
+  private final QueryRepository queryRepository;
+  private final ResultRepository resultRepository;
+  private final BrokerClient brokerClient;
+  private boolean brokerQueryStatusListenerConfigured;
 
-  @Autowired private ResultRepository resultRepository;
-
-  @Qualifier("applied")
-  @Autowired
-  private BrokerClient brokerClient;
+  public QueryHandlerService(QueryRepository queryRepository, ResultRepository resultRepository,
+                             @Qualifier("applied") BrokerClient brokerClient) {
+    this.queryRepository = queryRepository;
+    this.resultRepository = resultRepository;
+    this.brokerClient = brokerClient;
+    brokerQueryStatusListenerConfigured = false;
+  }
 
   public String runQuery(StructuredQuery structuredQuery)
       throws UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+
+    // TODO: maybe do this using a post construct method (think about middleware availability on startup + potential backoff!)
+    if (!brokerQueryStatusListenerConfigured) {
+        brokerClient.addQueryStatusListener(
+                new QueryStatusListenerImpl(resultRepository, brokerClient)
+        );
+        brokerQueryStatusListenerConfigured = true;
+    }
 
     var queryId = this.brokerClient.createQuery();
     var query = new Query();
