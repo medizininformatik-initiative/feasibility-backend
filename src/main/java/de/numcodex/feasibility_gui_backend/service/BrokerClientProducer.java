@@ -1,11 +1,8 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListenerImpl;
 import de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock.MockBrokerClient;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,40 +19,26 @@ public class BrokerClientProducer {
   public static final String CLIENT_TYPE_AKTIN = "AKTIN";
   public static final String CLIENT_TYPE_MOCK = "MOCK";
 
-  private final ResultRepository resultRepository;
+  private final ApplicationContext ctx;
 
-  @Autowired
-  private ApplicationContext ctx;
-
-  public BrokerClientProducer(@Autowired ResultRepository resultRepository) {
-    this.resultRepository = resultRepository;
+  public BrokerClientProducer(ApplicationContext ctx) {
+      this.ctx = ctx;
   }
 
   @Qualifier("applied")
   @Bean
   public BrokerClient createBrokerClient(@Value("${app.broker-client}") String type) {
-    if (StringUtils.equalsIgnoreCase(type, CLIENT_TYPE_DSF)) {
-      return BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
-    }
-
-    if (StringUtils.equalsIgnoreCase(type, CLIENT_TYPE_AKTIN)) {
-      return BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
-    }
-
-    if (StringUtils.equalsIgnoreCase(type, CLIENT_TYPE_MOCK)) {
-      return getMockBrokerClient();
-    }
-
-    throw new IllegalStateException(
-        String.format(
-            "No Broker Client configured for type '%s'. Allowed types are %s", type, List.of(CLIENT_TYPE_DSF, CLIENT_TYPE_AKTIN, CLIENT_TYPE_MOCK)));
-  }
-
-  private MockBrokerClient getMockBrokerClient() {
-    MockBrokerClient brokerClient = new MockBrokerClient();
-    brokerClient.addQueryStatusListener(
-        new QueryStatusListenerImpl(this.resultRepository, brokerClient));
-
-    return brokerClient;
+      return switch(StringUtils.upperCase(type)) {
+          case CLIENT_TYPE_DSF:
+              yield BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
+          case CLIENT_TYPE_AKTIN:
+              yield BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
+          case CLIENT_TYPE_MOCK:
+              yield new MockBrokerClient();
+          default:
+              throw new IllegalStateException(
+                      "No Broker Client configured for type '%s'. Allowed types are %s"
+                              .formatted(type, List.of(CLIENT_TYPE_DSF, CLIENT_TYPE_AKTIN, CLIENT_TYPE_MOCK)));
+      };
   }
 }
