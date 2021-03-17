@@ -4,9 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Data
 @Entity
@@ -22,5 +28,6 @@ public class Query {
   private JsonNode structuredQuery;
 
   @ElementCollection
+  @Column(columnDefinition="TEXT")
   private Map<String, String> contents = new HashMap<>();
 }

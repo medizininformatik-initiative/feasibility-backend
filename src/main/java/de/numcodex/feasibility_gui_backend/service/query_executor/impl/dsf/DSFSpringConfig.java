@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
  */
@@ -15,28 +16,28 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 public class DSFSpringConfig {
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.security.keystore.p12file}")
+    @Value("${app.dsf.security.keystore.p12file}")
     private String keyStoreFile;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.security.keystore.password}")
+    @Value("${app.dsf.security.keystore.password}")
     private char[] keyStorePassword;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.security.certificate}")
+    @Value("${app.dsf.security.certificate}")
     private String certificateFile;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.webservice.baseUrl}")
+    @Value("${app.dsf.webservice.baseUrl}")
     private String webserviceBaseUrl;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.webservice.readTimeout}")
+    @Value("${app.dsf.webservice.readTimeout}")
     private int webserviceReadTimeout;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.webservice.connectTimeout}")
+    @Value("${app.dsf.webservice.connectTimeout}")
     private int webserviceConnectTimeout;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.websocket.url}")
+    @Value("${app.dsf.websocket.url}")
     private String websocketUrl;
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.dsf.organizationId}")
+    @Value("${app.dsf.organizationId}")
     private String organizationId;
 
     @Qualifier("dsf")
@@ -82,4 +83,5 @@ public class DSFSpringConfig {
         return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, webserviceReadTimeout,
                 webserviceConnectTimeout, websocketUrl, securityContextProvider);
     }
+   
 }

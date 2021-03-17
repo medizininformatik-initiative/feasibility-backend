@@ -9,74 +9,79 @@ import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
+import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListenerImpl;
+import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Service
 public class QueryHandlerService {
 
   // TODO: Find correct media types
-  private static final String MEDIA_TYPE_CQL = "CQL";
+  private static final String MEDIA_TYPE_CQL = "text/cql";
   private static final String MEDIA_TYPE_FHIR = "FHIR";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String UNKNOWN_SITE = "Unbekannter Standort";
+
+  private final ObjectMapper objectMapper;
 
   private final QueryRepository queryRepository;
   private final ResultRepository resultRepository;
   private final BrokerClient brokerClient;
+  private final QueryStatusListener queryStatusListener;
+
+  private final QueryBuilder cqlQueryBuilder;
+
   private boolean brokerQueryStatusListenerConfigured;
 
   public QueryHandlerService(QueryRepository queryRepository, ResultRepository resultRepository,
-                             @Qualifier("applied") BrokerClient brokerClient) {
-    this.queryRepository = queryRepository;
-    this.resultRepository = resultRepository;
-    this.brokerClient = brokerClient;
+                             @Qualifier("applied") BrokerClient brokerClient,
+                             ObjectMapper objectMapper, QueryStatusListener queryStatusListener,
+                             @Qualifier("cql") QueryBuilder cqlQueryBuilder) {
+    this.queryRepository = Objects.requireNonNull(queryRepository);
+    this.resultRepository = Objects.requireNonNull(resultRepository);
+    this.brokerClient = Objects.requireNonNull(brokerClient);
+    this.objectMapper = Objects.requireNonNull(objectMapper);
+    this.queryStatusListener = Objects.requireNonNull(queryStatusListener);
+    this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
     brokerQueryStatusListenerConfigured = false;
   }
 
   public String runQuery(StructuredQuery structuredQuery)
-      throws UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+          throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryBuilderException {
 
     // TODO: maybe do this using a post construct method (think about middleware availability on startup + potential backoff!)
     if (!brokerQueryStatusListenerConfigured) {
-        brokerClient.addQueryStatusListener(
-                new QueryStatusListenerImpl(resultRepository, brokerClient)
-        );
+        brokerClient.addQueryStatusListener(queryStatusListener);
         brokerQueryStatusListenerConfigured = true;
     }
 
     var queryId = this.brokerClient.createQuery();
     var query = new Query();
     query.setQueryId(queryId);
-    query.setStructuredQuery(
-        OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(structuredQuery)));
 
-    String cqlContent = getCqlContent();
+    String structuredQueryStr = objectMapper.writeValueAsString(structuredQuery);
+    query.setStructuredQuery(objectMapper.readTree(structuredQueryStr));
+
+    var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
     query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
 
-    String fhirContent = getFhirContent();
-    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
-    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+//    String fhirContent = getFhirContent();
+//    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
+//    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
 
     this.brokerClient.publishQuery(queryId);
     this.queryRepository.save(query);
 
     return queryId;
-  }
-
-  // TODO: implement using QueryBuilderCql
-  private String getCqlContent() {
-    // return getQueryContent(...);
-    return "CQL query";
   }
 
   // TODO: implement using QueryBuilderFhir
@@ -107,10 +112,5 @@ public class QueryHandlerService {
         });
 
     return result;
-  }
-
-  public String getQueryContent(QueryBuilder queryBuilder) {
-    // TODO: adjust to restructuring
-    return queryBuilder.getQueryContent(null);
   }
 }

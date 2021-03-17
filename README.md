@@ -14,6 +14,8 @@
 |FEASIBILITY_DATABASE_HOST|Host under which the Postgres feasibility database can be reached.|localhost|`localhost`|
 |FEASIBILITY_DATABASE_USER|Username to connect to the Postgres feasibility database.|codex-postgres|`codex-postgres`|
 |FEASIBILITY_DATABASE_PASSWORD|Password to connect to the Postgres feasibility database.|codex-password|`codex-password`|
+| MAPPINGS_FILE | | | |
+| CONCEPT_TREE_FILE | | | |
 
 
 ### Running the AKTIN broker path

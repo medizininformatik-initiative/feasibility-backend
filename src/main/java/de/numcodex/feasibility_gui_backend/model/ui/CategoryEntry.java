@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.model.ui;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Objects;
 import java.util.UUID;
 
 public class CategoryEntry {
@@ -9,8 +11,8 @@ public class CategoryEntry {
   private final String display;
 
   public CategoryEntry(@JsonProperty("catId") UUID catId, @JsonProperty("display") String display) {
-    this.catId = catId;
-    this.display = display;
+    this.catId = Objects.requireNonNull(catId);
+    this.display = Objects.requireNonNull(display);
   }
 
   public String getDisplay() {

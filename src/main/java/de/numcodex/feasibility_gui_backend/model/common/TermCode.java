@@ -16,11 +16,4 @@ public class TermCode {
   @JsonProperty("display")
   private String display;
 
-  public Optional<String> getVersion() {
-    return Optional.ofNullable(version);
-  }
-
-  public Optional<String> getDisplay() {
-    return Optional.ofNullable(display);
-  }
 }

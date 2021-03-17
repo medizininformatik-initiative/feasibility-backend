@@ -38,7 +38,26 @@ spring:
 
 app:
   # AKTIN or DSF or MOCK
-  broker-client: ${BROKER_CLIENT_TYPE:MOCK}
+  brokerClient: ${BROKER_CLIENT_TYPE:MOCK}
+  mappingsFile: ${MAPPINGS_FILE}
+  conceptTreeFile: ${CONCEPT_TREE_FILE}
+  aktin:
+    broker:
+      baseUrl: ${AKTIN_BROKER_BASE_URL}
+      apiKey: ${AKTIN_BROKER_API_KEY}
+  dsf:
+    security:
+      certificate: ${DSF_SECURITY_CACERT}
+      keystore:
+        p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}
+        password: ${DSF_SECURITY_KEYSTORE_PASSWORD}
+    webservice:
+      baseUrl: ${DSF_WEBSERVICE_BASE_URL}
+      readTimeout: 20000
+      connectTimeout: 2000
+    websocket:
+      url: ${DSF_WEBSOCKET_URL}
+    organizationId: ${DSF_ORGANIZATION_ID}
 
 backend:
   ontology-folder: ontology/ui_profiles
@@ -65,24 +84,4 @@ cors:
   allowedOrigins:
     - "*"
 
-de:
-  num-codex:
-    FeasibilityGuiBackend:
-      aktin:
-        broker:
-          baseUrl: ${AKTIN_BROKER_BASE_URL}
-          apiKey: ${AKTIN_BROKER_API_KEY}
-      dsf:
-        security:
-          certificate: ${DSF_SECURITY_CACERT}
-          keystore:
-            p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}
-            password: ${DSF_SECURITY_KEYSTORE_PASSWORD}
-        webservice:
-          baseUrl: ${DSF_WEBSERVICE_BASE_URL}
-          readTimeout: 20000
-          connectTimeout: 2000
-        websocket:
-          url: ${DSF_WEBSOCKET_URL}
-        organizationId: ${DSF_ORGANIZATION_ID}
 
