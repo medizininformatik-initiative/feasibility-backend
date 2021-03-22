@@ -7,20 +7,20 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/certs
+          jwk-set-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/certs
       client:
         registration:
           userStoreClient:
             authorization-grant-type: client_credentials
-            client-id: codexFeasibilityGuiBackend
-            client-secret: bc1843c0-3c57-4c2c-9b40-ac38e6dd545e
+            client-id: ${KEYCLOAK_CLIENT_ID:codexFeasibilityGuiBackend}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:bc1843c0-3c57-4c2c-9b40-ac38e6dd545e}
         provider:
           userStoreClient:
-            token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
+            token-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/token
   datasource:
-    url: jdbc:postgresql://localhost:5555/codex_ui?currentSchema=codex
-    username: codex-postgres
-    password: codex-password
+    url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/codex_ui?currentSchema=codex
+    username: ${FEASIBILITY_DATABASE_USER:codex-postgres}
+    password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
     driverClassName: org.postgresql.Driver
 
   jpa:
@@ -38,20 +38,20 @@ spring:
 
 app:
   # AKTIN or DSF or MOCK
-  broker-client: MOCK
+  broker-client: ${BROKER_CLIENT_TYPE:MOCK}
 
 backend:
   ontology-folder: ontology/ui_profiles
 
 swagger:
   oauth2:
-    token-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/token
-    auth-uri: ${keycloak.url}/auth/realms/Num/protocol/openid-connect/auth
+    token-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/token
+    auth-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/auth
     client-name: codexFeasibilityGuiBackendWebapp
     client-secret: codexFeasibilityGuiBackendWebapp
 
 userstore:
-  url: ${keycloak.url}/auth/admin/realms/Num
+  url: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/admin/realms/${KEYCLOAK_REALM:Num}
 
 keycloak:
   url: http://localhost:8080
