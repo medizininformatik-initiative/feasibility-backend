@@ -1,10 +1,13 @@
 package de.numcodex.feasibility_gui_backend.model.ui;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 import java.util.UUID;
 
+@JsonInclude(Include.NON_NULL)
 public class CategoryEntry {
 
   private final UUID catId;

@@ -11,6 +11,7 @@ import lombok.Data;
 import java.util.Optional;
 
 @Data
+@JsonInclude(Include.NON_NULL)
 public class Criterion {
 
   @JsonProperty("termCode")

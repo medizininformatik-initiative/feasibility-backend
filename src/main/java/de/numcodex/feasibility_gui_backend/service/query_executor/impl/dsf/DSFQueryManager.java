@@ -92,10 +92,16 @@ class DSFQueryManager implements QueryManager {
     @Override
     public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException {
+
+        if(!mediaType.equalsIgnoreCase("text/cql")){
+            return;
+        }
+
         Bundle queryBundle = queryHeap.get(queryId);
         if (queryBundle == null) {
             throw new QueryNotFoundException(queryId);
         }
+
         if (!mediaType.equalsIgnoreCase("text/cql")) {
             throw new UnsupportedMediaTypeException(mediaType, Collections.singletonList("text/cql"));
         }

@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.model.ui;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
 
@@ -10,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 
 @Data
+@JsonInclude(Include.NON_NULL)
 public class TerminologyEntry {
 
   @JsonProperty("children")

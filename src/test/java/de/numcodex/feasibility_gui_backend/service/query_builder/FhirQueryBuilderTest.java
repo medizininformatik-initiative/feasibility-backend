@@ -49,7 +49,6 @@ class FhirQueryBuilderTest {
     var jsonString = objectMapper.writeValueAsString(test);
     System.out.println(jsonString);
     assert(! jsonString.contains("exclusionCriteria"));
-
     //assertEquals(testQueryForComp, jsonString);
 
   }
