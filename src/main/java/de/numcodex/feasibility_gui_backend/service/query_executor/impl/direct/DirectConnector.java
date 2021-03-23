@@ -1,22 +1,21 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+import java.util.Objects;
+
 public class DirectConnector {
 
   private final RestTemplate restTemplate;
+  private final String flareBaseUrl;
 
-  private String flareBaseUrl;
 
-
-  public DirectConnector (RestTemplate restTemplate, @Value("${de.num-codex.FeasibilityGuiBackend.flare.baseUrl}") String flareBaseUrl){
-    this.restTemplate = restTemplate;
-    this.flareBaseUrl = flareBaseUrl;
+  public DirectConnector (RestTemplate restTemplate, String flareBaseUrl){
+    this.restTemplate = Objects.requireNonNull(restTemplate);
+    this.flareBaseUrl = Objects.requireNonNull(flareBaseUrl);
   }
 
   

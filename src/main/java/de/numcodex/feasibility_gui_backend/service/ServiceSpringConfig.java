@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.CqlQueryBuilder;
+import de.numcodex.feasibility_gui_backend.service.query_builder.FhirQueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +36,7 @@ public class ServiceSpringConfig {
     public static final String CLIENT_TYPE_DSF = "DSF";
     public static final String CLIENT_TYPE_AKTIN = "AKTIN";
     public static final String CLIENT_TYPE_MOCK = "MOCK";
+    public static final String CLIENT_TYPE_DIRECT = "DIRECT";
 
     private final ApplicationContext ctx;
 
@@ -48,6 +51,7 @@ public class ServiceSpringConfig {
         return switch (StringUtils.upperCase(type)) {
             case CLIENT_TYPE_DSF -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
             case CLIENT_TYPE_AKTIN -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
+            case CLIENT_TYPE_DIRECT -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct");
             case CLIENT_TYPE_MOCK -> new MockBrokerClient();
             default -> throw new IllegalStateException(
                     "No Broker Client configured for type '%s'. Allowed types are %s"
@@ -75,6 +79,17 @@ public class ServiceSpringConfig {
     @Bean
     QueryBuilder createCqlQueryBuilder(Translator translator) {
         return new CqlQueryBuilder(translator, new ObjectMapper());
+    }
+
+    @Qualifier("fhir")
+    @Bean
+    QueryBuilder createFhirQueryBuilder(RestTemplate restTemplate, @Value("${app.flare.baseUrl}") String flareBaseUrl) {
+        return new FhirQueryBuilder(restTemplate, flareBaseUrl);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
     @Bean

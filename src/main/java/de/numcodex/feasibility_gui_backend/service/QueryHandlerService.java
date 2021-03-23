@@ -10,7 +10,6 @@ import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
-import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderFHIR;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
@@ -39,24 +38,25 @@ public class QueryHandlerService {
   private final ResultRepository resultRepository;
   private final BrokerClient brokerClient;
   private final QueryStatusListener queryStatusListener;
-
   private final QueryBuilder cqlQueryBuilder;
+  private final QueryBuilder fhirQueryBuilder;
 
   private boolean brokerQueryStatusListenerConfigured;
-  private final QueryBuilderFHIR fhirQueryBuilder;
 
 
 
   public QueryHandlerService(QueryRepository queryRepository, ResultRepository resultRepository,
                              @Qualifier("applied") BrokerClient brokerClient,
                              ObjectMapper objectMapper, QueryStatusListener queryStatusListener,
-                             @Qualifier("cql") QueryBuilder cqlQueryBuilder) {
+                             @Qualifier("cql") QueryBuilder cqlQueryBuilder,
+                             @Qualifier("fhir") QueryBuilder fhirQueryBuilder) {
     this.queryRepository = Objects.requireNonNull(queryRepository);
     this.resultRepository = Objects.requireNonNull(resultRepository);
     this.brokerClient = Objects.requireNonNull(brokerClient);
     this.objectMapper = Objects.requireNonNull(objectMapper);
     this.queryStatusListener = Objects.requireNonNull(queryStatusListener);
     this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
+    this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
     brokerQueryStatusListenerConfigured = false;
   }
 
@@ -76,7 +76,7 @@ public class QueryHandlerService {
     String structuredQueryStr = objectMapper.writeValueAsString(structuredQuery);
     query.setStructuredQuery(objectMapper.readTree(structuredQueryStr));
 
-    String structQueryContent = OBJECT_MAPPER.writeValueAsString(structuredQuery);
+    String structQueryContent = objectMapper.writeValueAsString(structuredQuery);
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
     query.getContents().put(MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
 
@@ -95,7 +95,7 @@ public class QueryHandlerService {
   }
 
   // TODO: implement using QueryBuilderFhir
-  private String getFhirContent(StructuredQuery structuredQuery) {
+  private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
     this.fhirQueryBuilder.getQueryContent(structuredQuery);
     // return getQueryContent(...);
     return "FHIR Search query";

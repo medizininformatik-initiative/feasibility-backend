@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class DirectSpringConfig {
 
-    @Value("${de.num-codex.FeasibilityGuiBackend.flare.baseUrl}")
+    @Value("${app.flare.baseUrl}")
     private String flareBaseUrl;
 
     @Qualifier("direct")

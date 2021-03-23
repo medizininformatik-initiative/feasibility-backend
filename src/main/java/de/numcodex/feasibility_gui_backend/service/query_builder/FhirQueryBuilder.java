@@ -4,24 +4,21 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+import java.util.Objects;
 
-@Service
-public class QueryBuilderFHIR implements QueryBuilder {
+public class FhirQueryBuilder implements QueryBuilder {
 
   private final RestTemplate restTemplate;
+  private final String flareBaseUrl;
 
-  private String flareBaseUrl;
-
-  public QueryBuilderFHIR (RestTemplate restTemplate, @Value("${de.num-codex.FeasibilityGuiBackend.flare.baseUrl}") String flareBaseUrl){
-    this.restTemplate = restTemplate;
-    this.flareBaseUrl = flareBaseUrl;
+  public FhirQueryBuilder(RestTemplate restTemplate, String flareBaseUrl){
+    this.restTemplate = Objects.requireNonNull(restTemplate);
+    this.flareBaseUrl = Objects.requireNonNull(flareBaseUrl);
   }
 
   @Override
