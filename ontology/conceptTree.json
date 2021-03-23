@@ -1,0 +1,23 @@
+{
+  "termCode": {
+    "code": "C71",
+    "display": "B\u00f6sartige Neubildung des Gehirns",
+    "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+  },
+  "children": [
+    {
+      "termCode": {
+        "code": "C71.1",
+        "display": "",
+        "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+      }
+    },
+    {
+      "termCode": {
+        "code": "C71.2",
+        "display": "",
+        "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+      }
+    }
+  ]
+}

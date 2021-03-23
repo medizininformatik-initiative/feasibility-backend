@@ -13,8 +13,8 @@ public class ValueFilter {
 
   @JsonProperty(value = "type", required = true)
   private ValueFilterType type;
-  @JsonProperty("selectableConcepts")
-  private List<TermCode> selectableConcepts = new ArrayList<>();
+  @JsonProperty("selectedConcepts")
+  private List<TermCode> selectedConcepts = new ArrayList<>();
   @JsonProperty("comparator")
   private Comparator comparator;
   @JsonProperty("quantityUnit")

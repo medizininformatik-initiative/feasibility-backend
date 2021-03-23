@@ -3,16 +3,25 @@ package de.numcodex.feasibility_gui_backend.api;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.service.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
+import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.URI;
 
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.
@@ -20,6 +29,7 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 @RequestMapping("api/v1/query-handler")
 @RestController
 @CrossOrigin
+@Slf4j
 public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
@@ -34,9 +44,10 @@ public class QueryHandlerRestController {
     String id;
     try {
       id = queryHandlerService.runQuery(query);
-    } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException e) {
+    } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException | QueryBuilderException e) {
       // TODO: Find correct Http error handling
-      return Response.status(Response.Status.BAD_REQUEST).build();
+      log.error("problem running query", e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
     URI uri =

@@ -15,9 +15,5 @@ public class Criterion {
 
   @JsonProperty("valueFilter")
   private ValueFilter valueFilter;
-
-
-  public Optional<ValueFilter> getValueFilter() {
-    return Optional.ofNullable(valueFilter);
-  }
+  
 }
