@@ -10,6 +10,7 @@ import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
+import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderFHIR;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
@@ -25,8 +26,10 @@ import java.util.Objects;
 public class QueryHandlerService {
 
   // TODO: Find correct media types
+  private static final String MEDIA_TYPE_STRUCT_QUERY = "text/structured-query";
   private static final String MEDIA_TYPE_CQL = "text/cql";
-  private static final String MEDIA_TYPE_FHIR = "FHIR";
+  private static final String MEDIA_TYPE_FHIR = "text/fhir-codex";
+
 
   private static final String UNKNOWN_SITE = "Unbekannter Standort";
 
@@ -40,6 +43,9 @@ public class QueryHandlerService {
   private final QueryBuilder cqlQueryBuilder;
 
   private boolean brokerQueryStatusListenerConfigured;
+  private final QueryBuilderFHIR fhirQueryBuilder;
+
+
 
   public QueryHandlerService(QueryRepository queryRepository, ResultRepository resultRepository,
                              @Qualifier("applied") BrokerClient brokerClient,
@@ -70,13 +76,17 @@ public class QueryHandlerService {
     String structuredQueryStr = objectMapper.writeValueAsString(structuredQuery);
     query.setStructuredQuery(objectMapper.readTree(structuredQueryStr));
 
+    String structQueryContent = OBJECT_MAPPER.writeValueAsString(structuredQuery);
+    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
+    query.getContents().put(MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
+
     var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
     query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
 
-//    String fhirContent = getFhirContent();
-//    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
-//    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+    String fhirContent = getFhirContent(structuredQuery);
+    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
+    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
 
     this.brokerClient.publishQuery(queryId);
     this.queryRepository.save(query);
@@ -85,7 +95,8 @@ public class QueryHandlerService {
   }
 
   // TODO: implement using QueryBuilderFhir
-  private String getFhirContent() {
+  private String getFhirContent(StructuredQuery structuredQuery) {
+    this.fhirQueryBuilder.getQueryContent(structuredQuery);
     // return getQueryContent(...);
     return "FHIR Search query";
   }

@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.model.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 public enum Comparator {
   @JsonProperty("eq")

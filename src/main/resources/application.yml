@@ -58,6 +58,10 @@ app:
     websocket:
       url: ${DSF_WEBSOCKET_URL}
     organizationId: ${DSF_ORGANIZATION_ID}
+  flare:
+    baseUrl: ${FLARE_WEBSERVICE_BASE_URL}
+    readTimeout: 20000
+    connectTimeout: 2000
 
 backend:
   ontology-folder: ontology/ui_profiles

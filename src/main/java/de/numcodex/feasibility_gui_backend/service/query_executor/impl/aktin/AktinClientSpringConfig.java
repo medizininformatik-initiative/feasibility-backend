@@ -28,6 +28,8 @@ public class AktinClientSpringConfig {
     @Value("${app.aktin.broker.apiKey}")
     private String brokerApiKey;
 
+
+
     @Qualifier("aktin")
     @Bean
     public BrokerClient aktinBrokerClient() {
