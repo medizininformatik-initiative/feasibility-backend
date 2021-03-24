@@ -65,13 +65,14 @@ public class ServiceSpringConfig {
         var mappings = objectMapper.readValue(new File(mappingsFile), Mapping[].class);
         var conceptTree = objectMapper.readValue(new File(conceptTreeFile), ConceptNode.class);
         return Translator.of(MappingContext.of(
-                Stream.of(mappings).collect(Collectors.toMap(Mapping::getConcept, Function.identity())),
+                Stream.of(mappings).collect(Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
                 conceptTree,
                 Map.of("http://fhir.de/CodeSystem/dimdi/icd-10-gm", "icd10",
                         "http://loinc.org", "loinc",
                         "https://fhir.bbmri.de/CodeSystem/SampleMaterialType", "sample",
                         "http://fhir.de/CodeSystem/dimdi/atc", "atc",
                         "http://snomed.info/sct", "snomed",
+                        "http://terminology.hl7.org/CodeSystem/condition-ver-status", "cvs",
                         "http://hl7.org/fhir/administrative-gender", "gender")));
     }
 

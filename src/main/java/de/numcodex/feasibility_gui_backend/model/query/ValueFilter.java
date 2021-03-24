@@ -3,12 +3,10 @@ package de.numcodex.feasibility_gui_backend.model.query;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.annotations.SerializedName;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
 import de.numcodex.feasibility_gui_backend.model.common.Unit;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,7 +16,7 @@ public class ValueFilter {
   @JsonProperty(value = "type", required = true)
   private ValueFilterType type;
   @JsonProperty("selectedConcepts")
-  private List<TermCode> selectedConcepts = new ArrayList<>();
+  private List<TermCode> selectedConcepts;
   @JsonProperty("comparator")
   private Comparator comparator;
   @JsonProperty("unit")

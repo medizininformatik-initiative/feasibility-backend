@@ -80,13 +80,13 @@ public class QueryHandlerService {
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
     query.getContents().put(MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
 
-    /*var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
+    var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
-    query.getContents().put(MEDIA_TYPE_CQL, cqlContent);*/
+    query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
 
-    String fhirContent = getFhirContent(structuredQuery);
-    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
-    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+//    String fhirContent = getFhirContent(structuredQuery);
+//    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
+//    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
 
     this.brokerClient.publishQuery(queryId);
     this.queryRepository.save(query);
