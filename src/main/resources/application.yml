@@ -68,16 +68,6 @@ app:
     connectTimeout: 2000
 
 
-swagger:
-  oauth2:
-    token-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/token
-    auth-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/auth
-    client-name: codexFeasibilityGuiBackendWebapp
-    client-secret: codexFeasibilityGuiBackendWebapp
-
-userstore:
-  url: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/admin/realms/${KEYCLOAK_REALM:Num}
-
 keycloak:
   url: http://localhost:8080
 
