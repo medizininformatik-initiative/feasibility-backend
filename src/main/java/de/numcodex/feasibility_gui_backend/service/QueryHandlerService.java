@@ -15,18 +15,19 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundE
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 @Service
 public class QueryHandlerService {
 
   // TODO: Find correct media types
+  private static final String MEDIA_TYPE_STRUCT_QUERY = "text/structured-query";
   private static final String MEDIA_TYPE_CQL = "text/cql";
-  private static final String MEDIA_TYPE_FHIR = "FHIR";
+  private static final String MEDIA_TYPE_FHIR = "text/fhir-codex";
+
 
   private static final String UNKNOWN_SITE = "Unbekannter Standort";
 
@@ -36,21 +37,25 @@ public class QueryHandlerService {
   private final ResultRepository resultRepository;
   private final BrokerClient brokerClient;
   private final QueryStatusListener queryStatusListener;
-
   private final QueryBuilder cqlQueryBuilder;
+  private final QueryBuilder fhirQueryBuilder;
 
   private boolean brokerQueryStatusListenerConfigured;
+
+
 
   public QueryHandlerService(QueryRepository queryRepository, ResultRepository resultRepository,
                              @Qualifier("applied") BrokerClient brokerClient,
                              ObjectMapper objectMapper, QueryStatusListener queryStatusListener,
-                             @Qualifier("cql") QueryBuilder cqlQueryBuilder) {
+                             @Qualifier("cql") QueryBuilder cqlQueryBuilder,
+                             @Qualifier("fhir") QueryBuilder fhirQueryBuilder) {
     this.queryRepository = Objects.requireNonNull(queryRepository);
     this.resultRepository = Objects.requireNonNull(resultRepository);
     this.brokerClient = Objects.requireNonNull(brokerClient);
     this.objectMapper = Objects.requireNonNull(objectMapper);
     this.queryStatusListener = Objects.requireNonNull(queryStatusListener);
     this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
+    this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
     brokerQueryStatusListenerConfigured = false;
   }
 
@@ -70,13 +75,17 @@ public class QueryHandlerService {
     String structuredQueryStr = objectMapper.writeValueAsString(structuredQuery);
     query.setStructuredQuery(objectMapper.readTree(structuredQueryStr));
 
+    String structQueryContent = objectMapper.writeValueAsString(structuredQuery);
+    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
+    query.getContents().put(MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
+
     var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
     query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
 
-//    String fhirContent = getFhirContent();
-//    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
-//    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+    String fhirContent = getFhirContent(structuredQuery);
+    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
+    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
 
     this.brokerClient.publishQuery(queryId);
     this.queryRepository.save(query);
@@ -85,7 +94,8 @@ public class QueryHandlerService {
   }
 
   // TODO: implement using QueryBuilderFhir
-  private String getFhirContent() {
+  private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
+    this.fhirQueryBuilder.getQueryContent(structuredQuery);
     // return getQueryContent(...);
     return "FHIR Search query";
   }

@@ -1,15 +1,17 @@
 package de.numcodex.feasibility_gui_backend.model.ui;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
 import de.numcodex.feasibility_gui_backend.model.common.Unit;
 import de.numcodex.feasibility_gui_backend.model.query.Comparator;
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 
 @Data
+@JsonInclude(Include.NON_NULL)
 public class ValueDefinition {
 
   @JsonProperty(value = "type", required = true)

@@ -6,12 +6,11 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundE
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
-import org.highmed.fhir.client.WebsocketClient;
-import org.hl7.fhir.r4.model.DomainResource;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.highmed.fhir.client.WebsocketClient;
+import org.hl7.fhir.r4.model.DomainResource;
 
 /**
  * Collector for collecting the results of feasibility queries that are running in a distributed fashion.

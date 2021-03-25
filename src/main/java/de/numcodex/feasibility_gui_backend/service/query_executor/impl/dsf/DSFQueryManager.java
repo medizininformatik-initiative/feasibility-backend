@@ -1,7 +1,20 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
+import static org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
+import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
+
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,20 +29,6 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION;
-import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
-import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
 
 /**
  * Manager for feasibility queries.
@@ -92,6 +91,11 @@ class DSFQueryManager implements QueryManager {
     @Override
     public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException {
+
+        if (!mediaType.equalsIgnoreCase("text/cql")) {
+            return;
+        }
+
         Bundle queryBundle = queryHeap.get(queryId);
         if (queryBundle == null) {
             throw new QueryNotFoundException(queryId);

@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock;
+package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
@@ -10,10 +10,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Data;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Service
-public class MockBrokerClient implements BrokerClient {
+public class DirectBrokerClient implements BrokerClient {
 
   private static final String SITE_1_NAME ="Lübeck";
   private static final String SITE_2_NAME ="Erlangen";
@@ -25,10 +24,14 @@ public class MockBrokerClient implements BrokerClient {
   private static final String SITE_3_ID ="3";
   private static final String SITE_4_ID ="4";
 
+
+  @Autowired
+  private DirectConnector directConnector;
+
   private final List<QueryStatusListener> listeners = new ArrayList<>();
-  private final List<MockQuery> queries = new ArrayList<>();
+  private final List<DirectQuery> queries = new ArrayList<>();
   // TODO: Thread handling should be refactored using Executor, Runnable ThreadPool
-  private final List<MockResultThread> runningResultThreads = new ArrayList<>();
+  private final List<DirectResultThread> runningResultThreads = new ArrayList<>();
 
   @Override
   public void addQueryStatusListener(QueryStatusListener queryStatusListener) {
@@ -37,7 +40,7 @@ public class MockBrokerClient implements BrokerClient {
 
   @Override
   public String createQuery() {
-    var query = new MockQuery();
+    var query = new DirectQuery();
     this.queries.add(query);
 
     return query.getQueryId();
@@ -46,7 +49,7 @@ public class MockBrokerClient implements BrokerClient {
   @Override
   public void addQueryDefinition(String queryId, String mediaTypeString, String content)
           throws QueryNotFoundException {
-    MockQuery query = findQuery(queryId);
+    DirectQuery query = findQuery(queryId);
     query.getContents().put(mediaTypeString, content);
   }
 
@@ -65,7 +68,7 @@ public class MockBrokerClient implements BrokerClient {
     var threadsToBeStopped = this.runningResultThreads.stream()
             .filter(thread -> thread.getQuery().getQueryId().equals(queryId))
             .collect(Collectors.toList());
-    threadsToBeStopped.forEach(MockResultThread::stopMockThread);
+    threadsToBeStopped.forEach(DirectResultThread::stopMockThread);
 
     this.runningResultThreads.removeAll(threadsToBeStopped);
   }
@@ -96,7 +99,7 @@ public class MockBrokerClient implements BrokerClient {
     };
   }
 
-  private MockQuery findQuery(String queryId) throws QueryNotFoundException {
+  private DirectQuery findQuery(String queryId) throws QueryNotFoundException {
     var queryOptional = this.queries.stream()
             .filter(queryTemp -> queryTemp.getQueryId().equals(queryId)).findFirst();
     if (queryOptional.isEmpty()) {
@@ -106,14 +109,14 @@ public class MockBrokerClient implements BrokerClient {
     return queryOptional.get();
   }
 
-  private void runResultThread(String siteId, MockQuery query) {
-    var thread = new MockResultThread(siteId, query, listeners);
+  private void runResultThread(String siteId, DirectQuery query) {
+    var thread = new DirectResultThread(siteId, query, listeners, directConnector);
     thread.start();
     this.runningResultThreads.add(thread);
   }
 
   @Data
-  static class MockQuery {
+  static class DirectQuery {
     private String queryId = UUID.randomUUID().toString();
 
     private Map<String, String> contents = new HashMap<>();

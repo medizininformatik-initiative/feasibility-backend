@@ -37,7 +37,7 @@ spring:
 
 
 app:
-  # AKTIN or DSF or MOCK
+  # AKTIN or DSF or MOCK or DIRECT
   brokerClient: ${BROKER_CLIENT_TYPE:MOCK}
   mappingsFile: ${MAPPINGS_FILE}
   conceptTreeFile: ${CONCEPT_TREE_FILE}
@@ -58,6 +58,10 @@ app:
     websocket:
       url: ${DSF_WEBSOCKET_URL}
     organizationId: ${DSF_ORGANIZATION_ID}
+  flare:
+    baseUrl: ${FLARE_WEBSERVICE_BASE_URL}
+    readTimeout: 20000
+    connectTimeout: 2000
 
 backend:
   ontology-folder: ontology/ui_profiles

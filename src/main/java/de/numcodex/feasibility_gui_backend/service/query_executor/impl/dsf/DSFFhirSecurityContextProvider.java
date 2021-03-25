@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;

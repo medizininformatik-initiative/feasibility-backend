@@ -6,7 +6,6 @@ import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.sq2cql.PrintContext;
 import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.cql.Library;
-
 import java.util.Objects;
 
 public class CqlQueryBuilder implements QueryBuilder {

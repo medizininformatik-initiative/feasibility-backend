@@ -1,8 +1,7 @@
 package de.numcodex;
 
-import org.hibernate.dialect.PostgreSQL95Dialect;
-
 import java.sql.Types;
+import org.hibernate.dialect.PostgreSQL95Dialect;
 
 public class CustomPostgreSQL95Dialect extends PostgreSQL95Dialect {
   
