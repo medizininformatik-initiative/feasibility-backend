@@ -6,10 +6,11 @@
 | EnvVar | Description | Example | Default |
 |--------|-------------|---------|---------|
 |BROKER_CLIENT_TYPE|Selects the BorkerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `DIRECT` , `MOCK` | `DSF` | `MOCK` |
-|KEYCLOAK_ENDPOINT| | |`http://localhost:8080`|
-|KEYCLOAK_REALM| | |`Num`|
-|KEYCLOAK_CLIENT_ID| | |`codexFeasibilityGuiBackend`|
-|KEYCLOAK_CLIENT_SECRET| | |`bc1843c0-3c57-4c2c-9b40-ac38e6dd545e`|
+|KEYCLOAK_ENABLED| Enables Keycloak if set to true. Possible values are `true` and `false`. | | `true` |
+|KEYCLOAK_BASE_URL| Base URL to reach a keycloak instance. | | `http://localhost:8080` |
+|KEYCLOAK_REALM| Realm to be used for checking bearer tokens. | | `codex-develop` |
+|KEYCLOAK_CLIENT_ID| Client ID to be used for checking bearer tokens. | | `middleware-broker` |
+|KEYCLOAK_ALLOWED_ROLE| Role that has to be part of the bearer token in order for the requester to be rendered authorized. | | `CODEX_USER` |
 |FEASIBILITY_DATABASE_HOST|Host under which the Postgres feasibility database can be reached.|localhost|`localhost`|
 |FEASIBILITY_DATABASE_USER|Username to connect to the Postgres feasibility database.|codex-postgres|`codex-postgres`|
 |FEASIBILITY_DATABASE_PASSWORD|Password to connect to the Postgres feasibility database.|codex-password|`codex-password`|

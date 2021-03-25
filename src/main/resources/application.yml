@@ -3,26 +3,11 @@ server:
 spring:
   application:
     name: codex-feasibility-gui-backend
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/certs
-      client:
-        registration:
-          userStoreClient:
-            authorization-grant-type: client_credentials
-            client-id: ${KEYCLOAK_CLIENT_ID:codexFeasibilityGuiBackend}
-            client-secret: ${KEYCLOAK_CLIENT_SECRET:bc1843c0-3c57-4c2c-9b40-ac38e6dd545e}
-        provider:
-          userStoreClient:
-            token-uri: ${KEYCLOAK_ENDPOINT:"http://localhost:8080"}/auth/realms/${KEYCLOAK_REALM:Num}/protocol/openid-connect/token
   datasource:
     url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/codex_ui?currentSchema=codex
     username: ${FEASIBILITY_DATABASE_USER:codex-postgres}
     password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
     driverClassName: org.postgresql.Driver
-
   jpa:
     database: POSTGRESQL
     show-sql: true
@@ -69,7 +54,20 @@ app:
 
 
 keycloak:
-  url: http://localhost:8080
+  enabled: ${KEYCLOAK_ENABLED:true}
+  cors: true
+  bearer-only: true
+  auth-server-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}/auth
+  realm: ${KEYCLOAK_REALM:codex-develop}
+  ssl-required: external
+  resource: ${KEYCLOAK_CLIENT_ID:feasibility-gui}
+  security-constraints:
+  - auth-roles:
+    - ${KEYCLOAK_ALLOWED_ROLE:CODEX_USER}
+    security-collections:
+    - name: "Secured endpoints"
+      patterns:
+      - "/api/*"
 
 logging:
   level:
