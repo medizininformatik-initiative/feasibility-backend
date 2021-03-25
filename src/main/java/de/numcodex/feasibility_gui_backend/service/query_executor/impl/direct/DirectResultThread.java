@@ -4,10 +4,6 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 // TODO: Use interface Runnable instead of extending Thread
 

@@ -1,6 +1,9 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.WebSocket.Builder;
 import lombok.AllArgsConstructor;
 import org.aktin.broker.client2.AuthFilter;
 import org.aktin.broker.client2.BrokerAdmin2;
@@ -9,10 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.WebSocket.Builder;
 
 
 /**

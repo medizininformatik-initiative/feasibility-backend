@@ -1,6 +1,15 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
+import static org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.WEBSOCKET;
+import static org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
+
 import ca.uhn.fhir.context.FhirContext;
+import java.net.URI;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -9,16 +18,6 @@ import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Subscription;
-
-import java.net.URI;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import static org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.WEBSOCKET;
-import static org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
 
 /**
  * An entity that can provide different kinds of web clients to communicate with a FHIR server.

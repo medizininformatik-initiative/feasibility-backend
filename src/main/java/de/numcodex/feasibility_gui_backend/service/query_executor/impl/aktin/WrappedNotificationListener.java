@@ -1,11 +1,10 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin;
 
-import org.aktin.broker.client2.AdminNotificationListener;
-import org.aktin.broker.xml.RequestStatus;
-
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import lombok.AllArgsConstructor;
+import org.aktin.broker.client2.AdminNotificationListener;
+import org.aktin.broker.xml.RequestStatus;
 
 /**
  * Wraps the CODEX notification listener with AKTIN admin notification listener

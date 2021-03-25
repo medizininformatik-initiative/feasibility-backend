@@ -1,17 +1,17 @@
 version: '3.7'
 services:
-  #feasibility-gui-backend:
-  #  container_name: feasibility-gui-backend
-  #  image: 'feasibility-gui-backend'
-  #  ports:
-  #  - ${PORT_FEASIBILITY_GUI_BACKEND:-127.0.0.1:8090}:8090
-  #  depends_on:
-  #    - feasibility-db
-  #  environment:
-  #    - SPRING_DATASOURCE_URL=jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex
-  #    - SPRING_DATASOURCE_USERNAME=codex-postgres
-  #    - SPRING_DATASOURCE_PASSWORD=codex-password
-  #    - BROKER_CLIENT_TYPE=MOCK
+  feasibility-gui-backend:
+    container_name: feasibility-gui-backend
+    build: .
+    ports:
+    - ${PORT_FEASIBILITY_GUI_BACKEND:-127.0.0.1:8090}:8090
+    depends_on:
+      - feasibility-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex
+      - SPRING_DATASOURCE_USERNAME=codex-postgres
+      - SPRING_DATASOURCE_PASSWORD=codex-password
+      - BROKER_CLIENT_TYPE=MOCK
 
   feasibility-db:
     image: 'postgres:13.1-alpine'

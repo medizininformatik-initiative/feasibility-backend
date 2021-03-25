@@ -1,21 +1,20 @@
 package de.numcodex.feasibility_gui_backend.service.query_builder;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.sq2cql.PrintContext;
 import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.cql.Library;
 import de.numcodex.sq2cql.model.structured_query.Criterion;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CqlQueryBuilderTest {

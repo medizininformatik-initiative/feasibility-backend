@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
 import de.numcodex.feasibility_gui_backend.model.common.Unit;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 @JsonInclude(Include.NON_NULL)

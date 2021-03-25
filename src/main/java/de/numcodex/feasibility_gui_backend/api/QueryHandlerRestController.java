@@ -6,6 +6,11 @@ import de.numcodex.feasibility_gui_backend.service.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
+import java.io.IOException;
+import java.net.URI;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.io.IOException;
-import java.net.URI;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.

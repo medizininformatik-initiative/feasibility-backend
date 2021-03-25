@@ -1,8 +1,7 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Indicates that a media type for a query is not supported.

@@ -1,7 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf.DSFBrokerClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

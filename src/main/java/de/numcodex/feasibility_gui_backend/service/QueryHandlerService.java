@@ -15,11 +15,10 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundE
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 @Service
 public class QueryHandlerService {
@@ -84,9 +83,9 @@ public class QueryHandlerService {
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
     query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
 
-//    String fhirContent = getFhirContent(structuredQuery);
-//    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
-//    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+    String fhirContent = getFhirContent(structuredQuery);
+    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
+    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
 
     this.brokerClient.publishQuery(queryId);
     this.queryRepository.save(query);

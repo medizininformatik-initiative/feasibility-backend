@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-
 import java.io.IOException;
 
 /**

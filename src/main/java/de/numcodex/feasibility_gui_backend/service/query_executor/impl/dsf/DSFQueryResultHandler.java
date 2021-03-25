@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -7,8 +8,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
-
-import java.util.Optional;
 
 /**
  * A handler that is capable of processing a FHIR Task which represents the result of a feasibility query that ran

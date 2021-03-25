@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

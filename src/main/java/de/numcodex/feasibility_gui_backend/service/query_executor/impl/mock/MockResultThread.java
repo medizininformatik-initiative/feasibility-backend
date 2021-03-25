@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 

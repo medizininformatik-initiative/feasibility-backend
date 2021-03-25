@@ -1,7 +1,12 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
+import java.util.List;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,12 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class DSFQueryResultCollectorTest {

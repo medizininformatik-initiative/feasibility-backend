@@ -3,11 +3,14 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.Data;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MockBrokerClient implements BrokerClient {

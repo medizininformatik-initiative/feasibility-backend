@@ -2,11 +2,9 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.validation.constraints.NotNull;
 
 /**

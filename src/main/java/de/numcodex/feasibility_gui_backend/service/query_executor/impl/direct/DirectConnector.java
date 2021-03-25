@@ -1,11 +1,10 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
+import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Objects;
 
 public class DirectConnector {
 

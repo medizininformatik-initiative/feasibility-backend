@@ -2,8 +2,6 @@ package de.numcodex.feasibility_gui_backend.service.query_executor;
 
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
-import de.numcodex.feasibility_gui_backend.service.query_executor.*;
-
 import java.io.IOException;
 
 public class QueryStatusListenerImpl implements QueryStatusListener {

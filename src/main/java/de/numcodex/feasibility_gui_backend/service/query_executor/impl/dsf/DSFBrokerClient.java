@@ -6,7 +6,6 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundE
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-
 import java.io.IOException;
 import java.util.List;
 

@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Objects;
 
 public class FhirQueryBuilder implements QueryBuilder {
 
