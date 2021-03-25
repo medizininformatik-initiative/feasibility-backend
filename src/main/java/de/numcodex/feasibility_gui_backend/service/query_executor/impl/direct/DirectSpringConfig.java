@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Spring configuration for providing a {@link DSFBrokerClient} instance.
+ * Spring configuration for providing a {@link DirectBrokerClient} instance.
  */
 @Lazy
 @Configuration
