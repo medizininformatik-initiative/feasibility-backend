@@ -3,12 +3,15 @@ package de.numcodex.feasibility_gui_backend.service.query_builder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
 
 class FhirQueryBuilderTestIT {
 
+  // TODO: re-enable when implementing integration + system tests (CI pipelines external projects are required for docker images)
+  @Disabled
   @Test
   public void queryBuilder() throws JsonProcessingException {
 
