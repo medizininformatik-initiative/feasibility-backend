@@ -1,22 +1,25 @@
 package de.numcodex.feasibility_gui_backend;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
+import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
+import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.sq2cql.model.structured_query.Criterion;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +40,12 @@ public class QueryHandlerTest {
 
     @Mock
     QueryRepository queryRepository;
+
+    @Mock
+    ResultRepository resultRepository;
+
+    @Mock
+    QueryStatusListener queryStatusListener;
 
     @Mock
     QueryBuilder cqlQueryBuilder;
