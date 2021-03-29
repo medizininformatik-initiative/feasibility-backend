@@ -32,7 +32,7 @@ public class TerminologyService {
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
-  public TerminologyService(@Value("${backend.ontology-folder}") String uiProfilePath) {
+  public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath) {
     this.uiProfilePath = uiProfilePath;
     readInTerminologyEntries();
     generateTerminologyEntriesWithoutDirectChildren();

@@ -18,6 +18,7 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMed
 import java.io.IOException;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +28,8 @@ public class QueryHandlerService {
   private static final String MEDIA_TYPE_STRUCT_QUERY = "text/structured-query";
   private static final String MEDIA_TYPE_CQL = "text/cql";
   private static final String MEDIA_TYPE_FHIR = "text/fhir-codex";
+
+
 
 
   private static final String UNKNOWN_SITE = "Unbekannter Standort";
@@ -39,6 +42,8 @@ public class QueryHandlerService {
   private final QueryStatusListener queryStatusListener;
   private final QueryBuilder cqlQueryBuilder;
   private final QueryBuilder fhirQueryBuilder;
+  private final boolean fhirTranslateEnabled;
+  private final boolean cqlTranslateEnabled;
 
   private boolean brokerQueryStatusListenerConfigured;
 
@@ -48,7 +53,9 @@ public class QueryHandlerService {
                              @Qualifier("applied") BrokerClient brokerClient,
                              ObjectMapper objectMapper, QueryStatusListener queryStatusListener,
                              @Qualifier("cql") QueryBuilder cqlQueryBuilder,
-                             @Qualifier("fhir") QueryBuilder fhirQueryBuilder) {
+                             @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
+      @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
+      @Value("${app.cqlTranslationEnabled}") boolean cqlTranslateEnabled) {
     this.queryRepository = Objects.requireNonNull(queryRepository);
     this.resultRepository = Objects.requireNonNull(resultRepository);
     this.brokerClient = Objects.requireNonNull(brokerClient);
@@ -57,6 +64,8 @@ public class QueryHandlerService {
     this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
     this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
     brokerQueryStatusListenerConfigured = false;
+    this.fhirTranslateEnabled = fhirTranslateEnabled;
+    this.cqlTranslateEnabled = cqlTranslateEnabled;
   }
 
   public String runQuery(StructuredQuery structuredQuery)
@@ -79,13 +88,18 @@ public class QueryHandlerService {
     this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
     query.getContents().put(MEDIA_TYPE_STRUCT_QUERY, structQueryContent);
 
-    var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
-    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
-    query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
 
-    String fhirContent = getFhirContent(structuredQuery);
-    this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
-    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+    if (cqlTranslateEnabled) {
+      var cqlContent = cqlQueryBuilder.getQueryContent(structuredQuery);
+      this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_CQL, cqlContent);
+      query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
+    }
+
+    if (fhirTranslateEnabled) {
+      String fhirContent = getFhirContent(structuredQuery);
+      this.brokerClient.addQueryDefinition(queryId, MEDIA_TYPE_FHIR, fhirContent);
+      query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+    }
 
     this.brokerClient.publishQuery(queryId);
     this.queryRepository.save(query);
@@ -93,11 +107,9 @@ public class QueryHandlerService {
     return queryId;
   }
 
-  // TODO: implement using QueryBuilderFhir
+
   private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
-    this.fhirQueryBuilder.getQueryContent(structuredQuery);
-    // return getQueryContent(...);
-    return "FHIR Search query";
+    return this.fhirQueryBuilder.getQueryContent(structuredQuery);
   }
 
   public QueryResult getQueryResult(String queryId) {

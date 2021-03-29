@@ -39,8 +39,11 @@ spring:
 app:
   # AKTIN or DSF or MOCK or DIRECT
   brokerClient: ${BROKER_CLIENT_TYPE:MOCK}
-  mappingsFile: ${MAPPINGS_FILE}
-  conceptTreeFile: ${CONCEPT_TREE_FILE}
+  ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_profiles}
+  mappingsFile: ${MAPPINGS_FILE:ontology/termCodeMapping.json}
+  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/conceptTree.json}
+  fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
+  cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   aktin:
     broker:
       baseUrl: ${AKTIN_BROKER_BASE_URL}
@@ -59,12 +62,10 @@ app:
       url: ${DSF_WEBSOCKET_URL}
     organizationId: ${DSF_ORGANIZATION_ID}
   flare:
-    baseUrl: ${FLARE_WEBSERVICE_BASE_URL}
+    baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
     readTimeout: 20000
     connectTimeout: 2000
 
-backend:
-  ontology-folder: ontology/ui_profiles
 
 swagger:
   oauth2:
