@@ -4,7 +4,7 @@ services:
     container_name: feasibility-gui-backend
     build: .
     ports:
-    - ${PORT_FEASIBILITY_GUI_BACKEND:-127.0.0.1:8090}:8090
+    - ${PORT_FEASIBILITY_GUI_BACKEND:-127.0.0.1:8091}:8090
     depends_on:
       - feasibility-db
     environment:
