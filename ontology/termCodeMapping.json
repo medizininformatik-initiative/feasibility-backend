@@ -1,119 +1,48 @@
 [
   {
-    "fhirResourceType": "Observation",
-    "termCode": {
-      "code": "72166-2",
-      "display": "Tabacco smoking status",
-      "system": "http://loinc.org"
-    },
-    "termCodeSearchParameter": "code",
-    "valueSearchParameter": "value-concept",
-    "fhirSearchExample": [
-      "[base]/Observation?code-value-concept=72166-2$LA18976-3",
-      "[base]/Observation?code=72166&value-concept=LA18976-3"
-    ],
-    "cqlExample": [
-      "exists(from [Observation: Code '72166-2' from loinc] O where O.value.coding contains Code 'LA18976-3' from loinc)"
-    ]
-  },
-  {
     "fhirResourceType": "Condition",
-    "termCode": {
-      "code": "G73.3",
-      "display": "Schlafapnoe",
-      "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
-    },
-    "termCodeSearchParameter": "code",
     "fixedCriteria": [
       {
-        "type": "coding",
-        "searchParameter": "verification-status",
         "fhirPath": "verificationStatus",
+        "searchParameter": "verification-status",
+        "type": "coding",
         "value": [
           {
-            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
-            "code": "confirmed"
+            "code": "confirmed",
+            "display": "confirmed",
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
           }
         ]
       }
-    ]
-  },
-  {
-    "fhirResourceType": "Observation",
-    "termCode": {
-      "system": "http://loinc.org",
-      "code": "1988-5",
-      "display": "C reactive protein [Mass/volume] in Serum or Plasma"
-    },
-    "termCodeSearchParameter": "code",
-    "valueSearchParameter": "value-quantity",
-    "example": [
-      "Observation?code=1988-5&value-quantity=gt18|http://unitsofmeasure.org|a"
     ],
-    "cqlExample": [
-      "exists(from [Observation: Code '1988-5' from loinc] O where (O.value as Quantity) < 18 'a')"
-    ]
-  },
-  {
-    "fhirResourceType": "Procedure",
-    "termCode": {
-      "system": "http://snomed.info/sct",
-      "code": "277132007",
-      "display": "Therapeutic procedure (procedure)"
+    "key": {
+      "code": "J98.4",
+      "display": "Sonstige Ver\u00e4nderungen der Lunge",
+      "system": "urn:oid:1.2.276.0.76.5.409"
     },
-    "termCodeSearchParameter": "code",
-    "fixedCriteria": [
-      {
-        "type": "code",
-        "searchParameter": "status",
-        "fhirPath": "status",
-        "value": [
-          "completed",
-          "in-progress"
-        ]
-      }
-    ]
-  },
-  {
-    "fhirResourceType": "MedicationStatement",
-    "termCode": {
-      "system": "http://fhir.de/CodeSystem/dimdi/atc",
-      "code": "J05AE08",
-      "display": "Atazanavir"
-    },
-    "termCodeSearchParameter": "code",
-    "fixedCriteria": [
-      {
-        "searchParameter": "status",
-        "value": [
-          "active",
-          "completed"
-        ]
-      }
-    ]
-  },
-  {
-    "fhirResourceType": "Observation",
-    "termCode": {
-      "code": "76689-9",
-      "display": "Sex assigned at birth",
-      "system": "http://loinc.org"
-    }
+    "termCodeSearchParameter": "code"
   },
   {
     "fhirResourceType": "Condition",
-    "termCode": {
-      "code": "C71.1",
-      "display": "",
+    "fixedCriteria": [
+      {
+        "fhirPath": "verificationStatus",
+        "searchParameter": "verification-status",
+        "type": "coding",
+        "value": [
+          {
+            "code": "confirmed",
+            "display": "confirmed",
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+          }
+        ]
+      }
+    ],
+    "key": {
+      "code": "A16.2",
+      "display": "Lungentuberkulose ohne Angabe einer bakteriologischen, molekularbiologischen oder histologischen Sicherung",
       "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
-    }
-  },
-  {
-    "fhirResourceType": "Condition",
-    "termCode": {
-      "code": "C71.2",
-      "display": "",
-      "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
-    }
+    },
+    "termCodeSearchParameter": "code"
   }
 ]

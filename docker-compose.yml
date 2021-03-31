@@ -8,10 +8,14 @@ services:
     depends_on:
       - feasibility-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex
-      - SPRING_DATASOURCE_USERNAME=codex-postgres
-      - SPRING_DATASOURCE_PASSWORD=codex-password
-      - BROKER_CLIENT_TYPE=MOCK
+      SPRING_DATASOURCE_URL: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_URL:-jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex}
+      SPRING_DATASOURCE_USERNAME: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_USERNAME:-codex-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_PASSWORD:-codex-password} 
+      BROKER_CLIENT_TYPE: ${BROKER_CLIENT_TYPE:-MOCK}
+      FLARE_WEBSERVICE_BASE_URL: ${FLARE_WEBSERVICE_BASE_URL:-http://flare:5000}
+    volumes:
+      - ${CODEX_CONCEPT_TREE_PATH:-./ontology/conceptTree.json}:/opt/codex-feasibility-backend/ontology/conceptTree.json
+      - ${CODEX_TERM_CODE_MAPPING_PATH:-./ontology/termCodeMapping.json}:/opt/codex-feasibility-backend/ontology/termCodeMapping.json
 
   feasibility-db:
     image: 'postgres:13.1-alpine'
