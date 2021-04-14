@@ -9,7 +9,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.NON_EMPTY)
 public class StructuredQuery {
 
   @JsonProperty
