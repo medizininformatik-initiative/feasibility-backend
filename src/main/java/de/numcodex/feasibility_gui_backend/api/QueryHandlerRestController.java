@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,9 +32,12 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
+  private final String apiBaseUrl;
 
-  public QueryHandlerRestController(QueryHandlerService queryHandlerService) {
+  public QueryHandlerRestController(QueryHandlerService queryHandlerService,
+      @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
+    this.apiBaseUrl = apiBaseUrl;
   }
 
   @PostMapping("run-query")
@@ -54,6 +58,16 @@ public class QueryHandlerRestController {
             .pathSegment("api", "v1", "query-handler", "result", id)
             .build()
             .toUri();
+
+    if(apiBaseUrl.length() > 0){
+      uri =
+          ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
+              .replacePath("")
+              .pathSegment("api", "v1", "query-handler", "result", id)
+              .build()
+              .toUri();
+    }
+
     return Response.created(uri).build();
   }
 

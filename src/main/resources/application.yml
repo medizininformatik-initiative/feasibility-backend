@@ -44,6 +44,7 @@ app:
   conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/conceptTree.json}
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
+  apiBaseUrl: ${API_BASE_URL:}
   aktin:
     broker:
       baseUrl: ${AKTIN_BROKER_BASE_URL}
