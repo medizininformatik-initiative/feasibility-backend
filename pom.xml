@@ -14,9 +14,18 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
+
+  <scm>
+    <connection>scm:git:${project.scm.url}</connection>
+    <developerConnection>scm:git:${project.scm.url}</developerConnection>
+    <url>https://github.com/num-codex/codex-feasibility-backend.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <java.version>15</java.version>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -32,10 +41,12 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.12.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -61,13 +72,11 @@
       <version>1.5.3</version>
     </dependency>
 
-
     <dependency>
       <groupId>org.aktin</groupId>
       <artifactId>broker-client</artifactId>
       <version>1.2</version>
     </dependency>
-    
 
     <dependency>
       <groupId>org.highmed.dsf</groupId>
@@ -108,11 +117,46 @@
 
   </dependencies>
 
+  <repositories>
+    <repository>
+      <id>highmed-dsf</id>
+      <name>GitHub HiGHmed Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>de.numcodex</id>
+      <name>GitHub NUM CODEX Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/num-codex/*</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M1</version>
+        <configuration>
+          <scmCommentPrefix>[ci-skip]</scmCommentPrefix>
+          <scmReleaseCommitComment>[release] prepare release @{releaseLabel}</scmReleaseCommitComment>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+        </configuration>
       </plugin>
     </plugins>
   </build>
