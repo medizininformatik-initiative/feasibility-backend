@@ -1,24 +1,10 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import static org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION;
-import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
-import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
-
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -30,6 +16,21 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
+import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
+
 /**
  * Manager for feasibility queries.
  * <p>
@@ -38,14 +39,17 @@ import org.hl7.fhir.r4.model.Task;
 class DSFQueryManager implements QueryManager {
 
     private static final String INSTANTIATE_URI = "http://highmed.org/bpe/Process/requestSimpleFeasibility/0.1.0";
-    private static final String PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-request-simple-feasibility";
+    private static final String REQUEST_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-request-simple-feasibility";
+    private static final String MEASURE_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-measure";
+    private static final String LIBRARY_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-library";
     private static final String REQUEST_URL_TASK = "Task";
     private static final String REQUEST_URL_LIBRARY = "Library";
     private static final String REQUEST_URL_MEASURE = "Measure";
-    private static final String MEASURE_RESOURCE_TYPE_REPRESENTATION = "Measure";
-    private static final String LIBRARY_RESOURCE_TYPE_REPRESENTATION = "Library";
-    private static final String MEASURE_CRITERIA_INITIAL_POPULATION = "InInitialPopulation";
+    private static final String MEASURE_CRITERIA_LANGUAGE = "text/cql";
+    private static final String MEASURE_CRITERIA_EXPRESSION = "InInitialPopulation";
     private static final String BPMN_REQUEST_SIMPLE_FEASIBILITY_MESSAGE = "requestSimpleFeasibilityMessage";
+    private static final String REQUESTER_TYPE = "Organization";
+    private static final String RECIPIENT_TYPE = "Organization";
 
     private static final String CODE_SYSTEM_FEASIBILITY = "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REFERENCE = "measure-reference";
@@ -64,61 +68,56 @@ class DSFQueryManager implements QueryManager {
     private static final String CODE_SYSTEM_MEASURE_POPULATION_VALUE_INITIAL_POPULATION = "initial-population";
 
     private final FhirWebClientProvider fhirWebClientProvider;
+    private final DSFMediaTypeTranslator mediaTypeTranslator;
     private final String organizationId;
-    private final Map<String, Bundle> queryHeap;
+    private final Map<String, DSFQueryData> queryHeap;
     private FhirWebserviceClient fhirWebserviceClient;
 
     /**
      * Creates a new {@link DSFQueryManager} instance.
      *
      * @param fhirWebClientProvider Provider capable of providing a client to communicate with a FHIR server via HTTP.
+     * @param mediaTypeTranslator   Translates different media types so that they can be sent to the ZARS.
      * @param organizationId        Identifies the local FHIR server instance (ZARS) that queries get published to.
      */
-    DSFQueryManager(FhirWebClientProvider fhirWebClientProvider, String organizationId) {
+    DSFQueryManager(FhirWebClientProvider fhirWebClientProvider, DSFMediaTypeTranslator mediaTypeTranslator,
+                    String organizationId) {
         this.fhirWebClientProvider = fhirWebClientProvider;
+        this.mediaTypeTranslator = mediaTypeTranslator;
         this.organizationId = organizationId;
         this.queryHeap = new HashMap<>();
     }
 
     @Override
     public String createQuery() {
-        UUID queryId = UUID.randomUUID();
-        queryHeap.put(queryId.toString(), createQueryBundleWithTask(queryId));
+        var queryId = UUID.randomUUID().toString();
+        queryHeap.put(queryId, new DSFQueryData());
 
-        return queryId.toString();
+        return queryId;
     }
 
     @Override
     public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException {
+        var translatedMediaType = mediaTypeTranslator.translate(mediaType);
 
-        if (!mediaType.equalsIgnoreCase("text/cql")) {
-            return;
-        }
-
-        Bundle queryBundle = queryHeap.get(queryId);
-        if (queryBundle == null) {
+        var query = queryHeap.get(queryId);
+        if (query == null) {
             throw new QueryNotFoundException(queryId);
         }
-        if (!mediaType.equalsIgnoreCase("text/cql")) {
-            throw new UnsupportedMediaTypeException(mediaType, Collections.singletonList("text/cql"));
-        }
-        if (containsQueryDefinition(queryBundle)) {
-            throw new IllegalStateException("Query with ID '" + queryId + "' already contains a query definition.");
-        }
 
-        UUID libraryId = UUID.randomUUID();
-        Bundle bundleWithLibrary = addLibrary(queryBundle, mediaType, content, libraryId);
-        queryHeap.put(queryId, addMeasure(bundleWithLibrary, mediaType, libraryId));
+        query.addQueryContent(translatedMediaType, content);
     }
 
     @Override
     public void publishQuery(String queryId) throws QueryNotFoundException, IOException {
-        Bundle queryBundle = queryHeap.get(queryId);
-        if (queryBundle == null) {
+        var query = queryHeap.get(queryId);
+        if (query == null) {
             throw new QueryNotFoundException(queryId);
         }
-        if (!containsQueryDefinition(queryBundle)) {
+
+        var queryContents = query.getContentByType();
+        if (queryContents.isEmpty()) {
             throw new IllegalStateException("Query with ID '" + queryId + "' does not contain query definition yet.");
         }
 
@@ -129,6 +128,11 @@ class DSFQueryManager implements QueryManager {
                 throw new IOException("could not provide fhir webservice client", e);
             }
         }
+
+        var queryBundle = createQueryBundleWithTask(queryId);
+        var libraryId = UUID.randomUUID();
+        queryBundle = addLibrary(queryBundle, queryContents, libraryId);
+        queryBundle = addMeasure(queryBundle, libraryId);
 
         try {
             fhirWebserviceClient.postBundle(queryBundle);
@@ -163,7 +167,7 @@ class DSFQueryManager implements QueryManager {
      * @param queryId Identifies the query for later use.
      * @return A {@link Bundle} with a task attached to it.
      */
-    private Bundle createQueryBundleWithTask(UUID queryId) {
+    private Bundle createQueryBundleWithTask(String queryId) {
         Bundle queryBundle = new Bundle().setType(TRANSACTION);
 
         Task task = new Task()
@@ -173,11 +177,11 @@ class DSFQueryManager implements QueryManager {
                 .setInstantiatesUri(INSTANTIATE_URI);
 
         task.getRequester()
-                .setType("Organization")
+                .setType(REQUESTER_TYPE)
                 .getIdentifier().setSystem(CODE_SYSTEM_ORGANIZATION).setValue(organizationId);
 
         task.getRestriction().getRecipientFirstRep()
-                .setType("Organization")
+                .setType(RECIPIENT_TYPE)
                 .getIdentifier().setSystem(CODE_SYSTEM_ORGANIZATION).setValue(organizationId);
 
         task.addInput()
@@ -191,8 +195,8 @@ class DSFQueryManager implements QueryManager {
                         .addCoding(new Coding()
                                 .setSystem(CODE_SYSTEM_BPMN_MESSAGE)
                                 .setCode(CODE_SYSTEM_BPMN_MESSAGE_VALUE_BUSINESS_KEY)))
-                .setValue(new StringType(queryId.toString()));
-        task.setMeta(new Meta().addProfile(PROFILE));
+                .setValue(new StringType(queryId));
+        task.setMeta(new Meta().addProfile(REQUEST_PROFILE));
 
         queryBundle.addEntry()
                 .setRequest(new BundleEntryRequestComponent()
@@ -207,16 +211,14 @@ class DSFQueryManager implements QueryManager {
     /**
      * Given a query bundle adds a library resource to it.
      * <p>
-     * Adds the library with the given content associated with it using the given media type
-     * The library
+     * Adds the library with the given content associated with it using the given media type.
      *
-     * @param queryBundle The library is added to this query bundle.
-     * @param mediaType   The media type of the library content.
-     * @param content     The content of the library.
-     * @param libraryId   Identifies the library for referential usage.
+     * @param queryBundle   The library is added to this query bundle.
+     * @param queryContents Contents of the library mapped by their corresponding media types.
+     * @param libraryId     Identifies the library for referential usage.
      * @return A copy of the given {@link Bundle} with the library added.
      */
-    private Bundle addLibrary(Bundle queryBundle, String mediaType, String content, UUID libraryId) {
+    private Bundle addLibrary(Bundle queryBundle, Map<String, String> queryContents, UUID libraryId) {
         Bundle bundle = queryBundle.copy();
         Library library = new Library()
                 .setStatus(ACTIVE)
@@ -224,9 +226,6 @@ class DSFQueryManager implements QueryManager {
                         .addCoding(new Coding()
                                 .setSystem(CODE_SYSTEM_LIBRARY_TYPE)
                                 .setCode(CODE_SYSTEM_LIBRARY_TYPE_VALUE_LOGIC_LIBRARY)))
-                .addContent(new Attachment()
-                        .setContentType(mediaType)
-                        .setData(content.getBytes(StandardCharsets.UTF_8)))
                 .setUrl(createCanonicalUUIDUrn(libraryId));
 
         library.getMeta()
@@ -235,7 +234,15 @@ class DSFQueryManager implements QueryManager {
                         .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL))
                 .addTag(new Coding()
                         .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE));
+                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE))
+                .addProfile(LIBRARY_PROFILE);
+
+        var attachments = queryContents.entrySet()
+                .stream()
+                .map(qc -> new Attachment().setContentType(qc.getKey()).setData(qc.getValue().getBytes(StandardCharsets.UTF_8)))
+                .collect(Collectors.toList());
+
+        library.setContent(attachments);
 
         bundle.addEntry()
                 .setRequest(new BundleEntryRequestComponent()
@@ -251,17 +258,16 @@ class DSFQueryManager implements QueryManager {
      * Given a query bundle adds a measure resource to it.
      * <p>
      * Adds a measure resource that references a library using the given library Id.
-     * The media type defines the type of the measure criteria.
      *
      * @param queryBundle The measure is added to this query bundle.
-     * @param mediaType   The media type of the measure criteria.
      * @param libraryId   Identifies a library that this measure is going to use.
      * @return A copy of the given {@link Bundle} with the measure added.
      */
-    private Bundle addMeasure(Bundle queryBundle, String mediaType, UUID libraryId) {
+    private Bundle addMeasure(Bundle queryBundle, UUID libraryId) {
         Bundle bundle = queryBundle.copy();
 
-        UUID measureId = UUID.randomUUID();
+        var measureId = UUID.randomUUID();
+        var measureUrl = URI.create(fhirWebserviceClient.getBaseUrl()).resolve("./Measure/" + measureId);
 
         Task task = (Task) bundle.getEntryFirstRep().getResource();
         task.addInput()
@@ -273,6 +279,7 @@ class DSFQueryManager implements QueryManager {
                         .setReference(createCanonicalUUIDUrn(measureId)));
 
         Measure measure = new Measure()
+                .setUrl(measureUrl.toString())
                 .setStatus(ACTIVE)
                 .setScoring(new CodeableConcept()
                         .addCoding(new Coding()
@@ -286,8 +293,8 @@ class DSFQueryManager implements QueryManager {
                                 .setSystem(CODE_SYSTEM_MEASURE_POPULATION)
                                 .setCode(CODE_SYSTEM_MEASURE_POPULATION_VALUE_INITIAL_POPULATION)))
                 .setCriteria(new Expression()
-                        .setLanguage(mediaType)
-                        .setExpression(MEASURE_CRITERIA_INITIAL_POPULATION));
+                        .setLanguage(MEASURE_CRITERIA_LANGUAGE)
+                        .setExpression(MEASURE_CRITERIA_EXPRESSION));
 
         measure.getMeta()
                 .addTag(new Coding()
@@ -295,7 +302,8 @@ class DSFQueryManager implements QueryManager {
                         .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL))
                 .addTag(new Coding()
                         .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE));
+                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE))
+                .addProfile(MEASURE_PROFILE);
 
         bundle.addEntry()
                 .setRequest(new BundleEntryRequestComponent()
@@ -304,25 +312,5 @@ class DSFQueryManager implements QueryManager {
                 .setResource(measure)
                 .setFullUrl(createCanonicalUUIDUrn(measureId));
         return bundle;
-    }
-
-    /**
-     * Checks whether a given bundle contains a query definition that consists of a measure and a library resource.
-     *
-     * @param queryBundle The query bundle that shall be checked.
-     * @return True if the bundle contains a query definition and false otherwise.
-     */
-    private boolean containsQueryDefinition(Bundle queryBundle) {
-        boolean containsMeasure = false;
-        boolean containsLibrary = false;
-        for (BundleEntryComponent entry : queryBundle.getEntry()) {
-            if (entry.getResource().fhirType().equals(MEASURE_RESOURCE_TYPE_REPRESENTATION)) {
-                containsMeasure = true;
-            } else if (entry.getResource().fhirType().equals(LIBRARY_RESOURCE_TYPE_REPRESENTATION)) {
-                containsLibrary = true;
-            }
-        }
-
-        return containsMeasure && containsLibrary;
     }
 }

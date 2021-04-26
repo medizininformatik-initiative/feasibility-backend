@@ -47,8 +47,14 @@ public class DSFSpringConfig {
     }
 
     @Bean
-    QueryManager dsfQueryManager(FhirWebClientProvider fhirWebClientProvider) {
-        return new DSFQueryManager(fhirWebClientProvider, organizationId.replace(' ', '_'));
+    QueryManager dsfQueryManager(FhirWebClientProvider fhirWebClientProvider, DSFMediaTypeTranslator dsfMediaTypeTranslator) {
+        return new DSFQueryManager(fhirWebClientProvider, dsfMediaTypeTranslator,
+                organizationId.replace(' ', '_'));
+    }
+
+    @Bean
+    DSFMediaTypeTranslator dsfMediaTypeTranslator() {
+        return new DSFMediaTypeTranslator();
     }
 
     @Bean
@@ -83,5 +89,5 @@ public class DSFSpringConfig {
         return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, webserviceReadTimeout,
                 webserviceConnectTimeout, websocketUrl, securityContextProvider);
     }
-   
+
 }
