@@ -151,7 +151,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>3.0.0-M1</version>
         <configuration>
-          <scmCommentPrefix>[ci-skip]</scmCommentPrefix>
+          <scmCommentPrefix>[ci skip]</scmCommentPrefix>
           <scmReleaseCommitComment>[release] prepare release @{releaseLabel}</scmReleaseCommitComment>
           <tagNameFormat>v@{project.version}</tagNameFormat>
         </configuration>
