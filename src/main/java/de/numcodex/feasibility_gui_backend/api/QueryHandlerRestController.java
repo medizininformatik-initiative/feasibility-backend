@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.
@@ -31,9 +33,12 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
+  private final String apiBaseUrl;
 
-  public QueryHandlerRestController(QueryHandlerService queryHandlerService) {
+  public QueryHandlerRestController(QueryHandlerService queryHandlerService,
+      @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
+    this.apiBaseUrl = apiBaseUrl;
   }
 
   @PostMapping("run-query")
@@ -48,9 +53,11 @@ public class QueryHandlerRestController {
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    URI uri =
-        ServletUriComponentsBuilder.fromRequestUri(httpServletRequest)
-            .replacePath("")
+    UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
+            ? ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
+            : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
+
+    var uri = uriBuilder.replacePath("")
             .pathSegment("api", "v1", "query-handler", "result", id)
             .build()
             .toUri();
