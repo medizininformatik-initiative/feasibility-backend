@@ -58,16 +58,14 @@ public class QueryHandlerRestController {
             .pathSegment("api", "v1", "query-handler", "result", id)
             .build()
             .toUri();
+UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
+            ? ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
+            : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
-    if(apiBaseUrl.length() > 0){
-      uri =
-          ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
-              .replacePath("")
-              .pathSegment("api", "v1", "query-handler", "result", id)
-              .build()
-              .toUri();
-    }
-
+    var uri = uriBuilder.replacePath("")
+            .pathSegment("api", "v1", "query-handler", "result", id)
+            .build()
+            .toUri();
     return Response.created(uri).build();
   }
 
