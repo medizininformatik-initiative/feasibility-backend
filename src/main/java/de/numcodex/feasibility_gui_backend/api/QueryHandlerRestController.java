@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.
@@ -52,13 +53,7 @@ public class QueryHandlerRestController {
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    URI uri =
-        ServletUriComponentsBuilder.fromRequestUri(httpServletRequest)
-            .replacePath("")
-            .pathSegment("api", "v1", "query-handler", "result", id)
-            .build()
-            .toUri();
-UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
+    UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
             ? ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
             : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
