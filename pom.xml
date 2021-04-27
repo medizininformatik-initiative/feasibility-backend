@@ -17,7 +17,7 @@
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/num-codex/codex-feasibility-backend.git</url>
-    <tag>v0.0.1</tag>
+    <tag>v0.0.2</tag>
   </scm>
 
   <properties>

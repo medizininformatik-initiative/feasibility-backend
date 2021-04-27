@@ -20,8 +20,7 @@
 |FHIR_TRANSLATE_ENABLED | | | false |
 |FLARE_WEBSERVICE_BASE_URL | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path | | http://localhost:5000 |
 |CQL_TRANSLATE_ENABLED | | | true |
-|API_BASE_URL| sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server,
-if not filled the api base url is the request url|https://host/api||
+|API_BASE_URL| sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url|https://host/api||
 
 ### Running the DIRECT path with local flare
 
