@@ -13,24 +13,21 @@ import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderExc
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListenerImpl;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import java.io.IOException;
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.util.Objects;
+
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+
 @Service
 public class QueryHandlerService {
-
-  // TODO: Find correct media types
-  private static final String MEDIA_TYPE_STRUCT_QUERY = "text/structured-query";
-  private static final String MEDIA_TYPE_CQL = "text/cql";
-  private static final String MEDIA_TYPE_FHIR = "text/fhir-codex";
-
-
   private static final String UNKNOWN_SITE = "Unbekannter Standort";
 
   private final ObjectMapper objectMapper;
@@ -116,19 +113,19 @@ public class QueryHandlerService {
   private void addSqQuery(Query query, StructuredQuery structuredQuery)
       throws IOException {
     var sqContent = objectMapper.writeValueAsString(structuredQuery);
-    query.getContents().put(MEDIA_TYPE_STRUCT_QUERY, sqContent);
+    query.getContents().put(STRUCTURED_QUERY, sqContent);
   }
 
   private void addFhirQuery(Query query, StructuredQuery structuredQuery)
       throws QueryBuilderException {
     var fhirContent = getFhirContent(structuredQuery);
-    query.getContents().put(MEDIA_TYPE_FHIR, fhirContent);
+    query.getContents().put(FHIR, fhirContent);
   }
 
   private void addCqlQuery(Query query, StructuredQuery structuredQuery)
       throws QueryBuilderException {
     var cqlContent = getCqlContent(structuredQuery);
-    query.getContents().put(MEDIA_TYPE_CQL, cqlContent);
+    query.getContents().put(CQL, cqlContent);
   }
 
   private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {

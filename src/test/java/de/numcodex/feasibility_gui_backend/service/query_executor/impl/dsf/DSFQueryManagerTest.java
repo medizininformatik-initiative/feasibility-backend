@@ -1,12 +1,13 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
+import de.numcodex.feasibility_gui_backend.service.QueryMediaTypes;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,14 +46,15 @@ public class DSFQueryManagerTest {
 
     @BeforeEach
     public void setUp() {
-        this.queryHandler = new DSFQueryManager(fhirWebClientProvider, ORGANIZATION);
+        var dsfMediaTypeTranslator = new DSFMediaTypeTranslator();
+        this.queryHandler = new DSFQueryManager(fhirWebClientProvider, dsfMediaTypeTranslator, ORGANIZATION);
         this.unknownQueryId = UUID.randomUUID().toString();
     }
 
     @Test
     public void testCreateQuery_QueryIdsDiffer() {
-        String queryA = queryHandler.createQuery();
-        String queryB = queryHandler.createQuery();
+        var queryA = queryHandler.createQuery();
+        var queryB = queryHandler.createQuery();
 
         assertNotEquals(queryA, queryB);
     }
@@ -63,18 +65,33 @@ public class DSFQueryManagerTest {
     }
 
     @Test
-    public void testAddQueryDefinition_NoCQLMediaType() {
-        String queryId = queryHandler.createQuery();
-        Assertions.assertDoesNotThrow(() -> queryHandler.addQueryDefinition(queryId, "application/json", ""));
+    public void testAddQueryDefinition_UnsupportedMediaType() {
+        var queryId = queryHandler.createQuery();
+        assertThrows(UnsupportedMediaTypeException.class,
+                () -> queryHandler.addQueryDefinition(queryId, "something/unsupported", ""));
     }
 
     @Test
-    public void testAddQueryDefinition_DefinitionAlreadyPresent() throws UnsupportedMediaTypeException, QueryNotFoundException {
-        String queryId = queryHandler.createQuery();
-        queryHandler.addQueryDefinition(queryId, "text/cql", "");
+    public void testAddQueryDefinition_AddingContentForExistingMediaTypeOverwritesExistingContent()
+            throws UnsupportedMediaTypeException, QueryNotFoundException, FhirWebClientProvisionException, IOException {
+        var queryId = queryHandler.createQuery();
+        var finalContent = "{\"foo\":\"bar\"}";
+        queryHandler.addQueryDefinition(queryId, QueryMediaTypes.STRUCTURED_QUERY, "{}");
+        queryHandler.addQueryDefinition(queryId, QueryMediaTypes.STRUCTURED_QUERY, finalContent);
 
-        IllegalStateException e = assertThrows(IllegalStateException.class, () -> queryHandler.addQueryDefinition(queryId, "text/cql", ""));
-        assertEquals("Query with ID '" + queryId + "' already contains a query definition.", e.getMessage());
+        when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirWebserviceClient);
+        when(fhirWebserviceClient.getBaseUrl()).thenReturn("http://localhost/fhir");
+        when(fhirWebserviceClient.postBundle(bundleCaptor.capture())).thenReturn(null);
+        queryHandler.publishQuery(queryId);
+
+        var library = (Library) bundleCaptor.getValue().getEntry().stream().filter(entry -> entry.getResource().fhirType().equals("Library"))
+                .findFirst()
+                .orElseThrow()
+                .getResource();
+
+        assertEquals(1, library.getContent().size());
+        assertEquals("application/json", library.getContent().get(0).getContentType());
+        assertEquals(finalContent, new String(library.getContent().get(0).getData()));
     }
 
     @Test
@@ -85,7 +102,7 @@ public class DSFQueryManagerTest {
 
     @Test
     public void testPublishQuery_QueryHasNoQueryDefinitionYet() {
-        String queryId = queryHandler.createQuery();
+        var queryId = queryHandler.createQuery();
 
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> queryHandler.publishQuery(queryId));
         assertEquals("Query with ID '" + queryId + "' does not contain query definition yet.", e.getMessage());
@@ -93,7 +110,7 @@ public class DSFQueryManagerTest {
 
     @Test
     public void testPublishQuery_PublishFailed() throws UnsupportedMediaTypeException, QueryNotFoundException {
-        String queryId = queryHandler.createQuery();
+        var queryId = queryHandler.createQuery();
         queryHandler.addQueryDefinition(queryId, "text/cql", "");
 
         when(fhirWebserviceClient.postBundle(any(Bundle.class))).thenThrow();
@@ -103,20 +120,21 @@ public class DSFQueryManagerTest {
 
     @Test
     public void testPublishQuery() throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, FhirWebClientProvisionException {
-        String queryId = queryHandler.createQuery();
+        var queryId = queryHandler.createQuery();
         queryHandler.addQueryDefinition(queryId, "text/cql", "");
 
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirWebserviceClient);
+        when(fhirWebserviceClient.getBaseUrl()).thenReturn("http://localhost/fhir");
         queryHandler.publishQuery(queryId);
 
         verify(fhirWebserviceClient).postBundle(bundleCaptor.capture());
 
 
         List<BundleEntryComponent> bundleEntries = bundleCaptor.getValue().getEntry();
-        Task task = (Task) bundleEntries.stream().filter(e -> e.getResource().fhirType().equals("Task")).findFirst()
+        var task = (Task) bundleEntries.stream().filter(e -> e.getResource().fhirType().equals("Task")).findFirst()
                 .orElseThrow().getResource();
 
-        String businessKey = task.getInput().stream().filter(i -> i.getType().getCodingFirstRep().getCode().equals("business-key"))
+        var businessKey = task.getInput().stream().filter(i -> i.getType().getCodingFirstRep().getCode().equals("business-key"))
                 .findFirst().orElseThrow().getValue().toString();
 
         assertEquals(businessKey, queryId);
@@ -129,7 +147,7 @@ public class DSFQueryManagerTest {
 
     @Test
     public void testRemoveQuery() throws QueryNotFoundException {
-        String queryId = queryHandler.createQuery();
+        var queryId = queryHandler.createQuery();
 
         queryHandler.removeQuery(queryId);
         assertThrows(QueryNotFoundException.class, () -> queryHandler.removeQuery(queryId));

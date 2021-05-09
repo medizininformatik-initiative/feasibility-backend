@@ -1,10 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
@@ -20,13 +15,19 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundE
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import java.io.IOException;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -91,7 +92,7 @@ public class QueryHandlerServiceTest {
     when(cqlQueryBuilder.getQueryContent(structuredQuery)).thenReturn("cql_query");
     when(fhirQueryBuilder.getQueryContent(structuredQuery)).thenReturn("fhir_query");
 
-    expectedQuery.getContents().put("text/structured-query", "structured_query");
+    expectedQuery.getContents().put("application/sq+json", "structured_query");
     expectedQuery.getContents().put("text/cql", "cql_query");
     expectedQuery.getContents().put("text/fhir-codex", "fhir_query");
     when(brokerClient.createQuery()).thenReturn("42");
@@ -109,7 +110,7 @@ public class QueryHandlerServiceTest {
     when(cqlQueryBuilder.getQueryContent(structuredQuery)).thenReturn("cql_query");
     when(fhirQueryBuilder.getQueryContent(structuredQuery)).thenReturn("fhir_query");
 
-    expectedQuery.getContents().put("text/structured-query", "structured_query");
+    expectedQuery.getContents().put("application/sq+json", "structured_query");
     expectedQuery.getContents().put("text/cql", "cql_query");
     expectedQuery.getContents().put("text/fhir-codex", "fhir_query");
     when(brokerClient.createQuery()).thenReturn("42");
