@@ -4,14 +4,14 @@ services:
     container_name: feasibility-gui-backend
     build: .
     ports:
-    - ${PORT_FEASIBILITY_GUI_BACKEND:-127.0.0.1:8091}:8090
+    - ${CODEX_FEASIBILITY_BACKEND_PORT:-127.0.0.1:8091}:8090
     depends_on:
       - feasibility-db
     environment:
       SPRING_DATASOURCE_URL: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_URL:-jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex}
       SPRING_DATASOURCE_USERNAME: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_USERNAME:-codex-postgres}
       SPRING_DATASOURCE_PASSWORD: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_PASSWORD:-codex-password}
-      BROKER_CLIENT_TYPE: ${BROKER_CLIENT_TYPE:-MOCK}
+      BROKER_CLIENT_TYPE: ${CODEX_FEASIBILITY_BACKEND_BROKER_CLIENT_TYPE:-MOCK}
       KEYCLOAK_ENABLED: ${CODEX_FEASIBILITY_BACKEND_KEYCLOAK_ENABLED:-true}
       KEYCLOAK_BASE_URL: ${CODEX_FEASIBILITY_BACKEND_KEYCLOAK_BASE_URL:-http://keycloak:8080}
       KEYCLOAK_REALM: ${CODEX_FEASIBILITY_BACKEND_KEYCLOAK_REALM:-codex-develop}
@@ -35,14 +35,14 @@ services:
       DSF_WEBSOCKET_URL: ${CODEX_FEASIBILITY_BACKEND_DSF_WEBSOCKET_URL:-wws://dsf:8080/fhir/ws}
       DSF_ORGANIZATION_ID: ${CODEX_FEASIBILITY_BACKEND_DSF_ORGANIZATION_ID}
     volumes:
-      - ${CODEX_CONCEPT_TREE_PATH:-./ontology/conceptTree.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/conceptTree.json
-      - ${CODEX_TERM_CODE_MAPPING_PATH:-./ontology/termCodeMapping.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/termCodeMapping.json
+      - ${CODEX_FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/conceptTree.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/conceptTree.json
+      - ${CODEX_FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/termCodeMapping.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/termCodeMapping.json
       - ${CODEX_FEASIBILITY_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/codex-feasibility-backend/dsf-security/
   feasibility-db:
     image: 'postgres:13.1-alpine'
     container_name: feasibility-db
     ports:
-    - ${FEASIBILITY_DATABASE_PORT:-5432}:5432
+    - ${CODEX_FEASIBILITY_BACKEND_DATABASE_PORT:-5432}:5432
     environment:
       - POSTGRES_USER=codex-postgres
       - POSTGRES_PASSWORD=codex-password
