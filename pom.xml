@@ -142,9 +142,9 @@
 
   <repositories>
     <repository>
-      <id>highmed-dsf</id>
+      <id>highmed</id>
       <name>GitHub HiGHmed Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+      <url>https://maven.pkg.github.com/highmed/*</url>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -153,7 +153,7 @@
       </snapshots>
     </repository>
     <repository>
-      <id>de.numcodex</id>
+      <id>codex</id>
       <name>GitHub NUM CODEX Apache Maven Packages</name>
       <url>https://maven.pkg.github.com/num-codex/*</url>
       <releases>
