@@ -5,8 +5,6 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusLis
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 
-import java.io.IOException;
-import java.net.http.WebSocket;
 import java.util.logging.Level;
 
 import org.aktin.broker.client2.AdminNotificationListener;
@@ -21,8 +19,8 @@ import org.aktin.broker.xml.RequestStatus;
  * @author R.W.Majeed
  *
  */
-@Log
 @AllArgsConstructor
+@Log
 public class WrappedNotificationListener implements AdminNotificationListener{
 	final private AktinBrokerClient client;
 	final private QueryStatusListener delegate;
@@ -59,6 +57,7 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 			case retrieved -> QueryStatus.RETRIEVED;
 			default -> QueryStatus.FAILED;
 		};
+		log.log(Level.INFO,"Request status updated {0} {1} {2}", new Object[] {requestId,nodeId,status});
 		delegate.onClientUpdate(client.wrapQueryId(requestId), client.wrapSiteId(nodeId), dest);
 	}
 
@@ -74,29 +73,7 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 
 	@Override
 	public void onWebsocketClosed(int statusCode) {
-		// try to reconnect
-		WebSocket ws = null;
-		while( ws == null ) {
-			try {
-				ws = client.connectWebsocket();
-				log.info("Websocket connection re-established.");
-				// connection successful.
-			}catch( IOException e ) {
-				// unable to connect
-				log.log(Level.WARNING, "Unable to reconnect closed websocket: "+e.getMessage()); 
-			}
-			if( ws == null ) {
-				// connection failed, try again after delay
-				// note that we are in a separate thread provided by the AKTIN client library for websocket callbacks
-				// therefore we can block here without breaking anything else
-				log.info("Waiting for next try to re-connect websocket in 10s");
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e) {
-					// interruption can be early, but we don't care to connect earlier
-				}
-			}
-		}
+		; // NOP
 	}
 
 }

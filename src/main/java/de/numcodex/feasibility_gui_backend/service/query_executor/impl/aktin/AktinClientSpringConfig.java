@@ -7,6 +7,7 @@ import java.net.http.WebSocket.Builder;
 import lombok.AllArgsConstructor;
 import org.aktin.broker.client2.AuthFilter;
 import org.aktin.broker.client2.BrokerAdmin2;
+import org.aktin.broker.client2.ReconnectingListener;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,8 @@ public class AktinClientSpringConfig {
     @Bean
     public BrokerClient aktinBrokerClient() {
     	BrokerAdmin2 client = new BrokerAdmin2(URI.create(brokerBaseUrl));
+    	// when websocket is disconnected, automatically reconnect. delay 10 seconds between failures.
+    	client.addListener(ReconnectingListener.forAdmin(client, 10*1000, -1));
     	client.setAuthFilter(new ApiKeyAuthFilter(brokerApiKey));
     	return new AktinBrokerClient(client);
     }

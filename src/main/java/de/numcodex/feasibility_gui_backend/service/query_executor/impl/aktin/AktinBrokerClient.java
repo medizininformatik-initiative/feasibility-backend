@@ -6,7 +6,6 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusLis
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import java.io.IOException;
-import java.net.http.WebSocket;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -27,12 +26,10 @@ public class AktinBrokerClient implements BrokerClient {
 	@Override
 	public void addQueryStatusListener(QueryStatusListener queryStatusListener) throws IOException {
 		delegate.addListener(new WrappedNotificationListener(this, queryStatusListener));
-		connectWebsocket(); // makes more sense to put in a separate method or in the constructor,
-		// .. otherwise adding multiple listeners will fail
-	}
-
-	WebSocket connectWebsocket() throws IOException {
-		return delegate.connectWebsocket();
+		if( delegate.getWebsocket() == null ) {
+			// only connect if previously not connected
+			delegate.connectWebsocket(); // makes more sense to put in a separate method or in the constructor
+		}
 	}
 
 	String wrapQueryId(int queryId) {
