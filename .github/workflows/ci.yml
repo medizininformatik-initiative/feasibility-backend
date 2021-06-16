@@ -63,7 +63,7 @@ jobs:
       with:
         servers: |
           [{"id": "highmed-dsf", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "de.numcodex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+           {"id": "codex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Prepare Version
       id: prep
