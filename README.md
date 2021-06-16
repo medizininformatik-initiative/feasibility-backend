@@ -149,6 +149,29 @@ curl --location --request POST 'http://localhost:8090/api/v1/query-handler/run-q
     ]
   }'
 ```
+another example
+```
+curl --location --request POST 'http://localhost:8090/api/v1/query-handler/run-query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "version": "http://to_be_decided.com/draft-1/schema#",
+    "display": "xxx",
+    "inclusionCriteria": [
+      [
+        {
+          "termCode": {
+            "code": "J98.4",
+            "system": "urn:oid:1.2.276.0.76.5.409",
+            "version": "v1",
+            "display": "xxx"
+        }
+
+        }
+      ]
+    ]
+  }'
+```
+
 
 The result of this query will return a location header, which links to the endpoint where the result
 for the query can be collected.
