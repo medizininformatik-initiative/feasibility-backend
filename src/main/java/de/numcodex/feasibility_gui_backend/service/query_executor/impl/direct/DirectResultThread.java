@@ -55,7 +55,7 @@ class DirectResultThread extends Thread {
     }
 
     //Add connection To flare here for each side (for start same flare for each side)
-    int resp = Integer.valueOf(directConnector.getQueryResult(query.getContents().get("text/structured-query")));
+    int resp = Integer.valueOf(directConnector.getQueryResult(query.getContents().get("application/sq+json")));
     this.query.getResults().put(siteId,resp);
 
     this.listeners.forEach(listener -> listener.onClientUpdate(query.getQueryId(), siteId, this.status));

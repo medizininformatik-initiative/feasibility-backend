@@ -25,8 +25,8 @@ app:
   # AKTIN or DSF or MOCK or DIRECT
   brokerClient: ${BROKER_CLIENT_TYPE:MOCK}
   ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_profiles}
-  mappingsFile: ${MAPPINGS_FILE:ontology/termCodeMapping.json}
-  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/conceptTree.json}
+  mappingsFile: ${MAPPINGS_FILE:ontology/codex-term-code-mapping.json}
+  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/codex-code-tree.json}
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
