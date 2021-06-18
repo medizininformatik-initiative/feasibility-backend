@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 public class TerminologyService {
 
   private  String uiProfilePath;
-  private static final List<String> SORTED_CATEGORIES = List.of("Anamnese / Risikofaktoren", "Demographie",
+  private static final List<String> SORTED_CATEGORIES = List.of("Einwilligung", "Anamnese / Risikofaktoren", "Bioproben", "Demographie",
       "Laborwerte", "Therapie", "Andere");
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
   private List<CategoryEntry> categoryEntries = new ArrayList<>();

@@ -18,8 +18,8 @@ services:
       KEYCLOAK_CLIENT_ID: ${CODEX_FEASIBILITY_BACKEND_KEYCLOAK_CLIENT_ID:-feasibility-gui}
       KEYCLOAK_ALLOWED_ROLE: ${CODEX_FEASIBILITY_BACKEND_KEYCLOAK_ALLOWED_ROLE:-CODEX_USER}
       ONTOLOGY_FILES_FOLDER_UI: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}
-      MAPPINGS_FILE: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/termCodeMapping.json
-      CONCEPT_TREE_FILE: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/conceptTree.json
+      MAPPINGS_FILE: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-term-code-mapping.json
+      CONCEPT_TREE_FILE: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-code-tree.json
       CQL_TRANSLATE_ENABLED: ${CODEX_FEASIBILITY_BACKEND_CQL_TRANSLATE_ENABLED:-true}
       FHIR_TRANSLATE_ENABLED: ${CODEX_FEASIBILITY_BACKEND_FHIR_TRANSLATE_ENABLED:-false}
       FLARE_WEBSERVICE_BASE_URL: ${CODEX_FEASIBILITY_BACKEND_FLARE_WEBSERVICE_BASE_URL:-http://flare:5000}
@@ -35,8 +35,8 @@ services:
       DSF_WEBSOCKET_URL: ${CODEX_FEASIBILITY_BACKEND_DSF_WEBSOCKET_URL:-wws://dsf:8080/fhir/ws}
       DSF_ORGANIZATION_ID: ${CODEX_FEASIBILITY_BACKEND_DSF_ORGANIZATION_ID}
     volumes:
-      - ${CODEX_FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/conceptTree.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/conceptTree.json
-      - ${CODEX_FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/termCodeMapping.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/termCodeMapping.json
+      - ${CODEX_FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/codex-code-tree.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-code-tree.json
+      - ${CODEX_FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/codex-term-code-mapping.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-term-code-mapping.json
       - ${CODEX_FEASIBILITY_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/codex-feasibility-backend/dsf-security/
   feasibility-db:
     image: 'postgres:13.1-alpine'
