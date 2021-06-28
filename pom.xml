@@ -9,7 +9,7 @@
   </parent>
   <groupId>de.num-codex</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>0.0.9</version>
+  <version>0.0.10-SNAPSHOT</version>
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
 
@@ -18,7 +18,7 @@
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/num-codex/codex-feasibility-backend.git</url>
-    <tag>v0.0.9</tag>
+    <tag>v0.0.8</tag>
   </scm>
 
   <properties>
