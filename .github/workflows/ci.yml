@@ -62,7 +62,7 @@ jobs:
     - uses: s4u/maven-settings-action@v2.4.0
       with:
         servers: |
-          [{"id": "highmed-dsf", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
+          [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
            {"id": "codex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Prepare Version
