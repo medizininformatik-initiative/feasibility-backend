@@ -23,6 +23,8 @@
 
   <properties>
     <java.version>15</java.version>
+    <mockwebserver.version>4.9.1</mockwebserver.version>
+    <okhttp3.version>4.9.1</okhttp3.version>
   </properties>
 
   <dependencyManagement>
@@ -64,6 +66,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -143,6 +151,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>${mockwebserver.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <repositories>
@@ -186,6 +201,20 @@
           <scmReleaseCommitComment>[release] prepare release @{releaseLabel}</scmReleaseCommitComment>
           <tagNameFormat>v@{project.version}</tagNameFormat>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.0.0-M5</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
