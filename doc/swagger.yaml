@@ -1,0 +1,408 @@
+openapi: 3.0.3
+info:
+  title: CODEX Feasibility Backend REST API
+  description: todo
+  contact:
+    email: noreply@todo.de
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+externalDocs:
+  description: Check out the github repository
+  url: https://github.com/num-codex/codex-feasibility-backend
+servers:
+  - url: https://to.be.defined
+    variables:
+      basePath:
+        default: /rest/v2
+tags:
+  - name: query
+    description: CRUD operations for queries
+    externalDocs:
+      description: More information
+      url: http://link.to.confluence
+  - name: query results
+    description: limited CRUD operations for query results (read and update only)
+paths:
+  /query:
+    get:
+      tags:
+        - query
+      summary: Read all your own queries from the broker
+      description: This returns all queries you created.
+      operationId: listQueries
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Query'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+      security:
+        - feasibility_auth:
+            - read:query
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - query
+      summary: Create a query in the broker
+      description: The query will be spawned in the 'created' state and will not be
+        published until modified accordingly
+      operationId: createQuery
+      requestBody:
+        description: Query criteria that will be stored in the broker
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      responses:
+        201:
+          description: Query successfully created
+          headers:
+            Location:
+              description: Path to your newly created query resource
+              schema:
+                type: string
+                example: "https://to.be.defined/rest/v2/query/42"
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        422:
+          description: Invalid input
+          content: {}
+      security:
+        - feasibility_auth:
+            - write:query
+      x-codegen-request-body-name: body
+  /query/findByUser:
+    get:
+      tags:
+        - query
+      summary: Finds All queries of one or more users
+      description: User identification is done via auth id or email (to be decided)
+      operationId: findQueriesByUser
+      parameters:
+        - name: user
+          in: query
+          description: User to filter by
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Query'
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - read:all
+  /query/{queryId}:
+    get:
+      tags:
+        - query
+      summary: Read query by ID
+      description: Returns a single query
+      operationId: getQueryById
+      parameters:
+      - name: queryId
+        in: path
+        description: ID of query to return
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Query'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - read:query
+    put:
+      tags:
+        - query
+      summary: Update a query in the broker
+      description: The query will be updated in the broker. Not sure if this will be allowed at all. If it will be allowed, only in the 'created' state.
+      operationId: updateQuery
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Query criteria that will be updated in the broker
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      responses:
+        204:
+          description: Query successfully updated
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+        422:
+          description: Invalid input
+          content: {}
+      security:
+        - feasibility_auth:
+            - write:query
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+        - query
+      summary: Deletes a query
+      operationId: deleteQuery
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Query successfully deleted
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - delete:query
+    patch:
+      tags:
+        - query
+      summary: Updates query status
+      operationId: updateQueryStatus
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Status to transition to
+      responses:
+        204:
+          description: Query status successfully updated
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+        409:
+          description: Invalid status transition requested
+          content: {}
+      security:
+        - feasibility_auth:
+            - write:query
+  /query/{queryId}/result:
+    get:
+      tags:
+        - query results
+      summary: Read query result by ID
+      description: Returns either your own result for this query
+        (if you are authorized by your token) or all results if you got admin rights.
+        The query results might also be an aggregated one. This is not decided yet.
+      operationId: getQueryResultsByQueryId
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/QueryResult'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - read:result
+            - read:all
+    delete:
+      tags:
+        - query results
+      summary: Delete single query result by query and "responder" ID
+      description: Delete the response of one site/client for a query
+      operationId: deleteQueryResultsByQueryId
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the result shall be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: clientIdentifier
+          in: query
+          description: identify the client whose result shall be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Query successfully deleted
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found or response not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - delete:result
+components:
+  schemas:
+    Query:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        criteria:
+          type: string
+        label:
+          type: string
+        status:
+          type: string
+          description: Query Status
+          enum:
+            - new
+            - running
+            - completed
+        results:
+          $ref: "#/components/schemas/QueryResult"
+    QueryResult:
+      type: object
+      properties:
+        queryId:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryResultLine"
+    QueryResultLine:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: distinct identifier for a client. Either a site or more precisely one client of a site
+        status:
+          type: string
+          description: Query Result Status
+          enum:
+            - success
+            - error
+        numberOfPatients:
+          type: integer
+          format: int64
+        errorMessage:
+          type: string
+          description: if the status is error, specify the cause of the error
+  securitySchemes:
+    feasibility_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://to.be.defined/auth
+          scopes:
+            write:query: create and modify queries in your account
+            read:query: read your queries
+            delete:query: delete your queries
+            read:all: read all queries
+            delete:all: delete any query
+            write:result: write a result for a query/site combination
+            read:result: read the results of a query
+            delete:result: delete the result of a query
