@@ -53,15 +53,14 @@ class DSFQueryManager implements QueryManager {
 
     private static final String CODE_SYSTEM_FEASIBILITY = "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REFERENCE = "measure-reference";
-    private static final String CODE_SYSTEM_ORGANIZATION = "http://highmed.org/fhir/NamingSystem/organization-identifier";
+    private static final String CODE_SYSTEM_ORGANIZATION = "http://highmed.org/sid/organization-identifier";
     private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
     private static final String CODE_SYSTEM_BPMN_MESSAGE_VALUE_MESSAGE_NAME = "message-name";
     private static final String CODE_SYSTEM_BPMN_MESSAGE_VALUE_BUSINESS_KEY = "business-key";
     private static final String CODE_SYSTEM_LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     private static final String CODE_SYSTEM_LIBRARY_TYPE_VALUE_LOGIC_LIBRARY = "logic-library";
-    private static final String CODE_SYSTEM_AUTHORIZATION_ROLE = "http://highmed.org/fhir/CodeSystem/authorization-role";
-    private static final String CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL = "LOCAL";
-    private static final String CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE = "REMOTE";
+    private static final String CODE_SYSTEM_READ_ACCESS_TAG = "http://highmed.org/fhir/CodeSystem/read-access-tag";
+    private static final String CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL = "ALL";
     private static final String CODE_SYSTEM_MEASURE_SCORING = "http://terminology.hl7.org/CodeSystem/measure-scoring";
     private static final String CODE_SYSTEM_MEASURE_SCORING_VALUE_COHORT = "cohort";
     private static final String CODE_SYSTEM_MEASURE_POPULATION = "http://terminology.hl7.org/CodeSystem/measure-population";
@@ -230,16 +229,14 @@ class DSFQueryManager implements QueryManager {
 
         library.getMeta()
                 .addTag(new Coding()
-                        .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL))
-                .addTag(new Coding()
-                        .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE))
+                        .setSystem(CODE_SYSTEM_READ_ACCESS_TAG)
+                        .setCode(CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL))
                 .addProfile(LIBRARY_PROFILE);
 
         var attachments = queryContents.entrySet()
                 .stream()
-                .map(qc -> new Attachment().setContentType(qc.getKey()).setData(qc.getValue().getBytes(StandardCharsets.UTF_8)))
+                .map(qc -> new Attachment().setContentType(qc.getKey()).setData(
+                        qc.getValue().getBytes(StandardCharsets.UTF_8)))
                 .collect(Collectors.toList());
 
         library.setContent(attachments);
@@ -298,11 +295,8 @@ class DSFQueryManager implements QueryManager {
 
         measure.getMeta()
                 .addTag(new Coding()
-                        .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL))
-                .addTag(new Coding()
-                        .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                        .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_REMOTE))
+                        .setSystem(CODE_SYSTEM_READ_ACCESS_TAG)
+                        .setCode(CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL))
                 .addProfile(MEASURE_PROFILE);
 
         bundle.addEntry()
