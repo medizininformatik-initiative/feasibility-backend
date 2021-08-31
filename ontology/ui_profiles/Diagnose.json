@@ -1,0 +1,43 @@
+{
+    "children": [
+        {
+            "children": [],
+            "display": "LogicalModelDiagnose",
+            "id": "8b112eb9-d007-45c8-b1c1-51511163ec36",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "LogicalModelDiagnose",
+                "display": "LogicalModelDiagnose",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileConditionDiagnose",
+            "id": "97163c24-b5ed-4e3a-9544-740b9769a5e8",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileConditionDiagnose",
+                "display": "ProfileConditionDiagnose",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        }
+    ],
+    "display": "Diagnose",
+    "id": "3d30dd5f-6508-46cb-afda-40d0ba47560e",
+    "leaf": false,
+    "selectable": false,
+    "termCode": {
+        "code": "Diagnose",
+        "display": "Diagnose",
+        "system": "num.abide"
+    },
+    "timeRestrictionAllowed": false,
+    "valueDefinitions": []
+}
