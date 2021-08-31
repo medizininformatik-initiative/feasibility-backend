@@ -99,6 +99,9 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
                 securityContext.getTrustStore(),
                 securityContext.getKeyStore(),
                 securityContext.getKeyStorePassword(),
+                "",
+                "",
+                "".toCharArray(),
                 subscriptionId);
     }
 
