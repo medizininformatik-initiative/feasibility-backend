@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
@@ -24,6 +27,15 @@ public class DSFSpringConfig {
 
     @Value("${app.dsf.security.certificate}")
     private String certificateFile;
+
+    @Value("${app.dsf.proxy.host}")
+    private String proxyHost;
+
+    @Value("${app.dsf.proxy.username}")
+    private String proxyUsername;
+
+    @Value("${app.dsf.proxy.password}")
+    private String proxyPassword;
 
     @Value("${app.dsf.webservice.baseUrl}")
     private String webserviceBaseUrl;
@@ -85,9 +97,16 @@ public class DSFSpringConfig {
     }
 
     @Bean
-    FhirWebClientProvider fhirWebClientProvider(FhirContext fhirContext, FhirSecurityContextProvider securityContextProvider) {
+    FhirProxyContext fhirProxyContext() throws MalformedURLException {
+        return new FhirProxyContext(new URL(proxyHost), proxyUsername, proxyPassword);
+    }
+
+    @Bean
+    FhirWebClientProvider fhirWebClientProvider(FhirContext fhirContext,
+                                                FhirSecurityContextProvider securityContextProvider,
+                                                FhirProxyContext proxyContext) {
         return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, webserviceReadTimeout,
-                webserviceConnectTimeout, websocketUrl, securityContextProvider);
+                webserviceConnectTimeout, websocketUrl, securityContextProvider, proxyContext);
     }
 
 }
