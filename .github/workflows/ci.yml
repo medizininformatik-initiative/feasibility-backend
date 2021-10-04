@@ -155,7 +155,7 @@ jobs:
         tags: |
           ghcr.io/${{ steps.prep.outputs.repository }}:latest
           ghcr.io/${{ steps.prep.outputs.repository }}:${{ steps.prep.outputs.version }}
-        push: false
+        push: true
 
 
 
