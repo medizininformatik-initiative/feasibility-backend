@@ -1,26 +1,34 @@
 package de.numcodex.feasibility_gui_backend.model.db;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import lombok.Data;
+
+import java.sql.Timestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Data
 @Entity
 public class Query {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id;
+    @Id
+    private String id;
 
-  private String queryId;
+    @Column(name = "created_by")
+    private String createdBy;
 
-  @ElementCollection
-  @Column(columnDefinition="TEXT")
-  private Map<String, String> contents = new HashMap<>();
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private Timestamp createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName = "id", name = "query_content_id")
+    private QueryContent queryContent;
+
+    @Convert(converter = QueryStatusConverter.class)
+    private QueryStatus status;
 }

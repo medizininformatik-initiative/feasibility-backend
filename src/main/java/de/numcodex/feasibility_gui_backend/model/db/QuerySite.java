@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -17,10 +16,10 @@ import javax.persistence.MapsId;
 
 @Data
 @Entity
-public class Result {
+public class QuerySite {
 
     @EmbeddedId
-    private ResultId id;
+    private QuerySiteId id;
 
     @MapsId("queryId")
     @JoinColumn(referencedColumnName = "id", name = "query_id")
@@ -32,16 +31,12 @@ public class Result {
     @ManyToOne(fetch = FetchType.LAZY)
     private Site site;
 
-    @Convert(converter = ResultTypeConverter.class)
-    private ResultType resultType;
-
-    private Integer result;
-
-    private Timestamp receivedAt;
+    @Column(name = "posted_at")
+    private Timestamp postedAt;
 
     @Data
     @Embeddable
-    static class ResultId implements Serializable {
+    static class QuerySiteId implements Serializable {
         @Column(name = "query_id")
         private String queryId;
 

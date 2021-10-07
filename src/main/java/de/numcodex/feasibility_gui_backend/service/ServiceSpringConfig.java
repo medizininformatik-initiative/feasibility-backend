@@ -1,9 +1,9 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import static java.util.Map.entry;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
+import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.CqlQueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_builder.FhirQueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
@@ -15,13 +15,7 @@ import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.ConceptNode;
 import de.numcodex.sq2cql.model.Mapping;
 import de.numcodex.sq2cql.model.MappingContext;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +24,19 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Map.entry;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
 
 @Configuration
 public class ServiceSpringConfig {
@@ -111,7 +118,15 @@ public class ServiceSpringConfig {
 
   @Bean
   QueryStatusListener createQueryStatusListener(@Qualifier("applied") BrokerClient client,
-      ResultRepository resultRepository) {
-    return new QueryStatusListenerImpl(resultRepository, client);
+                                                ResultRepository resultRepository, QueryRepository queryRepository,
+                                                SiteRepository siteRepository) {
+    return new QueryStatusListenerImpl(resultRepository, queryRepository, siteRepository, client);
+  }
+
+
+  @Qualifier("md5")
+  @Bean
+  MessageDigest md5MessageDigest() throws NoSuchAlgorithmException {
+    return MessageDigest.getInstance(MD5);
   }
 }
