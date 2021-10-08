@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Objects;
+import org.springframework.transaction.annotation.Transactional;
 
 import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.ACTIVE;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
@@ -31,6 +32,7 @@ import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
 
 @Service
+@Transactional
 public class QueryHandlerService {
     private static final String UNKNOWN_SITE = "Unbekannter Standort";
 

@@ -10,6 +10,7 @@ CREATE TYPE result_type AS ENUM (
 -- Currently, only "deleted" is needed, but most likely other status types will follow. So this
 -- is already added as an enum instead of a simple flag in the table
 CREATE TYPE status_type AS ENUM (
+    'ACTIVE',
     'DELETED'
 );
 
