@@ -7,10 +7,10 @@ import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderExc
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import java.io.IOException;
-import java.net.URI;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -47,7 +47,13 @@ public class QueryHandlerRestController {
     String id;
     try {
       id = queryHandlerService.runQuery(query);
-    } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException | QueryBuilderException e) {
+    } catch (UnsupportedMediaTypeException e) {
+      log.error("Unsupported Media Type submitted", e);
+      return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+    } catch (QueryNotFoundException e) {
+      log.error("Query not found", e);
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (IOException | QueryBuilderException e) {
       // TODO: Find correct Http error handling
       log.error("problem running query", e);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
