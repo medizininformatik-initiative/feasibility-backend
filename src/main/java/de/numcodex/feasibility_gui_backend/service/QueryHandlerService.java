@@ -15,8 +15,9 @@ import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderExc
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
+import java.util.Collections;
+import java.util.Comparator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -90,6 +91,7 @@ public class QueryHandlerService {
                 queryContentRepository.findByHash(hash)
                         .orElseGet(() -> {
                             var qc = new QueryContent(sq);
+                            qc.setHash(hash);
                             queryContentRepository.save(qc);
                             return qc;
                         });
@@ -169,16 +171,14 @@ public class QueryHandlerService {
         result.setTotalNumberOfPatients(
                 resultLines.stream().map(Result::getResult).reduce(0, Integer::sum));
 
+        // Sort by display site id, otherwise the real site ids would be easily identifiable by order
+        Collections.sort(resultLines, Comparator.comparingInt(Result::getDisplaySiteId));
+
         resultLines.forEach(
                 line -> {
                     var resultLine = new QueryResultLine();
                     resultLine.setNumberOfPatients(line.getResult());
-                    try {
-                        resultLine.setSiteName(brokerClient.getSiteName(line.getSite().getName()));
-                    } catch (SiteNotFoundException | IOException e) {
-                        resultLine.setSiteName(UNKNOWN_SITE);
-                    }
-
+                    resultLine.setSiteName(line.getDisplaySiteId().toString());
                     result.getResultLines().add(resultLine);
                 });
 

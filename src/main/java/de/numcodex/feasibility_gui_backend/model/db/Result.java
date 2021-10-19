@@ -43,6 +43,8 @@ public class Result {
 
     private Timestamp receivedAt;
 
+    private Integer displaySiteId;
+
     @Data
     @Embeddable
     static class ResultId implements Serializable {
