@@ -1,36 +1,39 @@
 package de.numcodex.feasibility_gui_backend.service;
 
+import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.ACTIVE;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
+import de.numcodex.feasibility_gui_backend.model.db.QuerySite;
+import de.numcodex.feasibility_gui_backend.model.db.QuerySite.QuerySiteId;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
+import de.numcodex.feasibility_gui_backend.repository.QuerySiteRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
+import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
+import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.util.Objects;
 import org.springframework.transaction.annotation.Transactional;
-
-import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.ACTIVE;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
 
 @Service
 @Transactional
@@ -41,6 +44,8 @@ public class QueryHandlerService {
     private final QueryRepository queryRepository;
     private final QueryContentRepository queryContentRepository;
     private final ResultRepository resultRepository;
+    private final QuerySiteRepository querySiteRepository;
+    private final SiteRepository siteRepository;
     private final BrokerClient brokerClient;
     private final QueryStatusListener queryStatusListener;
     private final QueryBuilder cqlQueryBuilder;
@@ -51,18 +56,25 @@ public class QueryHandlerService {
     private boolean brokerQueryStatusListenerConfigured;
 
 
-    public QueryHandlerService(QueryRepository queryRepository, QueryContentRepository queryContentRepository, ResultRepository resultRepository,
-                               @Qualifier("applied") BrokerClient brokerClient,
-                               ObjectMapper objectMapper,
-                               @Qualifier("md5") MessageDigest md5MessageDigest,
-                               QueryStatusListener queryStatusListener,
-                               @Qualifier("cql") QueryBuilder cqlQueryBuilder,
-                               @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
-                               @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
-                               @Value("${app.cqlTranslationEnabled}") boolean cqlTranslateEnabled) {
+    public QueryHandlerService(QueryRepository queryRepository,
+        QueryContentRepository queryContentRepository,
+        ResultRepository resultRepository,
+        QuerySiteRepository querySiteRepository,
+        SiteRepository siteRepository,
+        @Qualifier("applied") BrokerClient brokerClient,
+        ObjectMapper objectMapper,
+        @Qualifier("md5") MessageDigest md5MessageDigest,
+        QueryStatusListener queryStatusListener,
+        @Qualifier("cql") QueryBuilder cqlQueryBuilder,
+        @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
+        @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
+        @Value("${app.cqlTranslationEnabled}") boolean cqlTranslateEnabled) {
+
         this.queryRepository = Objects.requireNonNull(queryRepository);
         this.queryContentRepository = Objects.requireNonNull(queryContentRepository);
         this.resultRepository = Objects.requireNonNull(resultRepository);
+        this.querySiteRepository = Objects.requireNonNull(querySiteRepository);
+        this.siteRepository = Objects.requireNonNull(siteRepository);
         this.brokerClient = Objects.requireNonNull(brokerClient);
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.md5MessageDigest = Objects.requireNonNull(md5MessageDigest);
@@ -101,6 +113,15 @@ public class QueryHandlerService {
         sendQuery(query);
         queryRepository.save(query);
 
+        var sites = siteRepository.findAll();
+        sites.forEach(s -> {
+            QuerySite qs = new QuerySite();
+            QuerySiteId qsId = new QuerySiteId();
+            qsId.setQueryId(query.getId());
+            qsId.setSiteId(s.getId());
+            qs.setId(qsId);
+            querySiteRepository.save(qs);
+        });
         return query.getId();
     }
 

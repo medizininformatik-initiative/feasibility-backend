@@ -51,7 +51,7 @@ CREATE TABLE result (
 CREATE TABLE query_site (
     query_id TEXT NOT NULL,
     site_id INTEGER NOT NULL,
-    posted_at timestamp
+    posted_at timestamp NOT NULL DEFAULT current_timestamp
 );
 
 /***********************************
