@@ -35,8 +35,6 @@ import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCT
 @Service
 @Transactional
 public class QueryHandlerService {
-    private static final String UNKNOWN_SITE = "Unbekannter Standort";
-
     private final ObjectMapper objectMapper;
     private final MessageDigest md5MessageDigest;
 
@@ -84,7 +82,7 @@ public class QueryHandlerService {
 
         var sq = objectMapper.writeValueAsString(structuredQuery);
 
-        var hash = new String(md5MessageDigest.digest(sq.getBytes())).replaceAll("\\s", "");
+        var hash = new String(md5MessageDigest.digest(sq.getBytes())).replaceAll("\\s", "").replaceAll("\u0000", "");
         System.out.println("HASH: " + hash);
 
         var queryContent =

@@ -1,7 +1,12 @@
 package de.numcodex.feasibility_gui_backend.model.db;
 
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -20,6 +25,19 @@ public class Query {
 
     @Id
     private String id;
+
+    @OneToMany(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Result> results;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "query_site",
+        joinColumns = {
+            @JoinColumn(name = "query_id", referencedColumnName = "id",
+                nullable = false, updatable = false)},
+        inverseJoinColumns = {
+            @JoinColumn(name = "site_id", referencedColumnName = "id",
+                nullable = false, updatable = false)})
+    private List<Site> sites;
 
     @Column(name = "created_by")
     private String createdBy;
