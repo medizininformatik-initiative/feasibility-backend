@@ -4,8 +4,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import lombok.Data;
 
@@ -29,15 +27,11 @@ public class Query {
     @OneToMany(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Result> results;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "query_site",
-        joinColumns = {
-            @JoinColumn(name = "query_id", referencedColumnName = "id",
-                nullable = false, updatable = false)},
-        inverseJoinColumns = {
-            @JoinColumn(name = "site_id", referencedColumnName = "id",
-                nullable = false, updatable = false)})
-    private List<Site> sites;
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "comment")
+    private String comment;
 
     @Column(name = "created_by")
     private String createdBy;

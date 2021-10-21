@@ -1,6 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.ACTIVE;
+import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.PUBLISHED;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
@@ -8,15 +8,12 @@ import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCT
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
-import de.numcodex.feasibility_gui_backend.model.db.QuerySite;
-import de.numcodex.feasibility_gui_backend.model.db.QuerySite.QuerySiteId;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
-import de.numcodex.feasibility_gui_backend.repository.QuerySiteRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
@@ -44,7 +41,6 @@ public class QueryHandlerService {
     private final QueryRepository queryRepository;
     private final QueryContentRepository queryContentRepository;
     private final ResultRepository resultRepository;
-    private final QuerySiteRepository querySiteRepository;
     private final SiteRepository siteRepository;
     private final BrokerClient brokerClient;
     private final QueryStatusListener queryStatusListener;
@@ -59,7 +55,6 @@ public class QueryHandlerService {
     public QueryHandlerService(QueryRepository queryRepository,
         QueryContentRepository queryContentRepository,
         ResultRepository resultRepository,
-        QuerySiteRepository querySiteRepository,
         SiteRepository siteRepository,
         @Qualifier("applied") BrokerClient brokerClient,
         ObjectMapper objectMapper,
@@ -73,7 +68,6 @@ public class QueryHandlerService {
         this.queryRepository = Objects.requireNonNull(queryRepository);
         this.queryContentRepository = Objects.requireNonNull(queryContentRepository);
         this.resultRepository = Objects.requireNonNull(resultRepository);
-        this.querySiteRepository = Objects.requireNonNull(querySiteRepository);
         this.siteRepository = Objects.requireNonNull(siteRepository);
         this.brokerClient = Objects.requireNonNull(brokerClient);
         this.objectMapper = Objects.requireNonNull(objectMapper);
@@ -112,16 +106,6 @@ public class QueryHandlerService {
         addQueryContent(structuredQuery, query.getId());
         sendQuery(query);
         queryRepository.save(query);
-
-        var sites = siteRepository.findAll();
-        sites.forEach(s -> {
-            QuerySite qs = new QuerySite();
-            QuerySiteId qsId = new QuerySiteId();
-            qsId.setQueryId(query.getId());
-            qsId.setSiteId(s.getId());
-            qs.setId(qsId);
-            querySiteRepository.save(qs);
-        });
         return query.getId();
     }
 
@@ -137,7 +121,7 @@ public class QueryHandlerService {
         var queryId = this.brokerClient.createQuery();
         var query = new Query();
         query.setId(queryId);
-        query.setStatus(ACTIVE);
+        query.setStatus(PUBLISHED);
         return query;
     }
 

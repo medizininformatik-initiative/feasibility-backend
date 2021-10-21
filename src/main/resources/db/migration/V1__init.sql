@@ -10,7 +10,8 @@ CREATE TYPE result_type AS ENUM (
 -- Currently, only "deleted" is needed, but most likely other status types will follow. So this
 -- is already added as an enum instead of a simple flag in the table
 CREATE TYPE status_type AS ENUM (
-    'ACTIVE',
+    'DRAFT',
+    'PUBLISHED',
     'DELETED'
 );
 
@@ -20,6 +21,8 @@ CREATE TYPE status_type AS ENUM (
 
 CREATE TABLE query (
     id TEXT PRIMARY KEY,
+    title TEXT,
+    comment TEXT,
     query_content_id INTEGER,
     created_by TEXT, -- TODO: set to non null
     created_at timestamp NOT NULL DEFAULT current_timestamp,
@@ -48,18 +51,9 @@ CREATE TABLE result (
     display_site_id INTEGER NOT NULL
 );
 
-CREATE TABLE query_site (
-    query_id TEXT NOT NULL,
-    site_id INTEGER NOT NULL,
-    posted_at timestamp NOT NULL DEFAULT current_timestamp
-);
-
 /***********************************
 **  COMPOSITE PRIMARY KEYS
 ************************************/
-
-ALTER TABLE query_site
-    ADD CONSTRAINT query_site_pkey PRIMARY KEY (query_id, site_id);
 
 ALTER TABLE result
     ADD CONSTRAINT result_pkey PRIMARY KEY (query_id, site_id);
@@ -75,11 +69,6 @@ ALTER TABLE result
     ADD CONSTRAINT result_query_id_fkey FOREIGN KEY (query_id) REFERENCES query (id) ON DELETE CASCADE;
 ALTER TABLE result
     ADD CONSTRAINT result_site_id_fkey FOREIGN KEY (site_id) REFERENCES site (id) ON DELETE CASCADE;
-
-ALTER TABLE query_site
-    ADD CONSTRAINT query_site_query_id_fkey FOREIGN KEY (query_id) REFERENCES query (id) ON DELETE CASCADE;
-ALTER TABLE query_site
-    ADD CONSTRAINT query_site_site_id_fkey FOREIGN KEY (site_id) REFERENCES site (id) ON DELETE CASCADE;
 
 /***********************************
 **  OTHER CONSTRAINTS
