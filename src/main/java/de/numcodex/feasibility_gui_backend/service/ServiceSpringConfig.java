@@ -41,10 +41,17 @@ import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
 @Configuration
 public class ServiceSpringConfig {
 
-  public static final String CLIENT_TYPE_DSF = "DSF";
-  public static final String CLIENT_TYPE_AKTIN = "AKTIN";
-  public static final String CLIENT_TYPE_MOCK = "MOCK";
-  public static final String CLIENT_TYPE_DIRECT = "DIRECT";
+  @Value("${app.broker.mock.enabled}")
+  private boolean mockClientEnabled;
+
+  @Value("${app.broker.direct.enabled}")
+  private boolean directClientEnabled;
+
+  @Value("${app.broker.aktin.enabled}")
+  private boolean aktinClientEnabled;
+
+  @Value("${app.broker.dsf.enabled}")
+  private boolean dsfClientEnabled;
 
   private final ApplicationContext ctx;
 
@@ -55,19 +62,28 @@ public class ServiceSpringConfig {
   // TODO: use aktin and dsf provider to avoid necessary qualifier annotation
   @Qualifier("applied")
   @Bean
-  public BrokerClient createBrokerClient(@Value("${app.brokerClient}") String type) {
-    return switch (StringUtils.upperCase(type)) {
-      case CLIENT_TYPE_DSF -> BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
-      case CLIENT_TYPE_AKTIN -> BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
-      case CLIENT_TYPE_DIRECT -> BeanFactoryAnnotationUtils
+  public BrokerClient createBrokerClient() {
+
+    System.out.println("enable mock: " + mockClientEnabled);
+    System.out.println("enable direct: " + directClientEnabled);
+    System.out.println("enable aktin: " + aktinClientEnabled);
+    System.out.println("enable dsf: " + dsfClientEnabled);
+    if (mockClientEnabled) {
+      return new MockBrokerClient();
+    }
+    if (directClientEnabled) {
+      return BeanFactoryAnnotationUtils
           .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct");
-      case CLIENT_TYPE_MOCK -> new MockBrokerClient();
-      default -> throw new IllegalStateException(
-          "No Broker Client configured for type '%s'. Allowed types are %s"
-              .formatted(type, List.of(CLIENT_TYPE_DSF, CLIENT_TYPE_AKTIN, CLIENT_TYPE_MOCK)));
-    };
+    }
+    if (aktinClientEnabled) {
+      return BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
+    }
+    if (dsfClientEnabled) {
+      return BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
+    }
+    throw new RuntimeException("no client enabled");
   }
 
   @Bean

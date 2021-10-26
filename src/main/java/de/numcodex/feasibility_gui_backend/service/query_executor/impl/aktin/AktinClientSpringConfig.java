@@ -22,10 +22,10 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 public class AktinClientSpringConfig {
 
-    @Value("${app.aktin.broker.baseUrl}")
+    @Value("${app.broker.aktin.broker.baseUrl}")
     private String brokerBaseUrl;
 
-    @Value("${app.aktin.broker.apiKey}")
+    @Value("${app.broker.aktin.broker.apiKey}")
     private String brokerApiKey;
 
 

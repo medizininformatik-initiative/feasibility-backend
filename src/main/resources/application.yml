@@ -30,27 +30,34 @@ app:
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
-  aktin:
-    broker:
-      baseUrl: ${AKTIN_BROKER_BASE_URL}
-      apiKey: ${AKTIN_BROKER_API_KEY}
-  dsf:
-    security:
-      certificate: ${DSF_SECURITY_CACERT}
-      keystore:
-        p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}
-        password: ${DSF_SECURITY_KEYSTORE_PASSWORD}
-    proxy:
-      host: ${DSF_PROXY_HOST:}
-      username: ${DSF_PROXY_USERNAME:}
-      password: ${DSF_PROXY_PASSWORD:}
-    webservice:
-      baseUrl: ${DSF_WEBSERVICE_BASE_URL}
-      readTimeout: 20000
-      connectTimeout: 2000
-    websocket:
-      url: ${DSF_WEBSOCKET_URL}
-    organizationId: ${DSF_ORGANIZATION_ID}
+  broker:
+    mock:
+      enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
+    direct:
+      enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
+    aktin:
+      enabled: ${BROKER_CLIENT_AKTIN_ENABLED:false}
+      broker:
+        baseUrl: ${AKTIN_BROKER_BASE_URL}
+        apiKey: ${AKTIN_BROKER_API_KEY}
+    dsf:
+      enabled: ${BROKER_CLIENT_DSF_ENABLED:false}
+      security:
+        certificate: ${DSF_SECURITY_CACERT}
+        keystore:
+          p12file: ${DSF_SECURITY_KEYSTORE_P12FILE}
+          password: ${DSF_SECURITY_KEYSTORE_PASSWORD}
+      proxy:
+        host: ${DSF_PROXY_HOST}
+        username: ${DSF_PROXY_USERNAME}
+        password: ${DSF_PROXY_PASSWORD}
+      webservice:
+        baseUrl: ${DSF_WEBSERVICE_BASE_URL}
+        readTimeout: 20000
+        connectTimeout: 2000
+      websocket:
+        url: ${DSF_WEBSOCKET_URL}
+      organizationId: ${DSF_ORGANIZATION_ID}
   flare:
     baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
     readTimeout: 20000
