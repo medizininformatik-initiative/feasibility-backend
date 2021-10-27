@@ -23,7 +23,6 @@ spring:
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
-  brokerClient: ${BROKER_CLIENT_TYPE:MOCK}
   ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_profiles}
   mappingsFile: ${MAPPINGS_FILE:ontology/codex-term-code-mapping.json}
   conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/codex-code-tree.json}

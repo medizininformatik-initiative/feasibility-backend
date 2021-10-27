@@ -15,8 +15,7 @@ import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.ConceptNode;
 import de.numcodex.sq2cql.model.Mapping;
 import de.numcodex.sq2cql.model.MappingContext;
-import org.apache.commons.codec.digest.MessageDigestAlgorithms;
-import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,31 +58,28 @@ public class ServiceSpringConfig {
     this.ctx = ctx;
   }
 
-  // TODO: use aktin and dsf provider to avoid necessary qualifier annotation
+  // Do NOT remove the qualifier annotation, since spring attempts to initialize ALL broker clients
+  // and does not call this method anymore - rendering the enable-switches moot.
   @Qualifier("applied")
   @Bean
-  public BrokerClient createBrokerClient() {
-
-    System.out.println("enable mock: " + mockClientEnabled);
-    System.out.println("enable direct: " + directClientEnabled);
-    System.out.println("enable aktin: " + aktinClientEnabled);
-    System.out.println("enable dsf: " + dsfClientEnabled);
+  public List<BrokerClient> createBrokerClients() {
+    List<BrokerClient> brokerClients = new ArrayList<>();
     if (mockClientEnabled) {
-      return new MockBrokerClient();
+      brokerClients.add(new MockBrokerClient());
     }
     if (directClientEnabled) {
-      return BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct");
+      brokerClients.add(BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct"));
     }
     if (aktinClientEnabled) {
-      return BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
+      brokerClients.add(BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin"));
     }
     if (dsfClientEnabled) {
-      return BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
+      brokerClients.add(BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf"));
     }
-    throw new RuntimeException("no client enabled");
+    return brokerClients;
   }
 
   @Bean
@@ -133,12 +129,14 @@ public class ServiceSpringConfig {
   }
 
   @Bean
-  QueryStatusListener createQueryStatusListener(@Qualifier("applied") BrokerClient client,
+  List<QueryStatusListener> createQueryStatusListener(@Qualifier("applied") List<BrokerClient> clients,
                                                 ResultRepository resultRepository, QueryRepository queryRepository,
                                                 SiteRepository siteRepository) {
-    return new QueryStatusListenerImpl(resultRepository, queryRepository, siteRepository, client);
+    var queryStatusListeners = new ArrayList<QueryStatusListener>();
+    clients.forEach(c -> queryStatusListeners.add(
+        new QueryStatusListenerImpl(resultRepository, queryRepository, siteRepository, c)));
+    return queryStatusListeners;
   }
-
 
   @Qualifier("md5")
   @Bean

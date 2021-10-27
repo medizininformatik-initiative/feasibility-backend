@@ -6,6 +6,7 @@ import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.ThrowingConsumer;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
@@ -26,7 +27,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,8 +45,8 @@ public class QueryHandlerService {
     private final QueryContentRepository queryContentRepository;
     private final ResultRepository resultRepository;
     private final SiteRepository siteRepository;
-    private final BrokerClient brokerClient;
-    private final QueryStatusListener queryStatusListener;
+    private final List<BrokerClient> brokerClients;
+    private final List<QueryStatusListener> queryStatusListeners;
     private final QueryBuilder cqlQueryBuilder;
     private final QueryBuilder fhirQueryBuilder;
     private final boolean fhirTranslateEnabled;
@@ -56,10 +59,10 @@ public class QueryHandlerService {
         QueryContentRepository queryContentRepository,
         ResultRepository resultRepository,
         SiteRepository siteRepository,
-        @Qualifier("applied") BrokerClient brokerClient,
+        @Qualifier("applied") List<BrokerClient> brokerClients,
         ObjectMapper objectMapper,
         @Qualifier("md5") MessageDigest md5MessageDigest,
-        QueryStatusListener queryStatusListener,
+        List<QueryStatusListener> queryStatusListeners,
         @Qualifier("cql") QueryBuilder cqlQueryBuilder,
         @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
         @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
@@ -69,10 +72,10 @@ public class QueryHandlerService {
         this.queryContentRepository = Objects.requireNonNull(queryContentRepository);
         this.resultRepository = Objects.requireNonNull(resultRepository);
         this.siteRepository = Objects.requireNonNull(siteRepository);
-        this.brokerClient = Objects.requireNonNull(brokerClient);
+        this.brokerClients = Objects.requireNonNull(brokerClients);
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.md5MessageDigest = Objects.requireNonNull(md5MessageDigest);
-        this.queryStatusListener = Objects.requireNonNull(queryStatusListener);
+        this.queryStatusListeners = Objects.requireNonNull(queryStatusListeners);
         this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
         this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
         brokerQueryStatusListenerConfigured = false;
@@ -112,21 +115,25 @@ public class QueryHandlerService {
     // TODO: maybe do this using a post construct method (think about middleware availability on startup + potential backoff!)
     private void addQueryStatusListener() throws IOException {
         if (!brokerQueryStatusListenerConfigured) {
-            brokerClient.addQueryStatusListener(queryStatusListener);
+//            brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryStatusListener(queryStatusListeners)));
             brokerQueryStatusListenerConfigured = true;
         }
     }
 
     private Query createQuery() throws IOException {
-        var queryId = this.brokerClient.createQuery();
         var query = new Query();
-        query.setId(queryId);
+        // TODO: how to deal with different query ids from different broker clients for the same query?
+        brokerClients.forEach(throwingConsumerWrapper(bc -> {
+            var queryId = bc.createQuery();
+            query.setId(queryId); // TODO: This is creating garbage when there is more than one client
+        }));
         query.setStatus(PUBLISHED);
         return query;
     }
 
     private void sendQuery(Query query) throws QueryNotFoundException, IOException {
-        this.brokerClient.publishQuery(query.getId());
+        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
+        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.publishQuery(query.getId())));
     }
 
     private void addQueryContent(StructuredQuery structuredQuery, String queryId)
@@ -143,19 +150,22 @@ public class QueryHandlerService {
     private void addSqQuery(String queryId, StructuredQuery structuredQuery)
             throws IOException, UnsupportedMediaTypeException, QueryNotFoundException {
         var sqContent = objectMapper.writeValueAsString(structuredQuery);
-        brokerClient.addQueryDefinition(queryId, STRUCTURED_QUERY, sqContent);
+        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
+        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryDefinition(queryId, STRUCTURED_QUERY, sqContent)));
     }
 
     private void addFhirQuery(String queryId, StructuredQuery structuredQuery)
             throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
         var fhirContent = getFhirContent(structuredQuery);
-        brokerClient.addQueryDefinition(queryId, FHIR, fhirContent);
+        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
+        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryDefinition(queryId, FHIR, fhirContent)));
     }
 
     private void addCqlQuery(String queryId, StructuredQuery structuredQuery)
             throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
         var cqlContent = getCqlContent(structuredQuery);
-        brokerClient.addQueryDefinition(queryId, CQL, cqlContent);
+        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
+        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryDefinition(queryId, CQL, cqlContent)));
     }
 
     private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
@@ -186,5 +196,17 @@ public class QueryHandlerService {
                 });
 
         return result;
+    }
+
+    static <T> Consumer<T> throwingConsumerWrapper(
+        ThrowingConsumer<T, Exception> throwingConsumer) {
+
+        return i -> {
+            try {
+                throwingConsumer.accept(i);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        };
     }
 }

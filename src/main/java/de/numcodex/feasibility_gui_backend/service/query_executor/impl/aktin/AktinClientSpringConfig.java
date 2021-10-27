@@ -28,8 +28,6 @@ public class AktinClientSpringConfig {
     @Value("${app.broker.aktin.broker.apiKey}")
     private String brokerApiKey;
 
-
-
     @Qualifier("aktin")
     @Bean
     public BrokerClient aktinBrokerClient() {
@@ -40,18 +38,20 @@ public class AktinClientSpringConfig {
     	return new AktinBrokerClient(client);
     }
 
-    @AllArgsConstructor
-    private static class ApiKeyAuthFilter implements AuthFilter{
-    	final private String key;
+	@AllArgsConstructor
+	private static class ApiKeyAuthFilter implements AuthFilter {
+
+		final private String key;
+
 		@Override
 		public void addAuthentication(Builder builder) throws IOException {
-			builder.header("Authorization", "Bearer "+key);
+			builder.header("Authorization", "Bearer " + key);
 		}
 
 		@Override
 		public void addAuthentication(java.net.http.HttpRequest.Builder builder) throws IOException {
-			builder.header("Authorization", "Bearer "+key);
+			builder.header("Authorization", "Bearer " + key);
 		}
-    }
+	}
 
 }
