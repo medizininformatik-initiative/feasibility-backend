@@ -4,6 +4,7 @@ import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.PUBLISHED
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+import static de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig.throwingConsumerWrapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.ThrowingConsumer;
@@ -86,9 +87,6 @@ public class QueryHandlerService {
     public String runQuery(StructuredQuery structuredQuery)
             throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryBuilderException {
 
-        //TODO: Should not be here
-        addQueryStatusListener();
-
         var sq = objectMapper.writeValueAsString(structuredQuery);
 
         var hash = new String(md5MessageDigest.digest(sq.getBytes())).replaceAll("\\s", "").replaceAll("\u0000", "");
@@ -110,14 +108,6 @@ public class QueryHandlerService {
         sendQuery(query);
         queryRepository.save(query);
         return query.getId();
-    }
-
-    // TODO: maybe do this using a post construct method (think about middleware availability on startup + potential backoff!)
-    private void addQueryStatusListener() throws IOException {
-        if (!brokerQueryStatusListenerConfigured) {
-//            brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryStatusListener(queryStatusListeners)));
-            brokerQueryStatusListenerConfigured = true;
-        }
     }
 
     private Query createQuery() throws IOException {
@@ -196,17 +186,5 @@ public class QueryHandlerService {
                 });
 
         return result;
-    }
-
-    static <T> Consumer<T> throwingConsumerWrapper(
-        ThrowingConsumer<T, Exception> throwingConsumer) {
-
-        return i -> {
-            try {
-                throwingConsumer.accept(i);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        };
     }
 }

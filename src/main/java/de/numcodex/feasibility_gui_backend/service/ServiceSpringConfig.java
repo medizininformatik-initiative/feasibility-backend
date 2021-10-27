@@ -1,6 +1,10 @@
 package de.numcodex.feasibility_gui_backend.service;
 
+import static java.util.Map.entry;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.ThrowingConsumer;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
@@ -15,7 +19,17 @@ import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.ConceptNode;
 import de.numcodex.sq2cql.model.Mapping;
 import de.numcodex.sq2cql.model.MappingContext;
+import java.io.File;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,19 +37,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.File;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Map.entry;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
 
 @Configuration
 public class ServiceSpringConfig {
@@ -131,10 +132,15 @@ public class ServiceSpringConfig {
   @Bean
   List<QueryStatusListener> createQueryStatusListener(@Qualifier("applied") List<BrokerClient> clients,
                                                 ResultRepository resultRepository, QueryRepository queryRepository,
-                                                SiteRepository siteRepository) {
+                                                SiteRepository siteRepository) throws IOException {
     var queryStatusListeners = new ArrayList<QueryStatusListener>();
-    clients.forEach(c -> queryStatusListeners.add(
-        new QueryStatusListenerImpl(resultRepository, queryRepository, siteRepository, c)));
+    clients.forEach(throwingConsumerWrapper(client -> {
+          QueryStatusListener queryStatusListener = new QueryStatusListenerImpl(resultRepository,
+              queryRepository, siteRepository, client);
+          queryStatusListeners.add(queryStatusListener);
+          client.addQueryStatusListener(queryStatusListener);
+        })
+    );
     return queryStatusListeners;
   }
 
@@ -142,5 +148,17 @@ public class ServiceSpringConfig {
   @Bean
   MessageDigest md5MessageDigest() throws NoSuchAlgorithmException {
     return MessageDigest.getInstance(MD5);
+  }
+
+  static <T> Consumer<T> throwingConsumerWrapper(
+      ThrowingConsumer<T, Exception> throwingConsumer) {
+
+    return i -> {
+      try {
+        throwingConsumer.accept(i);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    };
   }
 }
