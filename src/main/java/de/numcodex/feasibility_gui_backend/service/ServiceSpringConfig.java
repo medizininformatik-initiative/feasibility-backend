@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
+@Slf4j
 public class ServiceSpringConfig {
 
   @Value("${app.broker.mock.enabled}")
@@ -66,17 +68,21 @@ public class ServiceSpringConfig {
   public List<BrokerClient> createBrokerClients() {
     List<BrokerClient> brokerClients = new ArrayList<>();
     if (mockClientEnabled) {
+      log.info("Enable mock client");
       brokerClients.add(new MockBrokerClient());
     }
     if (directClientEnabled) {
+      log.info("Enable direct client");
       brokerClients.add(BeanFactoryAnnotationUtils
           .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct"));
     }
     if (aktinClientEnabled) {
+      log.info("Enable aktin client");
       brokerClients.add(BeanFactoryAnnotationUtils
           .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin"));
     }
     if (dsfClientEnabled) {
+      log.info("Enable dsf client");
       brokerClients.add(BeanFactoryAnnotationUtils
           .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf"));
     }

@@ -10,7 +10,10 @@ import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 
+@Slf4j
 public class QueryStatusListenerImpl implements QueryStatusListener {
 
   private final ResultRepository resultRepository;
@@ -71,7 +74,11 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
         result.setSite(site.get());
         result.setResultType(ResultType.SUCCESS);
         result.setDisplaySiteId(getFreeDisplaySiteId(query.get().getId()));
-        this.resultRepository.save(result);
+        try {
+          this.resultRepository.save(result);
+        } catch (DataIntegrityViolationException e) {
+          log.warn("Duplicate result received. Omitting. Site=[{}], ResultId=[{}]", site.get().getSiteName(), resultId);
+        }
       } else {
         System.out.println("No query entity found.");
       }
