@@ -24,6 +24,10 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
+import de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin.AktinBrokerClient;
+import de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct.DirectBrokerClient;
+import de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf.DSFBrokerClient;
+import de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock.MockBrokerClient;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Collections;
@@ -84,7 +88,7 @@ public class QueryHandlerService {
         this.cqlTranslateEnabled = cqlTranslateEnabled;
     }
 
-    public String runQuery(StructuredQuery structuredQuery)
+    public Long runQuery(StructuredQuery structuredQuery)
             throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryBuilderException {
 
         var sq = objectMapper.writeValueAsString(structuredQuery);
@@ -104,7 +108,7 @@ public class QueryHandlerService {
         var query = createQuery();
         query.setQueryContent(queryContent);
 
-        addQueryContent(structuredQuery, query.getId());
+        addQueryContent(structuredQuery, query);
         sendQuery(query);
         queryRepository.save(query);
         return query.getId();
@@ -112,50 +116,126 @@ public class QueryHandlerService {
 
     private Query createQuery() throws IOException {
         var query = new Query();
-        // TODO: how to deal with different query ids from different broker clients for the same query?
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
             var queryId = bc.createQuery();
-            query.setId(queryId); // TODO: This is creating garbage when there is more than one client
+            switch (bc.getClass().getSimpleName()) {
+                case "DirectBrokerClient":
+                    query.setDirectId(queryId);
+                    break;
+                case "AktinBrokerClient":
+                    query.setAktinId(queryId);
+                    break;
+                case "DSFBrokerClient":
+                    query.setDsfId(queryId);
+                    break;
+                case "MockBrokerClient":
+                default:
+                    query.setMockId(queryId);
+                    break;
+            }
         }));
         query.setStatus(PUBLISHED);
         return query;
     }
 
     private void sendQuery(Query query) throws QueryNotFoundException, IOException {
-        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
-        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.publishQuery(query.getId())));
+        brokerClients.forEach(throwingConsumerWrapper(bc -> {
+            switch (bc.getClass().getSimpleName()) {
+                case "DirectBrokerClient":
+                    bc.publishQuery(query.getDirectId());
+                    break;
+                case "AktinBrokerClient":
+                    bc.publishQuery(query.getAktinId());
+                    break;
+                case "DSFBrokerClient":
+                    bc.publishQuery(query.getDsfId());
+                    break;
+                case "MockBrokerClient":
+                default:
+                    bc.publishQuery(query.getMockId());
+                    break;
+            }
+        }));
     }
 
-    private void addQueryContent(StructuredQuery structuredQuery, String queryId)
+    private void addQueryContent(StructuredQuery structuredQuery, Query query)
             throws IOException, QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException {
-        addSqQuery(queryId, structuredQuery);
+        addSqQuery(query, structuredQuery);
         if (cqlTranslateEnabled) {
-            addCqlQuery(queryId, structuredQuery);
+            addCqlQuery(query, structuredQuery);
         }
         if (fhirTranslateEnabled) {
-            addFhirQuery(queryId, structuredQuery);
+            addFhirQuery(query, structuredQuery);
         }
     }
 
-    private void addSqQuery(String queryId, StructuredQuery structuredQuery)
+    private void addSqQuery(Query query, StructuredQuery structuredQuery)
             throws IOException, UnsupportedMediaTypeException, QueryNotFoundException {
         var sqContent = objectMapper.writeValueAsString(structuredQuery);
-        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
-        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryDefinition(queryId, STRUCTURED_QUERY, sqContent)));
+        brokerClients.forEach(throwingConsumerWrapper(bc -> {
+            switch (bc.getClass().getSimpleName()) {
+                case "DirectBrokerClient":
+                    bc.addQueryDefinition(query.getDirectId(), STRUCTURED_QUERY, sqContent);
+                    break;
+                case "AktinBrokerClient":
+                    bc.addQueryDefinition(query.getAktinId(), STRUCTURED_QUERY, sqContent);
+                    break;
+                case "DSFBrokerClient":
+                    bc.addQueryDefinition(query.getDsfId(), STRUCTURED_QUERY, sqContent);
+                    break;
+                case "MockBrokerClient":
+                default:
+                    bc.addQueryDefinition(query.getMockId(), STRUCTURED_QUERY, sqContent);
+                    break;
+            }
+
+        }));
     }
 
-    private void addFhirQuery(String queryId, StructuredQuery structuredQuery)
+    private void addFhirQuery(Query query, StructuredQuery structuredQuery)
             throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
         var fhirContent = getFhirContent(structuredQuery);
         // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
-        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryDefinition(queryId, FHIR, fhirContent)));
+        brokerClients.forEach(throwingConsumerWrapper(bc -> {
+            switch (bc.getClass().getSimpleName()) {
+                case "DirectBrokerClient":
+                    bc.addQueryDefinition(query.getDirectId(), FHIR, fhirContent);
+                    break;
+                case "AktinBrokerClient":
+                    bc.addQueryDefinition(query.getAktinId(), FHIR, fhirContent);
+                    break;
+                case "DSFBrokerClient":
+                    bc.addQueryDefinition(query.getDsfId(), FHIR, fhirContent);
+                    break;
+                case "MockBrokerClient":
+                default:
+                    bc.addQueryDefinition(query.getMockId(), FHIR, fhirContent);
+                    break;
+            }
+        }));
     }
 
-    private void addCqlQuery(String queryId, StructuredQuery structuredQuery)
+    private void addCqlQuery(Query query, StructuredQuery structuredQuery)
             throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
         var cqlContent = getCqlContent(structuredQuery);
         // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
-        brokerClients.forEach(throwingConsumerWrapper(bc -> bc.addQueryDefinition(queryId, CQL, cqlContent)));
+        brokerClients.forEach(throwingConsumerWrapper(bc -> {
+            switch (bc.getClass().getSimpleName()) {
+                case "DirectBrokerClient":
+                    bc.addQueryDefinition(query.getDirectId(), CQL, cqlContent);
+                    break;
+                case "AktinBrokerClient":
+                    bc.addQueryDefinition(query.getAktinId(), CQL, cqlContent);
+                    break;
+                case "DSFBrokerClient":
+                    bc.addQueryDefinition(query.getDsfId(), CQL, cqlContent);
+                    break;
+                case "MockBrokerClient":
+                default:
+                    bc.addQueryDefinition(query.getMockId(), CQL, cqlContent);
+                    break;
+            }
+        }));
     }
 
     private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
@@ -166,7 +246,7 @@ public class QueryHandlerService {
         return this.cqlQueryBuilder.getQueryContent(structuredQuery);
     }
 
-    public QueryResult getQueryResult(String queryId) {
+    public QueryResult getQueryResult(Long queryId) {
         var resultLines = this.resultRepository.findByQueryId(queryId);
         var result = new QueryResult();
 

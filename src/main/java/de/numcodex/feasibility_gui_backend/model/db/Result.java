@@ -50,7 +50,7 @@ public class Result {
     @Embeddable
     public static class ResultId implements Serializable {
         @Column(name = "query_id")
-        private String queryId;
+        private Long queryId;
 
         @Column(name = "site_id")
         private Long siteId;

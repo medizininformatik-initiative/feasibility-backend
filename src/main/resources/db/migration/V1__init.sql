@@ -20,7 +20,11 @@ CREATE TYPE status_type AS ENUM (
 ************************************/
 
 CREATE TABLE query (
-    id TEXT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    mock_id TEXT, -- TODO: maybe create new tables for brokers and join table with specific ids?
+    direct_id TEXT,
+    aktin_id TEXT,
+    dsf_id TEXT,
     title TEXT,
     comment TEXT,
     query_content_id INTEGER,
@@ -43,7 +47,7 @@ CREATE TABLE site (
 );
 
 CREATE TABLE result (
-    query_id TEXT NOT NULL,
+    query_id INTEGER NOT NULL,
     site_id INTEGER NOT NULL,
     result_type result_type NOT NULL DEFAULT 'SUCCESS',
     result INTEGER,

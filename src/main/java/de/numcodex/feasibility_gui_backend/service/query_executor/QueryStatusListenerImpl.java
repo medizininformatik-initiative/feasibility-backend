@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor;
 
+import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.db.Result.ResultId;
 import de.numcodex.feasibility_gui_backend.model.db.ResultType;
@@ -8,6 +9,7 @@ import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
 public class QueryStatusListenerImpl implements QueryStatusListener {
 
@@ -25,7 +27,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
   }
 
   @Override
-  public void onClientUpdate(String queryId, String siteId, QueryStatus status) {
+  public void onClientUpdate(String brokerspecificQueryId, String siteId, QueryStatus status) {
     if (status != QueryStatus.COMPLETED) {
       return;
     }
@@ -33,7 +35,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
     Result result = new Result();
     int numberOfPatients;
     try {
-      numberOfPatients = brokerClient.getResultFeasibility(queryId, siteId);
+      numberOfPatients = brokerClient.getResultFeasibility(brokerspecificQueryId, siteId);
     } catch (QueryNotFoundException | SiteNotFoundException | IOException e) {
       System.out.println(e.getMessage());
       return;
@@ -41,9 +43,23 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
 
     try {
       var site = siteRepository.findBySiteId(Long.parseLong(siteId));
+      Optional<Query> query;
 
-      // TODO: proper error handling
-      var query = queryRepository.findById(queryId);
+      switch (brokerClient.getClass().getSimpleName()) {
+        case "DirectBrokerClient":
+          query = queryRepository.findByDirectId(brokerspecificQueryId);
+          break;
+        case "AktinBrokerClient":
+          query = queryRepository.findByAktinId(brokerspecificQueryId);
+          break;
+        case "DSFBrokerClient":
+          query = queryRepository.findByDsfId(brokerspecificQueryId);
+          break;
+        case "MockBrokerClient":
+        default:
+          query = queryRepository.findByMockId(brokerspecificQueryId);
+          break;
+      }
 
       if (query.isPresent() && site.isPresent()) {
         ResultId resultId = new ResultId();
@@ -54,7 +70,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
         result.setQuery(query.get());
         result.setSite(site.get());
         result.setResultType(ResultType.SUCCESS);
-        result.setDisplaySiteId(getFreeDisplaySiteId(queryId));
+        result.setDisplaySiteId(getFreeDisplaySiteId(query.get().getId()));
         this.resultRepository.save(result);
       } else {
         System.out.println("No query entity found.");
@@ -64,7 +80,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
     }
   }
 
-  private Integer getFreeDisplaySiteId(String queryId) {
+  private Integer getFreeDisplaySiteId(Long queryId) {
     var siteIds = siteRepository.getSiteIds();
     var usedSiteIds = resultRepository.getUsedDisplaySiteIds(queryId);
 
