@@ -4,6 +4,7 @@ import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.db.Result.ResultId;
 import de.numcodex.feasibility_gui_backend.model.db.ResultType;
+import de.numcodex.feasibility_gui_backend.model.db.Site;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
@@ -45,21 +46,28 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
     }
 
     try {
-      var site = siteRepository.findBySiteId(Long.parseLong(siteId));
+      Optional<Site> site;
       Optional<Query> query;
+      String siteName;
 
       switch (brokerClient.getClass().getSimpleName()) {
         case "DirectBrokerClient":
+          site = siteRepository.findBySiteId(Long.parseLong(siteId));
           query = queryRepository.findByDirectId(brokerspecificQueryId);
           break;
         case "AktinBrokerClient":
+          siteName = brokerClient.getSiteName(siteId);
+          site = siteRepository.findByAktinIdentifier(siteName);
           query = queryRepository.findByAktinId(brokerspecificQueryId);
           break;
         case "DSFBrokerClient":
+          siteName = brokerClient.getSiteName(siteId);
+          site = siteRepository.findByDsfIdentifier(siteName);
           query = queryRepository.findByDsfId(brokerspecificQueryId);
           break;
         case "MockBrokerClient":
         default:
+          site = siteRepository.findBySiteId(Long.parseLong(siteId));
           query = queryRepository.findByMockId(brokerspecificQueryId);
           break;
       }
@@ -80,7 +88,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
           log.warn("Duplicate result received. Omitting. Site=[{}], ResultId=[{}]", site.get().getSiteName(), resultId);
         }
       } else {
-        System.out.println("No query entity found.");
+        System.out.println("No query or no site entity found.");
       }
     } catch (Exception e) {
       e.printStackTrace();
