@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @JsonInclude(Include.NON_NULL)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TerminologyEntry {
 
   @JsonProperty("children")
@@ -19,6 +21,7 @@ public class TerminologyEntry {
   @JsonProperty("termCode")
   private TermCode termCode;
   @JsonProperty("termCodes")
+  @EqualsAndHashCode.Include
   private List<TermCode> termCodes = new ArrayList<>();
   @JsonProperty("id")
   private UUID id;
@@ -59,5 +62,4 @@ public class TerminologyEntry {
     terminologyEntry.display = other.display;
     return terminologyEntry;
   }
-
 }
