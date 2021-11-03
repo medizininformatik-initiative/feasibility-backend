@@ -3,7 +3,6 @@ package de.numcodex.feasibility_gui_backend.model.ui;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.numcodex.feasibility_gui_backend.model.common.AttributeCode;
 import de.numcodex.feasibility_gui_backend.model.common.TermCode;
 import de.numcodex.feasibility_gui_backend.model.common.Unit;
 import de.numcodex.feasibility_gui_backend.model.query.Comparator;
@@ -20,7 +19,7 @@ public class AttributeDefinition {
     @JsonProperty("selectableConcepts")
     private List<TermCode> selectableConcepts = new ArrayList<>();
     @JsonProperty("attributeCode")
-    private AttributeCode attributeCode;
+    private TermCode attributeCode;
     @JsonProperty("comparator")
     private Comparator comparator;
     @JsonProperty("optional")
