@@ -33,7 +33,7 @@ public class TerminologyEntry {
   @JsonProperty("valueDefinitions")
   private List<ValueDefinition> valueDefinitions = new ArrayList<>();
   @JsonProperty("attributeDefinitions")
-  private List<ValueDefinition> attributeDefinitions = new ArrayList<>();
+  private List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
   @JsonProperty("display")
   private String display;
 

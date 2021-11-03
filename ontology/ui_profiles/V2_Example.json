@@ -87,6 +87,11 @@
               "display": "m"
             }
           ],
+          "attributeCode": {
+            "code": "quantity",
+            "system": "num.abide",
+            "display": "quantity"
+          },
           "precision": 1,
           "selectableConcepts": [],
           "type": "quantity"
