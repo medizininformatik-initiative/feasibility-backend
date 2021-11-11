@@ -8,9 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
@@ -97,8 +94,8 @@ public class DSFSpringConfig {
     }
 
     @Bean
-    FhirProxyContext fhirProxyContext() throws MalformedURLException {
-        return new FhirProxyContext(new URL(proxyHost), proxyUsername, proxyPassword);
+    FhirProxyContext fhirProxyContext() {
+        return new FhirProxyContext(proxyHost, proxyUsername, proxyPassword);
     }
 
     @Bean
