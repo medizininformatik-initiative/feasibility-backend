@@ -95,7 +95,11 @@ public class DSFSpringConfig {
 
     @Bean
     FhirProxyContext fhirProxyContext() {
-        return new FhirProxyContext(proxyHost, proxyUsername, proxyPassword);
+        return new FhirProxyContext(
+                (proxyHost.isEmpty()) ? null : proxyHost,
+                (proxyUsername.isEmpty()) ? null : proxyUsername,
+                (proxyPassword.isEmpty()) ? null : proxyPassword
+        );
     }
 
     @Bean

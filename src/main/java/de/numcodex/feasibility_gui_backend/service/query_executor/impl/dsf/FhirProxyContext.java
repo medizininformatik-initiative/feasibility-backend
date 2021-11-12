@@ -12,4 +12,8 @@ public class FhirProxyContext {
     String proxyHost;
     String username;
     String password;
+
+    public char[] getPassword() {
+        return (password == null) ? null : password.toCharArray();
+    }
 }
