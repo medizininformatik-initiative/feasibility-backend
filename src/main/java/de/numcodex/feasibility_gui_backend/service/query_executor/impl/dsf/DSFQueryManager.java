@@ -38,7 +38,7 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
  */
 class DSFQueryManager implements QueryManager {
 
-    private static final String INSTANTIATE_URI = "http://highmed.org/bpe/Process/requestSimpleFeasibility/0.1.0";
+    private static final String INSTANTIATE_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/requestSimpleFeasibility/0.1.0";
     private static final String REQUEST_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-request-simple-feasibility";
     private static final String MEASURE_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-measure";
     private static final String LIBRARY_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-library";
