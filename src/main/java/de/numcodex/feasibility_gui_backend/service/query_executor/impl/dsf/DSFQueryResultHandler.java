@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -9,6 +8,8 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 
+import java.util.Optional;
+
 /**
  * A handler that is capable of processing a FHIR Task which represents the result of a feasibility query that ran
  * in a single DIC.
@@ -16,7 +17,7 @@ import org.hl7.fhir.r4.model.Task;
 @Slf4j
 class DSFQueryResultHandler {
 
-    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility";
+    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0";
     private static final String CODE_SYSTEM_FEASIBILITY = "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REPORT_REF = "measure-report-reference";
     private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
