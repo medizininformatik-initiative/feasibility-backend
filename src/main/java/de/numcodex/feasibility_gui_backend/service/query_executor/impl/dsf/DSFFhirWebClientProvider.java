@@ -71,9 +71,9 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
                 securityContext.getTrustStore(),
                 securityContext.getKeyStore(),
                 securityContext.getKeyStorePassword(),
-                proxyContext.getProxyHost().toString(),
+                proxyContext.getProxyHost(),
                 proxyContext.getUsername(),
-                proxyContext.getUsername().toCharArray(),
+                proxyContext.getPassword(),
                 webserviceConnectTimeout,
                 webserviceReadTimeout,
                 null,
@@ -104,9 +104,9 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
                 securityContext.getTrustStore(),
                 securityContext.getKeyStore(),
                 securityContext.getKeyStorePassword(),
-                proxyContext.getProxyHost().toString(),
+                proxyContext.getProxyHost(),
                 proxyContext.getUsername(),
-                proxyContext.getPassword().toCharArray(),
+                proxyContext.getPassword(),
                 subscriptionId);
     }
 

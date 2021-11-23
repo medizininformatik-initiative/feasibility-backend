@@ -43,7 +43,7 @@ app:
     proxy:
       host: ${DSF_PROXY_HOST:}
       username: ${DSF_PROXY_USERNAME:}
-      passowrd: ${DSF_PROXY_PASSWORD:}
+      password: ${DSF_PROXY_PASSWORD:}
     webservice:
       baseUrl: ${DSF_WEBSERVICE_BASE_URL}
       readTimeout: 20000
