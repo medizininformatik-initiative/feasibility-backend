@@ -27,8 +27,8 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
 
     private static final String QUERY_RESULT_SUBSCRIPTION_REASON = "Waiting for query results";
     private static final String QUERY_RESULT_SUBSCRIPTION_CHANNEL_PAYLOAD = "application/fhir+json";
-    private static final String CODE_SYSTEM_AUTHORIZATION_ROLE = "http://highmed.org/fhir/CodeSystem/authorization-role";
-    private static final String CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL = "LOCAL";
+    private static final String CODE_SYSTEM_READ_ACCESS_TAG = "http://highmed.org/fhir/CodeSystem/read-access-tag";
+    private static final String CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL = "ALL";
 
     private final FhirContext fhirContext;
     private final String webserviceBaseUrl;
@@ -155,8 +155,8 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
 
             subscription.getMeta()
                     .addTag()
-                    .setSystem(CODE_SYSTEM_AUTHORIZATION_ROLE)
-                    .setCode(CODE_SYSTEM_AUTHORIZATION_ROLE_VALUE_LOCAL);
+                    .setSystem(CODE_SYSTEM_READ_ACCESS_TAG)
+                    .setCode(CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL);
 
             return fhirClient.create(subscription);
         };
