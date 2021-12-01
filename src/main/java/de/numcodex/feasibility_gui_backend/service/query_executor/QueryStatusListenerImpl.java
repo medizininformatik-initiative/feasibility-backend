@@ -8,11 +8,12 @@ import de.numcodex.feasibility_gui_backend.model.db.Site;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 
 @Slf4j
 public class QueryStatusListenerImpl implements QueryStatusListener {
@@ -61,8 +62,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
           query = queryRepository.findByAktinId(brokerspecificQueryId);
           break;
         case "DSFBrokerClient":
-          siteName = brokerClient.getSiteName(siteId);
-          site = siteRepository.findByDsfIdentifier(siteName);
+          site = siteRepository.findByDsfIdentifier(siteId);
           query = queryRepository.findByDsfId(brokerspecificQueryId);
           break;
         case "MockBrokerClient":
