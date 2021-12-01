@@ -1,13 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.PUBLISHED;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
-import static de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig.throwingConsumerWrapper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.ThrowingConsumer;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
@@ -24,21 +17,23 @@ import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin.AktinBrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct.DirectBrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf.DSFBrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock.MockBrokerClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.PUBLISHED;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
+import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+import static de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig.throwingConsumerWrapper;
 
 @Service
 @Transactional
@@ -94,7 +89,6 @@ public class QueryHandlerService {
         var sq = objectMapper.writeValueAsString(structuredQuery);
 
         var hash = new String(md5MessageDigest.digest(sq.getBytes())).replaceAll("\\s", "").replaceAll("\u0000", "");
-        System.out.println("HASH: " + hash);
 
         var queryContent =
                 queryContentRepository.findByHash(hash)
@@ -114,7 +108,7 @@ public class QueryHandlerService {
         return query.getId();
     }
 
-    private Query createQuery() throws IOException {
+    private Query createQuery() {
         var query = new Query();
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
             var queryId = bc.createQuery();
@@ -138,7 +132,7 @@ public class QueryHandlerService {
         return query;
     }
 
-    private void sendQuery(Query query) throws QueryNotFoundException, IOException {
+    private void sendQuery(Query query) {
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
             switch (bc.getClass().getSimpleName()) {
                 case "DirectBrokerClient":
@@ -159,7 +153,7 @@ public class QueryHandlerService {
     }
 
     private void addQueryContent(StructuredQuery structuredQuery, Query query)
-            throws IOException, QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException {
+            throws IOException, QueryBuilderException {
         addSqQuery(query, structuredQuery);
         if (cqlTranslateEnabled) {
             addCqlQuery(query, structuredQuery);
@@ -170,7 +164,7 @@ public class QueryHandlerService {
     }
 
     private void addSqQuery(Query query, StructuredQuery structuredQuery)
-            throws IOException, UnsupportedMediaTypeException, QueryNotFoundException {
+            throws IOException {
         var sqContent = objectMapper.writeValueAsString(structuredQuery);
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
             switch (bc.getClass().getSimpleName()) {
@@ -193,7 +187,7 @@ public class QueryHandlerService {
     }
 
     private void addFhirQuery(Query query, StructuredQuery structuredQuery)
-            throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+            throws QueryBuilderException {
         var fhirContent = getFhirContent(structuredQuery);
         // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
@@ -216,7 +210,7 @@ public class QueryHandlerService {
     }
 
     private void addCqlQuery(Query query, StructuredQuery structuredQuery)
-            throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+            throws QueryBuilderException {
         var cqlContent = getCqlContent(structuredQuery);
         // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
