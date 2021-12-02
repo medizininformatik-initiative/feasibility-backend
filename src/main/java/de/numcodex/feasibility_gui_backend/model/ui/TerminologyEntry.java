@@ -9,15 +9,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @JsonInclude(Include.NON_NULL)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TerminologyEntry {
 
   @JsonProperty("children")
   private List<TerminologyEntry> children = new ArrayList<>();
   @JsonProperty("termCode")
   private TermCode termCode;
+  @JsonProperty("termCodes")
+  @EqualsAndHashCode.Include
+  private List<TermCode> termCodes = new ArrayList<>();
   @JsonProperty("id")
   private UUID id;
   @JsonProperty("leaf")
@@ -26,8 +31,12 @@ public class TerminologyEntry {
   private boolean selectable;
   @JsonProperty("timeRestrictionAllowed")
   private boolean timeRestrictionAllowed;
+  @JsonProperty("valueDefinition")
+  private ValueDefinition valueDefinition;
   @JsonProperty("valueDefinitions")
   private List<ValueDefinition> valueDefinitions = new ArrayList<>();
+  @JsonProperty("attributeDefinitions")
+  private List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
   @JsonProperty("display")
   private String display;
 
@@ -42,13 +51,15 @@ public class TerminologyEntry {
   public static TerminologyEntry copyWithoutChildren(TerminologyEntry other) {
     var terminologyEntry = new TerminologyEntry();
     terminologyEntry.termCode = other.termCode;
+    terminologyEntry.termCodes = other.termCodes;
     terminologyEntry.id = other.id;
     terminologyEntry.leaf = other.leaf;
     terminologyEntry.selectable = other.selectable;
     terminologyEntry.timeRestrictionAllowed = other.timeRestrictionAllowed;
+    terminologyEntry.valueDefinition = other.valueDefinition;
     terminologyEntry.valueDefinitions = other.valueDefinitions;
+    terminologyEntry.attributeDefinitions = other.attributeDefinitions;
     terminologyEntry.display = other.display;
     return terminologyEntry;
   }
-
 }
