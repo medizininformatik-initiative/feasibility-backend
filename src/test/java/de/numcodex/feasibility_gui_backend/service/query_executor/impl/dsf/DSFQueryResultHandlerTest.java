@@ -1,13 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
-import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,6 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
+import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class DSFQueryResultHandlerTest {
@@ -63,7 +64,7 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility");
+        task.getMeta().addProfile("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
@@ -96,7 +97,7 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility");
+        task.getMeta().addProfile("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
