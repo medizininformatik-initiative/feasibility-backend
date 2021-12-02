@@ -21,7 +21,7 @@ public class QueryContent {
     @Column(name = "query_content", nullable = false)
     private String queryContent;
 
-    @Column(columnDefinition = "TEXT", insertable = false, updatable = false)
+    @Column(columnDefinition = "TEXT")
     private String hash;
 
     public QueryContent(String queryContent) {

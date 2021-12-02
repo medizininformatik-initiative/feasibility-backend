@@ -5,7 +5,7 @@
 
 | EnvVar | Description | Example | Default |
 |--------|-------------|---------|---------|
-|BROKER_CLIENT_TYPE|Selects the BorkerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `DIRECT` , `MOCK` | `DSF` | `MOCK` |
+|BROKER_CLIENT_TYPE|Selects the BrokerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `DIRECT` , `MOCK` | `DSF` | `MOCK` |
 |KEYCLOAK_ENABLED| Enables Keycloak if set to true. Possible values are `true` and `false`. | | `true` |
 |KEYCLOAK_BASE_URL| Base URL to reach a keycloak instance. | | `http://localhost:8080` |
 |KEYCLOAK_REALM| Realm to be used for checking bearer tokens. | | `codex-develop` |
@@ -113,7 +113,7 @@ The project requires a PSQL database. The easiest way to set this up is to use t
 `docker-compose up -d`
 
 Note that this starts an empty psql database as well as a containerized version of the backend.
-The containerized version of the backend will then connects to the backend database.
+The containerized version of the backend will then connect to the backend database.
 One can then connect to the same database when starting the backend in an IDE.
 
 ## Working with the backend

@@ -1,7 +1,8 @@
 package de.numcodex.feasibility_gui_backend.model.db;
 
 public enum QueryStatus {
-    ACTIVE("A"),
+    DRAFT("DR"),
+    PUBLISHED("P"),
     DELETED("D");
 
     private final String shortcode;
@@ -17,6 +18,10 @@ public enum QueryStatus {
     public static QueryStatus fromShortcode(String shortcode) {
         if ("D".equals(shortcode)) {
             return DELETED;
+        } else if ("P".equals(shortcode)) {
+            return PUBLISHED;
+        } else if ("DR".equals(shortcode)) {
+            return DRAFT;
         }
         throw new IllegalArgumentException("No QueryStatus with shortcode " + shortcode + " found.");
     }

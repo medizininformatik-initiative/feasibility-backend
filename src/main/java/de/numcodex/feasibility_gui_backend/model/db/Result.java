@@ -25,12 +25,12 @@ public class Result {
     private ResultId id;
 
     @MapsId("queryId")
-    @JoinColumn(referencedColumnName = "id", name = "query_id")
+    @JoinColumn(referencedColumnName = "id", name = "query_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Query query;
 
     @MapsId("siteId")
-    @JoinColumn(referencedColumnName = "id", name = "site_id")
+    @JoinColumn(referencedColumnName = "id", name = "site_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Site site;
 
@@ -41,11 +41,14 @@ public class Result {
 
     private Integer result;
 
+    @Column(insertable = false)
     private Timestamp receivedAt;
+
+    private Integer displaySiteId;
 
     @Data
     @Embeddable
-    static class ResultId implements Serializable {
+    public static class ResultId implements Serializable {
         @Column(name = "query_id")
         private String queryId;
 

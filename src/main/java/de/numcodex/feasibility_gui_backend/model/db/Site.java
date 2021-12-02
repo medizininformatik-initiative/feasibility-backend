@@ -16,7 +16,7 @@ public class Site {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String siteName;
 
     @Column(name = "aktin_identifier")
     private String aktinIdentifier;

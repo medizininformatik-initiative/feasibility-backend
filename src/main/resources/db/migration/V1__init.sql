@@ -10,7 +10,8 @@ CREATE TYPE result_type AS ENUM (
 -- Currently, only "deleted" is needed, but most likely other status types will follow. So this
 -- is already added as an enum instead of a simple flag in the table
 CREATE TYPE status_type AS ENUM (
-    'ACTIVE',
+    'DRAFT',
+    'PUBLISHED',
     'DELETED'
 );
 
@@ -20,6 +21,8 @@ CREATE TYPE status_type AS ENUM (
 
 CREATE TABLE query (
     id TEXT PRIMARY KEY,
+    title TEXT,
+    comment TEXT,
     query_content_id INTEGER,
     created_by TEXT, -- TODO: set to non null
     created_at timestamp NOT NULL DEFAULT current_timestamp,
@@ -43,21 +46,14 @@ CREATE TABLE result (
     query_id TEXT NOT NULL,
     site_id INTEGER NOT NULL,
     result_type result_type NOT NULL DEFAULT 'SUCCESS',
-    received_at timestamp NOT NULL DEFAULT current_timestamp
-);
-
-CREATE TABLE query_site (
-    query_id TEXT NOT NULL,
-    site_id INTEGER NOT NULL,
-    posted_at timestamp
+    result INTEGER,
+    received_at timestamp NOT NULL DEFAULT current_timestamp,
+    display_site_id INTEGER NOT NULL
 );
 
 /***********************************
 **  COMPOSITE PRIMARY KEYS
 ************************************/
-
-ALTER TABLE query_site
-    ADD CONSTRAINT query_site_pkey PRIMARY KEY (query_id, site_id);
 
 ALTER TABLE result
     ADD CONSTRAINT result_pkey PRIMARY KEY (query_id, site_id);
@@ -73,11 +69,6 @@ ALTER TABLE result
     ADD CONSTRAINT result_query_id_fkey FOREIGN KEY (query_id) REFERENCES query (id) ON DELETE CASCADE;
 ALTER TABLE result
     ADD CONSTRAINT result_site_id_fkey FOREIGN KEY (site_id) REFERENCES site (id) ON DELETE CASCADE;
-
-ALTER TABLE query_site
-    ADD CONSTRAINT query_site_query_id_fkey FOREIGN KEY (query_id) REFERENCES query (id) ON DELETE CASCADE;
-ALTER TABLE query_site
-    ADD CONSTRAINT query_site_site_id_fkey FOREIGN KEY (site_id) REFERENCES site (id) ON DELETE CASCADE;
 
 /***********************************
 **  OTHER CONSTRAINTS
@@ -95,18 +86,21 @@ ALTER TABLE site
 ALTER TABLE site
     ADD CONSTRAINT site_dsf_identifier_unique UNIQUE (dsf_identifier);
 
+ALTER TABLE result
+    ADD CONSTRAINT result_display_site_unique UNIQUE (query_id, display_site_id);
+
 /***********************************
 **  TRIGGERS AND FUNCTIONS
 ************************************/
 
 -- TODO: discuss whether this raises problems (maybe we generate hashes in a different fashion, e.g. for lookups etc.)
 
-CREATE OR REPLACE FUNCTION query_content_generate_hash() RETURNS trigger AS
-$query_content_generate_hash$
-BEGIN
-    NEW.hash := MD5(NEW.query_content);
-    RETURN NEW;
-END;
-$query_content_generate_hash$ LANGUAGE plpgsql;
-
-CREATE TRIGGER query_content_generate_hash BEFORE INSERT ON query_content FOR EACH ROW EXECUTE PROCEDURE query_content_generate_hash();
+-- CREATE OR REPLACE FUNCTION query_content_generate_hash() RETURNS trigger AS
+-- $query_content_generate_hash$
+-- BEGIN
+--     NEW.hash := MD5(NEW.query_content);
+--     RETURN NEW;
+-- END;
+-- $query_content_generate_hash$ LANGUAGE plpgsql;
+--
+-- CREATE TRIGGER query_content_generate_hash BEFORE INSERT ON query_content FOR EACH ROW EXECUTE PROCEDURE query_content_generate_hash();

@@ -1,7 +1,10 @@
 package de.numcodex.feasibility_gui_backend.model.db;
 
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.OneToMany;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -20,6 +23,15 @@ public class Query {
 
     @Id
     private String id;
+
+    @OneToMany(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Result> results;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "comment")
+    private String comment;
 
     @Column(name = "created_by")
     private String createdBy;

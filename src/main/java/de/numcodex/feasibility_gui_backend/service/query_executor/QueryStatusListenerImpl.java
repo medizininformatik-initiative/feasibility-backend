@@ -1,11 +1,13 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor;
 
 import de.numcodex.feasibility_gui_backend.model.db.Result;
+import de.numcodex.feasibility_gui_backend.model.db.Result.ResultId;
+import de.numcodex.feasibility_gui_backend.model.db.ResultType;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
-
 import java.io.IOException;
+import java.util.Collections;
 
 public class QueryStatusListenerImpl implements QueryStatusListener {
 
@@ -37,19 +39,37 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
       return;
     }
 
-    var site = siteRepository.findBySiteId(siteId);
+    try {
+      var site = siteRepository.findBySiteId(Long.parseLong(siteId));
 
-    // TODO: proper error handling
-    var query = queryRepository.findById(queryId);
+      // TODO: proper error handling
+      var query = queryRepository.findById(queryId);
 
-    if (query.isPresent()) {
-      result.setResult(numberOfPatients);
-      result.setQuery(query.get());
-      result.setSite(site);
-
-      this.resultRepository.save(result);
-    } else {
-      System.out.println("No query entity found.");
+      if (query.isPresent() && site.isPresent()) {
+        ResultId resultId = new ResultId();
+        resultId.setQueryId(query.get().getId());
+        resultId.setSiteId(site.get().getId());
+        result.setId(resultId);
+        result.setResult(numberOfPatients);
+        result.setQuery(query.get());
+        result.setSite(site.get());
+        result.setResultType(ResultType.SUCCESS);
+        result.setDisplaySiteId(getFreeDisplaySiteId(queryId));
+        this.resultRepository.save(result);
+      } else {
+        System.out.println("No query entity found.");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
+
+  private Integer getFreeDisplaySiteId(String queryId) {
+    var siteIds = siteRepository.getSiteIds();
+    var usedSiteIds = resultRepository.getUsedDisplaySiteIds(queryId);
+
+    siteIds.removeIf(id -> usedSiteIds.contains(id));
+    Collections.shuffle(siteIds);
+    return siteIds.get(0);
   }
 }
