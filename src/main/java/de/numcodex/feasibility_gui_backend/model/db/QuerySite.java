@@ -1,7 +1,5 @@
 package de.numcodex.feasibility_gui_backend.model.db;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,14 +13,13 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
-import org.hibernate.annotations.Type;
 
 @Data
 @Entity
-public class Result {
+public class QuerySite {
 
     @EmbeddedId
-    private ResultId id;
+    private QuerySiteId id;
 
     @MapsId("queryId")
     @JoinColumn(referencedColumnName = "id", name = "query_id")
@@ -34,18 +31,12 @@ public class Result {
     @ManyToOne(fetch = FetchType.LAZY)
     private Site site;
 
-    @Enumerated(EnumType.STRING)
-    @Type(type = "result_type")
-    @Column(columnDefinition = "result_type")
-    private ResultType resultType;
-
-    private Integer result;
-
-    private Timestamp receivedAt;
+    @Column(name = "posted_at")
+    private Timestamp postedAt;
 
     @Data
     @Embeddable
-    static class ResultId implements Serializable {
+    static class QuerySiteId implements Serializable {
         @Column(name = "query_id")
         private String queryId;
 

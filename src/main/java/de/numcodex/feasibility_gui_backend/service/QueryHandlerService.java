@@ -2,10 +2,12 @@ package de.numcodex.feasibility_gui_backend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
+import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
@@ -20,143 +22,166 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.Objects;
+import org.springframework.transaction.annotation.Transactional;
 
+import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.ACTIVE;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
 import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
 
 @Service
+@Transactional
 public class QueryHandlerService {
-  private static final String UNKNOWN_SITE = "Unbekannter Standort";
+    private static final String UNKNOWN_SITE = "Unbekannter Standort";
 
-  private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final MessageDigest md5MessageDigest;
 
-  private final QueryRepository queryRepository;
-  private final ResultRepository resultRepository;
-  private final BrokerClient brokerClient;
-  private final QueryStatusListener queryStatusListener;
-  private final QueryBuilder cqlQueryBuilder;
-  private final QueryBuilder fhirQueryBuilder;
-  private final boolean fhirTranslateEnabled;
-  private final boolean cqlTranslateEnabled;
+    private final QueryRepository queryRepository;
+    private final QueryContentRepository queryContentRepository;
+    private final ResultRepository resultRepository;
+    private final BrokerClient brokerClient;
+    private final QueryStatusListener queryStatusListener;
+    private final QueryBuilder cqlQueryBuilder;
+    private final QueryBuilder fhirQueryBuilder;
+    private final boolean fhirTranslateEnabled;
+    private final boolean cqlTranslateEnabled;
 
-  private boolean brokerQueryStatusListenerConfigured;
+    private boolean brokerQueryStatusListenerConfigured;
 
 
-  public QueryHandlerService(QueryRepository queryRepository, ResultRepository resultRepository,
-      @Qualifier("applied") BrokerClient brokerClient,
-      ObjectMapper objectMapper, QueryStatusListener queryStatusListener,
-      @Qualifier("cql") QueryBuilder cqlQueryBuilder,
-      @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
-      @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
-      @Value("${app.cqlTranslationEnabled}") boolean cqlTranslateEnabled) {
-    this.queryRepository = Objects.requireNonNull(queryRepository);
-    this.resultRepository = Objects.requireNonNull(resultRepository);
-    this.brokerClient = Objects.requireNonNull(brokerClient);
-    this.objectMapper = Objects.requireNonNull(objectMapper);
-    this.queryStatusListener = Objects.requireNonNull(queryStatusListener);
-    this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
-    this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
-    brokerQueryStatusListenerConfigured = false;
-    this.fhirTranslateEnabled = fhirTranslateEnabled;
-    this.cqlTranslateEnabled = cqlTranslateEnabled;
-  }
-
-  public String runQuery(StructuredQuery structuredQuery)
-      throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryBuilderException {
-
-    //TODO: Should not be here
-    addQueryStatusListener();
-    var query = createQuery();
-    addQueryContent(structuredQuery, query);
-    sendQuery(query);
-    this.queryRepository.save(query);
-
-    return query.getQueryId();
-  }
-
-  // TODO: maybe do this using a post construct method (think about middleware availability on startup + potential backoff!)
-  private void addQueryStatusListener() throws IOException {
-    if (!brokerQueryStatusListenerConfigured) {
-      brokerClient.addQueryStatusListener(queryStatusListener);
-      brokerQueryStatusListenerConfigured = true;
+    public QueryHandlerService(QueryRepository queryRepository, QueryContentRepository queryContentRepository, ResultRepository resultRepository,
+                               @Qualifier("applied") BrokerClient brokerClient,
+                               ObjectMapper objectMapper,
+                               @Qualifier("md5") MessageDigest md5MessageDigest,
+                               QueryStatusListener queryStatusListener,
+                               @Qualifier("cql") QueryBuilder cqlQueryBuilder,
+                               @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
+                               @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
+                               @Value("${app.cqlTranslationEnabled}") boolean cqlTranslateEnabled) {
+        this.queryRepository = Objects.requireNonNull(queryRepository);
+        this.queryContentRepository = Objects.requireNonNull(queryContentRepository);
+        this.resultRepository = Objects.requireNonNull(resultRepository);
+        this.brokerClient = Objects.requireNonNull(brokerClient);
+        this.objectMapper = Objects.requireNonNull(objectMapper);
+        this.md5MessageDigest = Objects.requireNonNull(md5MessageDigest);
+        this.queryStatusListener = Objects.requireNonNull(queryStatusListener);
+        this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
+        this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
+        brokerQueryStatusListenerConfigured = false;
+        this.fhirTranslateEnabled = fhirTranslateEnabled;
+        this.cqlTranslateEnabled = cqlTranslateEnabled;
     }
-  }
 
-  private Query createQuery() throws IOException {
-    var queryId = this.brokerClient.createQuery();
-    var query = new Query();
-    query.setQueryId(queryId);
-    return query;
-  }
+    public String runQuery(StructuredQuery structuredQuery)
+            throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryBuilderException {
 
-  private void sendQuery(Query query)
-      throws QueryNotFoundException, UnsupportedMediaTypeException, IOException {
-    for (var entry : query.getContents().entrySet()) {
-      this.brokerClient.addQueryDefinition(query.getQueryId(), entry.getKey(), entry.getValue());
+        //TODO: Should not be here
+        addQueryStatusListener();
+
+        var sq = objectMapper.writeValueAsString(structuredQuery);
+
+        var hash = new String(md5MessageDigest.digest(sq.getBytes())).replaceAll("\\s", "");
+        System.out.println("HASH: " + hash);
+
+        var queryContent =
+                queryContentRepository.findByHash(hash)
+                        .orElseGet(() -> {
+                            var qc = new QueryContent(sq);
+                            queryContentRepository.save(qc);
+                            return qc;
+                        });
+
+        var query = createQuery();
+        query.setQueryContent(queryContent);
+
+        addQueryContent(structuredQuery, query.getId());
+        sendQuery(query);
+        queryRepository.save(query);
+
+        return query.getId();
     }
-    this.brokerClient.publishQuery(query.getQueryId());
-  }
 
-  private void addQueryContent(StructuredQuery structuredQuery, Query query)
-      throws IOException, QueryBuilderException {
-    addSqQuery(query, structuredQuery);
-    if (cqlTranslateEnabled) {
-      addCqlQuery(query, structuredQuery);
+    // TODO: maybe do this using a post construct method (think about middleware availability on startup + potential backoff!)
+    private void addQueryStatusListener() throws IOException {
+        if (!brokerQueryStatusListenerConfigured) {
+            brokerClient.addQueryStatusListener(queryStatusListener);
+            brokerQueryStatusListenerConfigured = true;
+        }
     }
-    if (fhirTranslateEnabled) {
-      addFhirQuery(query, structuredQuery);
+
+    private Query createQuery() throws IOException {
+        var queryId = this.brokerClient.createQuery();
+        var query = new Query();
+        query.setId(queryId);
+        query.setStatus(ACTIVE);
+        return query;
     }
-  }
 
-  private void addSqQuery(Query query, StructuredQuery structuredQuery)
-      throws IOException {
-    var sqContent = objectMapper.writeValueAsString(structuredQuery);
-    query.getContents().put(STRUCTURED_QUERY, sqContent);
-  }
+    private void sendQuery(Query query) throws QueryNotFoundException, IOException {
+        this.brokerClient.publishQuery(query.getId());
+    }
 
-  private void addFhirQuery(Query query, StructuredQuery structuredQuery)
-      throws QueryBuilderException {
-    var fhirContent = getFhirContent(structuredQuery);
-    query.getContents().put(FHIR, fhirContent);
-  }
+    private void addQueryContent(StructuredQuery structuredQuery, String queryId)
+            throws IOException, QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException {
+        addSqQuery(queryId, structuredQuery);
+        if (cqlTranslateEnabled) {
+            addCqlQuery(queryId, structuredQuery);
+        }
+        if (fhirTranslateEnabled) {
+            addFhirQuery(queryId, structuredQuery);
+        }
+    }
 
-  private void addCqlQuery(Query query, StructuredQuery structuredQuery)
-      throws QueryBuilderException {
-    var cqlContent = getCqlContent(structuredQuery);
-    query.getContents().put(CQL, cqlContent);
-  }
+    private void addSqQuery(String queryId, StructuredQuery structuredQuery)
+            throws IOException, UnsupportedMediaTypeException, QueryNotFoundException {
+        var sqContent = objectMapper.writeValueAsString(structuredQuery);
+        brokerClient.addQueryDefinition(queryId, STRUCTURED_QUERY, sqContent);
+    }
 
-  private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
-    return this.fhirQueryBuilder.getQueryContent(structuredQuery);
-  }
+    private void addFhirQuery(String queryId, StructuredQuery structuredQuery)
+            throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+        var fhirContent = getFhirContent(structuredQuery);
+        brokerClient.addQueryDefinition(queryId, FHIR, fhirContent);
+    }
 
-  private String getCqlContent(StructuredQuery structuredQuery) throws QueryBuilderException {
-    return this.cqlQueryBuilder.getQueryContent(structuredQuery);
-  }
+    private void addCqlQuery(String queryId, StructuredQuery structuredQuery)
+            throws QueryBuilderException, UnsupportedMediaTypeException, QueryNotFoundException, IOException {
+        var cqlContent = getCqlContent(structuredQuery);
+        brokerClient.addQueryDefinition(queryId, CQL, cqlContent);
+    }
 
-  public QueryResult getQueryResult(String queryId) {
-    var resultLines = this.resultRepository.findByQueryId(queryId);
-    var result = new QueryResult();
+    private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
+        return this.fhirQueryBuilder.getQueryContent(structuredQuery);
+    }
 
-    result.setQueryId(queryId);
-    result.setTotalNumberOfPatients(
-        resultLines.stream().map(Result::getNumberOfPatients).reduce(0, Integer::sum));
+    private String getCqlContent(StructuredQuery structuredQuery) throws QueryBuilderException {
+        return this.cqlQueryBuilder.getQueryContent(structuredQuery);
+    }
 
-    resultLines.forEach(
-        line -> {
-          var resultLine = new QueryResultLine();
-          resultLine.setNumberOfPatients(line.getNumberOfPatients());
-          try {
-            resultLine.setSiteName(brokerClient.getSiteName(line.getSiteId()));
-          } catch (SiteNotFoundException | IOException e) {
-            resultLine.setSiteName(UNKNOWN_SITE);
-          }
+    public QueryResult getQueryResult(String queryId) {
+        var resultLines = this.resultRepository.findByQueryId(queryId);
+        var result = new QueryResult();
 
-          result.getResultLines().add(resultLine);
-        });
+        result.setQueryId(queryId);
+        result.setTotalNumberOfPatients(
+                resultLines.stream().map(Result::getResult).reduce(0, Integer::sum));
 
-    return result;
-  }
+        resultLines.forEach(
+                line -> {
+                    var resultLine = new QueryResultLine();
+                    resultLine.setNumberOfPatients(line.getResult());
+                    try {
+                        resultLine.setSiteName(brokerClient.getSiteName(line.getSite().getName()));
+                    } catch (SiteNotFoundException | IOException e) {
+                        resultLine.setSiteName(UNKNOWN_SITE);
+                    }
+
+                    result.getResultLines().add(resultLine);
+                });
+
+        return result;
+    }
 }
