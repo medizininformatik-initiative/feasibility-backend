@@ -44,7 +44,7 @@ public class QueryHandlerRestController {
   @PostMapping("run-query")
   public Response runQuery(
       @RequestBody StructuredQuery query, @Context HttpServletRequest httpServletRequest) {
-    String id;
+    Long id;
     try {
       id = queryHandlerService.runQuery(query);
     } catch (UnsupportedMediaTypeException e) {
@@ -64,14 +64,14 @@ public class QueryHandlerRestController {
             : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uri = uriBuilder.replacePath("")
-            .pathSegment("api", "v1", "query-handler", "result", id)
+            .pathSegment("api", "v1", "query-handler", "result", String.valueOf(id))
             .build()
             .toUri();
     return Response.created(uri).build();
   }
 
   @GetMapping(path = "/result/{id}")
-  public QueryResult getQueryResult(@PathVariable("id") String queryId) {
+  public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId);
   }
 }

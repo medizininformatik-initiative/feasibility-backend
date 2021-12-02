@@ -1,6 +1,10 @@
 package de.numcodex.feasibility_gui_backend.service;
 
+import static java.util.Map.entry;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.ThrowingConsumer;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
@@ -15,8 +19,18 @@ import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.ConceptNode;
 import de.numcodex.sq2cql.model.Mapping;
 import de.numcodex.sq2cql.model.MappingContext;
-import org.apache.commons.codec.digest.MessageDigestAlgorithms;
-import org.apache.commons.lang3.StringUtils;
+import java.io.File;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,26 +39,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Map.entry;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
-
 @Configuration
+@Slf4j
 public class ServiceSpringConfig {
 
-  public static final String CLIENT_TYPE_DSF = "DSF";
-  public static final String CLIENT_TYPE_AKTIN = "AKTIN";
-  public static final String CLIENT_TYPE_MOCK = "MOCK";
-  public static final String CLIENT_TYPE_DIRECT = "DIRECT";
+  @Value("${app.broker.mock.enabled}")
+  private boolean mockClientEnabled;
+
+  @Value("${app.broker.direct.enabled}")
+  private boolean directClientEnabled;
+
+  @Value("${app.broker.aktin.enabled}")
+  private boolean aktinClientEnabled;
+
+  @Value("${app.broker.dsf.enabled}")
+  private boolean dsfClientEnabled;
 
   private final ApplicationContext ctx;
 
@@ -52,22 +61,32 @@ public class ServiceSpringConfig {
     this.ctx = ctx;
   }
 
-  // TODO: use aktin and dsf provider to avoid necessary qualifier annotation
+  // Do NOT remove the qualifier annotation, since spring attempts to initialize ALL broker clients
+  // and does not call this method anymore - rendering the enable-switches moot.
   @Qualifier("applied")
   @Bean
-  public BrokerClient createBrokerClient(@Value("${app.brokerClient}") String type) {
-    return switch (StringUtils.upperCase(type)) {
-      case CLIENT_TYPE_DSF -> BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf");
-      case CLIENT_TYPE_AKTIN -> BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin");
-      case CLIENT_TYPE_DIRECT -> BeanFactoryAnnotationUtils
-          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct");
-      case CLIENT_TYPE_MOCK -> new MockBrokerClient();
-      default -> throw new IllegalStateException(
-          "No Broker Client configured for type '%s'. Allowed types are %s"
-              .formatted(type, List.of(CLIENT_TYPE_DSF, CLIENT_TYPE_AKTIN, CLIENT_TYPE_MOCK)));
-    };
+  public List<BrokerClient> createBrokerClients() {
+    List<BrokerClient> brokerClients = new ArrayList<>();
+    if (mockClientEnabled) {
+      log.info("Enable mock client");
+      brokerClients.add(new MockBrokerClient());
+    }
+    if (directClientEnabled) {
+      log.info("Enable direct client");
+      brokerClients.add(BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "direct"));
+    }
+    if (aktinClientEnabled) {
+      log.info("Enable aktin client");
+      brokerClients.add(BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "aktin"));
+    }
+    if (dsfClientEnabled) {
+      log.info("Enable dsf client");
+      brokerClients.add(BeanFactoryAnnotationUtils
+          .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf"));
+    }
+    return brokerClients;
   }
 
   @Bean
@@ -117,16 +136,35 @@ public class ServiceSpringConfig {
   }
 
   @Bean
-  QueryStatusListener createQueryStatusListener(@Qualifier("applied") BrokerClient client,
+  List<QueryStatusListener> createQueryStatusListener(@Qualifier("applied") List<BrokerClient> clients,
                                                 ResultRepository resultRepository, QueryRepository queryRepository,
-                                                SiteRepository siteRepository) {
-    return new QueryStatusListenerImpl(resultRepository, queryRepository, siteRepository, client);
+                                                SiteRepository siteRepository) throws IOException {
+    var queryStatusListeners = new ArrayList<QueryStatusListener>();
+    clients.forEach(throwingConsumerWrapper(client -> {
+          QueryStatusListener queryStatusListener = new QueryStatusListenerImpl(resultRepository,
+              queryRepository, siteRepository, client);
+          queryStatusListeners.add(queryStatusListener);
+          client.addQueryStatusListener(queryStatusListener);
+        })
+    );
+    return queryStatusListeners;
   }
-
 
   @Qualifier("md5")
   @Bean
   MessageDigest md5MessageDigest() throws NoSuchAlgorithmException {
     return MessageDigest.getInstance(MD5);
+  }
+
+  static <T> Consumer<T> throwingConsumerWrapper(
+      ThrowingConsumer<T, Exception> throwingConsumer) {
+
+    return i -> {
+      try {
+        throwingConsumer.accept(i);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    };
   }
 }

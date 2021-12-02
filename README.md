@@ -5,7 +5,10 @@
 
 | EnvVar | Description | Example | Default |
 |--------|-------------|---------|---------|
-|BROKER_CLIENT_TYPE|Selects the BrokerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `DIRECT` , `MOCK` | `DSF` | `MOCK` |
+|BROKER_CLIENT_MOCK_ENABLED|Enables the mock client. Possible values are `true` and `false`. | | `true` |
+|BROKER_CLIENT_DIRECT_ENABLED|Enables the direct client. Possible values are `true` and `false`. | | `false` |
+|BROKER_CLIENT_AKTIN_ENABLED|Enables the aktin client. Possible values are `true` and `false`. | | `false` |
+|BROKER_CLIENT_DSF_ENABLED|Enables the dsf client. Possible values are `true` and `false`. | | `false` |
 |KEYCLOAK_ENABLED| Enables Keycloak if set to true. Possible values are `true` and `false`. | | `true` |
 |KEYCLOAK_BASE_URL| Base URL to reach a keycloak instance. | | `http://localhost:8080` |
 |KEYCLOAK_REALM| Realm to be used for checking bearer tokens. | | `codex-develop` |

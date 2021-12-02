@@ -16,37 +16,37 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 public class DSFSpringConfig {
 
-    @Value("${app.dsf.security.keystore.p12file}")
+    @Value("${app.broker.dsf.security.keystore.p12file}")
     private String keyStoreFile;
 
-    @Value("${app.dsf.security.keystore.password}")
+    @Value("${app.broker.dsf.security.keystore.password}")
     private char[] keyStorePassword;
 
-    @Value("${app.dsf.security.certificate}")
+    @Value("${app.broker.dsf.security.certificate}")
     private String certificateFile;
 
-    @Value("${app.dsf.proxy.host}")
+    @Value("${app.broker.dsf.proxy.host}")
     private String proxyHost;
 
-    @Value("${app.dsf.proxy.username}")
+    @Value("${app.broker.dsf.proxy.username}")
     private String proxyUsername;
 
-    @Value("${app.dsf.proxy.password}")
+    @Value("${app.broker.dsf.proxy.password}")
     private String proxyPassword;
 
-    @Value("${app.dsf.webservice.baseUrl}")
+    @Value("${app.broker.dsf.webservice.baseUrl}")
     private String webserviceBaseUrl;
 
-    @Value("${app.dsf.webservice.readTimeout}")
+    @Value("${app.broker.dsf.webservice.readTimeout}")
     private int webserviceReadTimeout;
 
-    @Value("${app.dsf.webservice.connectTimeout}")
+    @Value("${app.broker.dsf.webservice.connectTimeout}")
     private int webserviceConnectTimeout;
 
-    @Value("${app.dsf.websocket.url}")
+    @Value("${app.broker.dsf.websocket.url}")
     private String websocketUrl;
 
-    @Value("${app.dsf.organizationId}")
+    @Value("${app.broker.dsf.organizationId}")
     private String organizationId;
 
     @Qualifier("dsf")

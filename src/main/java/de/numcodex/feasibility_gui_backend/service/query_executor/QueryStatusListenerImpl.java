@@ -1,14 +1,21 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor;
 
+import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.db.Result.ResultId;
 import de.numcodex.feasibility_gui_backend.model.db.ResultType;
+import de.numcodex.feasibility_gui_backend.model.db.Site;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
 import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
+@Slf4j
 public class QueryStatusListenerImpl implements QueryStatusListener {
 
   private final ResultRepository resultRepository;
@@ -25,7 +32,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
   }
 
   @Override
-  public void onClientUpdate(String queryId, String siteId, QueryStatus status) {
+  public void onClientUpdate(String brokerspecificQueryId, String siteId, QueryStatus status) {
     if (status != QueryStatus.COMPLETED) {
       return;
     }
@@ -33,17 +40,37 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
     Result result = new Result();
     int numberOfPatients;
     try {
-      numberOfPatients = brokerClient.getResultFeasibility(queryId, siteId);
+      numberOfPatients = brokerClient.getResultFeasibility(brokerspecificQueryId, siteId);
     } catch (QueryNotFoundException | SiteNotFoundException | IOException e) {
       System.out.println(e.getMessage());
       return;
     }
 
     try {
-      var site = siteRepository.findBySiteId(Long.parseLong(siteId));
+      Optional<Site> site;
+      Optional<Query> query;
+      String siteName;
 
-      // TODO: proper error handling
-      var query = queryRepository.findById(queryId);
+      switch (brokerClient.getClass().getSimpleName()) {
+        case "DirectBrokerClient":
+          site = siteRepository.findBySiteId(Long.parseLong(siteId));
+          query = queryRepository.findByDirectId(brokerspecificQueryId);
+          break;
+        case "AktinBrokerClient":
+          siteName = brokerClient.getSiteName(siteId);
+          site = siteRepository.findByAktinIdentifier(siteName);
+          query = queryRepository.findByAktinId(brokerspecificQueryId);
+          break;
+        case "DSFBrokerClient":
+          site = siteRepository.findByDsfIdentifier(siteId);
+          query = queryRepository.findByDsfId(brokerspecificQueryId);
+          break;
+        case "MockBrokerClient":
+        default:
+          site = siteRepository.findBySiteId(Long.parseLong(siteId));
+          query = queryRepository.findByMockId(brokerspecificQueryId);
+          break;
+      }
 
       if (query.isPresent() && site.isPresent()) {
         ResultId resultId = new ResultId();
@@ -54,17 +81,21 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
         result.setQuery(query.get());
         result.setSite(site.get());
         result.setResultType(ResultType.SUCCESS);
-        result.setDisplaySiteId(getFreeDisplaySiteId(queryId));
-        this.resultRepository.save(result);
+        result.setDisplaySiteId(getFreeDisplaySiteId(query.get().getId()));
+        try {
+          this.resultRepository.save(result);
+        } catch (DataIntegrityViolationException e) {
+          log.warn("Duplicate result received. Omitting. Site=[{}], ResultId=[{}]", site.get().getSiteName(), resultId);
+        }
       } else {
-        System.out.println("No query entity found.");
+        System.out.println("No query or no site entity found.");
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  private Integer getFreeDisplaySiteId(String queryId) {
+  private Integer getFreeDisplaySiteId(Long queryId) {
     var siteIds = siteRepository.getSiteIds();
     var usedSiteIds = resultRepository.getUsedDisplaySiteIds(queryId);
 

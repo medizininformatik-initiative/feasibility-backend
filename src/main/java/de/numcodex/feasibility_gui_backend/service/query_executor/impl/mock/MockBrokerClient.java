@@ -38,10 +38,10 @@ public class MockBrokerClient implements BrokerClient {
         listeners = new ArrayList<>();
         queries = new HashMap<>();
         siteNames = Map.of(
-                "1", "Lübeck",
-                "2", "Erlangen",
-                "3", "Frankfurt",
-                "4", "Leipzig"
+                "2", "Lübeck",
+                "3", "Erlangen",
+                "4", "Frankfurt",
+                "5", "Leipzig"
         );
         runningMocks = new HashMap<>();
     }

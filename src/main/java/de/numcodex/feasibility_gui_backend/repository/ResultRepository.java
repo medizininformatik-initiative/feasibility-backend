@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface ResultRepository extends JpaRepository<Result, Long> {
     @Query("SELECT t FROM Result t WHERE t.id.queryId = ?1")
-    List<Result> findByQueryId(String queryId);
+    List<Result> findByQueryId(Long queryId);
 
     @Query("SELECT t.displaySiteId from Result t where t.id.queryId=?1")
-    List<Integer> getUsedDisplaySiteIds(String queryId);
+    List<Integer> getUsedDisplaySiteIds(Long queryId);
 }

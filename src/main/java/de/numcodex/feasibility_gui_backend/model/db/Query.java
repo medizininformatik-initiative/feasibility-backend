@@ -4,6 +4,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.OneToMany;
 import lombok.Data;
 
@@ -22,7 +24,20 @@ import org.hibernate.annotations.Type;
 public class Query {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "mock_id")
+    private String mockId;
+
+    @Column(name = "direct_id")
+    private String directId;
+
+    @Column(name = "aktin_id")
+    private String aktinId;
+
+    @Column(name = "dsf_id")
+    private String dsfId;
 
     @OneToMany(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Result> results;

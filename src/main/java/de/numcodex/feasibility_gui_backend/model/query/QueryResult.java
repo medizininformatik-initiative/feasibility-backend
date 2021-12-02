@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class QueryResult {
     private int totalNumberOfPatients;
-    private String queryId;
+    private Long queryId;
 
     private List<QueryResultLine> resultLines = new ArrayList<>();
 }
