@@ -67,12 +67,12 @@ class MockBrokerClientTest {
 
     @Test
     void testGetSiteName() {
-        assertEquals("Lübeck", client.getSiteName("1"));
-        assertEquals("Erlangen", client.getSiteName("2"));
-        assertEquals("Frankfurt", client.getSiteName("3"));
-        assertEquals("Leipzig", client.getSiteName("4"));
-        assertEquals("", client.getSiteName("5"));
+        assertEquals("Lübeck", client.getSiteName("2"));
+        assertEquals("Erlangen", client.getSiteName("3"));
+        assertEquals("Frankfurt", client.getSiteName("4"));
+        assertEquals("Leipzig", client.getSiteName("5"));
+        assertEquals("", client.getSiteName("6"));
         assertEquals("", client.getSiteName("foo"));
-        assertEquals("", client.getSiteName("anything-other-than-1-to-4"));
+        assertEquals("", client.getSiteName("anything-other-than-2-to-5"));
     }
 }

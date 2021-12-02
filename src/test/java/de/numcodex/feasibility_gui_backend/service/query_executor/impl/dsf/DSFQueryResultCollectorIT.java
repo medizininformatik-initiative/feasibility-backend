@@ -1,22 +1,8 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import static org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus.COMPLETE;
-import static org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUMMARY;
-import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
-import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -33,10 +19,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus.COMPLETE;
+import static org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUMMARY;
+import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
+import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 public class DSFQueryResultCollectorIT {
 
-    private static final String SINGLE_DIC_RESULT_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility";
+    private static final String SINGLE_DIC_RESULT_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0";
 
     @Mock
     private FhirWebserviceClient fhirClient;

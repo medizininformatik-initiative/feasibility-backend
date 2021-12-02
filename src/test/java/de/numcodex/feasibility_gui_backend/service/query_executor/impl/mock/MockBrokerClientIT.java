@@ -34,16 +34,16 @@ public class MockBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(queryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "1", COMPLETED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "2", COMPLETED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "3", COMPLETED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "4", COMPLETED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "5", COMPLETED);
 
         assertEquals(4, client.getResultSiteIds(queryId).size());
-        assertTrue(client.getResultFeasibility(queryId, "1") >= 10);
         assertTrue(client.getResultFeasibility(queryId, "2") >= 10);
         assertTrue(client.getResultFeasibility(queryId, "3") >= 10);
         assertTrue(client.getResultFeasibility(queryId, "4") >= 10);
+        assertTrue(client.getResultFeasibility(queryId, "5") >= 10);
     }
 
     @Test
