@@ -12,7 +12,7 @@ else
 
     for f in "$1"*.*; do
       echo -n "Importing file '$f'"...
-      keytool -importcert -storepass changeit -keystore cacerts -noprompt -file $f 2>&1
+      keytool -importcert -alias "${f##*/}" -storepass changeit -keystore cacerts -noprompt -file $f 2>&1
 
       if [ $? -eq 0 ]; then
         echo "DONE"
