@@ -191,6 +191,13 @@ mvn install
 docker build -t feasibility-gui-backend .
 ```
 
+### Adding Certificates to Docker
+
+To use custom certificates (either self signed or not already known) just mount them under:
+- `/opt/codex-feasibility-backend/additional-certs/`
+
+All files within this directory are eligible to be imported into the Java trust store.
+
 ### Start backend and database
 ```
 docker-compose up -d

@@ -1,8 +1,10 @@
 FROM openjdk:15
 
 WORKDIR /opt/codex-feasibility-backend
+COPY ./start.sh .
 COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology
+RUN mkdir "additional-certs"
 
 ARG VERSION=0.0.0
 ENV APP_VERSION=${VERSION}
@@ -11,7 +13,8 @@ ENV FEASIBILITY_DATABASE_PORT=5432
 ENV FEASIBILITY_DATABASE_USER=postgres
 ENV FEASIBILITY_DATABASE_PASSWORD=password
 
-ENTRYPOINT ["java","-jar","feasibility-gui-backend.jar"]
+#ENTRYPOINT["start.sh"]
+CMD ["./start.sh", "/opt/codex-feasibility-backend/additional-certs/"]
 
 ARG GIT_REF=""
 ARG BUILD_TIME=""

@@ -44,6 +44,7 @@ services:
       - ${CODEX_FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/codex-code-tree.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-code-tree.json
       - ${CODEX_FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/codex-term-code-mapping.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-term-code-mapping.json
       - ${CODEX_FEASIBILITY_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/codex-feasibility-backend/dsf-security/
+      - ${CODEX_FEASIBILITY_BACKEND_ADDITIONAL_CERTS_DIR:-/dev/null}:/opt/codex-feasibility-backend/additional-certs/
   feasibility-db:
     image: 'postgres:13.1-alpine'
     container_name: feasibility-db
