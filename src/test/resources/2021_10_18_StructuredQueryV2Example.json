@@ -1,0 +1,172 @@
+{
+  "version": "http://to_be_decided.com/draft-2/schema#",
+  "display": "Beispiel-Query",
+  "inclusionCriteria": [
+    [
+      {
+        "termCodes": [
+          {
+            "code": "LL2191-6",
+            "display": "Geschlecht",
+            "system": "http://loinc.org"
+          }
+        ],
+        "valueFilter": {
+          "type": "concept",
+          "selectedConcepts": [
+            {
+              "code": "F",
+              "display": "female",
+              "system": "https://fhir.loinc.org/CodeSystem/$lookup?system=http://loinc.org&code=LL2191-6",
+              "version": ""
+            },
+            {
+              "code": "M",
+              "display": "male",
+              "system": "https://fhir.loinc.org/CodeSystem/$lookup?system=http://loinc.org&code=LL2191-6",
+              "version": ""
+            }
+          ]
+        }
+      }
+    ],
+    [
+      {
+        "termCodes": [
+          {
+            "code": "30525-0",
+            "display": "Alter",
+            "system": "http://loinc.org"
+          }
+        ],
+        "valueFilter": {
+          "type": "quantity-comparator",
+          "comparator": "gt",
+          "unit": {
+            "code": "a",
+            "display": "Jahr"
+          },
+          "value": 18
+        }
+      }
+    ],
+    [
+      {
+        "termCodes": [
+          {
+            "code": "F00",
+            "display": "F00",
+            "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+          }
+        ]
+      },
+      {
+        "termCodes": [
+          {
+            "code": "F09",
+            "display": "F09",
+            "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+          }
+        ],
+        "timeRestriction": {
+          "beforeDate": "2021-10-09",
+          "afterDate": "2021-09-09"
+        }
+      }
+    ]
+  ],
+  "exclusionCriteria": [
+    [
+      {
+        "termCodes": [
+          {
+            "code": "LL2191-6",
+            "display": "Geschlecht",
+            "system": "http://loinc.org"
+          }
+        ],
+        "valueFilter": {
+          "type": "concept",
+          "selectedConcepts": [
+            {
+              "code": "male",
+              "display": "male",
+              "system": "",
+              "version": ""
+            }
+          ]
+        }
+      }
+    ],
+    [
+      {
+        "termCodes": [
+          {
+            "code": "30525-0",
+            "display": "Alter",
+            "system": "http://loinc.org"
+          }
+        ],
+        "valueFilter": {
+          "type": "quantity-comparator",
+          "comparator": "gt",
+          "unit": {
+            "code": "year",
+            "display": "Jahr"
+          },
+          "value": 65
+        }
+      }
+    ],
+    [
+      {
+        "termCodes": [
+          {
+            "code": "F00.9",
+            "display": "F00.9",
+            "system": "http://fhir.de/CodeSystem/dimdi/icd-10-gm"
+          }
+        ]
+      },
+      {
+        "termCodes": [
+          {
+            "code": "8310-5",
+            "display": "Körpertemperatur",
+            "system": "http://loinc.org"
+          }
+        ],
+        "valueFilter": {
+          "type": "quantity-range",
+          "unit": {
+            "code": "Cel",
+            "display": "°C"
+          },
+          "minValue": 35,
+          "maxValue": 39
+        },
+        "attributeFilters": [
+          {
+            "attributeCode": {
+              "code": "method",
+              "system": "abide",
+              "display": "method"
+            },
+            "type": "concept",
+            "selectedConcepts": [
+              {
+                "code": "LA9370-3",
+                "system": "http://loinc.org",
+                "display": "Axillary"
+              }
+            ]
+          }
+        ],
+        "timeRestriction": {
+          "beforeDate": "2021-10-09",
+          "afterDate": "2021-09-09"
+        }
+      }
+    ]
+  ]
+}
