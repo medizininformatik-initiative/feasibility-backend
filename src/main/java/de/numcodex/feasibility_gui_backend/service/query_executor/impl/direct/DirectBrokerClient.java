@@ -32,9 +32,9 @@ public class DirectBrokerClient implements BrokerClient {
     private static final String SITE_1_ID = "1";
     private static final String SITE_1_NAME = "FHIR Server";
 
-    private static final String FLARE_REQUEST_CONTENT_TYPE = "codex/json";
-    private static final String FLARE_RESPONSE_ACCEPT_CONTENT_TYPE = "internal/json";
-    private static final String FLARE_QUERY_ENDPOINT_URL = "/query-sync";
+    private static final String FLARE_REQUEST_CONTENT_TYPE = "application/json";
+    private static final String FLARE_RESPONSE_ACCEPT_CONTENT_TYPE = "CSQ";
+    private static final String FLARE_QUERY_ENDPOINT_URL = "/query/execute";
 
     private final WebClient webClient;
     private final List<QueryStatusListener> listeners;
@@ -84,7 +84,7 @@ public class DirectBrokerClient implements BrokerClient {
             webClient.post()
                     .uri(FLARE_QUERY_ENDPOINT_URL)
                     .header(HttpHeaders.CONTENT_TYPE, FLARE_REQUEST_CONTENT_TYPE)
-                    .header(HttpHeaders.ACCEPT, FLARE_RESPONSE_ACCEPT_CONTENT_TYPE)
+                    .header(HttpHeaders.ACCEPT_ENCODING, FLARE_RESPONSE_ACCEPT_CONTENT_TYPE)
                     .bodyValue(structuredQueryContent)
                     .retrieve()
                     .bodyToMono(String.class)
