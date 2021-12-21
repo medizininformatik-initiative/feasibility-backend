@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
@@ -14,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
 import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +51,7 @@ class DirectBrokerClientIT {
     @Test
     void testPublishQuery() throws QueryNotFoundException, IOException, InterruptedException, SiteNotFoundException {
         var queryId = client.createQuery();
-        client.addQueryDefinition(queryId, STRUCTURED_QUERY, "foo");
+        client.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), "foo");
 
         mockWebServer.enqueue(new MockResponse().setBody("123").setHeader(CONTENT_TYPE, "internal/json"));
 
@@ -74,7 +75,7 @@ class DirectBrokerClientIT {
     @Test
     void testPublishQueryServerError() throws QueryNotFoundException, IOException {
         var queryId = client.createQuery();
-        client.addQueryDefinition(queryId, STRUCTURED_QUERY, "foo");
+        client.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), "foo");
 
         mockWebServer.enqueue(new MockResponse().setStatus(INTERNAL_SERVER_ERROR.toString()));
 
@@ -88,7 +89,7 @@ class DirectBrokerClientIT {
     @Test
     void testPublishQueryUnexpectedResponseBody() throws QueryNotFoundException, IOException {
         var queryId = client.createQuery();
-        client.addQueryDefinition(queryId, STRUCTURED_QUERY, "foo");
+        client.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), "foo");
 
         mockWebServer.enqueue(new MockResponse().setBody("not-a-number").setHeader(CONTENT_TYPE, "internal/json"));
 

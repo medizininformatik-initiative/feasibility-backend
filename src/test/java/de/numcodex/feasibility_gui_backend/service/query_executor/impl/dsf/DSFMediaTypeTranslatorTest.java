@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import de.numcodex.feasibility_gui_backend.service.QueryMediaTypes;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,19 +18,19 @@ class DSFMediaTypeTranslatorTest {
 
     @Test
     public void testTranslate_StructuredQueryMediaType() throws UnsupportedMediaTypeException {
-        var dsfMediaType = translator.translate(QueryMediaTypes.STRUCTURED_QUERY);
+        var dsfMediaType = translator.translate("application/sq+json");
         assertEquals("application/json", dsfMediaType);
     }
 
     @Test
     public void testTranslate_CqlQueryMediaType() throws UnsupportedMediaTypeException {
-        var dsfMediaType = translator.translate(QueryMediaTypes.CQL);
-        assertEquals(QueryMediaTypes.CQL, dsfMediaType);
+        var dsfMediaType = translator.translate("text/cql");
+        assertEquals("text/cql", dsfMediaType);
     }
 
     @Test
     public void testTranslate_FhirQueryMediaType() throws UnsupportedMediaTypeException {
-        var dsfMediaType = translator.translate(QueryMediaTypes.FHIR);
+        var dsfMediaType = translator.translate("text/fhir-codex");
         assertEquals("application/x-fhir-query", dsfMediaType);
     }
 

@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
@@ -10,15 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
 import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.FAILED;
 
@@ -166,7 +161,7 @@ public class DirectBrokerClient implements BrokerClient {
          * When invoked multiple times for a single mime type, any already existing query content associated with this
          * mime type gets overwritten.
          * <p>
-         * For more information on available mime types see {@link de.numcodex.feasibility_gui_backend.service.QueryMediaTypes}.
+         * For more information on available mime types see {@link QueryMediaType}.
          *
          * @param mimeType The mime type defining the format of the query.
          * @param content  The actual query in its string representation.
@@ -182,8 +177,8 @@ public class DirectBrokerClient implements BrokerClient {
          * @return The query in its string representation or null if there is no query definition associated with the
          * specified mime type.
          */
-        public String getQueryDefinition(String mimeType) {
-            return queryDefinitions.get(mimeType);
+        public String getQueryDefinition(QueryMediaType mimeType) {
+            return queryDefinitions.get(mimeType.getRepresentation());
         }
 
         /**
