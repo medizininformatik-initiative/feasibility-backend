@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
-import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
@@ -19,14 +18,13 @@ import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURE
 import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
 import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpHeaders.ACCEPT_ENCODING;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("NewClassNamingConvention")
 class DirectBrokerClientIT {
 
     private static final int ASYNC_TIMEOUT_WAIT_MS = 2000;
@@ -60,8 +58,8 @@ class DirectBrokerClientIT {
         client.publishQuery(queryId);
         var recordedRequest = mockWebServer.takeRequest();
 
-        assertEquals("codex/json", recordedRequest.getHeader(CONTENT_TYPE));
-        assertEquals("internal/json", recordedRequest.getHeader(ACCEPT));
+        assertEquals("application/json", recordedRequest.getHeader(CONTENT_TYPE));
+        assertEquals("CSQ", recordedRequest.getHeader(ACCEPT_ENCODING));
         assertEquals("POST", recordedRequest.getMethod());
         assertEquals("foo", recordedRequest.getBody().readUtf8());
 
