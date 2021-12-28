@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
  * Thus, it is less of a translator than a serializer.
  */
 @RequiredArgsConstructor
-public class JsonQueryTranslator implements QueryTranslator {
+class JsonQueryTranslator implements QueryTranslator {
 
     @NonNull
     private ObjectMapper jsonUtil;

@@ -17,7 +17,7 @@ import java.util.Map;
  * A translator for translating a {@link StructuredQuery} into its FHIR search query format.
  */
 @RequiredArgsConstructor
-public class FhirQueryTranslator implements QueryTranslator {
+class FhirQueryTranslator implements QueryTranslator {
 
     private static final String FLARE_QUERY_TRANSLATE_ENDPOINT_PATH = "/query-translate";
     private static final String FLARE_QUERY_TRANSLATE_CONTENT_TYPE = "codex/json";
