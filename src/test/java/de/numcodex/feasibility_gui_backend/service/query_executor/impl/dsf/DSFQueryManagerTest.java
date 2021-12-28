@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
-import de.numcodex.feasibility_gui_backend.service.QueryMediaTypes;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -20,9 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -76,8 +74,8 @@ public class DSFQueryManagerTest {
             throws UnsupportedMediaTypeException, QueryNotFoundException, FhirWebClientProvisionException, IOException {
         var queryId = queryHandler.createQuery();
         var finalContent = "{\"foo\":\"bar\"}";
-        queryHandler.addQueryDefinition(queryId, QueryMediaTypes.STRUCTURED_QUERY, "{}");
-        queryHandler.addQueryDefinition(queryId, QueryMediaTypes.STRUCTURED_QUERY, finalContent);
+        queryHandler.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), "{}");
+        queryHandler.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), finalContent);
 
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirWebserviceClient);
         when(fhirWebserviceClient.getBaseUrl()).thenReturn("http://localhost/fhir");

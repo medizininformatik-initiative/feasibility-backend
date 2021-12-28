@@ -1,115 +1,101 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
 import de.numcodex.feasibility_gui_backend.model.db.Result;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
 import de.numcodex.feasibility_gui_backend.model.query.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
 import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
-import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
-import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilder;
-import de.numcodex.feasibility_gui_backend.service.query_builder.QueryBuilderException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.PUBLISHED;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.CQL;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.FHIR;
-import static de.numcodex.feasibility_gui_backend.service.QueryMediaTypes.STRUCTURED_QUERY;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig.throwingConsumerWrapper;
 
 @Service
 @Transactional
 public class QueryHandlerService {
-    private final ObjectMapper objectMapper;
-    private final MessageDigest md5MessageDigest;
-
     private final QueryRepository queryRepository;
     private final QueryContentRepository queryContentRepository;
     private final ResultRepository resultRepository;
-    private final SiteRepository siteRepository;
     private final List<BrokerClient> brokerClients;
-    private final List<QueryStatusListener> queryStatusListeners;
-    private final QueryBuilder cqlQueryBuilder;
-    private final QueryBuilder fhirQueryBuilder;
-    private final boolean fhirTranslateEnabled;
-    private final boolean cqlTranslateEnabled;
-
-    private boolean brokerQueryStatusListenerConfigured;
+    private final MessageDigest md5MessageDigest;
+    private final QueryTranslationComponent queryTranslationComponent;
 
 
     public QueryHandlerService(QueryRepository queryRepository,
         QueryContentRepository queryContentRepository,
         ResultRepository resultRepository,
-        SiteRepository siteRepository,
         @Qualifier("applied") List<BrokerClient> brokerClients,
-        ObjectMapper objectMapper,
         @Qualifier("md5") MessageDigest md5MessageDigest,
-        List<QueryStatusListener> queryStatusListeners,
-        @Qualifier("cql") QueryBuilder cqlQueryBuilder,
-        @Qualifier("fhir") QueryBuilder fhirQueryBuilder,
-        @Value("${app.fhirTranslationEnabled}") boolean fhirTranslateEnabled,
-        @Value("${app.cqlTranslationEnabled}") boolean cqlTranslateEnabled) {
+        QueryTranslationComponent queryTranslationComponent) {
 
         this.queryRepository = Objects.requireNonNull(queryRepository);
         this.queryContentRepository = Objects.requireNonNull(queryContentRepository);
         this.resultRepository = Objects.requireNonNull(resultRepository);
-        this.siteRepository = Objects.requireNonNull(siteRepository);
         this.brokerClients = Objects.requireNonNull(brokerClients);
-        this.objectMapper = Objects.requireNonNull(objectMapper);
         this.md5MessageDigest = Objects.requireNonNull(md5MessageDigest);
-        this.queryStatusListeners = Objects.requireNonNull(queryStatusListeners);
-        this.cqlQueryBuilder = Objects.requireNonNull(cqlQueryBuilder);
-        this.fhirQueryBuilder = Objects.requireNonNull(fhirQueryBuilder);
-        brokerQueryStatusListenerConfigured = false;
-        this.fhirTranslateEnabled = fhirTranslateEnabled;
-        this.cqlTranslateEnabled = cqlTranslateEnabled;
+        this.queryTranslationComponent = Objects.requireNonNull(queryTranslationComponent);
     }
 
     public Long runQuery(StructuredQuery structuredQuery)
-            throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryBuilderException {
+            throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, QueryTranslationException {
 
-        var sq = objectMapper.writeValueAsString(structuredQuery);
-
-        var hash = new String(md5MessageDigest.digest(sq.getBytes())).replaceAll("\\s", "").replaceAll("\u0000", "");
-
-        var queryContent =
-                queryContentRepository.findByHash(hash)
-                        .orElseGet(() -> {
-                            var qc = new QueryContent(sq);
-                            qc.setHash(hash);
-                            queryContentRepository.save(qc);
-                            return qc;
-                        });
+        var queryFormats = queryTranslationComponent.translate(structuredQuery);
+        var queryContent = findExistingQueryContentOrCreateNewOne(queryFormats.get(STRUCTURED_QUERY));
 
         var query = createQuery();
         query.setQueryContent(queryContent);
 
-        addQueryContent(structuredQuery, query);
+        addQueryFormats(query, queryFormats);
         sendQuery(query);
         queryRepository.save(query);
         return query.getId();
     }
 
+    private QueryContent findExistingQueryContentOrCreateNewOne(String queryRepresentation) {
+        var queryHash = calculateQueryHashMD5(queryRepresentation);
+
+        return queryContentRepository.findByHash(queryHash)
+                .orElseGet(() -> {
+                    var queryContent = new QueryContent(queryRepresentation);
+                    queryContent.setHash(queryHash);
+                    queryContentRepository.save(queryContent);
+                    return queryContent;
+                });
+    }
+
+    private String calculateQueryHashMD5(String queryRepresentation) {
+        return Stream.of(queryRepresentation)
+                .map(String::getBytes)
+                .map(md5MessageDigest::digest)
+                .map(String::new)
+                .map(s -> s.replaceAll("\\s", ""))
+                .map(s -> s.replaceAll("\u0000", ""))
+                .collect(Collectors.joining());
+    }
+
     private Query createQuery() {
         var query = new Query();
+        // TODO: this needs to get refactored ASAP!!!
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
             var queryId = bc.createQuery();
             switch (bc.getClass().getSimpleName()) {
@@ -133,111 +119,44 @@ public class QueryHandlerService {
     }
 
     private void sendQuery(Query query) {
+        // TODO: this needs to get refactored ASAP!!!
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
-            switch (bc.getClass().getSimpleName()) {
+            var queryId = switch (bc.getClass().getSimpleName()) {
                 case "DirectBrokerClient":
-                    bc.publishQuery(query.getDirectId());
-                    break;
+                    yield query.getDirectId();
                 case "AktinBrokerClient":
-                    bc.publishQuery(query.getAktinId());
-                    break;
+                    yield query.getAktinId();
                 case "DSFBrokerClient":
-                    bc.publishQuery(query.getDsfId());
-                    break;
+                    yield query.getDsfId();
                 case "MockBrokerClient":
                 default:
-                    bc.publishQuery(query.getMockId());
-                    break;
-            }
+                    yield query.getMockId();
+            };
+
+            bc.publishQuery(queryId);
         }));
     }
 
-    private void addQueryContent(StructuredQuery structuredQuery, Query query)
-            throws IOException, QueryBuilderException {
-        addSqQuery(query, structuredQuery);
-        if (cqlTranslateEnabled) {
-            addCqlQuery(query, structuredQuery);
-        }
-        if (fhirTranslateEnabled) {
-            addFhirQuery(query, structuredQuery);
-        }
-    }
-
-    private void addSqQuery(Query query, StructuredQuery structuredQuery)
-            throws IOException {
-        var sqContent = objectMapper.writeValueAsString(structuredQuery);
+    private void addQueryFormats(Query query, Map<QueryMediaType, String> queryFormats) {
+        // TODO: this needs to get refactored ASAP!!!
         brokerClients.forEach(throwingConsumerWrapper(bc -> {
-            switch (bc.getClass().getSimpleName()) {
+            var queryId = switch (bc.getClass().getSimpleName()) {
                 case "DirectBrokerClient":
-                    bc.addQueryDefinition(query.getDirectId(), STRUCTURED_QUERY, sqContent);
-                    break;
+                    yield query.getDirectId();
                 case "AktinBrokerClient":
-                    bc.addQueryDefinition(query.getAktinId(), STRUCTURED_QUERY, sqContent);
-                    break;
+                    yield query.getAktinId();
                 case "DSFBrokerClient":
-                    bc.addQueryDefinition(query.getDsfId(), STRUCTURED_QUERY, sqContent);
-                    break;
+                    yield query.getDsfId();
                 case "MockBrokerClient":
                 default:
-                    bc.addQueryDefinition(query.getMockId(), STRUCTURED_QUERY, sqContent);
-                    break;
-            }
+                    yield query.getMockId();
+            };
 
-        }));
-    }
-
-    private void addFhirQuery(Query query, StructuredQuery structuredQuery)
-            throws QueryBuilderException {
-        var fhirContent = getFhirContent(structuredQuery);
-        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
-        brokerClients.forEach(throwingConsumerWrapper(bc -> {
-            switch (bc.getClass().getSimpleName()) {
-                case "DirectBrokerClient":
-                    bc.addQueryDefinition(query.getDirectId(), FHIR, fhirContent);
-                    break;
-                case "AktinBrokerClient":
-                    bc.addQueryDefinition(query.getAktinId(), FHIR, fhirContent);
-                    break;
-                case "DSFBrokerClient":
-                    bc.addQueryDefinition(query.getDsfId(), FHIR, fhirContent);
-                    break;
-                case "MockBrokerClient":
-                default:
-                    bc.addQueryDefinition(query.getMockId(), FHIR, fhirContent);
-                    break;
+            for (Entry<QueryMediaType, String> queryFormatEntry : queryFormats.entrySet()) {
+                bc.addQueryDefinition(queryId, queryFormatEntry.getKey().getRepresentation(),
+                        queryFormatEntry.getValue());
             }
         }));
-    }
-
-    private void addCqlQuery(Query query, StructuredQuery structuredQuery)
-            throws QueryBuilderException {
-        var cqlContent = getCqlContent(structuredQuery);
-        // TODO: Depending on how the issue with multiple query ids is solved, this needs to be fixed
-        brokerClients.forEach(throwingConsumerWrapper(bc -> {
-            switch (bc.getClass().getSimpleName()) {
-                case "DirectBrokerClient":
-                    bc.addQueryDefinition(query.getDirectId(), CQL, cqlContent);
-                    break;
-                case "AktinBrokerClient":
-                    bc.addQueryDefinition(query.getAktinId(), CQL, cqlContent);
-                    break;
-                case "DSFBrokerClient":
-                    bc.addQueryDefinition(query.getDsfId(), CQL, cqlContent);
-                    break;
-                case "MockBrokerClient":
-                default:
-                    bc.addQueryDefinition(query.getMockId(), CQL, cqlContent);
-                    break;
-            }
-        }));
-    }
-
-    private String getFhirContent(StructuredQuery structuredQuery) throws QueryBuilderException {
-        return this.fhirQueryBuilder.getQueryContent(structuredQuery);
-    }
-
-    private String getCqlContent(StructuredQuery structuredQuery) throws QueryBuilderException {
-        return this.cqlQueryBuilder.getQueryContent(structuredQuery);
     }
 
     public QueryResult getQueryResult(Long queryId) {
