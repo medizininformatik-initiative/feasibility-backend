@@ -72,6 +72,7 @@ public class QueryTranslatorSpringConfig {
         return new QueryTranslationComponent(queryTranslators);
     }
 
+    @Lazy
     @Bean
     Translator createCqlTranslator(@Qualifier("translation") ObjectMapper jsonUtil) throws IOException {
         var mappings = jsonUtil.readValue(new File(mappingsFile), Mapping[].class);

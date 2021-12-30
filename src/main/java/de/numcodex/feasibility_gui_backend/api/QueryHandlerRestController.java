@@ -2,10 +2,8 @@ package de.numcodex.feasibility_gui_backend.api;
 
 import de.numcodex.feasibility_gui_backend.model.query.QueryResult;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
-import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
+import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.service.QueryHandlerService;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +13,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
+
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.
@@ -39,19 +37,13 @@ public class QueryHandlerRestController {
   @PostMapping("run-query")
   public Response runQuery(
       @RequestBody StructuredQuery query, @Context HttpServletRequest httpServletRequest) {
-    Long id;
+
+    Long queryId;
     try {
-      id = queryHandlerService.runQuery(query);
-    } catch (UnsupportedMediaTypeException e) {
-      log.error("Unsupported Media Type submitted", e);
-      return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
-    } catch (QueryNotFoundException e) {
-      log.error("Query not found", e);
-      return Response.status(Status.NOT_FOUND).build();
-    } catch (IOException | QueryTranslationException e) {
-      // TODO: Find correct Http error handling
-      log.error("problem running query", e);
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+      queryId = queryHandlerService.runQuery(query);
+    } catch (QueryDispatchException e) {
+      log.error("Error while running query", e);
+      return Response.status(INTERNAL_SERVER_ERROR).build();
     }
 
     UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
@@ -59,7 +51,7 @@ public class QueryHandlerRestController {
             : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uri = uriBuilder.replacePath("")
-            .pathSegment("api", "v1", "query-handler", "result", String.valueOf(id))
+            .pathSegment("api", "v1", "query-handler", "result", String.valueOf(queryId))
             .build()
             .toUri();
     return Response.created(uri).build();

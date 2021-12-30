@@ -13,14 +13,7 @@ CREATE TYPE result_type AS ENUM (
 
 CREATE TABLE query (
     id SERIAL PRIMARY KEY,
-    mock_id TEXT, -- TODO: maybe create new tables for brokers and join table with specific ids?
-    direct_id TEXT,
-    aktin_id TEXT,
-    dsf_id TEXT,
-    title TEXT,
-    comment TEXT,
     query_content_id INTEGER,
-    created_by TEXT, -- TODO: set to non null
     created_at timestamp NOT NULL DEFAULT current_timestamp
 );
 
