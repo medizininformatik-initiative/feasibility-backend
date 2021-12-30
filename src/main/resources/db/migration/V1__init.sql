@@ -7,14 +7,6 @@ CREATE TYPE result_type AS ENUM (
     'ERROR'
 );
 
--- Currently, only "deleted" is needed, but most likely other status types will follow. So this
--- is already added as an enum instead of a simple flag in the table
-CREATE TYPE status_type AS ENUM (
-    'DRAFT',
-    'PUBLISHED',
-    'DELETED'
-);
-
 /***********************************
 **  TABLES
 ************************************/
@@ -29,8 +21,7 @@ CREATE TABLE query (
     comment TEXT,
     query_content_id INTEGER,
     created_by TEXT, -- TODO: set to non null
-    created_at timestamp NOT NULL DEFAULT current_timestamp,
-    status status_type
+    created_at timestamp NOT NULL DEFAULT current_timestamp
 );
 
 CREATE TABLE query_content (

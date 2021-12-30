@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.numcodex.feasibility_gui_backend.model.db.QueryStatus.PUBLISHED;
 import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig.throwingConsumerWrapper;
 
@@ -114,7 +113,6 @@ public class QueryHandlerService {
                     break;
             }
         }));
-        query.setStatus(PUBLISHED);
         return query;
     }
 

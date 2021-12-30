@@ -57,9 +57,4 @@ public class Query {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id", name = "query_content_id")
     private QueryContent queryContent;
-
-    @Enumerated(EnumType.STRING)
-    @Type(type = "status_type")
-    @Column(columnDefinition = "status")
-    private QueryStatus status;
 }
