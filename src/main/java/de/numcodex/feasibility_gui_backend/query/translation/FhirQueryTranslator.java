@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.translation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;

@@ -1,9 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query.collect;
 
-import de.numcodex.feasibility_gui_backend.model.db.*;
-import de.numcodex.feasibility_gui_backend.model.db.QueryDispatch.QueryDispatchId;
-import de.numcodex.feasibility_gui_backend.repository.*;
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatch.QueryDispatchId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -19,11 +18,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
-import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.DIRECT;
-import static de.numcodex.feasibility_gui_backend.model.db.ResultType.ERROR;
-import static de.numcodex.feasibility_gui_backend.model.db.ResultType.SUCCESS;
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
+import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType.DIRECT;
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
 // TODO: maybe we should check the whole setup at this point - dispatch, process, collect? -> discuss in review

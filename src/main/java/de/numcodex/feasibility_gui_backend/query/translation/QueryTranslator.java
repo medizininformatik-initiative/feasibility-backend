@@ -1,6 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.translation;
 
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 
 /**
  * Describes an entity that is capable of translating a @{link StructuredQuery}

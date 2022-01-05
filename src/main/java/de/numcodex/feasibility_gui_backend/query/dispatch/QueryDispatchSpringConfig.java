@@ -1,11 +1,11 @@
 package de.numcodex.feasibility_gui_backend.query.dispatch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
-import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
-import de.numcodex.feasibility_gui_backend.repository.QueryDispatchRepository;
-import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ public class QueryDispatchSpringConfig {
 
     @Bean
     public QueryDispatcher createQueryDispatcher(
-            @Qualifier("applied") List<BrokerClient> brokerClients,
+            @Qualifier("brokerClients") List<BrokerClient> brokerClients,
             QueryTranslationComponent queryTranslationComponent,
             QueryHashCalculator queryHashCalculator,
             @Qualifier("translation") ObjectMapper jsonUtil,

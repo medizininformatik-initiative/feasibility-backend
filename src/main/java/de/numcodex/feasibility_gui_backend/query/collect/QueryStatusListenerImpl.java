@@ -1,15 +1,9 @@
 package de.numcodex.feasibility_gui_backend.query.collect;
 
-import de.numcodex.feasibility_gui_backend.model.db.Query;
-import de.numcodex.feasibility_gui_backend.model.db.Result;
-import de.numcodex.feasibility_gui_backend.model.db.Site;
-import de.numcodex.feasibility_gui_backend.repository.QueryDispatchRepository;
-import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
-import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
+import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
+import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
+import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +15,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 
-import static de.numcodex.feasibility_gui_backend.model.db.ResultType.ERROR;
-import static de.numcodex.feasibility_gui_backend.model.db.ResultType.SUCCESS;
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 
 /**
  * An entity capable of reacting on updates from broker clients regarding different kinds of query status updates.

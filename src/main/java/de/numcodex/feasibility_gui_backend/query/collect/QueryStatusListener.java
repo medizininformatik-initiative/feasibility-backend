@@ -1,6 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.collect;
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 
 /**
  * Represents an entity capable of receiving results from a feasibility query running in a distributed fashion.

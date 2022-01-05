@@ -1,13 +1,13 @@
 package de.numcodex.feasibility_gui_backend.query.translation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.model.common.TermCode;
-import de.numcodex.feasibility_gui_backend.model.common.Unit;
-import de.numcodex.feasibility_gui_backend.model.query.AttributeFilter;
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
-import de.numcodex.feasibility_gui_backend.model.query.TimeRestriction;
-import de.numcodex.feasibility_gui_backend.model.query.ValueFilter;
-import de.numcodex.feasibility_gui_backend.model.ui.Criterion;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.common.api.Unit;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
+import de.numcodex.feasibility_gui_backend.query.api.AttributeFilter;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
+import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
@@ -29,10 +29,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.numcodex.feasibility_gui_backend.model.query.Comparator.GREATER_EQUAL;
-import static de.numcodex.feasibility_gui_backend.model.query.Comparator.GREATER_THAN;
-import static de.numcodex.feasibility_gui_backend.model.query.ValueFilterType.CONCEPT;
-import static de.numcodex.feasibility_gui_backend.model.query.ValueFilterType.QUANTITY_COMPARATOR;
+import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
+import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_THAN;
+import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.CONCEPT;
+import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.testcontainers.containers.BindMode.READ_ONLY;
 

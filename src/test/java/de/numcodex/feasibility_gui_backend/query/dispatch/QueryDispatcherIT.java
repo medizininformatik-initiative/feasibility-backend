@@ -2,15 +2,15 @@ package de.numcodex.feasibility_gui_backend.query.dispatch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryContent;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
-import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
-import de.numcodex.feasibility_gui_backend.repository.QueryDispatchRepository;
-import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
-import de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.net.URI;
 
-import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.MOCK;
+import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType.MOCK;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("query")
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
         QueryTranslatorSpringConfig.class,
         QueryDispatchSpringConfig.class,
         QueryCollectSpringConfig.class,
-        ServiceSpringConfig.class
+        BrokerSpringConfig.class
 })
 @DataJpaTest(
         properties = {
