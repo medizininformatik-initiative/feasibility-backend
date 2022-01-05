@@ -1,27 +1,36 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin;
 
+import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.aktin.broker.client2.BrokerAdmin2;
 import org.aktin.broker.xml.Node;
 import org.aktin.broker.xml.RequestStatusInfo;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.AKTIN;
+
 /**
  * CODEX middleware controller implementation via AKTIN broker.
- * 
+ *
  * @author R.W.Majeed
  *
  */
 @AllArgsConstructor
 public class AktinBrokerClient implements BrokerClient {
 	final private BrokerAdmin2 delegate;
+
+	@Override
+	public BrokerClientType getBrokerType() {
+		return AKTIN;
+	}
 
 	@Override
 	public void addQueryStatusListener(QueryStatusListener queryStatusListener) throws IOException {
@@ -36,13 +45,13 @@ public class AktinBrokerClient implements BrokerClient {
 		return Integer.toString(queryId);
 	}
 	int unwrapQueryId(String queryId) {
-		return Integer.valueOf(queryId);
+		return Integer.parseInt(queryId);
 	}
 	String wrapSiteId(int siteId) {
 		return Integer.toString(siteId);
 	}
 	int unwrapSiteId(String siteId) {
-		return Integer.valueOf(siteId);
+		return Integer.parseInt(siteId);
 	}
 
 	@Override
@@ -54,7 +63,7 @@ public class AktinBrokerClient implements BrokerClient {
 	public void addQueryDefinition(String queryId, String mediaType, String content)
 			throws QueryNotFoundException, UnsupportedMediaTypeException, IOException {
 		delegate.putRequestDefinition(unwrapQueryId(queryId), mediaType, content);
-		
+
 	}
 
 	@Override
@@ -63,7 +72,7 @@ public class AktinBrokerClient implements BrokerClient {
 	}
 
 	@Override
-	public void closeQuery(String queryId) throws QueryNotFoundException, IOException {
+	public void closeQuery(String queryId) throws IOException {
 		delegate.closeRequest(unwrapQueryId(queryId));
 	}
 
@@ -74,7 +83,7 @@ public class AktinBrokerClient implements BrokerClient {
 		if( result == null ) {
 			throw new SiteNotFoundException(queryId, siteId);
 		}
-		return Integer.valueOf(result);
+		return Integer.parseInt(result);
 	}
 
 	@Override

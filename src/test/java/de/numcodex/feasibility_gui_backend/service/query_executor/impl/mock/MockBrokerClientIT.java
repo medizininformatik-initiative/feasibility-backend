@@ -1,12 +1,12 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -14,6 +14,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("NewClassNamingConvention")
 public class MockBrokerClientIT {
 
     private static final int ASYNC_TIMEOUT_WAIT_MS = 9000;
@@ -34,10 +35,10 @@ public class MockBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(queryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "2", COMPLETED);
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "3", COMPLETED);
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "4", COMPLETED);
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "5", COMPLETED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(client, queryId, "2", COMPLETED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(client, queryId, "3", COMPLETED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(client, queryId, "4", COMPLETED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(client, queryId, "5", COMPLETED);
 
         assertEquals(4, client.getResultSiteIds(queryId).size());
         assertTrue(client.getResultFeasibility(queryId, "2") >= 10);
@@ -55,9 +56,9 @@ public class MockBrokerClientIT {
         client.publishQuery(queryId);
         client.closeQuery(queryId);
 
-        verify(statusListener, never()).onClientUpdate(queryId, "1", COMPLETED);
-        verify(statusListener, never()).onClientUpdate(queryId, "2", COMPLETED);
-        verify(statusListener, never()).onClientUpdate(queryId, "3", COMPLETED);
-        verify(statusListener, never()).onClientUpdate(queryId, "4", COMPLETED);
+        verify(statusListener, never()).onClientUpdate(client, queryId, "1", COMPLETED);
+        verify(statusListener, never()).onClientUpdate(client, queryId, "2", COMPLETED);
+        verify(statusListener, never()).onClientUpdate(client, queryId, "3", COMPLETED);
+        verify(statusListener, never()).onClientUpdate(client, queryId, "4", COMPLETED);
     }
 }

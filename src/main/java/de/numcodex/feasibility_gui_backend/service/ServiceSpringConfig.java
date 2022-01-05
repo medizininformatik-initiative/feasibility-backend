@@ -1,12 +1,6 @@
 package de.numcodex.feasibility_gui_backend.service;
 
-import de.numcodex.feasibility_gui_backend.ThrowingConsumer;
-import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
-import de.numcodex.feasibility_gui_backend.repository.ResultRepository;
-import de.numcodex.feasibility_gui_backend.repository.SiteRepository;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListenerImpl;
 import de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock.MockBrokerClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
@@ -21,7 +15,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
 
@@ -80,36 +73,9 @@ public class ServiceSpringConfig {
     return new RestTemplate();
   }
 
-  @Bean
-  List<QueryStatusListener> createQueryStatusListener(@Qualifier("applied") List<BrokerClient> clients,
-                                                ResultRepository resultRepository, QueryRepository queryRepository,
-                                                SiteRepository siteRepository) {
-    var queryStatusListeners = new ArrayList<QueryStatusListener>();
-    clients.forEach(throwingConsumerWrapper(client -> {
-          QueryStatusListener queryStatusListener = new QueryStatusListenerImpl(resultRepository,
-              queryRepository, siteRepository, client);
-          queryStatusListeners.add(queryStatusListener);
-          client.addQueryStatusListener(queryStatusListener);
-        })
-    );
-    return queryStatusListeners;
-  }
-
   @Qualifier("md5")
   @Bean
   MessageDigest md5MessageDigest() throws NoSuchAlgorithmException {
     return MessageDigest.getInstance(MD5);
-  }
-
-  static <T> Consumer<T> throwingConsumerWrapper(
-      ThrowingConsumer<T, Exception> throwingConsumer) {
-
-    return i -> {
-      try {
-        throwingConsumer.accept(i);
-      } catch (Exception ex) {
-        throw new RuntimeException(ex);
-      }
-    };
   }
 }

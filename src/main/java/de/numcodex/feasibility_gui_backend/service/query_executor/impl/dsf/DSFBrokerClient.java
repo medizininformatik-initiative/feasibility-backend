@@ -1,13 +1,14 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
+import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.service.query_executor.*;
+
 import java.io.IOException;
 import java.util.List;
+
+import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.DSF;
 
 /**
  * A {@link BrokerClient} to be used in conjunction with a Data Sharing Framework (DSF) instance.
@@ -28,8 +29,13 @@ public final class DSFBrokerClient implements BrokerClient {
     }
 
     @Override
+    public BrokerClientType getBrokerType() {
+        return DSF;
+    }
+
+    @Override
     public void addQueryStatusListener(QueryStatusListener queryStatusListener) throws IOException {
-        queryResultCollector.addResultListener(queryStatusListener);
+        queryResultCollector.addResultListener(this, queryStatusListener);
     }
 
     @Override

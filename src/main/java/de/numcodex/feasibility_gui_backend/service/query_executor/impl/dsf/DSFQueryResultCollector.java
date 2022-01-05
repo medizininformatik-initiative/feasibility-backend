@@ -2,15 +2,18 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.DomainResource;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Collector for collecting the results of feasibility queries that are running in a distributed fashion.
@@ -24,7 +27,7 @@ class DSFQueryResultCollector implements QueryResultCollector {
     private final FhirContext fhirContext;
     private final FhirWebClientProvider fhirWebClientProvider;
     private final DSFQueryResultHandler resultHandler;
-    private final List<QueryStatusListener> listeners;
+    private final Map<DSFBrokerClient, QueryStatusListener> listeners;
     private boolean websocketConnectionEstablished;
 
     /**
@@ -43,7 +46,7 @@ class DSFQueryResultCollector implements QueryResultCollector {
         this.fhirWebClientProvider = fhirWebClientProvider;
         this.resultHandler = resultHandler;
         this.websocketConnectionEstablished = false;
-        this.listeners = new ArrayList<>();
+        this.listeners = new HashMap<>();
     }
 
     private void listenForQueryResults() throws FhirWebClientProvisionException {
@@ -70,18 +73,19 @@ class DSFQueryResultCollector implements QueryResultCollector {
     }
 
     private void notifyResultListeners(DSFQueryResult result) {
-        for (QueryStatusListener listener : listeners) {
-            listener.onClientUpdate(result.getQueryId(), result.getSiteId(), QueryStatus.COMPLETED);
+        for (Entry<DSFBrokerClient, QueryStatusListener> listener : listeners.entrySet()) {
+            listener.getValue().onClientUpdate(listener.getKey(), result.getQueryId(), result.getSiteId(),
+                    QueryStatus.COMPLETED);
         }
     }
 
     @Override
-    public void addResultListener(QueryStatusListener listener) throws IOException {
-        listeners.add(listener);
+    public void addResultListener(DSFBrokerClient broker, QueryStatusListener listener) throws IOException {
+        listeners.put(broker, listener);
         try {
             listenForQueryResults();
         } catch (FhirWebClientProvisionException e) {
-            listeners.remove(listener);
+            listeners.remove(broker);
             throw new IOException("failed to establish websocket connection to listen for results", e);
         }
     }

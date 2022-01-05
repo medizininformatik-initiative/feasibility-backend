@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.service.query_executor;
+package de.numcodex.feasibility_gui_backend.query.collect;
 
 /**
  * Represents different states a query can be in.

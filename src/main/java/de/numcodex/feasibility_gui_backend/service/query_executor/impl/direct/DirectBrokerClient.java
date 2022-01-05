@@ -1,10 +1,9 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
+import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.service.query_executor.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -14,8 +13,9 @@ import java.io.IOException;
 import java.util.*;
 
 import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.FAILED;
+import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.DIRECT;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
 
 /**
  * A {@link BrokerClient} to be used to directly communicate with a Flare instance without the need for using on of the
@@ -45,6 +45,11 @@ public class DirectBrokerClient implements BrokerClient {
         this.webClient = Objects.requireNonNull(webClient);
         listeners = new ArrayList<>();
         queries = new HashMap<>();
+    }
+
+    @Override
+    public BrokerClientType getBrokerType() {
+        return DIRECT;
     }
 
     @Override
@@ -89,11 +94,11 @@ public class DirectBrokerClient implements BrokerClient {
                     .map(Integer::valueOf)
                     .doOnError(error -> {
                         log.error(error.getMessage(), error);
-                        listeners.forEach(l -> l.onClientUpdate(queryId, SITE_1_ID, FAILED));
+                        listeners.forEach(l -> l.onClientUpdate(this, queryId, SITE_1_ID, FAILED));
                     })
                     .subscribe(val -> {
                         query.registerSiteResults(SITE_1_ID, val);
-                        listeners.forEach(l -> l.onClientUpdate(queryId, SITE_1_ID, COMPLETED));
+                        listeners.forEach(l -> l.onClientUpdate(this, queryId, SITE_1_ID, COMPLETED));
                     });
         } catch (Exception e) {
             throw new IOException("An error occurred while publishing the query with ID: " + queryId, e);

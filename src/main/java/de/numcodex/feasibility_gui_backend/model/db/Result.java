@@ -44,8 +44,6 @@ public class Result {
     @Column(insertable = false)
     private Timestamp receivedAt;
 
-    private Integer displaySiteId;
-
     @Data
     @Embeddable
     public static class ResultId implements Serializable {

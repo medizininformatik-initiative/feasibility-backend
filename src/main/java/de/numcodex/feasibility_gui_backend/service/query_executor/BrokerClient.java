@@ -1,5 +1,8 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor;
 
+import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -8,6 +11,13 @@ import java.util.List;
  * collecting and providing their results.
  */
 public interface BrokerClient {
+
+    /**
+     * Gets the type of the broker.
+     *
+     * @return The broker type.
+     */
+    BrokerClientType getBrokerType();
 
     /**
      * Adds a listener that gets called whenever a feasibility query changes its status.
@@ -35,7 +45,7 @@ public interface BrokerClient {
      * @param content   The actual query in plain text.
      * @throws QueryNotFoundException        If the given query ID does not identify a known query.
      * @throws UnsupportedMediaTypeException If the given media type is not supported.
-     * @throws IOException IO/communication error
+     * @throws IOException                   IO/communication error
      */
     void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException, IOException;
@@ -45,7 +55,7 @@ public interface BrokerClient {
      *
      * @param queryId Identifies the query that shall be published.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
-     * @throws IOException If the query was not published due IO/communication error
+     * @throws IOException            If the query was not published due IO/communication error
      */
     void publishQuery(String queryId) throws QueryNotFoundException, IOException;
 
@@ -57,7 +67,7 @@ public interface BrokerClient {
      *
      * @param queryId Identifies the query that shall be closed.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
-     * @throws IOException IO/communication error
+     * @throws IOException            IO/communication error
      */
     void closeQuery(String queryId) throws QueryNotFoundException, IOException;
 
@@ -69,7 +79,7 @@ public interface BrokerClient {
      * @return The feasibility for a specific site within a query.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
      * @throws SiteNotFoundException  If the given site ID does not identify a known site within a query.
-     * @throws IOException IO/communication error
+     * @throws IOException            IO/communication error
      */
     int getResultFeasibility(String queryId, String siteId) throws QueryNotFoundException, SiteNotFoundException, IOException;
 
@@ -79,7 +89,7 @@ public interface BrokerClient {
      * @param queryId Identifies the query whose associated site IDs with results shall be gotten.
      * @return All site IDs of a specific query that can already provide results.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
-     * @throws IOException IO/communication error
+     * @throws IOException            IO/communication error
      */
     List<String> getResultSiteIds(String queryId) throws QueryNotFoundException, IOException;
 
@@ -89,7 +99,7 @@ public interface BrokerClient {
      * @param siteId Identifies the site whose display name shall be gotten.
      * @return The display name of the site.
      * @throws SiteNotFoundException If the given site ID does not identify a known site.
-     * @throws IOException IO/communication error
+     * @throws IOException           IO/communication error
      */
     String getSiteName(String siteId) throws SiteNotFoundException, IOException;
 }

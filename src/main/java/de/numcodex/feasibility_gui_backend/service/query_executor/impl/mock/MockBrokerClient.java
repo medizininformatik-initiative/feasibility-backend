@@ -1,9 +1,8 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.mock;
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
-import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
+import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.service.query_executor.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,8 +15,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.FAILED;
+import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.MOCK;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
 
 /**
  * A {@link BrokerClient} to be used when results need to be mocked. This broker mocks a middleware an all the other
@@ -44,6 +44,11 @@ public class MockBrokerClient implements BrokerClient {
                 "5", "Leipzig"
         );
         runningMocks = new HashMap<>();
+    }
+
+    @Override
+    public BrokerClientType getBrokerType() {
+        return MOCK;
     }
 
     @Override
@@ -74,10 +79,10 @@ public class MockBrokerClient implements BrokerClient {
                     try {
                         Thread.sleep(Math.round(2000 + 6000 * Math.random()));
                         query.registerSiteResults(siteId, (int) Math.round(10 + 500 * Math.random()));
-                        listeners.forEach(l -> l.onClientUpdate(queryId, siteId, COMPLETED));
+                        listeners.forEach(l -> l.onClientUpdate(this, queryId, siteId, COMPLETED));
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
-                        listeners.forEach(l -> l.onClientUpdate(queryId, siteId, FAILED));
+                        listeners.forEach(l -> l.onClientUpdate(this, queryId, siteId, FAILED));
                     }
                 }))
                 .collect(Collectors.toList());

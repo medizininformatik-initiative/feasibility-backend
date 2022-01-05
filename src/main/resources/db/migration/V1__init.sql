@@ -7,6 +7,13 @@ CREATE TYPE result_type AS ENUM (
     'ERROR'
 );
 
+CREATE TYPE broker_type AS ENUM (
+    'AKTIN',
+    'DIRECT',
+    'DSF',
+    'MOCK'
+);
+
 /***********************************
 **  TABLES
 ************************************/
@@ -23,11 +30,16 @@ CREATE TABLE query_content (
     hash TEXT
 );
 
+CREATE TABLE query_dispatch (
+    query_id INTEGER NOT NULL,
+    external_query_id TEXT NOT NULL,
+    broker_type broker_type NOT NULL,
+    dispatched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE site (
     id SERIAL PRIMARY KEY,
-    site_name TEXT NOT NULL,
-    aktin_identifier TEXT,
-    dsf_identifier TEXT
+    site_name TEXT NOT NULL
 );
 
 CREATE TABLE result (
@@ -35,16 +47,19 @@ CREATE TABLE result (
     site_id INTEGER NOT NULL,
     result_type result_type NOT NULL DEFAULT 'SUCCESS',
     result INTEGER,
-    received_at timestamp NOT NULL DEFAULT current_timestamp,
-    display_site_id INTEGER NOT NULL
+    received_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 /***********************************
 **  COMPOSITE PRIMARY KEYS
 ************************************/
 
+ALTER TABLE query_dispatch
+    ADD CONSTRAINT query_dispatch_pkey PRIMARY KEY (query_id, external_query_id, broker_type);
+
 ALTER TABLE result
     ADD CONSTRAINT result_pkey PRIMARY KEY (query_id, site_id);
+
 
 /***********************************
 **  FOREIGN KEY RELATIONS
@@ -52,6 +67,9 @@ ALTER TABLE result
 
 ALTER TABLE query
     ADD CONSTRAINT query_query_content_id_fkey FOREIGN KEY (query_content_id) REFERENCES query_content (id) ON DELETE CASCADE;
+
+ALTER TABLE query_dispatch
+    ADD CONSTRAINT query_dispatch_query_id_fkey FOREIGN KEY (query_id) REFERENCES query (id) ON DELETE CASCADE;
 
 ALTER TABLE result
     ADD CONSTRAINT result_query_id_fkey FOREIGN KEY (query_id) REFERENCES query (id) ON DELETE CASCADE;
@@ -67,28 +85,3 @@ ALTER TABLE query_content
 
 ALTER TABLE site
     ADD CONSTRAINT site_name_unique UNIQUE (site_name);
-
-ALTER TABLE site
-    ADD CONSTRAINT site_aktin_identifier_unique UNIQUE (aktin_identifier);
-
-ALTER TABLE site
-    ADD CONSTRAINT site_dsf_identifier_unique UNIQUE (dsf_identifier);
-
-ALTER TABLE result
-    ADD CONSTRAINT result_display_site_unique UNIQUE (query_id, display_site_id);
-
-/***********************************
-**  TRIGGERS AND FUNCTIONS
-************************************/
-
--- TODO: discuss whether this raises problems (maybe we generate hashes in a different fashion, e.g. for lookups etc.)
-
--- CREATE OR REPLACE FUNCTION query_content_generate_hash() RETURNS trigger AS
--- $query_content_generate_hash$
--- BEGIN
---     NEW.hash := MD5(NEW.query_content);
---     RETURN NEW;
--- END;
--- $query_content_generate_hash$ LANGUAGE plpgsql;
---
--- CREATE TRIGGER query_content_generate_hash BEFORE INSERT ON query_content FOR EACH ROW EXECUTE PROCEDURE query_content_generate_hash();

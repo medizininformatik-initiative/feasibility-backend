@@ -1,8 +1,9 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -14,10 +15,11 @@ interface QueryResultCollector {
     /**
      * Registers a listener that gets called whenever a new query result comes in.
      *
+     * @param broker   The broker that acts as a source for new results.
      * @param listener The listener that gets notified for new results.
      * @throws IOException If there is a problem when trying to establish a result listener channel.
      */
-    void addResultListener(QueryStatusListener listener) throws IOException;
+    void addResultListener(DSFBrokerClient broker, QueryStatusListener listener) throws IOException;
 
     /**
      * Gets the feasibility of a specific site within a query.

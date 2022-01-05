@@ -17,10 +17,4 @@ public class Site {
     private Long id;
 
     private String siteName;
-
-    @Column(name = "aktin_identifier")
-    private String aktinIdentifier;
-
-    @Column(name = "dsf_identifier")
-    private String dsfIdentifier;
 }

@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.service.query_executor.impl.dsf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -35,9 +35,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("NewClassNamingConvention")
 public class DSFQueryResultCollectorIT {
 
     private static final String SINGLE_DIC_RESULT_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0";
+
+    @Mock
+    private DSFBrokerClient brokerClient;
 
     @Mock
     private FhirWebserviceClient fhirClient;
@@ -140,7 +144,7 @@ public class DSFQueryResultCollectorIT {
             String siteId = null;
             QueryStatus status = null;
         };
-        resultCollector.addResultListener((qId, sId, status) -> {
+        resultCollector.addResultListener(brokerClient, (broker, qId, sId, status) -> {
             actual.queryId = qId;
             actual.siteId = sId;
             actual.status = status;
@@ -165,7 +169,7 @@ public class DSFQueryResultCollectorIT {
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
-        resultCollector.addResultListener((qId, cId, status) -> {
+        resultCollector.addResultListener(brokerClient, (broker, qId, cId, status) -> {
             try {
                 int resultFeasibility = resultCollector.getResultFeasibility(qId, cId);
 
@@ -191,7 +195,7 @@ public class DSFQueryResultCollectorIT {
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
-        resultCollector.addResultListener((qId, sId, status) -> {
+        resultCollector.addResultListener(brokerClient, (broker, qId, sId, status) -> {
             try {
                 List<String> siteIds = resultCollector.getResultSiteIds(qId);
 
@@ -210,7 +214,7 @@ public class DSFQueryResultCollectorIT {
         Task task = createTestTask(UUID.randomUUID().toString(), "DIC", "MeasureReport/" + measureReportId, "other-profile");
 
         when(fhirWebClientProvider.provideFhirWebsocketClient()).thenReturn(websocketClient);
-        resultCollector.addResultListener((qId, cId, status) -> fail());
+        resultCollector.addResultListener(brokerClient, (broker, qId, cId, status) -> fail());
 
         websocketClient.fakeIncomingMessage(task);
     }

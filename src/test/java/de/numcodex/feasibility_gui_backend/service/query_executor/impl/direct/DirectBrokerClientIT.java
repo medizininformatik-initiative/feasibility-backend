@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.direct;
 
 import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.service.query_executor.SiteNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -15,8 +15,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
 
 import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.COMPLETED;
-import static de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus.FAILED;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpHeaders.ACCEPT_ENCODING;
@@ -63,7 +63,7 @@ class DirectBrokerClientIT {
         assertEquals("POST", recordedRequest.getMethod());
         assertEquals("foo", recordedRequest.getBody().readUtf8());
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(queryId, "1", COMPLETED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(client, queryId, "1", COMPLETED);
 
         assertEquals(1, client.getResultSiteIds(queryId).size());
         assertEquals("1", client.getResultSiteIds(queryId).get(0));
@@ -81,7 +81,7 @@ class DirectBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(queryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(queryId, "1", FAILED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(client, queryId, "1", FAILED);
     }
 
     @Test
@@ -95,6 +95,6 @@ class DirectBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(queryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(queryId, "1", FAILED);
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(client, queryId, "1", FAILED);
     }
 }

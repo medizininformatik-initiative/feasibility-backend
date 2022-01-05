@@ -1,14 +1,13 @@
 package de.numcodex.feasibility_gui_backend.service.query_executor.impl.aktin;
 
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatus;
-import de.numcodex.feasibility_gui_backend.service.query_executor.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
-
-import java.util.logging.Level;
-
 import org.aktin.broker.client2.AdminNotificationListener;
 import org.aktin.broker.xml.RequestStatus;
+
+import java.util.logging.Level;
 
 /**
  * Wraps the CODEX notification listener with AKTIN admin notification listener
@@ -58,7 +57,7 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 			default -> QueryStatus.FAILED;
 		};
 		log.log(Level.INFO,"Request status updated {0} {1} {2}", new Object[] {requestId,nodeId,status});
-		delegate.onClientUpdate(client.wrapQueryId(requestId), client.wrapSiteId(nodeId), dest);
+		delegate.onClientUpdate(client, client.wrapQueryId(requestId), client.wrapSiteId(nodeId), dest);
 	}
 
 	@Override
