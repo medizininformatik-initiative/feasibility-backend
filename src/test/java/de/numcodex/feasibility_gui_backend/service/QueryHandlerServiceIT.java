@@ -150,4 +150,58 @@ public class QueryHandlerServiceIT {
         assertEquals(10, siteAResultLine.getNumberOfPatients());
         assertEquals(20, siteBResultLine.getNumberOfPatients());
     }
+
+    @Test
+    public void testGetQueryResult_FailedResultsDoNotAffectResult() {
+        var testQueryContent = new QueryContent("irrelevant-for-this-test");
+        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
+        var testQueryId = queryContentRepository.save(testQueryContent).getId();
+
+        var testQuery = new Query();
+        testQuery.setId(testQueryId);
+        testQuery.setQueryContent(testQueryContent);
+        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
+        queryRepository.save(testQuery);
+
+        var testSiteA = new Site();
+        testSiteA.setSiteName("A");
+        var testSiteAId = siteRepository.save(testSiteA).getId();
+
+        var testSiteB = new Site();
+        testSiteB.setSiteName("B");
+        var testSiteBId = siteRepository.save(testSiteB).getId();
+
+        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
+
+        var testSiteAResultId = new ResultId();
+        testSiteAResultId.setSiteId(testSiteAId);
+        testSiteAResultId.setQueryId(testQueryId);
+
+        var testSiteAResult = new Result();
+        testSiteAResult.setId(testSiteAResultId);
+        testSiteAResult.setSite(testSiteA);
+        testSiteAResult.setQuery(testQuery);
+        testSiteAResult.setResult(10);
+        testSiteAResult.setReceivedAt(Timestamp.from(Instant.now()));
+        testSiteAResult.setResultType(SUCCESS);
+        resultRepository.save(testSiteAResult);
+
+        var testSiteBResultId = new ResultId();
+        testSiteBResultId.setSiteId(testSiteBId);
+        testSiteBResultId.setQueryId(testQueryId);
+
+        var testSiteBResult = new Result();
+        testSiteBResult.setId(testSiteBResultId);
+        testSiteBResult.setSite(testSiteB);
+        testSiteBResult.setQuery(testQuery);
+        testSiteBResult.setResult(20);
+        testSiteBResult.setReceivedAt(Timestamp.from(Instant.now()));
+        testSiteBResult.setResultType(ERROR);
+        resultRepository.save(testSiteBResult);
+
+        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
+
+        assertEquals(10, queryResult.getTotalNumberOfPatients());
+        assertEquals(1, queryResult.getResultLines().size());
+    }
 }

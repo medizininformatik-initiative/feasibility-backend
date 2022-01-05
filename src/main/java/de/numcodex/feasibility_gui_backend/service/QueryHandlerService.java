@@ -13,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
+
+import static de.numcodex.feasibility_gui_backend.model.db.ResultType.SUCCESS;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -35,25 +39,23 @@ public class QueryHandlerService {
 
     // TODO: re-enable site obfuscation later on!!!
     public QueryResult getQueryResult(Long queryId) {
-        var resultLines = this.resultRepository.findByQueryId(queryId);
-        var result = new QueryResult();
+        var singleSiteResults = resultRepository.findByQueryAndStatus(queryId, SUCCESS);
 
-        result.setQueryId(queryId);
-        result.setTotalNumberOfPatients(
-                resultLines.stream().map(Result::getResult).reduce(0, Integer::sum));
+        var resultLines = singleSiteResults.stream()
+                .map(ssr -> QueryResultLine.builder()
+                        .siteName(ssr.getSite().getSiteName())
+                        .numberOfPatients(ssr.getResult())
+                        .build())
+                .collect(Collectors.toList());
 
-        // Sort by display site id, otherwise the real site ids would be easily identifiable by order
-        //resultLines.sort(Comparator.comparingInt(Result::getDisplaySiteId));
+        var totalMatchesInPopulation = singleSiteResults.stream()
+                .map(Result::getResult)
+                .reduce(0, Integer::sum);
 
-        resultLines.forEach(
-                line -> {
-                    var resultLine = new QueryResultLine();
-                    resultLine.setNumberOfPatients(line.getResult());
-                    //resultLine.setSiteName(line.getDisplaySiteId().toString());
-                    resultLine.setSiteName(line.getSite().getSiteName());
-                    result.getResultLines().add(resultLine);
-                });
-
-        return result;
+        return QueryResult.builder()
+                .queryId(queryId)
+                .resultLines(resultLines)
+                .totalNumberOfPatients(totalMatchesInPopulation)
+                .build();
     }
 }
