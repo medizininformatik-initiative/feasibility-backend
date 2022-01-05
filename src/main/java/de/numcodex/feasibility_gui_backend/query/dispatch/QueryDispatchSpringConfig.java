@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.query.dispatch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
 import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.repository.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,9 +24,10 @@ public class QueryDispatchSpringConfig {
             QueryHashCalculator queryHashCalculator,
             @Qualifier("translation") ObjectMapper jsonUtil,
             QueryRepository queryRepository,
-            QueryContentRepository queryContentRepository) {
+            QueryContentRepository queryContentRepository,
+            QueryDispatchRepository queryDispatchRepository) {
         return new QueryDispatcher(brokerClients, queryTranslationComponent, queryHashCalculator, jsonUtil,
-                queryRepository, queryContentRepository);
+                queryRepository, queryContentRepository, queryDispatchRepository);
     }
 
     @Bean

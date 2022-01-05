@@ -2,23 +2,35 @@ package de.numcodex.feasibility_gui_backend.query.dispatch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.model.db.BrokerClientType;
 import de.numcodex.feasibility_gui_backend.model.db.Query;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
+import de.numcodex.feasibility_gui_backend.model.db.QueryDispatch;
+import de.numcodex.feasibility_gui_backend.model.db.QueryDispatch.QueryDispatchId;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
 import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.repository.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
 import de.numcodex.feasibility_gui_backend.service.query_executor.BrokerClient;
+import de.numcodex.feasibility_gui_backend.service.query_executor.QueryNotFoundException;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
+import de.numcodex.feasibility_gui_backend.service.query_executor.UnsupportedMediaTypeException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
- * Centralized component to enqueue and publish a {@link StructuredQuery}.
+ * Centralized component to enqueue and dispatch (publish) a {@link StructuredQuery}.
  */
 @Transactional
 @RequiredArgsConstructor
@@ -42,6 +54,9 @@ public class QueryDispatcher {
     @NonNull
     private QueryContentRepository queryContentRepository;
 
+    @NonNull
+    private QueryDispatchRepository queryDispatchRepository;
+
     /**
      * Enqueues a {@link StructuredQuery}, allowing it to be published afterwards. Enqueued queries are stored within
      * the database as a side effect.
@@ -52,12 +67,7 @@ public class QueryDispatcher {
      */
     // TODO: Pass in audit information! (actor)
     public Long enqueueNewQuery(StructuredQuery query) throws QueryDispatchException {
-        String querySerialized;
-        try {
-            querySerialized = jsonUtil.writeValueAsString(query);
-        } catch (JsonProcessingException e) {
-            throw new QueryDispatchException("could not serialize query in order to enqueue it", e);
-        }
+        var querySerialized = serializedStructuredQuery(query);
 
         var queryHash = queryHashCalculator.calculateSerializedQueryBodyHash(querySerialized);
         var queryBody = queryContentRepository.findByHash(queryHash)
@@ -67,14 +77,88 @@ public class QueryDispatcher {
                     return queryContentRepository.save(freshQueryBody);
                 });
 
+        return persistEnqueuedQuery(queryBody);
+    }
+
+    /**
+     * Dispatches (publishes) an already enqueued query in a broadcast fashion using configured {@link BrokerClient}s.
+     *
+     * @param queryId        Identifies the query that shall be dispatched.
+     * @param statusListener Entity that gets called for every status change of the dispatched query.
+     * @throws QueryDispatchException If an error occurs while dispatching the query.
+     */
+    // TODO: Pass in audit information! (actor)
+    public void dispatchEnqueuedQuery(Long queryId, QueryStatusListener statusListener) throws QueryDispatchException {
+        var enqueuedQuery = getEnqueuedQuery(queryId);
+        var deserializedQueryBody = getStructuredQueryFromEnqueuedQuery(enqueuedQuery);
+        var translatedQueryBodyFormats = translateQueryIntoTargetFormats(deserializedQueryBody);
+
+        try {
+            for (BrokerClient broker : queryBrokerClients) {
+                broker.addQueryStatusListener(statusListener);
+
+                var brokerQueryId = broker.createQuery();
+
+                for (Entry<QueryMediaType, String> queryBodyFormats : translatedQueryBodyFormats.entrySet()) {
+                    broker.addQueryDefinition(brokerQueryId, queryBodyFormats.getKey().getRepresentation(),
+                            queryBodyFormats.getValue());
+                }
+                broker.publishQuery(brokerQueryId);
+                persistDispatchedQuery(enqueuedQuery, brokerQueryId, broker.getBrokerType());
+            }
+        } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException e) {
+            throw new QueryDispatchException("cannot publish query with id '%s'".formatted(queryId));
+        }
+    }
+
+    private String serializedStructuredQuery(StructuredQuery query) throws QueryDispatchException {
+        try {
+            return jsonUtil.writeValueAsString(query);
+        } catch (JsonProcessingException e) {
+            throw new QueryDispatchException("could not serialize query in order to enqueue it", e);
+        }
+    }
+
+    private Long persistEnqueuedQuery(QueryContent queryBody) {
         var feasibilityQuery = new Query();
         feasibilityQuery.setCreatedAt(Timestamp.from(Instant.now()));
         feasibilityQuery.setQueryContent(queryBody);
         return queryRepository.save(feasibilityQuery).getId();
     }
 
+    private void persistDispatchedQuery(Query query, String brokerInternalId, BrokerClientType brokerType) {
+        var queryDispatchId = new QueryDispatchId();
+        queryDispatchId.setQueryId(query.getId());
+        queryDispatchId.setExternalId(brokerInternalId);
+        queryDispatchId.setBrokerType(brokerType);
 
-    public void publishEnqueuedQuery(Long queryId) throws QueryDispatchException {
-        // TODO: translation needs to happen here in order to allow for replay of saved queries!
+        var dispatchedQuery = new QueryDispatch();
+        dispatchedQuery.setId(queryDispatchId);
+        dispatchedQuery.setQuery(query);
+        dispatchedQuery.setDispatchedAt(Timestamp.from(Instant.now()));
+        queryDispatchRepository.save(dispatchedQuery);
+    }
+
+    private Query getEnqueuedQuery(Long queryId) throws QueryDispatchException {
+        return queryRepository.findById(queryId)
+                .orElseThrow(() ->
+                        new QueryDispatchException("cannot find enqueued query with id '%s'".formatted(queryId)));
+    }
+
+    private StructuredQuery getStructuredQueryFromEnqueuedQuery(Query enqueuedQuery) throws QueryDispatchException {
+        try {
+            return jsonUtil.readValue(enqueuedQuery.getQueryContent().getQueryContent(), StructuredQuery.class);
+        } catch (JsonProcessingException e) {
+            throw new QueryDispatchException("cannot deserialize enqueued query body as structured query");
+        }
+    }
+
+    private Map<QueryMediaType, String> translateQueryIntoTargetFormats(StructuredQuery query)
+            throws QueryDispatchException {
+        try {
+            return queryTranslationComponent.translate(query);
+        } catch (QueryTranslationException e) {
+            throw new QueryDispatchException("cannot translate enqueued query body into configured formats");
+        }
     }
 }

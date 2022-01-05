@@ -29,8 +29,7 @@ public class QueryHandlerService {
 
     public Long runQuery(StructuredQuery structuredQuery) throws QueryDispatchException {
         var queryId = queryDispatcher.enqueueNewQuery(structuredQuery);
-        queryDispatcher.publishEnqueuedQuery(queryId);
-
+        queryDispatcher.dispatchEnqueuedQuery(queryId, queryStatusListener);
         return queryId;
     }
 

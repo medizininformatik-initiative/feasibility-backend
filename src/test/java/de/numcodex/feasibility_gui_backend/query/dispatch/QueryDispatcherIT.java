@@ -4,9 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.model.db.QueryContent;
 import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.repository.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.repository.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.repository.QueryRepository;
+import de.numcodex.feasibility_gui_backend.service.ServiceSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +22,25 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.net.URI;
 
+import static de.numcodex.feasibility_gui_backend.model.db.BrokerClientType.MOCK;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("query")
 @Tag("dispatch")
 @Import({
         QueryTranslatorSpringConfig.class,
-        QueryDispatchSpringConfig.class
+        QueryDispatchSpringConfig.class,
+        QueryCollectSpringConfig.class,
+        ServiceSpringConfig.class
 })
 @DataJpaTest(
         properties = {
                 "app.cqlTranslationEnabled=false",
-                "app.fhirTranslationEnabled=false"
+                "app.fhirTranslationEnabled=false",
+                "app.broker.mock.enabled=true",
+                "app.broker.direct.enabled=false",
+                "app.broker.aktin.enabled=false",
+                "app.broker.dsf.enabled=false"
         }
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -44,6 +55,9 @@ public class QueryDispatcherIT {
     private QueryRepository queryRepository;
 
     @Autowired
+    private QueryDispatchRepository queryDispatchRepository;
+
+    @Autowired
     private QueryContentRepository queryContentRepository;
 
     @Autowired
@@ -52,6 +66,9 @@ public class QueryDispatcherIT {
 
     @Autowired
     private QueryHashCalculator queryHashCalculator;
+
+    @Autowired
+    private QueryStatusListener queryStatusListener;
 
     @Test
     public void testEnqueueNewQuery_QueryContentGetsCreatedIfNotAlreadyPresent() throws JsonProcessingException {
@@ -106,4 +123,30 @@ public class QueryDispatcherIT {
         assertNotNull(enqueuedQueries.get(0).getCreatedAt());
         assertNull(enqueuedQueries.get(0).getResults());
     }
+
+    @Test
+    public void testDispatchEnqueuedQuery_UnknownQueryIdDoesNotLeadToPersistedDispatchEntry() {
+        var unknownQueryId = 9999999L;
+
+        assertThrows(QueryDispatchException.class, () -> queryDispatcher.dispatchEnqueuedQuery(unknownQueryId,
+                queryStatusListener));
+        assertEquals(0, queryDispatchRepository.count());
+    }
+
+    @Test
+    public void testDispatchEnqueuedQuery() {
+        var testQuery = new StructuredQuery();
+
+        var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery));
+        assertDoesNotThrow(() -> queryDispatcher.dispatchEnqueuedQuery(queryId, queryStatusListener));
+
+        var dispatches = queryDispatchRepository.findAll();
+        assertEquals(1, dispatches.size());
+        assertEquals(MOCK, dispatches.get(0).getId().getBrokerType());
+        assertEquals(queryId, dispatches.get(0).getId().getQueryId());
+        assertNotNull(dispatches.get(0).getDispatchedAt());
+        assertNotNull(dispatches.get(0).getQuery());
+    }
+
+    // TODO: single dispatch entry per configured broker client --> discuss in review!!!
 }

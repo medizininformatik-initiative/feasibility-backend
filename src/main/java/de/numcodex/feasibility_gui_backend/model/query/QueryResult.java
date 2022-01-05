@@ -1,13 +1,14 @@
 package de.numcodex.feasibility_gui_backend.model.query;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
+@Builder
 public class QueryResult {
     private int totalNumberOfPatients;
     private Long queryId;
-
-    private List<QueryResultLine> resultLines = new ArrayList<>();
+    private List<QueryResultLine> resultLines;
 }
