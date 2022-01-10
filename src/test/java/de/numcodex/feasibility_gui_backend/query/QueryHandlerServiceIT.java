@@ -5,8 +5,9 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryObfuscationSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
-import de.numcodex.feasibility_gui_backend.query.persistence.Result.ResultId;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
         QueryTranslatorSpringConfig.class,
         QueryDispatchSpringConfig.class,
         QueryCollectSpringConfig.class,
-        QueryHandlerService.class
+        QueryHandlerService.class,
+        QueryObfuscationSpringConfig.class
 })
 @DataJpaTest(
         properties = {
@@ -64,6 +66,9 @@ public class QueryHandlerServiceIT {
 
     @Autowired
     private ResultRepository resultRepository;
+
+    @Autowired
+    private QueryResultObfuscator queryResultObfuscator;
 
     @Test
     public void testRunQuery() {
@@ -101,20 +106,15 @@ public class QueryHandlerServiceIT {
 
         var testSiteA = new Site();
         testSiteA.setSiteName("A");
-        var testSiteAId = siteRepository.save(testSiteA).getId();
+        siteRepository.save(testSiteA);
 
         var testSiteB = new Site();
         testSiteB.setSiteName("B");
-        var testSiteBId = siteRepository.save(testSiteB).getId();
+        siteRepository.save(testSiteB);
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
 
-        var testSiteAResultId = new ResultId();
-        testSiteAResultId.setSiteId(testSiteAId);
-        testSiteAResultId.setQueryId(testQueryId);
-
         var testSiteAResult = new Result();
-        testSiteAResult.setId(testSiteAResultId);
         testSiteAResult.setSite(testSiteA);
         testSiteAResult.setQuery(testQuery);
         testSiteAResult.setResult(10);
@@ -122,12 +122,7 @@ public class QueryHandlerServiceIT {
         testSiteAResult.setResultType(SUCCESS);
         resultRepository.save(testSiteAResult);
 
-        var testSiteBResultId = new ResultId();
-        testSiteBResultId.setSiteId(testSiteBId);
-        testSiteBResultId.setQueryId(testQueryId);
-
         var testSiteBResult = new Result();
-        testSiteBResult.setId(testSiteBResultId);
         testSiteBResult.setSite(testSiteB);
         testSiteBResult.setQuery(testQuery);
         testSiteBResult.setResult(20);
@@ -137,10 +132,13 @@ public class QueryHandlerServiceIT {
 
         var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
 
+        var testSiteAResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testSiteAResult);
         var siteAResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
-                .equals("A")).findFirst().orElseThrow();
+                .equals(testSiteAResultTokenizedSiteName)).findFirst().orElseThrow();
+
+        var testSiteBResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testSiteBResult);
         var siteBResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
-                .equals("B")).findFirst().orElseThrow();
+                .equals(testSiteBResultTokenizedSiteName)).findFirst().orElseThrow();
 
         assertEquals(30, queryResult.getTotalNumberOfPatients());
         assertEquals(10, siteAResultLine.getNumberOfPatients());
@@ -160,20 +158,15 @@ public class QueryHandlerServiceIT {
 
         var testSiteA = new Site();
         testSiteA.setSiteName("A");
-        var testSiteAId = siteRepository.save(testSiteA).getId();
+        siteRepository.save(testSiteA);
 
         var testSiteB = new Site();
         testSiteB.setSiteName("B");
-        var testSiteBId = siteRepository.save(testSiteB).getId();
+        siteRepository.save(testSiteB);
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
 
-        var testSiteAResultId = new ResultId();
-        testSiteAResultId.setSiteId(testSiteAId);
-        testSiteAResultId.setQueryId(testQueryId);
-
         var testSiteAResult = new Result();
-        testSiteAResult.setId(testSiteAResultId);
         testSiteAResult.setSite(testSiteA);
         testSiteAResult.setQuery(testQuery);
         testSiteAResult.setResult(10);
@@ -181,12 +174,7 @@ public class QueryHandlerServiceIT {
         testSiteAResult.setResultType(SUCCESS);
         resultRepository.save(testSiteAResult);
 
-        var testSiteBResultId = new ResultId();
-        testSiteBResultId.setSiteId(testSiteBId);
-        testSiteBResultId.setQueryId(testQueryId);
-
         var testSiteBResult = new Result();
-        testSiteBResult.setId(testSiteBResultId);
         testSiteBResult.setSite(testSiteB);
         testSiteBResult.setQuery(testQuery);
         testSiteBResult.setResult(20);

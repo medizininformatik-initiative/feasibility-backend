@@ -6,6 +6,7 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
+import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
 import lombok.NonNull;
@@ -31,6 +32,9 @@ public class QueryHandlerService {
     @NonNull
     private final ResultRepository resultRepository;
 
+    @NonNull
+    private final QueryResultObfuscator queryResultObfuscator;
+
     public Long runQuery(StructuredQuery structuredQuery) throws QueryDispatchException {
         var queryId = queryDispatcher.enqueueNewQuery(structuredQuery);
         queryDispatcher.dispatchEnqueuedQuery(queryId, queryStatusListener);
@@ -43,7 +47,7 @@ public class QueryHandlerService {
 
         var resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                        .siteName(ssr.getSite().getSiteName())
+                        .siteName(queryResultObfuscator.tokenizeSiteName(ssr))
                         .numberOfPatients(ssr.getResult())
                         .build())
                 .collect(Collectors.toList());

@@ -108,12 +108,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
 
     private void persistResult(Query internalQuery, Site site, Integer matchesInPopulation)
             throws QueryResultCollectException {
-        var resultId = new Result.ResultId();
-        resultId.setQueryId(internalQuery.getId());
-        resultId.setSiteId(site.getId());
-
         var result = new Result();
-        result.setId(resultId);
         result.setQuery(internalQuery);
         result.setSite(site);
         result.setResultType((matchesInPopulation != null) ? SUCCESS : ERROR);
@@ -128,14 +123,4 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
                     .formatted(internalQuery.getId(), site.getSiteName()));
         }
     }
-
-    // TODO: refactor this functionality!!!
-//    private Integer getFreeDisplaySiteId(Long queryId) {
-//        var siteIds = siteRepository.getSiteIds();
-//        var usedSiteIds = resultRepository.getUsedDisplaySiteIds(queryId);
-//
-//        siteIds.removeIf(id -> usedSiteIds.contains(id));
-//        Collections.shuffle(siteIds);
-//        return siteIds.get(0);
-//    }
 }

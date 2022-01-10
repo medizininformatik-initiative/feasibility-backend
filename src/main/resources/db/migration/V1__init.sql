@@ -43,6 +43,7 @@ CREATE TABLE site (
 );
 
 CREATE TABLE result (
+    id SERIAL PRIMARY KEY,
     query_id INTEGER NOT NULL,
     site_id INTEGER NOT NULL,
     result_type result_type NOT NULL DEFAULT 'SUCCESS',
@@ -56,9 +57,6 @@ CREATE TABLE result (
 
 ALTER TABLE query_dispatch
     ADD CONSTRAINT query_dispatch_pkey PRIMARY KEY (query_id, external_query_id, broker_type);
-
-ALTER TABLE result
-    ADD CONSTRAINT result_pkey PRIMARY KEY (query_id, site_id);
 
 
 /***********************************
