@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker;
 
 import de.numcodex.feasibility_gui_backend.query.broker.mock.MockBrokerClient;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class BrokerSpringConfig {
   // and does not call this method anymore - rendering the enable-switches moot.
   @Qualifier("brokerClients")
   @Bean
-  public List<BrokerClient> createBrokerClients() {
+  public List<BrokerClient> createBrokerClients(QueryStatusListener statusListener) throws IOException {
     List<BrokerClient> brokerClients = new ArrayList<>();
     if (mockClientEnabled) {
       log.info("Enable mock client");
@@ -59,6 +61,11 @@ public class BrokerSpringConfig {
       brokerClients.add(BeanFactoryAnnotationUtils
           .qualifiedBeanOfType(ctx.getAutowireCapableBeanFactory(), BrokerClient.class, "dsf"));
     }
+
+    for (BrokerClient brokerClient : brokerClients) {
+      brokerClient.addQueryStatusListener(statusListener);
+    }
+
     return brokerClients;
   }
 }

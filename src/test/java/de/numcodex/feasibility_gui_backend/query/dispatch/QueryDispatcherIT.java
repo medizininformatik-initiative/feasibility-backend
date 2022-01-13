@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContent;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
@@ -67,9 +66,6 @@ public class QueryDispatcherIT {
     @Autowired
     private QueryHashCalculator queryHashCalculator;
 
-    @Autowired
-    private QueryStatusListener queryStatusListener;
-
     @Test
     public void testEnqueueNewQuery_QueryContentGetsCreatedIfNotAlreadyPresent() throws JsonProcessingException {
         var otherQuery = new StructuredQuery();
@@ -128,8 +124,7 @@ public class QueryDispatcherIT {
     public void testDispatchEnqueuedQuery_UnknownQueryIdDoesNotLeadToPersistedDispatchEntry() {
         var unknownQueryId = 9999999L;
 
-        assertThrows(QueryDispatchException.class, () -> queryDispatcher.dispatchEnqueuedQuery(unknownQueryId,
-                queryStatusListener));
+        assertThrows(QueryDispatchException.class, () -> queryDispatcher.dispatchEnqueuedQuery(unknownQueryId));
         assertEquals(0, queryDispatchRepository.count());
     }
 
@@ -138,7 +133,7 @@ public class QueryDispatcherIT {
         var testQuery = new StructuredQuery();
 
         var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery));
-        assertDoesNotThrow(() -> queryDispatcher.dispatchEnqueuedQuery(queryId, queryStatusListener));
+        assertDoesNotThrow(() -> queryDispatcher.dispatchEnqueuedQuery(queryId));
 
         var dispatches = queryDispatchRepository.findAll();
         assertEquals(1, dispatches.size());

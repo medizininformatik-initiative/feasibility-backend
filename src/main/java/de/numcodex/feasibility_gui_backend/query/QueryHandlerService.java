@@ -3,7 +3,6 @@ package de.numcodex.feasibility_gui_backend.query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
-import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
@@ -27,9 +26,6 @@ public class QueryHandlerService {
     private final QueryDispatcher queryDispatcher;
 
     @NonNull
-    private final QueryStatusListener queryStatusListener;
-
-    @NonNull
     private final ResultRepository resultRepository;
 
     @NonNull
@@ -37,11 +33,10 @@ public class QueryHandlerService {
 
     public Long runQuery(StructuredQuery structuredQuery) throws QueryDispatchException {
         var queryId = queryDispatcher.enqueueNewQuery(structuredQuery);
-        queryDispatcher.dispatchEnqueuedQuery(queryId, queryStatusListener);
+        queryDispatcher.dispatchEnqueuedQuery(queryId);
         return queryId;
     }
 
-    // TODO: re-enable site obfuscation later on!!!
     public QueryResult getQueryResult(Long queryId) {
         var singleSiteResults = resultRepository.findByQueryAndStatus(queryId, SUCCESS);
 

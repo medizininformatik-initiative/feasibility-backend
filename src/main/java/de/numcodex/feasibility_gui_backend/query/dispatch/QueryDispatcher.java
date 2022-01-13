@@ -7,7 +7,6 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
-import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatch.QueryDispatchId;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
@@ -78,19 +77,16 @@ public class QueryDispatcher {
      * Dispatches (publishes) an already enqueued query in a broadcast fashion using configured {@link BrokerClient}s.
      *
      * @param queryId        Identifies the query that shall be dispatched.
-     * @param statusListener Entity that gets called for every status change of the dispatched query.
      * @throws QueryDispatchException If an error occurs while dispatching the query.
      */
     // TODO: Pass in audit information! (actor)
-    public void dispatchEnqueuedQuery(Long queryId, QueryStatusListener statusListener) throws QueryDispatchException {
+    public void dispatchEnqueuedQuery(Long queryId) throws QueryDispatchException {
         var enqueuedQuery = getEnqueuedQuery(queryId);
         var deserializedQueryBody = getStructuredQueryFromEnqueuedQuery(enqueuedQuery);
         var translatedQueryBodyFormats = translateQueryIntoTargetFormats(deserializedQueryBody);
 
         try {
             for (BrokerClient broker : queryBrokerClients) {
-                broker.addQueryStatusListener(statusListener);
-
                 var brokerQueryId = broker.createQuery();
 
                 for (Entry<QueryMediaType, String> queryBodyFormats : translatedQueryBodyFormats.entrySet()) {
