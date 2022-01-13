@@ -19,9 +19,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 class FhirQueryTranslator implements QueryTranslator {
 
-    private static final String FLARE_QUERY_TRANSLATE_ENDPOINT_PATH = "/query-translate";
-    private static final String FLARE_QUERY_TRANSLATE_CONTENT_TYPE = "codex/json";
-    private static final String FLARE_QUERY_TRANSLATE_ACCEPT = "internal/json";
+    private static final String FLARE_QUERY_TRANSLATE_ENDPOINT_PATH = "/query/translate";
+    private static final String FLARE_QUERY_TRANSLATE_CONTENT_TYPE = "application/json";
+    private static final String FLARE_QUERY_TRANSLATE_ACCEPT = "CSQ";
 
     // TODO: this one should be replaced with a WebClient instance for asynchronous translation support.
     //       However, this will require changes to the interface as well. Additional changes will propagate
@@ -37,7 +37,10 @@ class FhirQueryTranslator implements QueryTranslator {
     public String translate(StructuredQuery query) throws QueryTranslationException {
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.putAll(Map.of(
-                HttpHeaders.ACCEPT, List.of(FLARE_QUERY_TRANSLATE_ACCEPT),
+                // TODO: Resolve this with the Flare team. This is NOT the header to be used.
+                //       The accept encoding header should not change the content itself.
+                //       Thus, it's mainly used for compression algorithms.
+                HttpHeaders.ACCEPT_ENCODING, List.of(FLARE_QUERY_TRANSLATE_ACCEPT),
                 HttpHeaders.CONTENT_TYPE, List.of(FLARE_QUERY_TRANSLATE_CONTENT_TYPE)
         ));
 
