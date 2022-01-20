@@ -13,6 +13,7 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationCom
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.Map.Entry;
 /**
  * Centralized component to enqueue and dispatch (publish) a {@link StructuredQuery}.
  */
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class QueryDispatcher {
@@ -70,13 +72,15 @@ public class QueryDispatcher {
                     return queryContentRepository.save(freshQueryBody);
                 });
 
-        return persistEnqueuedQuery(queryBody);
+        var queryId = persistEnqueuedQuery(queryBody);
+        log.info("enqueued query '%s'".formatted(queryId));
+        return queryId;
     }
 
     /**
      * Dispatches (publishes) an already enqueued query in a broadcast fashion using configured {@link BrokerClient}s.
      *
-     * @param queryId        Identifies the query that shall be dispatched.
+     * @param queryId Identifies the query that shall be dispatched.
      * @throws QueryDispatchException If an error occurs while dispatching the query.
      */
     // TODO: Pass in audit information! (actor)
@@ -96,6 +100,8 @@ public class QueryDispatcher {
                 }
                 broker.publishQuery(brokerQueryId);
                 persistDispatchedQuery(enqueuedQuery, brokerQueryId, broker.getBrokerType());
+                log.info("dispatched query '%s' as '%s' with broker type '%s'".formatted(queryId, brokerQueryId,
+                        broker.getBrokerType()));
             }
         } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException e) {
             throw new QueryDispatchException("cannot publish query with id '%s'".formatted(queryId), e);
