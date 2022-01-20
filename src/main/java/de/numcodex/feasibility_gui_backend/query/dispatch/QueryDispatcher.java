@@ -85,6 +85,7 @@ public class QueryDispatcher {
         var deserializedQueryBody = getStructuredQueryFromEnqueuedQuery(enqueuedQuery);
         var translatedQueryBodyFormats = translateQueryIntoTargetFormats(deserializedQueryBody);
 
+        // TODO: error handling + asynchronous dispatch!
         try {
             for (BrokerClient broker : queryBrokerClients) {
                 var brokerQueryId = broker.createQuery();
@@ -97,7 +98,7 @@ public class QueryDispatcher {
                 persistDispatchedQuery(enqueuedQuery, brokerQueryId, broker.getBrokerType());
             }
         } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException e) {
-            throw new QueryDispatchException("cannot publish query with id '%s'".formatted(queryId));
+            throw new QueryDispatchException("cannot publish query with id '%s'".formatted(queryId), e);
         }
     }
 
@@ -139,7 +140,7 @@ public class QueryDispatcher {
         try {
             return jsonUtil.readValue(enqueuedQuery.getQueryContent().getQueryContent(), StructuredQuery.class);
         } catch (JsonProcessingException e) {
-            throw new QueryDispatchException("cannot deserialize enqueued query body as structured query");
+            throw new QueryDispatchException("cannot deserialize enqueued query body as structured query", e);
         }
     }
 
@@ -148,7 +149,7 @@ public class QueryDispatcher {
         try {
             return queryTranslationComponent.translate(query);
         } catch (QueryTranslationException e) {
-            throw new QueryDispatchException("cannot translate enqueued query body into configured formats");
+            throw new QueryDispatchException("cannot translate enqueued query body into configured formats", e);
         }
     }
 }
