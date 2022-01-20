@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.translation;
 
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;

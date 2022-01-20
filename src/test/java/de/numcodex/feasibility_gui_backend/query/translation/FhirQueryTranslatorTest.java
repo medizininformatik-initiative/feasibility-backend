@@ -3,13 +3,14 @@ package de.numcodex.feasibility_gui_backend.query.translation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,15 +60,14 @@ public class FhirQueryTranslatorTest {
     public void testTranslate_EverythingSucceeds() throws JsonProcessingException, QueryTranslationException {
         var testQuery = new StructuredQuery();
         doReturn("foo").when(jsonUtil).writeValueAsString(testQuery);
-        when(client.postForObject(eq("/query-translate"), requestCaptor.capture(), eq(String.class)))
+        when(client.postForObject(eq("/query/translate"), requestCaptor.capture(), eq(String.class)))
                 .thenReturn("bar");
 
         var translationResult = fhirQueryTranslator.translate(testQuery);
         assertEquals("bar", translationResult);
         assertEquals("foo", requestCaptor.getValue().getBody());
-        assertEquals(1, requestCaptor.getValue().getHeaders().getAccept().size());
-        assertEquals("internal/json", requestCaptor.getValue().getHeaders().getAccept().get(0).toString());
+        assertEquals("CSQ", requestCaptor.getValue().getHeaders().getFirst(HttpHeaders.ACCEPT_ENCODING));
         assertNotNull(requestCaptor.getValue().getHeaders().getContentType());
-        assertEquals("codex/json", requestCaptor.getValue().getHeaders().getContentType().toString());
+        assertEquals("application/json", requestCaptor.getValue().getHeaders().getContentType().toString());
     }
 }

@@ -1,10 +1,9 @@
 package de.numcodex.feasibility_gui_backend.query.translation;
 
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;

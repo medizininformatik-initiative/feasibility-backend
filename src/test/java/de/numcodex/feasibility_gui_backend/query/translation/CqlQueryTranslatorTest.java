@@ -3,9 +3,9 @@ package de.numcodex.feasibility_gui_backend.query.translation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.model.common.TermCode;
-import de.numcodex.feasibility_gui_backend.model.query.StructuredQuery;
-import de.numcodex.feasibility_gui_backend.model.ui.Criterion;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.cql.Library;
 import org.junit.jupiter.api.Disabled;
