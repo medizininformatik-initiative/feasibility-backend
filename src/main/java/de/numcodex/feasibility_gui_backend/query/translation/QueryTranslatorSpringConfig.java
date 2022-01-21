@@ -3,9 +3,9 @@ package de.numcodex.feasibility_gui_backend.query.translation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.sq2cql.Translator;
-import de.numcodex.sq2cql.model.ConceptNode;
 import de.numcodex.sq2cql.model.Mapping;
 import de.numcodex.sq2cql.model.MappingContext;
+import de.numcodex.sq2cql.model.TermCodeNode;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,10 +76,10 @@ public class QueryTranslatorSpringConfig {
     @Bean
     Translator createCqlTranslator(@Qualifier("translation") ObjectMapper jsonUtil) throws IOException {
         var mappings = jsonUtil.readValue(new File(mappingsFile), Mapping[].class);
-        var conceptTree = jsonUtil.readValue(new File(conceptTreeFile), ConceptNode.class);
+        var conceptTree = jsonUtil.readValue(new File(conceptTreeFile), TermCodeNode.class);
         return Translator.of(MappingContext.of(
                 Stream.of(mappings)
-                        .collect(Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
+                        .collect(Collectors.toMap(Mapping::getKey, Function.identity(), (a, b) -> a)),
                 conceptTree,
                 Map.ofEntries(entry("http://fhir.de/CodeSystem/dimdi/icd-10-gm", "icd10"),
                         entry("http://loinc.org", "loinc"),
