@@ -1,4 +1,4 @@
-FROM openjdk:15
+FROM openjdk:17
 
 WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar

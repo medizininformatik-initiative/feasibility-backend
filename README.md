@@ -5,7 +5,10 @@
 
 | EnvVar | Description | Example | Default |
 |--------|-------------|---------|---------|
-|BROKER_CLIENT_TYPE|Selects the BorkerClient implementation to be used. Valid types are: `DSF`, `AKTIN`, `DIRECT` , `MOCK` | `DSF` | `MOCK` |
+|BROKER_CLIENT_MOCK_ENABLED|Enables the mock client. Possible values are `true` and `false`. | | `true` |
+|BROKER_CLIENT_DIRECT_ENABLED|Enables the direct client. Possible values are `true` and `false`. | | `false` |
+|BROKER_CLIENT_AKTIN_ENABLED|Enables the aktin client. Possible values are `true` and `false`. | | `false` |
+|BROKER_CLIENT_DSF_ENABLED|Enables the dsf client. Possible values are `true` and `false`. | | `false` |
 |KEYCLOAK_ENABLED| Enables Keycloak if set to true. Possible values are `true` and `false`. | | `true` |
 |KEYCLOAK_BASE_URL| Base URL to reach a keycloak instance. | | `http://localhost:8080` |
 |KEYCLOAK_REALM| Realm to be used for checking bearer tokens. | | `codex-develop` |
@@ -52,6 +55,9 @@ In order to run the backend using the DSF path, the following environment variab
 | DSF_SECURITY_CACERT | Certificate required for secured communication with the DSF middleware. |||
 | DSF_SECURITY_KEYSTORE_P12FILE | Security archive (`PKCS #12`) carrying authentication information required for communication with the DSF middleware. |||
 | DSF_SECURITY_KEYSTORE_PASSWORD | Password required to decrypt the security archive for subsequent use. |||
+| DSF_PROXY_HOST | Proxy host to be used. |||
+| DSF_PROXY_USERNAME | Proxy username to be used. |||
+| DSF_PROXY_PASSWORD | Proxy password to be used. |||
 | DSF_WEBSERVICE_BASE_URL | Base URL pointing to the local ZARS FHIR server. | `https://zars/fhir` ||
 | DSF_WEBSOCKET_URL | URL pointing to the local ZARS FHIR server websocket endpoint. | `wss://zars/fhir/ws` ||
 | DSF_ORGANIZATION_ID | Identifier for the local organization this backend is part of. | `MY ZARS` ||
@@ -110,7 +116,7 @@ The project requires a PSQL database. The easiest way to set this up is to use t
 `docker-compose up -d`
 
 Note that this starts an empty psql database as well as a containerized version of the backend.
-The containerized version of the backend will then connects to the backend database.
+The containerized version of the backend will then connect to the backend database.
 One can then connect to the same database when starting the backend in an IDE.
 
 ## Working with the backend

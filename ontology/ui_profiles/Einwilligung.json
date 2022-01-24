@@ -3,7 +3,7 @@
         {
             "children": [],
             "display": "Erhebung, Verarbeitung und wissenschaftliche Nutzung (Punkte 1.1 - 1.3)",
-            "id": "197c46a0-819c-4500-928c-2604f180118a",
+            "id": "e7c94259-9bf0-4a5d-b8f8-6f2d62e07c30",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -35,7 +35,7 @@
         {
             "children": [],
             "display": "Krankenkassendaten: R\u00fcckwirkend f\u00fcr die Daten der vergangenen 5 Kalenderjahre (Punkt 2.1)",
-            "id": "6c5efce2-0907-481e-8f54-acab02dee22f",
+            "id": "5a058605-b687-433a-9ff1-1d643753a6a4",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -67,7 +67,7 @@
         {
             "children": [],
             "display": "Krankenkassendaten: Ab dem Datum der Unterschrift \u00fcber einen Zeitraum von 5 Jahren (Punkt 2.2)",
-            "id": "9addfc02-b964-418c-b8ab-43185fd16224",
+            "id": "815166af-9864-4eb0-91bd-9bf5aac13e35",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -99,7 +99,7 @@
         {
             "children": [],
             "display": "Biomaterialien: Einwilligung in die Gewinnung, Lagerung und wissenschaftliche Nutzung (Punkte 3.1 - 3.3)",
-            "id": "8972f1b7-8c45-4194-ac75-3699d2fec80f",
+            "id": "848c0e37-150a-48e9-8b90-7506fee7f27f",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -131,7 +131,7 @@
         {
             "children": [],
             "display": "Biomaterialien: Entnahme geringer zus\u00e4tzlicher Mengen (Punkt 3.2)",
-            "id": "b92f7852-0728-415d-b7ba-502146233c6c",
+            "id": "e3c314ab-54da-42ea-ac6b-e2419b7d89b8",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -163,7 +163,7 @@
         {
             "children": [],
             "display": "Erneute Kontaktaufnahme: Zus\u00e4tzliche wissenschaftliche Fragen, neue Forschungsvorhaben/Studien, Verkn\u00fcpfung mit anderen Datenbanken (Punkt 4.1)",
-            "id": "d48b358e-9003-4917-ae08-b29fd31a15b4",
+            "id": "aa9164f5-4576-4e83-aa5a-57afcc309ac9",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -195,7 +195,7 @@
         {
             "children": [],
             "display": "Erneute Kontaktaufnahme: Information \u00fcber medizinische Zusatzbefunde (Punkt 4.2)",
-            "id": "5c937a08-5ee6-41d6-8252-8c2488c2135c",
+            "id": "7f254159-6dd8-4332-84d4-5ab49bc9d124",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -227,7 +227,7 @@
         {
             "children": [],
             "display": "Nutzung im Rahmen von NUM-CODEX: Nutzung auf der zentralen Datenplattform (Punkt Z1)",
-            "id": "7607a80e-2ca1-4f5e-9939-21a455a35cd9",
+            "id": "92e763a9-e792-4207-8ffb-56e3ef0de2d8",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -259,7 +259,7 @@
         {
             "children": [],
             "display": "Nutzung im Rahmen von NUM-CODEX: Weitergabe in L\u00e4nder ohne angemessenes Datenschutzniveau (Punkt Z1.1)",
-            "id": "e713d636-8a99-473f-9312-0c476795317e",
+            "id": "43ee4fc9-7d5b-4f8f-be66-7b11c745d0fe",
             "leaf": true,
             "selectable": true,
             "termCode": {
@@ -290,7 +290,7 @@
         }
     ],
     "display": "Einwilligung",
-    "id": "c9a3ea8d-8dc8-4f98-b8d9-0ee1a3be82b9",
+    "id": "48380e72-5e74-482d-bbe7-b55dc2e75159",
     "leaf": false,
     "selectable": false,
     "termCode": {
