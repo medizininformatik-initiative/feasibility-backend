@@ -9,7 +9,7 @@
   </parent>
   <groupId>de.num-codex</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>0.0.10-SNAPSHOT</version>
+  <version>1.0.1</version>
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
 
