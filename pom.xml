@@ -130,7 +130,7 @@
     <dependency>
       <groupId>de.numcodex</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>0.1.8</version>
+      <version>0.1.10</version>
     </dependency>
 
     <dependency>
