@@ -9,7 +9,9 @@ import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType.DSF;
 
@@ -19,6 +21,7 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClient
 public final class DSFBrokerClient implements BrokerClient {
     private final QueryManager queryManager;
     private final QueryResultCollector queryResultCollector;
+    private final Map<String, Long> brokerToBackendQueryIdMapping;
 
     /**
      * Creates a new {@link DSFBrokerClient} instance.
@@ -29,6 +32,7 @@ public final class DSFBrokerClient implements BrokerClient {
     public DSFBrokerClient(QueryManager queryManager, QueryResultCollector queryResultCollector) {
         this.queryManager = queryManager;
         this.queryResultCollector = queryResultCollector;
+        brokerToBackendQueryIdMapping = new HashMap<>();
     }
 
     @Override
@@ -42,40 +46,47 @@ public final class DSFBrokerClient implements BrokerClient {
     }
 
     @Override
-    public String createQuery() {
-        return queryManager.createQuery();
+    public String createQuery(Long backendQueryId) {
+        var brokerQueryId = queryManager.createQuery();
+        brokerToBackendQueryIdMapping.put(brokerQueryId, backendQueryId);
+
+        return brokerQueryId;
     }
 
     @Override
-    public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
+    public void addQueryDefinition(String brokerQueryId, String mediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException {
-        queryManager.addQueryDefinition(queryId, mediaType, content);
+        queryManager.addQueryDefinition(brokerQueryId, mediaType, content);
     }
 
     @Override
-    public void publishQuery(String queryId) throws QueryNotFoundException, IOException {
-        queryManager.publishQuery(queryId);
+    public void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException {
+        queryManager.publishQuery(brokerQueryId);
     }
 
     @Override
-    public void closeQuery(String queryId) throws QueryNotFoundException {
-        queryManager.removeQuery(queryId);
-        queryResultCollector.removeResults(queryId);
+    public void closeQuery(String brokerQueryId) throws QueryNotFoundException {
+        queryManager.removeQuery(brokerQueryId);
+        queryResultCollector.removeResults(brokerQueryId);
     }
 
     @Override
-    public int getResultFeasibility(String queryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
-        return queryResultCollector.getResultFeasibility(queryId, siteId);
+    public int getResultFeasibility(String brokerQueryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
+        return queryResultCollector.getResultFeasibility(brokerQueryId, siteId);
     }
 
     @Override
-    public List<String> getResultSiteIds(String queryId) throws QueryNotFoundException {
-        return queryResultCollector.getResultSiteIds(queryId);
+    public List<String> getResultSiteIds(String brokerQueryId) throws QueryNotFoundException {
+        return queryResultCollector.getResultSiteIds(brokerQueryId);
     }
 
     @Override
     public String getSiteName(String siteId) throws SiteNotFoundException {
         // TODO: implement (separate issue)
         return null;
+    }
+
+    Long getBackendQueryId(String brokerQueryId) {
+        return brokerToBackendQueryIdMapping.get(brokerQueryId);
     }
 }

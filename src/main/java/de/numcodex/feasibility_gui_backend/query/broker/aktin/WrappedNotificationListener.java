@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.aktin;
 
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.logging.Level;
 @Log
 public class WrappedNotificationListener implements AdminNotificationListener{
 	final private AktinBrokerClient client;
-	final private QueryStatusListener delegate;
+	final private QueryStatusListener statusListener;
 
 	@Override
 	public void onRequestCreated(int requestId) {
@@ -41,7 +42,7 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 
 	@Override
 	public void onRequestStatusUpdate(int requestId, int nodeId, String status) {
-		QueryStatus dest;
+		QueryStatus queryStatus;
 		RequestStatus rs;
 		try{
 			rs = RequestStatus.valueOf(status);
@@ -49,7 +50,7 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 			return; // unsupported/unrecognized status
 		}
 		
-		dest = switch (rs) {
+		queryStatus = switch (rs) {
 			case completed -> QueryStatus.COMPLETED;
 			case processing -> QueryStatus.EXECUTING;
 			case queued -> QueryStatus.QUEUED;
@@ -57,7 +58,10 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 			default -> QueryStatus.FAILED;
 		};
 		log.log(Level.INFO,"Request status updated {0} {1} {2}", new Object[] {requestId,nodeId,status});
-		delegate.onClientUpdate(client, client.wrapQueryId(requestId), client.wrapSiteId(nodeId), dest);
+		var statusUpdate = new QueryStatusUpdate(client, client.wrapQueryId(requestId), client.wrapSiteId(nodeId),
+				queryStatus);
+		var associatedBackendQueryId = client.getBackendQueryId(client.wrapQueryId(requestId));
+		statusListener.onClientUpdate(associatedBackendQueryId, statusUpdate);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
@@ -35,7 +36,8 @@ public class DirectBrokerClient implements BrokerClient {
 
     private final WebClient webClient;
     private final List<QueryStatusListener> listeners;
-    private final Map<String, DirectQuery> queries;
+    private final Map<String, DirectQuery> brokerQueries;
+    private final Map<String, Long> brokerToBackendQueryIdMapping;
 
     /**
      * Creates a new {@link DirectBrokerClient} instance that uses the given web client to communicate with a Flare
@@ -46,7 +48,8 @@ public class DirectBrokerClient implements BrokerClient {
     public DirectBrokerClient(WebClient webClient) {
         this.webClient = Objects.requireNonNull(webClient);
         listeners = new ArrayList<>();
-        queries = new HashMap<>();
+        brokerQueries = new HashMap<>();
+        brokerToBackendQueryIdMapping = new HashMap<>();
     }
 
     @Override
@@ -60,24 +63,26 @@ public class DirectBrokerClient implements BrokerClient {
     }
 
     @Override
-    public String createQuery() {
-        var query = DirectQuery.create();
-        queries.put(query.getQueryId(), query);
+    public String createQuery(Long backendQueryId) {
+        var brokerQuery = DirectQuery.create();
+        var brokerQueryId = brokerQuery.getQueryId();
+        brokerQueries.put(brokerQueryId, brokerQuery);
+        brokerToBackendQueryIdMapping.put(brokerQueryId, backendQueryId);
 
-        return query.getQueryId();
+        return brokerQueryId;
     }
 
     @Override
-    public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException {
-        findQuery(queryId).addQueryDefinition(mediaType, content);
+    public void addQueryDefinition(String brokerQueryId, String mediaType, String content) throws QueryNotFoundException {
+        findQuery(brokerQueryId).addQueryDefinition(mediaType, content);
     }
 
     @Override
-    public void publishQuery(String queryId) throws QueryNotFoundException, IOException {
-        var query = findQuery(queryId);
+    public void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException {
+        var query = findQuery(brokerQueryId);
         var structuredQueryContent = Optional.ofNullable(query.getQueryDefinition(STRUCTURED_QUERY))
                 .orElseThrow(() -> new IllegalStateException("Query with ID "
-                        + queryId
+                        + brokerQueryId
                         + " does not contain a query definition for the mandatory type: "
                         + STRUCTURED_QUERY
                 ));
@@ -96,32 +101,36 @@ public class DirectBrokerClient implements BrokerClient {
                     .map(Integer::valueOf)
                     .doOnError(error -> {
                         log.error(error.getMessage(), error);
-                        listeners.forEach(l -> l.onClientUpdate(this, queryId, SITE_1_ID, FAILED));
+                        var statusUpdate = new QueryStatusUpdate(this, brokerQueryId, SITE_1_ID, FAILED);
+                        var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(brokerQueryId);
+                        listeners.forEach(l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate));
                     })
                     .subscribe(val -> {
                         query.registerSiteResults(SITE_1_ID, val);
-                        listeners.forEach(l -> l.onClientUpdate(this, queryId, SITE_1_ID, COMPLETED));
+                        var statusUpdate = new QueryStatusUpdate(this, brokerQueryId, SITE_1_ID, COMPLETED);
+                        var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(brokerQueryId);
+                        listeners.forEach(l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate));
                     });
         } catch (Exception e) {
-            throw new IOException("An error occurred while publishing the query with ID: " + queryId, e);
+            throw new IOException("An error occurred while publishing the query with ID: " + brokerQueryId, e);
         }
     }
 
     @Override
-    public void closeQuery(String queryId) throws QueryNotFoundException {
-        if (queries.remove(queryId) == null) {
-            throw new QueryNotFoundException(queryId);
+    public void closeQuery(String brokerQueryId) throws QueryNotFoundException {
+        if (brokerQueries.remove(brokerQueryId) == null) {
+            throw new QueryNotFoundException(brokerQueryId);
         }
     }
 
     @Override
-    public int getResultFeasibility(String queryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
-        return findQuery(queryId).getSiteResult(siteId);
+    public int getResultFeasibility(String brokerQueryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
+        return findQuery(brokerQueryId).getSiteResult(siteId);
     }
 
     @Override
-    public List<String> getResultSiteIds(String queryId) throws QueryNotFoundException {
-        return findQuery(queryId).getSiteIdsWithResult();
+    public List<String> getResultSiteIds(String brokerQueryId) throws QueryNotFoundException {
+        return findQuery(brokerQueryId).getSiteIdsWithResult();
     }
 
     @Override
@@ -137,7 +146,7 @@ public class DirectBrokerClient implements BrokerClient {
      * @throws QueryNotFoundException If the ID does not identify a known query.
      */
     private DirectQuery findQuery(String queryId) throws QueryNotFoundException {
-        return Optional.ofNullable(queries.get(queryId))
+        return Optional.ofNullable(brokerQueries.get(queryId))
                 .orElseThrow(() -> new QueryNotFoundException(queryId));
     }
 

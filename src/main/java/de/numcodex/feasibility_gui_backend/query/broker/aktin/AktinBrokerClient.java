@@ -6,14 +6,15 @@ import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
-import lombok.AllArgsConstructor;
 import org.aktin.broker.client2.BrokerAdmin2;
 import org.aktin.broker.xml.Node;
 import org.aktin.broker.xml.RequestStatusInfo;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Objects;
 
 import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType.AKTIN;
 
@@ -23,11 +24,16 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClient
  * @author R.W.Majeed
  *
  */
-@AllArgsConstructor
 public class AktinBrokerClient implements BrokerClient {
-	final private BrokerAdmin2 delegate;
+	private final BrokerAdmin2 delegate;
+	private final Map<String, Long> brokerToBackendQueryIdMapping;
 
-	@Override
+    public AktinBrokerClient(BrokerAdmin2 delegate) {
+        this.delegate = Objects.requireNonNull(delegate);
+        this.brokerToBackendQueryIdMapping = new HashMap<>();
+    }
+
+    @Override
 	public BrokerClientType getBrokerType() {
 		return AKTIN;
 	}
@@ -55,46 +61,49 @@ public class AktinBrokerClient implements BrokerClient {
 	}
 
 	@Override
-	public String createQuery() throws IOException {
-		return wrapQueryId(delegate.createRequest());
-	}
+	public String createQuery(Long backendQueryId) throws IOException {
+        var brokerQueryId = wrapQueryId(delegate.createRequest());
+        brokerToBackendQueryIdMapping.put(brokerQueryId, backendQueryId);
+
+        return brokerQueryId;
+    }
 
 	@Override
-	public void addQueryDefinition(String queryId, String mediaType, String content)
+	public void addQueryDefinition(String brokerQueryId, String mediaType, String content)
 			throws QueryNotFoundException, UnsupportedMediaTypeException, IOException {
-		delegate.putRequestDefinition(unwrapQueryId(queryId), mediaType, content);
+		delegate.putRequestDefinition(unwrapQueryId(brokerQueryId), mediaType, content);
 
 	}
 
 	@Override
-	public void publishQuery(String queryId) throws QueryNotFoundException, IOException {
-		delegate.publishRequest(unwrapQueryId(queryId));
+	public void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException {
+		delegate.publishRequest(unwrapQueryId(brokerQueryId));
 	}
 
 	@Override
-	public void closeQuery(String queryId) throws IOException {
-		delegate.closeRequest(unwrapQueryId(queryId));
+	public void closeQuery(String brokerQueryId) throws IOException {
+		delegate.closeRequest(unwrapQueryId(brokerQueryId));
 	}
 
 	@Override
-	public int getResultFeasibility(String queryId, String siteId)
+	public int getResultFeasibility(String brokerQueryId, String siteId)
 			throws QueryNotFoundException, SiteNotFoundException, IOException {
-		String result = delegate.getResultString(unwrapQueryId(queryId), unwrapSiteId(siteId));
+		String result = delegate.getResultString(unwrapQueryId(brokerQueryId), unwrapSiteId(siteId));
 		if( result == null ) {
-			throw new SiteNotFoundException(queryId, siteId);
+			throw new SiteNotFoundException(brokerQueryId, siteId);
 		}
 		return Integer.parseInt(result);
 	}
 
 	@Override
-	public List<String> getResultSiteIds(String queryId) throws QueryNotFoundException, IOException {
-		List<RequestStatusInfo> list = delegate.listRequestStatus(unwrapQueryId(queryId));
+	public List<String> getResultSiteIds(String brokerQueryId) throws QueryNotFoundException, IOException {
+		List<RequestStatusInfo> list = delegate.listRequestStatus(unwrapQueryId(brokerQueryId));
 		if( list == null ) {
-			throw new QueryNotFoundException(queryId);
+			throw new QueryNotFoundException(brokerQueryId);
 		}
 		return list.stream()
 				.map( (info) -> wrapSiteId(info.node) )
-				.collect(Collectors.toUnmodifiableList());
+                .toList();
 	}
 
 	@Override
@@ -106,4 +115,7 @@ public class AktinBrokerClient implements BrokerClient {
 		return node.getCommonName();
 	}
 
+    Long getBackendQueryId(String brokerQueryId) {
+        return brokerToBackendQueryIdMapping.get(brokerQueryId);
+    }
 }

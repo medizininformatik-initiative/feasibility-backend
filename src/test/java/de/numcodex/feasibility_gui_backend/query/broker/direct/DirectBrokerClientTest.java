@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class DirectBrokerClientTest {
 
+    private static final Long TEST_BACKEND_QUERY_ID = 1L;
+
     @SuppressWarnings("unused")
     @Mock
     WebClient webClient;
@@ -28,7 +30,7 @@ class DirectBrokerClientTest {
 
     @Test
     void testPublishExistingQueryWithoutStructuredQueryDefinition() {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         assertThrows(IllegalStateException.class, () -> client.publishQuery(queryId));
     }
 
@@ -46,7 +48,7 @@ class DirectBrokerClientTest {
 
     @Test
     void testCloseQuery() {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         assertDoesNotThrow(() -> client.closeQuery(queryId));
     }
 
@@ -57,7 +59,7 @@ class DirectBrokerClientTest {
 
     @Test
     void testGetResultFeasibilityForUnknownSite() {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         assertThrows(SiteNotFoundException.class, () -> client.getResultFeasibility(queryId, "unknown-site-id"));
     }
 
@@ -68,7 +70,7 @@ class DirectBrokerClientTest {
 
     @Test
     void testGetResultSiteIdsForUnpublishedQuery() throws QueryNotFoundException {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         var resultSiteIds = client.getResultSiteIds(queryId);
 
         assertTrue(resultSiteIds.isEmpty());

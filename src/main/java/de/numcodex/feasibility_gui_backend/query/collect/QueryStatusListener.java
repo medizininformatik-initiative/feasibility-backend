@@ -1,19 +1,16 @@
 package de.numcodex.feasibility_gui_backend.query.collect;
 
-import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
-
 /**
- * Represents an entity capable of receiving results from a feasibility query running in a distributed fashion.
+ * Represents an entity capable of receiving results from brokers for broker specific queries that they run.
  */
 public interface QueryStatusListener {
 
     /**
-     * Callback method to process feasibility query result updates.
+     * Processes update notifications from brokers to one of their broker specific queries that is associated with an
+     * internal (backend specific) query.
      *
-     * @param client  The broker client that this update belongs to.
-     * @param queryId Identifies the query within the broker for which there is an update.
-     * @param siteId  Identifies the site within the broker for which there is an update. Related to a specific query.
-     * @param status  New state of the query.
+     * @param backendQueryId    Identifier for a backend specific query that the status update is associated with.
+     * @param queryStatusUpdate Describes the update for a broker specific query.
      */
-    void onClientUpdate(BrokerClient client, String queryId, String siteId, QueryStatus status);
+    void onClientUpdate(Long backendQueryId, QueryStatusUpdate queryStatusUpdate);
 }

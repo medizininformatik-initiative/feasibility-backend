@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MockBrokerClientTest {
 
+    private static final Long TEST_BACKEND_QUERY_ID = 1L;
+
     MockBrokerClient client;
 
     @BeforeEach
@@ -23,7 +25,7 @@ class MockBrokerClientTest {
 
     @Test
     void testAddQueryDefinitionToExistingQuery() {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         assertDoesNotThrow(() -> client.addQueryDefinition(queryId, "application/json", ""));
     }
 
@@ -34,7 +36,7 @@ class MockBrokerClientTest {
 
     @Test
     void testCloseQueryWhichHasNotYetBeenPublished() {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         assertDoesNotThrow(() -> client.closeQuery(queryId));
     }
 
@@ -45,7 +47,7 @@ class MockBrokerClientTest {
 
     @Test
     void testGetResultFeasibilityForUnknownSite() {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         assertThrows(SiteNotFoundException.class, () -> client.getResultFeasibility(queryId, "unknown-site-id"));
     }
 
@@ -56,7 +58,7 @@ class MockBrokerClientTest {
 
     @Test
     void testGetResultSiteIdsForUnpublishedQuery() throws QueryNotFoundException {
-        var queryId = client.createQuery();
+        var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         var resultSiteIds = client.getResultSiteIds(queryId);
 
         assertTrue(resultSiteIds.isEmpty());
