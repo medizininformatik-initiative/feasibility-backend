@@ -75,7 +75,10 @@ public final class DSFBrokerClient implements BrokerClient {
 
     @Override
     public String getSiteName(String siteId) throws SiteNotFoundException {
-        // TODO: implement (separate issue)
-        return null;
+        // TODO: replace this identity function with a real resolve routine later on.
+        if (siteId == null) {
+            throw new SiteNotFoundException("cannot find site name of site id with value 'null'");
+        }
+        return siteId;
     }
 }
