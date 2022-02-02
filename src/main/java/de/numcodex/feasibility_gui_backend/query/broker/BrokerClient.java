@@ -28,70 +28,72 @@ public interface BrokerClient {
     void addQueryStatusListener(QueryStatusListener queryStatusListener) throws IOException;
 
     /**
-     * Creates a new unpublished query.
+     * Creates a new unpublished broker specific query.
      *
-     * @return The ID of the created query.
+     * @param backendQueryId Identifier for a backend specific query that a broker specific query is created for.
+     * @return Identifier of the broker specific query.
      * @throws IOException IO/communication error
      */
-    String createQuery() throws IOException;
+    String createQuery(Long backendQueryId) throws IOException;
 
     /**
-     * Adds the necessary query definition to a query.
+     * Adds the necessary query definition to a broker specific query.
      * <p>
      * The query definition is added to a query identified by the given query ID.
      *
-     * @param queryId   Identifies the query that the query definition shall be added to.
-     * @param mediaType ?
-     * @param content   The actual query in plain text.
+     * @param brokerQueryId Identifies the broker specific query that the query definition shall be added to.
+     * @param mediaType     MIME type for the query content.
+     * @param content       The actual query in plain text.
      * @throws QueryNotFoundException        If the given query ID does not identify a known query.
      * @throws UnsupportedMediaTypeException If the given media type is not supported.
      * @throws IOException                   IO/communication error
      */
-    void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
+    void addQueryDefinition(String brokerQueryId, String mediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException, IOException;
 
     /**
-     * Publishes a query for distributed execution.
+     * Publishes a broker specific query for distributed execution.
      *
-     * @param queryId Identifies the query that shall be published.
+     * @param brokerQueryId Identifies the broker specific query that shall be published.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
      * @throws IOException            If the query was not published due IO/communication error
      */
-    void publishQuery(String queryId) throws QueryNotFoundException, IOException;
+    void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException;
 
     /**
-     * Marks an already published query as closed.
+     * Marks an already published broker specific query as closed.
      * <p>
      * After calling this function calls to {@link #getResultFeasibility(String, String)} and
      * {@link #getResultSiteIds(String)} will fail.
      *
-     * @param queryId Identifies the query that shall be closed.
+     * @param brokerQueryId Identifies the broker specific query that shall be closed.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
      * @throws IOException            IO/communication error
      */
-    void closeQuery(String queryId) throws QueryNotFoundException, IOException;
+    void closeQuery(String brokerQueryId) throws QueryNotFoundException, IOException;
 
     /**
-     * Gets the feasibility (measure count) of a published query for a specific site.
+     * Gets the feasibility (measure count) of a published broker specific query for a specific site.
      *
-     * @param queryId Identifies the query.
-     * @param siteId  Identifies the site within the query whose feasibility shall be gotten.
+     * @param brokerQueryId Identifies the broker specific query.
+     * @param siteId        Identifies the site within the query whose feasibility shall be gotten.
      * @return The feasibility for a specific site within a query.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
      * @throws SiteNotFoundException  If the given site ID does not identify a known site within a query.
      * @throws IOException            IO/communication error
      */
-    int getResultFeasibility(String queryId, String siteId) throws QueryNotFoundException, SiteNotFoundException, IOException;
+    int getResultFeasibility(String brokerQueryId, String siteId) throws QueryNotFoundException, SiteNotFoundException,
+            IOException;
 
     /**
-     * Gets all site IDs associated with a published query that can already provide a result.
+     * Gets all site IDs associated with a published broker specific query that can already provide a result.
      *
-     * @param queryId Identifies the query whose associated site IDs with results shall be gotten.
+     * @param brokerQueryId Identifies the broker specific query whose associated site IDs with results shall be gotten.
      * @return All site IDs of a specific query that can already provide results.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
      * @throws IOException            IO/communication error
      */
-    List<String> getResultSiteIds(String queryId) throws QueryNotFoundException, IOException;
+    List<String> getResultSiteIds(String brokerQueryId) throws QueryNotFoundException, IOException;
 
     /**
      * Gets the display name of a site.

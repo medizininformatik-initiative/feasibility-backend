@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class QueryHandlerService {
 
@@ -37,6 +36,7 @@ public class QueryHandlerService {
         return queryId;
     }
 
+    @Transactional
     public QueryResult getQueryResult(Long queryId) {
         var singleSiteResults = resultRepository.findByQueryAndStatus(queryId, SUCCESS);
 

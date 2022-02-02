@@ -55,7 +55,7 @@ public class DSFQueryResultCollectorIT {
         resultCollector = new DSFQueryResultCollector(resultStore, fhirCtx, fhirWebClientProvider, resultHandler);
     }
 
-    private Task createTestTask(String queryId, String siteId, String measureReportReference, String profile) {
+    private Task createTestTask(String brokerQueryId, String siteId, String measureReportReference, String profile) {
         Task task = new Task()
                 .setStatus(COMPLETED)
                 .setIntent(ORDER)
@@ -81,7 +81,7 @@ public class DSFQueryResultCollectorIT {
                         .addCoding(new Coding()
                                 .setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
                                 .setCode("business-key")))
-                .setValue(new StringType(queryId));
+                .setValue(new StringType(brokerQueryId));
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
@@ -120,10 +120,10 @@ public class DSFQueryResultCollectorIT {
 
     @Test
     public void testRegisteredListenerGetsNotifiedOnUpdate() throws IOException, FhirWebClientProvisionException {
-        String queryId = UUID.randomUUID().toString();
+        String brokerQueryId = UUID.randomUUID().toString();
         String siteId = "DIC";
         String measureReportId = UUID.randomUUID().toString();
-        Task task = createTestTask(queryId, siteId, "MeasureReport/" + measureReportId, SINGLE_DIC_RESULT_PROFILE);
+        Task task = createTestTask(brokerQueryId, siteId, "MeasureReport/" + measureReportId, SINGLE_DIC_RESULT_PROFILE);
 
         int measureCount = 5;
         MeasureReport measureReport = createTestMeasureReport(measureCount);
@@ -133,19 +133,19 @@ public class DSFQueryResultCollectorIT {
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
         var actual = new Object() {
-            String queryId = null;
+            String brokerQueryId = null;
             String siteId = null;
             QueryStatus status = null;
         };
-        resultCollector.addResultListener(brokerClient, (broker, qId, sId, status) -> {
-            actual.queryId = qId;
-            actual.siteId = sId;
-            actual.status = status;
+        resultCollector.addResultListener(brokerClient, (backendQueryId, statusUpdate) -> {
+            actual.brokerQueryId = statusUpdate.brokerQueryId();
+            actual.siteId = statusUpdate.brokerSiteId();
+            actual.status = statusUpdate.status();
         });
 
         websocketClient.fakeIncomingMessage(task);
 
-        assertEquals(queryId, actual.queryId);
+        assertEquals(brokerQueryId, actual.brokerQueryId);
         assertEquals(siteId, actual.siteId);
         assertEquals(QueryStatus.COMPLETED, actual.status);
     }
@@ -162,9 +162,10 @@ public class DSFQueryResultCollectorIT {
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
-        resultCollector.addResultListener(brokerClient, (broker, qId, cId, status) -> {
+        resultCollector.addResultListener(brokerClient, (backendQueryId, statusUpdate) -> {
             try {
-                int resultFeasibility = resultCollector.getResultFeasibility(qId, cId);
+                int resultFeasibility = resultCollector.getResultFeasibility(statusUpdate.brokerQueryId(),
+                        statusUpdate.brokerSiteId());
 
                 assertEquals(measureCount, resultFeasibility);
             } catch (Exception e) {
@@ -188,9 +189,9 @@ public class DSFQueryResultCollectorIT {
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirClient);
         when(fhirClient.read(MeasureReport.class, measureReportId)).thenReturn(measureReport);
 
-        resultCollector.addResultListener(brokerClient, (broker, qId, sId, status) -> {
+        resultCollector.addResultListener(brokerClient, (backendQueryId, statusUpdate) -> {
             try {
-                List<String> siteIds = resultCollector.getResultSiteIds(qId);
+                List<String> siteIds = resultCollector.getResultSiteIds(statusUpdate.brokerQueryId());
 
                 assertEquals(List.of(siteId), siteIds);
             } catch (Exception e) {
@@ -207,7 +208,7 @@ public class DSFQueryResultCollectorIT {
         Task task = createTestTask(UUID.randomUUID().toString(), "DIC", "MeasureReport/" + measureReportId, "other-profile");
 
         when(fhirWebClientProvider.provideFhirWebsocketClient()).thenReturn(websocketClient);
-        resultCollector.addResultListener(brokerClient, (broker, qId, cId, status) -> fail());
+        resultCollector.addResultListener(brokerClient, (backendQueryId, statusUpdate) -> fail());
 
         websocketClient.fakeIncomingMessage(task);
     }
