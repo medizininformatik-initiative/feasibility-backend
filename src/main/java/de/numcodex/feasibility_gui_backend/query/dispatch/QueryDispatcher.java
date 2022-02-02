@@ -80,7 +80,7 @@ public class QueryDispatcher {
     /**
      * Dispatches (publishes) an already enqueued query in a broadcast fashion using configured {@link BrokerClient}s.
      *
-     * @param queryId Identifies the query that shall be dispatched.
+     * @param queryId Identifies the backend query that shall be dispatched.
      * @throws QueryDispatchException If an error occurs while dispatching the query.
      */
     // TODO: Pass in audit information! (actor)
@@ -92,7 +92,7 @@ public class QueryDispatcher {
         // TODO: error handling + asynchronous dispatch!
         try {
             for (BrokerClient broker : queryBrokerClients) {
-                var brokerQueryId = broker.createQuery();
+                var brokerQueryId = broker.createQuery(queryId);
 
                 for (Entry<QueryMediaType, String> queryBodyFormats : translatedQueryBodyFormats.entrySet()) {
                     broker.addQueryDefinition(brokerQueryId, queryBodyFormats.getKey().getRepresentation(),

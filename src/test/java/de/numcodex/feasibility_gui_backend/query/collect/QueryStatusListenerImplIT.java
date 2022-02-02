@@ -1,8 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query.collect;
 
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatch.QueryDispatchId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -14,8 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
@@ -42,9 +40,6 @@ class QueryStatusListenerImplIT {
     private QueryRepository queryRepository;
 
     @Autowired
-    private QueryDispatchRepository queryDispatchRepository;
-
-    @Autowired
     private SiteRepository siteRepository;
 
     @Autowired
@@ -55,10 +50,11 @@ class QueryStatusListenerImplIT {
 
     private static final String TEST_SITE_NAME = "TestSite";
     private static final int TEST_MATCHES_IN_POPULATION = 100;
-    private static final String EXTERNAL_QUERY_ID = "37ff21b1-3d5f-49b0-ac09-063c94eac7aa";
+    private static final String BROKER_QUERY_ID = "37ff21b1-3d5f-49b0-ac09-063c94eac7aa";
     private static final BrokerClientType FAKE_BROKER_CLIENT_TYPE = DIRECT;
 
     private String testSiteId;
+    private Long testBackendQueryId;
 
     @BeforeEach
     public void setUpDatabaseState() {
@@ -68,22 +64,14 @@ class QueryStatusListenerImplIT {
 
         var testQuery = new Query();
         testQuery.setQueryContent(fakeContent);
-        var internalTestQuery = queryRepository.save(testQuery);
+        testBackendQueryId = queryRepository.save(testQuery).getId();
 
         var testSite = new Site();
         testSite.setSiteName(TEST_SITE_NAME);
         testSiteId = String.valueOf(siteRepository.save(testSite).getId());
 
-        var testQueryDispatchId = new QueryDispatchId();
-        testQueryDispatchId.setQueryId(internalTestQuery.getId());
-        testQueryDispatchId.setExternalId(EXTERNAL_QUERY_ID);
-        testQueryDispatchId.setBrokerType(FAKE_BROKER_CLIENT_TYPE);
-
-        var testQueryDispatch = new QueryDispatch();
-        testQueryDispatch.setId(testQueryDispatchId);
-        testQueryDispatch.setQuery(internalTestQuery);
-        testQueryDispatch.setDispatchedAt(Timestamp.from(Instant.now()));
-        queryDispatchRepository.save(testQueryDispatch);
+        // Dispatch Table setup has been left out for brevity (will be filled at runtime but is not important for any of
+        // the test cases).
     }
 
     @ParameterizedTest
@@ -93,18 +81,18 @@ class QueryStatusListenerImplIT {
     public void testPersistResult_NonTerminatingStatusChangesDoesNotLeadToPersistedResult(QueryStatus status) {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(fakeBrokerClient, EXTERNAL_QUERY_ID, testSiteId,
-                status));
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, testSiteId, status);
+        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
         assertEquals(0, resultRepository.count());
     }
 
     @Test
-    public void testPersistResult_UnknownExternalQueryIdDoesNotLeadToPersistedResult() {
+    public void testPersistResult_UnknownBrokerQueryIdDoesNotLeadToPersistedResult() {
         var fakeBrokerClient = new FakeBrokerClient();
-        var unknownExternalQueryId = "some_unknown_id";
+        var unknownBrokerQueryId = "some_unknown_id";
 
-        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(fakeBrokerClient, unknownExternalQueryId, testSiteId,
-                COMPLETED));
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, unknownBrokerQueryId, testSiteId, COMPLETED);
+        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
         assertEquals(0, resultRepository.count());
     }
 
@@ -112,8 +100,8 @@ class QueryStatusListenerImplIT {
     public void testPersistResult_CompleteStatusLeadsToPersistedResultWithMatchesInPopulation() {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(fakeBrokerClient, EXTERNAL_QUERY_ID, testSiteId,
-                COMPLETED));
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, testSiteId, COMPLETED);
+        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
         var registeredResults = resultRepository.findAll();
         assertEquals(1, registeredResults.size());
@@ -126,8 +114,8 @@ class QueryStatusListenerImplIT {
     public void testPersistResult_FailedStatusLeadsToPersistedResultWithoutMatchesInPopulation() {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(fakeBrokerClient, EXTERNAL_QUERY_ID, testSiteId,
-                FAILED));
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, testSiteId, FAILED);
+        assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
         var registeredResults = resultRepository.findAll();
         assertEquals(1, registeredResults.size());
@@ -149,33 +137,38 @@ class QueryStatusListenerImplIT {
         }
 
         @Override
-        public String createQuery() {
+        public String createQuery(Long backendQueryId) {
             // NO-OP
             return null;
         }
 
         @Override
-        public void addQueryDefinition(String queryId, String mediaType, String content) {
+        public void addQueryDefinition(String brokerQueryId, String mediaType, String content) {
             // NO-OP
         }
 
         @Override
-        public void publishQuery(String queryId) {
+        public void publishQuery(String brokerQueryId) {
             // NO-OP
         }
 
         @Override
-        public void closeQuery(String queryId) {
+        public void closeQuery(String brokerQueryId) {
             // NO-OP
         }
 
         @Override
-        public int getResultFeasibility(String queryId, String siteId) {
+        public int getResultFeasibility(String brokerQueryId, String siteId) throws QueryNotFoundException {
+            if (!brokerQueryId.equals(BROKER_QUERY_ID)) {
+                throw new QueryNotFoundException("cannot find broker specific query for id '%s'"
+                        .formatted(brokerQueryId));
+            }
             return TEST_MATCHES_IN_POPULATION;
+
         }
 
         @Override
-        public List<String> getResultSiteIds(String queryId) {
+        public List<String> getResultSiteIds(String brokerQueryId) {
             // NO-OP
             return null;
         }

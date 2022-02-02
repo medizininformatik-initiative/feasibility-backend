@@ -29,7 +29,7 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.S
 public class QueryStatusListenerImpl implements QueryStatusListener {
 
     @NonNull
-    private final QueryDispatchRepository queryDispatchRepository;
+    private final QueryRepository queryRepository;
 
     @NonNull
     private final SiteRepository siteRepository;
@@ -38,17 +38,18 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
     private final ResultRepository resultRepository;
 
     @Override
-    public void onClientUpdate(BrokerClient client, String externalQueryId, String externalSiteId, QueryStatus status) {
-        logQueryStatusChange(externalQueryId, externalSiteId, client.getBrokerType(), status);
+    public void onClientUpdate(Long backendQueryId, QueryStatusUpdate statusUpdate) {
+        logQueryStatusChange(statusUpdate.brokerQueryId(), statusUpdate.brokerSiteId(),
+                statusUpdate.source().getBrokerType(), statusUpdate.status());
 
         try {
-            Optional<Integer> matchesInPopulation = (status == COMPLETED)
-                    ? Optional.of(resolveMatchesInPopulation(externalQueryId, externalSiteId, client))
+            Optional<Integer> matchesInPopulation = (statusUpdate.status() == COMPLETED)
+                    ? Optional.of(resolveMatchesInPopulation(statusUpdate.brokerQueryId(), statusUpdate.brokerSiteId(), statusUpdate.source()))
                     : Optional.empty();
 
-            if (status == COMPLETED || status == FAILED) {
-                var internalQuery = lookupCorrespondingInternalQuery(externalQueryId, client.getBrokerType());
-                var siteName = resolveSiteName(externalSiteId, client);
+            if (statusUpdate.status() == COMPLETED || statusUpdate.status() == FAILED) {
+                var internalQuery = lookupAssociatedBackendQuery(backendQueryId);
+                var siteName = resolveSiteName(statusUpdate.brokerSiteId(), statusUpdate.source());
                 var site = lookupSite(siteName)
                         .orElseGet(() -> createSite(siteName));
 
@@ -56,7 +57,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
             }
         } catch (QueryResultCollectException e) {
             log.error("cannot persist result of query '%s' for site '%s' with status '%s'".formatted(
-                    externalQueryId, externalSiteId, status.toString()), e);
+                    statusUpdate.brokerQueryId(), statusUpdate.brokerSiteId(), statusUpdate.status().toString()), e);
         }
     }
 
@@ -80,12 +81,10 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
         }
     }
 
-    private Query lookupCorrespondingInternalQuery(String externalQueryId, BrokerClientType brokerClientType)
-            throws QueryResultCollectException {
-        return queryDispatchRepository.findByExternalQueryIdAndBrokerType(externalQueryId, brokerClientType)
-                .flatMap(queryDispatch -> Optional.of(queryDispatch.getQuery()))
-                .orElseThrow(() -> new QueryResultCollectException("cannot resolve internal query for external query '%s'"
-                        .formatted(externalQueryId)));
+    private Query lookupAssociatedBackendQuery(Long backendQueryId) throws QueryResultCollectException {
+        return queryRepository.findById(backendQueryId)
+                .orElseThrow(() -> new QueryResultCollectException("cannot find backend query with id '%s'"
+                        .formatted(backendQueryId)));
     }
 
     private String resolveSiteName(String externalSiteId, BrokerClient client) throws QueryResultCollectException {

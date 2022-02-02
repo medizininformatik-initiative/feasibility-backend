@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker.mock;
 
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
@@ -26,14 +27,16 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClient
 public class MockBrokerClient implements BrokerClient {
 
     private final List<QueryStatusListener> listeners;
-    private final Map<String, MockQuery> queries;
+    private final Map<String, MockQuery> brokerQueries;
+    private final Map<String, Long> brokerToBackendQueryIdMapping;
     private final Map<String, String> siteNames;
 
     private final Map<String, List<CompletableFuture<Void>>> runningMocks;
 
     public MockBrokerClient() {
         listeners = new ArrayList<>();
-        queries = new HashMap<>();
+        brokerQueries = new HashMap<>();
+        brokerToBackendQueryIdMapping = new HashMap<>();
         siteNames = Map.of(
                 "2", "Lübeck",
                 "3", "Erlangen",
@@ -54,53 +57,59 @@ public class MockBrokerClient implements BrokerClient {
     }
 
     @Override
-    public String createQuery() {
-        var query = MockQuery.create();
-        queries.put(query.getQueryId(), query);
-        runningMocks.put(query.getQueryId(), List.of());
+    public String createQuery(Long backendQueryId) {
+        var brokerQuery = MockQuery.create();
+        var brokerQueryId = brokerQuery.getQueryId();
+        brokerQueries.put(brokerQueryId, brokerQuery);
+        brokerToBackendQueryIdMapping.put(brokerQueryId, backendQueryId);
+        runningMocks.put(brokerQueryId, List.of());
 
-        return query.getQueryId();
+        return brokerQueryId;
     }
 
     @Override
-    public void addQueryDefinition(String queryId, String mediaType, String content) {
+    public void addQueryDefinition(String brokerQueryId, String mediaType, String content) {
         // No-Op since this is irrelevant.
     }
 
     @Override
-    public void publishQuery(String queryId) throws QueryNotFoundException {
-        var query = findQuery(queryId);
+    public void publishQuery(String brokerQueryId) throws QueryNotFoundException {
+        var query = findQuery(brokerQueryId);
 
         var mocks = siteNames.keySet()
                 .stream().map(siteId -> CompletableFuture.runAsync(() -> {
                     try {
                         Thread.sleep(Math.round(2000 + 6000 * Math.random()));
                         query.registerSiteResults(siteId, (int) Math.round(10 + 500 * Math.random()));
-                        listeners.forEach(l -> l.onClientUpdate(this, queryId, siteId, COMPLETED));
+                        var statusUpdate = new QueryStatusUpdate(this, brokerQueryId, siteId, COMPLETED);
+                        var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(brokerQueryId);
+                        listeners.forEach(l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate));
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
-                        listeners.forEach(l -> l.onClientUpdate(this, queryId, siteId, FAILED));
+                        var statusUpdate = new QueryStatusUpdate(this, brokerQueryId, siteId, FAILED);
+                        var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(brokerQueryId);
+                        listeners.forEach(l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate));
                     }
                 }))
                 .collect(Collectors.toList());
-        runningMocks.put(queryId, mocks);
+        runningMocks.put(brokerQueryId, mocks);
     }
 
     @Override
-    public void closeQuery(String queryId) throws QueryNotFoundException {
-        Optional.ofNullable(runningMocks.get(queryId))
-                .orElseThrow(() -> new QueryNotFoundException(queryId))
+    public void closeQuery(String brokerQueryId) throws QueryNotFoundException {
+        Optional.ofNullable(runningMocks.get(brokerQueryId))
+                .orElseThrow(() -> new QueryNotFoundException(brokerQueryId))
                 .forEach(rm -> rm.complete(null));
     }
 
     @Override
-    public int getResultFeasibility(String queryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
-        return findQuery(queryId).getSiteResult(siteId);
+    public int getResultFeasibility(String brokerQueryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
+        return findQuery(brokerQueryId).getSiteResult(siteId);
     }
 
     @Override
-    public List<String> getResultSiteIds(String queryId) throws QueryNotFoundException {
-        return findQuery(queryId).getSiteIdsWithResult();
+    public List<String> getResultSiteIds(String brokerQueryId) throws QueryNotFoundException {
+        return findQuery(brokerQueryId).getSiteIdsWithResult();
     }
 
     @Override
@@ -116,7 +125,7 @@ public class MockBrokerClient implements BrokerClient {
      * @throws QueryNotFoundException If the ID does not identify a known query.
      */
     private MockQuery findQuery(String queryId) throws QueryNotFoundException {
-        return Optional.ofNullable(queries.get(queryId))
+        return Optional.ofNullable(brokerQueries.get(queryId))
                 .orElseThrow(() -> new QueryNotFoundException(queryId));
     }
 

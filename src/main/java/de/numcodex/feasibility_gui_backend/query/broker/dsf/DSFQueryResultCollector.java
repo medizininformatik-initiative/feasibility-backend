@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
@@ -74,8 +75,13 @@ class DSFQueryResultCollector implements QueryResultCollector {
 
     private void notifyResultListeners(DSFQueryResult result) {
         for (Entry<DSFBrokerClient, QueryStatusListener> listener : listeners.entrySet()) {
-            listener.getValue().onClientUpdate(listener.getKey(), result.getQueryId(), result.getSiteId(),
+            var broker = listener.getKey();
+            var statusListener = listener.getValue();
+            var statusUpdate = new QueryStatusUpdate(broker, result.getQueryId(), result.getSiteId(),
                     QueryStatus.COMPLETED);
+            var associatedBackendQueryId = broker.getBackendQueryId(result.getQueryId());
+
+            statusListener.onClientUpdate(associatedBackendQueryId, statusUpdate);
         }
     }
 
