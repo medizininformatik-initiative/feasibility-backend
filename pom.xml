@@ -108,10 +108,6 @@
       <artifactId>broker-client</artifactId>
       <version>1.3.2</version>
     </dependency>
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.highmed.dsf</groupId>
@@ -247,6 +243,7 @@
           <skipITs>${skipIntegrationTests}</skipITs>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
