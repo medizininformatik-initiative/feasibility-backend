@@ -82,7 +82,7 @@ public class QueryTranslatorSpringConfig {
                         .collect(Collectors.toMap(Mapping::getKey, Function.identity(), (a, b) -> a)),
                 conceptTree,
                 Map.ofEntries(entry("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "icd10"),
-                    entry("num.abide", "abide"),
+                    entry("mii.abide", "abide"),
                         entry("http://fhir.de/CodeSystem/bfarm/ops", "ops"),
                         entry("http://dicom.nema.org/resources/ontology/DCM", "dcm"),
                         entry("http://loinc.org", "loinc"),
