@@ -85,6 +85,7 @@ public class QueryTranslatorSpringConfig {
                     entry("mii.abide", "abide"),
                         entry("http://fhir.de/CodeSystem/bfarm/ops", "ops"),
                         entry("http://dicom.nema.org/resources/ontology/DCM", "dcm"),
+                        entry("https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus", "vitalstatus"),
                         entry("http://loinc.org", "loinc"),
                         entry("https://fhir.bbmri.de/CodeSystem/SampleMaterialType", "sample"),
                         entry("http://fhir.de/CodeSystem/bfarm/atc", "atc"),
