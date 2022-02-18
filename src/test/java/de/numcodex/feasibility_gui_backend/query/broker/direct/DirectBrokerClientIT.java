@@ -60,8 +60,7 @@ class DirectBrokerClientIT {
         client.publishQuery(brokerQueryId);
         var recordedRequest = mockWebServer.takeRequest();
 
-        assertEquals("application/json", recordedRequest.getHeader(CONTENT_TYPE));
-        assertEquals("CSQ", recordedRequest.getHeader(ACCEPT_ENCODING));
+        assertEquals("application/sq+json", recordedRequest.getHeader(CONTENT_TYPE));
         assertEquals("POST", recordedRequest.getMethod());
         assertEquals("foo", recordedRequest.getBody().readUtf8());
 
