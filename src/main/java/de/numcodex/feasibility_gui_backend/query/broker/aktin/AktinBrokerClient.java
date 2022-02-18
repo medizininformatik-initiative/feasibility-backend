@@ -92,7 +92,13 @@ public class AktinBrokerClient implements BrokerClient {
 		if( result == null ) {
 			throw new SiteNotFoundException(brokerQueryId, siteId);
 		}
-		return Integer.parseInt(result);
+
+		try {
+			return Integer.parseInt(result);
+		} catch (final NumberFormatException e) {
+			return 0;
+		}
+
 	}
 
 	@Override
