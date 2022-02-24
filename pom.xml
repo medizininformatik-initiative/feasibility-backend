@@ -104,9 +104,9 @@
     </dependency>
 
     <dependency>
-      <artifactId>org.everit.json.schema</artifactId>
-      <groupId>org.everit.json</groupId>
-      <version>1.5.1</version>
+      <groupId>com.github.erosb</groupId>
+      <artifactId>everit-json-schema</artifactId>
+      <version>1.14.0</version>
     </dependency>
 
     <dependency>

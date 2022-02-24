@@ -8,7 +8,6 @@ import java.io.InputStream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
@@ -36,9 +35,13 @@ public class QueryValidator {
   public void validate(StructuredQuery structuredQuery)
       throws ValidationException, FileNotFoundException, JSONException {
     try (InputStream inputStream = QueryValidator.class.getResourceAsStream(JSON_SCHEMA)) {
-      JSONObject jsonSchema = new JSONObject(new JSONTokener(inputStream));
-      JSONObject jsonSubject = new JSONObject(jsonUtil.writeValueAsString(structuredQuery));
-      Schema schema = SchemaLoader.load(jsonSchema);
+      var jsonSchema = new JSONObject(new JSONTokener(inputStream));
+      var jsonSubject = new JSONObject(jsonUtil.writeValueAsString(structuredQuery));
+      SchemaLoader loader = SchemaLoader.builder()
+          .schemaJson(jsonSchema)
+          .draftV7Support()
+          .build();
+      var schema = loader.load().build();
       schema.validate(jsonSubject);
     } catch (IOException | NullPointerException e) {
       throw new FileNotFoundException();
