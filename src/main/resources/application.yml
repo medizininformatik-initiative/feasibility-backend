@@ -29,6 +29,7 @@ app:
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
+  enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
