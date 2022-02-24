@@ -24,6 +24,15 @@ public class QueryValidator {
 
   private static final String JSON_SCHEMA = "/query/query-schema.json";
 
+  /**
+   * Validate the submitted {@link StructuredQuery} against the json query schema.
+   *
+   * @param structuredQuery the {@link StructuredQuery} to validate
+   * @throws ValidationException in case the submitted {@link StructuredQuery} does not comply with
+   * the schema
+   * @throws FileNotFoundException if the JSON schema file can not be found or read
+   * @throws JSONException in case the JSON schema file is not a valid JSON file
+   */
   public void validate(StructuredQuery structuredQuery)
       throws ValidationException, FileNotFoundException, JSONException {
     try (InputStream inputStream = QueryValidator.class.getResourceAsStream(JSON_SCHEMA)) {
