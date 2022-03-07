@@ -79,7 +79,7 @@ public class QueryTranslatorSpringConfig {
         var conceptTree = jsonUtil.readValue(new File(conceptTreeFile), TermCodeNode.class);
         return Translator.of(MappingContext.of(
                 Stream.of(mappings)
-                        .collect(Collectors.toMap(Mapping::getKey, Function.identity(), (a, b) -> a)),
+                        .collect(Collectors.toMap(Mapping::key, Function.identity(), (a, b) -> a)),
                 conceptTree,
                 Map.ofEntries(entry("http://fhir.de/CodeSystem/dimdi/icd-10-gm", "icd10"),
                         entry("mii.abide", "abide"),
