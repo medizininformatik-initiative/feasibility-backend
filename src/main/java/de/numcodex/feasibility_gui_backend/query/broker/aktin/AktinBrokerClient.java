@@ -6,6 +6,7 @@ import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
+import lombok.extern.slf4j.Slf4j;
 import org.aktin.broker.client2.BrokerAdmin2;
 import org.aktin.broker.xml.Node;
 import org.aktin.broker.xml.RequestStatusInfo;
@@ -24,6 +25,7 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClient
  * @author R.W.Majeed
  *
  */
+@Slf4j
 public class AktinBrokerClient implements BrokerClient {
 	private final BrokerAdmin2 delegate;
 	private final Map<String, Long> brokerToBackendQueryIdMapping;
@@ -92,7 +94,15 @@ public class AktinBrokerClient implements BrokerClient {
 		if( result == null ) {
 			throw new SiteNotFoundException(brokerQueryId, siteId);
 		}
-		return Integer.parseInt(result);
+
+		try {
+			return Integer.parseInt(result);
+		} catch (NumberFormatException e) {
+			log.warn(("returning result of '0' for Aktin broker query with ID '%s' of site '%s' since result can not" +
+					" be parsed as an integer")
+					.formatted(brokerQueryId, siteId), e);
+			return 0;
+		}
 	}
 
 	@Override
