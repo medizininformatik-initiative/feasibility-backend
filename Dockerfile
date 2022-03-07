@@ -11,6 +11,8 @@ ENV FEASIBILITY_DATABASE_PORT=5432
 ENV FEASIBILITY_DATABASE_USER=postgres
 ENV FEASIBILITY_DATABASE_PASSWORD=password
 
+HEALTHCHECK --interval=5s --start-period=10s CMD curl -s -f http://localhost:8090/actuator/health || exit 1
+
 ENTRYPOINT ["java","-jar","feasibility-gui-backend.jar"]
 
 ARG GIT_REF=""
