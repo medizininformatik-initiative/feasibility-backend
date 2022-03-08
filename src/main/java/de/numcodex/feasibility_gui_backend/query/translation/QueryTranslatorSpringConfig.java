@@ -81,10 +81,10 @@ public class QueryTranslatorSpringConfig {
                 Stream.of(mappings)
                         .collect(Collectors.toMap(Mapping::getKey, Function.identity(), (a, b) -> a)),
                 conceptTree,
-                Map.ofEntries(entry("http://fhir.de/CodeSystem/dimdi/icd-10-gm", "icd10"),
+                Map.ofEntries(entry("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "icd10"),
                         entry("http://loinc.org", "loinc"),
                         entry("https://fhir.bbmri.de/CodeSystem/SampleMaterialType", "sample"),
-                        entry("http://fhir.de/CodeSystem/dimdi/atc", "atc"),
+                        entry("http://fhir.de/CodeSystem/bfarm/atc", "atc"),
                         entry("http://snomed.info/sct", "snomed"),
                         entry("http://terminology.hl7.org/CodeSystem/condition-ver-status", "cvs"),
                         entry("http://hl7.org/fhir/administrative-gender", "gender"),
