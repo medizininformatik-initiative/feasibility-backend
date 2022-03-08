@@ -1,5 +1,12 @@
 package de.numcodex.feasibility_gui_backend.query.validation;
 
+import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
+import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
@@ -7,18 +14,18 @@ import de.numcodex.feasibility_gui_backend.common.api.Unit;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import org.everit.json.schema.ValidationException;
+import javax.validation.ConstraintValidatorContext;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
-import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Tag("query")
 @Tag("validation")
@@ -26,31 +33,47 @@ public class QueryValidationTest {
 
   public static QueryValidator validator;
 
+  private static ObjectMapper jsonUtil;
+
+  private ConstraintValidatorContext constraintValidatorContext = mock(
+      ConstraintValidatorContext.class);
+
   @BeforeAll
-  public static void setUp() {
-    var jsonUtil = new ObjectMapper();
-    validator = new QueryValidator(jsonUtil);
+  public static void setUp() throws IOException {
+    jsonUtil = new ObjectMapper();
+    try (InputStream inputStream = QueryValidator.class.getResourceAsStream(
+        "/query/query-schema.json")) {
+      var jsonSchema = new JSONObject(new JSONTokener(inputStream));
+      SchemaLoader loader = SchemaLoader.builder()
+          .schemaJson(jsonSchema)
+          .draftV7Support()
+          .build();
+      var schema = loader.load().build();
+      validator = new QueryValidator(schema, jsonUtil);
+    } catch (IOException e) {
+      throw (e);
+    }
   }
 
   @Test
-  public void testValidate_validQueryOk() {
+  public void testValidate_validQueryOk() throws JsonProcessingException {
     var structuredQuery = buildValidQuery();
-    assertDoesNotThrow(() -> validator.validate(structuredQuery));
+    assertTrue(validator.isValid(structuredQuery, constraintValidatorContext));
   }
 
   @Test
-  public void testValidate_invalidQueriesThrow() {
+  public void testValidate_invalidQueriesFail() throws JsonProcessingException {
     var queryWithoutVersion = buildValidQuery();
     queryWithoutVersion.setVersion(null);
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithoutVersion));
+    assertFalse(validator.isValid(queryWithoutVersion, constraintValidatorContext));
 
     var queryWithoutInclusionCriteria = buildValidQuery();
     queryWithoutInclusionCriteria.setInclusionCriteria(null);
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithoutInclusionCriteria));
+    assertFalse(validator.isValid(queryWithoutInclusionCriteria, constraintValidatorContext));
 
     var queryWithEmptyInclusionCriteria = buildValidQuery();
     queryWithEmptyInclusionCriteria.setInclusionCriteria(new ArrayList<>());
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithEmptyInclusionCriteria));
+    assertFalse(validator.isValid(queryWithEmptyInclusionCriteria, constraintValidatorContext));
 
     var queryWithEmptyCriterionTermCodes = buildValidQuery();
     queryWithEmptyCriterionTermCodes.getInclusionCriteria().forEach(ic -> {
@@ -58,7 +81,7 @@ public class QueryValidationTest {
         c.setTermCodes(null);
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithEmptyCriterionTermCodes));
+    assertFalse(validator.isValid(queryWithEmptyCriterionTermCodes, constraintValidatorContext));
 
     var queryWithEmptyTermCodeCodes = buildValidQuery();
     queryWithEmptyTermCodeCodes.getInclusionCriteria().forEach(ic -> {
@@ -68,7 +91,7 @@ public class QueryValidationTest {
         });
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithEmptyTermCodeCodes));
+    assertFalse(validator.isValid(queryWithEmptyTermCodeCodes, constraintValidatorContext));
 
     var queryWithEmptyTermCodeSystems = buildValidQuery();
     queryWithEmptyTermCodeSystems.getInclusionCriteria().forEach(ic -> {
@@ -78,7 +101,7 @@ public class QueryValidationTest {
         });
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithEmptyTermCodeSystems));
+    assertFalse(validator.isValid(queryWithEmptyTermCodeSystems, constraintValidatorContext));
 
     var queryWithEmptyTermCodeDisplays = buildValidQuery();
     queryWithEmptyTermCodeDisplays.getInclusionCriteria().forEach(ic -> {
@@ -88,7 +111,7 @@ public class QueryValidationTest {
         });
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithEmptyTermCodeDisplays));
+    assertFalse(validator.isValid(queryWithEmptyTermCodeDisplays, constraintValidatorContext));
 
     var queryWithMalformedTimeRestrictions = buildValidQuery();
     queryWithMalformedTimeRestrictions.getInclusionCriteria().forEach(ic -> {
@@ -97,7 +120,7 @@ public class QueryValidationTest {
         c.getTimeRestriction().setAfterDate("bar");
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithMalformedTimeRestrictions));
+    assertFalse(validator.isValid(queryWithMalformedTimeRestrictions, constraintValidatorContext));
 
     var queryWithTimeRestrictionsWithoutDates = buildValidQuery();
     queryWithTimeRestrictionsWithoutDates.getInclusionCriteria().forEach(ic -> {
@@ -106,7 +129,8 @@ public class QueryValidationTest {
         c.getTimeRestriction().setAfterDate(null);
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithTimeRestrictionsWithoutDates));
+    assertFalse(
+        validator.isValid(queryWithTimeRestrictionsWithoutDates, constraintValidatorContext));
 
     var queryWithMissingValueFilterType = buildValidQuery();
     queryWithMissingValueFilterType.getInclusionCriteria().forEach(ic -> {
@@ -114,7 +138,7 @@ public class QueryValidationTest {
         c.getValueFilter().setType(null);
       });
     });
-    assertThrows(ValidationException.class, () -> validator.validate(queryWithMissingValueFilterType));
+    assertFalse(validator.isValid(queryWithMissingValueFilterType, constraintValidatorContext));
   }
 
   private StructuredQuery buildValidQuery() {
