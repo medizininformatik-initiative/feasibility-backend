@@ -24,6 +24,8 @@ tags:
       url: http://link.to.confluence
   - name: query results
     description: limited CRUD operations for query results (read and update only)
+  - name: intrinsics
+    description: Offers intrinsic information about this application.
 paths:
   /query:
     get:
@@ -343,6 +345,24 @@ paths:
       security:
         - feasibility_auth:
             - delete:result
+  /actuator/health:
+    get:
+      summary: Offers health information about this application.
+      description: ''
+      operationId: ''
+      responses:
+        200:
+          description: Successful health information.
+          content:
+            application/vnd.spring-boot.actuator.v3+json:
+              examples:
+                Healthy Application:
+                  value: |-
+                    {
+                        "status": "UP"
+                    }
+      tags:
+        - intrinsics
 components:
   schemas:
     Query:

@@ -79,15 +79,20 @@ public class QueryTranslatorSpringConfig {
         var conceptTree = jsonUtil.readValue(new File(conceptTreeFile), TermCodeNode.class);
         return Translator.of(MappingContext.of(
                 Stream.of(mappings)
-                        .collect(Collectors.toMap(Mapping::getKey, Function.identity(), (a, b) -> a)),
+                        .collect(Collectors.toMap(Mapping::key, Function.identity(), (a, b) -> a)),
                 conceptTree,
                 Map.ofEntries(entry("http://fhir.de/CodeSystem/dimdi/icd-10-gm", "icd10"),
+                        entry("mii.abide", "abide"),
+                        entry("http://fhir.de/CodeSystem/bfarm/ops", "ops"),
+                        entry("http://dicom.nema.org/resources/ontology/DCM", "dcm"),
+                        entry("https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus", "vitalstatus"),
                         entry("http://loinc.org", "loinc"),
                         entry("https://fhir.bbmri.de/CodeSystem/SampleMaterialType", "sample"),
                         entry("http://fhir.de/CodeSystem/dimdi/atc", "atc"),
                         entry("http://snomed.info/sct", "snomed"),
                         entry("http://terminology.hl7.org/CodeSystem/condition-ver-status", "cvs"),
                         entry("http://hl7.org/fhir/administrative-gender", "gender"),
+                        entry("urn:oid:1.2.276.0.76.5.409", "urn409"),
                         entry(
                                 "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/ecrf-parameter-codes",
                                 "num-ecrf"),
