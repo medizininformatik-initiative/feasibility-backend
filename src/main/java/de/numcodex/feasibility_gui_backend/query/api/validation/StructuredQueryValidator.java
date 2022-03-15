@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -27,9 +26,6 @@ public class StructuredQueryValidator implements ConstraintValidator<StructuredQ
   @NonNull
   private ObjectMapper jsonUtil;
 
-  @Setter
-  private boolean enabled = true;
-
   /**
    * Validate the submitted {@link StructuredQuery} against the json query schema.
    *
@@ -38,10 +34,6 @@ public class StructuredQueryValidator implements ConstraintValidator<StructuredQ
   @Override
   public boolean isValid(StructuredQuery structuredQuery,
       ConstraintValidatorContext constraintValidatorContext) {
-    if (!enabled) {
-      log.debug("Query validation disabled.");
-      return true;
-    }
     try {
       var jsonSubject = new JSONObject(jsonUtil.writeValueAsString(structuredQuery));
       jsonSchema.validate(jsonSubject);
