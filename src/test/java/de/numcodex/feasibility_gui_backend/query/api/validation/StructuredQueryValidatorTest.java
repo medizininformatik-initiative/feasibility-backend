@@ -1,12 +1,5 @@
-package de.numcodex.feasibility_gui_backend.query.validation;
+package de.numcodex.feasibility_gui_backend.query.api.validation;
 
-import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
-import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
@@ -14,12 +7,6 @@ import de.numcodex.feasibility_gui_backend.common.api.Unit;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.ConstraintValidatorContext;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -27,42 +14,50 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import javax.validation.ConstraintValidatorContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
+import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
 @Tag("query")
+@Tag("api")
 @Tag("validation")
-public class QueryValidationTest {
-
-  public static QueryValidator validator;
-
-  private static ObjectMapper jsonUtil;
+public class StructuredQueryValidatorTest {
+  public static StructuredQueryValidator validator;
 
   private ConstraintValidatorContext constraintValidatorContext = mock(
       ConstraintValidatorContext.class);
 
   @BeforeAll
   public static void setUp() throws IOException {
-    jsonUtil = new ObjectMapper();
-    try (InputStream inputStream = QueryValidator.class.getResourceAsStream(
-        "/query/query-schema.json")) {
-      var jsonSchema = new JSONObject(new JSONTokener(inputStream));
-      SchemaLoader loader = SchemaLoader.builder()
-          .schemaJson(jsonSchema)
-          .draftV7Support()
-          .build();
-      var schema = loader.load().build();
-      validator = new QueryValidator(schema, jsonUtil);
-    } catch (IOException e) {
-      throw (e);
-    }
+    var jsonUtil = new ObjectMapper();
+    InputStream inputStream = StructuredQueryValidator.class.getResourceAsStream(
+        "/query/query-schema.json");
+    var jsonSchema = new JSONObject(new JSONTokener(inputStream));
+    SchemaLoader loader = SchemaLoader.builder()
+        .schemaJson(jsonSchema)
+        .draftV7Support()
+        .build();
+    var schema = loader.load().build();
+    validator = new StructuredQueryValidator(schema, jsonUtil);
   }
 
   @Test
-  public void testValidate_validQueryOk() throws JsonProcessingException {
+  public void testValidate_validQueryOk() {
     var structuredQuery = buildValidQuery();
     assertTrue(validator.isValid(structuredQuery, constraintValidatorContext));
   }
 
   @Test
-  public void testValidate_invalidQueriesFail() throws JsonProcessingException {
+  public void testValidate_invalidQueriesFail() {
     var queryWithoutVersion = buildValidQuery();
     queryWithoutVersion.setVersion(null);
     assertFalse(validator.isValid(queryWithoutVersion, constraintValidatorContext));

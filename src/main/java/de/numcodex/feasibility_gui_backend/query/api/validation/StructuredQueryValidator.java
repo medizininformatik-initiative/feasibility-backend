@@ -1,10 +1,8 @@
-package de.numcodex.feasibility_gui_backend.query.validation;
+package de.numcodex.feasibility_gui_backend.query.api.validation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -13,9 +11,15 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+/**
+ * Validator for {@link StructuredQuery} that does an actual check based on a JSON schema.
+ */
 @RequiredArgsConstructor
 @Slf4j
-public class QueryValidator implements ConstraintValidator<JsonSchemaValidation, StructuredQuery> {
+public class StructuredQueryValidator implements ConstraintValidator<StructuredQueryValidation, StructuredQuery> {
 
   @NonNull
   private Schema jsonSchema;
@@ -43,7 +47,7 @@ public class QueryValidator implements ConstraintValidator<JsonSchemaValidation,
       jsonSchema.validate(jsonSubject);
       return true;
     } catch (ValidationException | JsonProcessingException e) {
-      log.debug("Query validation failed: {}", e.getMessage());
+      log.debug("Structured query is invalid", e);
       return false;
     }
   }

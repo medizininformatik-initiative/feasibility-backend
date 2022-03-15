@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class QueryValidatorSpringConfig {
+public class StructuredQueryValidatorSpringConfig {
 
   private static final String JSON_SCHEMA = "/query/query-schema.json";
 
