@@ -13,6 +13,9 @@ import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.validation.ConstraintValidatorContext;
 import java.io.IOException;
@@ -25,16 +28,16 @@ import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_
 import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @Tag("query")
 @Tag("api")
 @Tag("validation")
+@ExtendWith(MockitoExtension.class)
 public class StructuredQueryValidatorTest {
   public static StructuredQueryValidator validator;
 
-  private ConstraintValidatorContext constraintValidatorContext = mock(
-      ConstraintValidatorContext.class);
+  @Mock
+  private ConstraintValidatorContext constraintValidatorContext;
 
   @BeforeAll
   public static void setUp() throws IOException {
@@ -71,68 +74,42 @@ public class StructuredQueryValidatorTest {
     assertFalse(validator.isValid(queryWithEmptyInclusionCriteria, constraintValidatorContext));
 
     var queryWithEmptyCriterionTermCodes = buildValidQuery();
-    queryWithEmptyCriterionTermCodes.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.setTermCodes(null);
-      });
-    });
+    queryWithEmptyCriterionTermCodes.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.setTermCodes(null)));
     assertFalse(validator.isValid(queryWithEmptyCriterionTermCodes, constraintValidatorContext));
 
     var queryWithEmptyTermCodeCodes = buildValidQuery();
-    queryWithEmptyTermCodeCodes.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.getTermCodes().forEach(tc -> {
-          tc.setCode(null);
-        });
-      });
-    });
+    queryWithEmptyTermCodeCodes.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.getTermCodes().forEach(tc ->
+            tc.setCode(null))));
     assertFalse(validator.isValid(queryWithEmptyTermCodeCodes, constraintValidatorContext));
 
     var queryWithEmptyTermCodeSystems = buildValidQuery();
-    queryWithEmptyTermCodeSystems.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.getTermCodes().forEach(tc -> {
-          tc.setSystem(null);
-        });
-      });
-    });
+    queryWithEmptyTermCodeSystems.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.getTermCodes().forEach(tc ->
+            tc.setSystem(null))));
     assertFalse(validator.isValid(queryWithEmptyTermCodeSystems, constraintValidatorContext));
 
     var queryWithEmptyTermCodeDisplays = buildValidQuery();
-    queryWithEmptyTermCodeDisplays.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.getTermCodes().forEach(tc -> {
-          tc.setDisplay(null);
-        });
-      });
-    });
+    queryWithEmptyTermCodeDisplays.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.getTermCodes().forEach(tc ->
+            tc.setDisplay(null))));
     assertFalse(validator.isValid(queryWithEmptyTermCodeDisplays, constraintValidatorContext));
 
     var queryWithMalformedTimeRestrictions = buildValidQuery();
-    queryWithMalformedTimeRestrictions.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.getTimeRestriction().setBeforeDate("foo");
-        c.getTimeRestriction().setAfterDate("bar");
-      });
-    });
+    queryWithMalformedTimeRestrictions.getInclusionCriteria().forEach(ic -> ic.forEach(c -> {
+      c.getTimeRestriction().setBeforeDate("foo");
+      c.getTimeRestriction().setAfterDate("bar");
+    }));
     assertFalse(validator.isValid(queryWithMalformedTimeRestrictions, constraintValidatorContext));
 
     var queryWithTimeRestrictionsWithoutDates = buildValidQuery();
-    queryWithTimeRestrictionsWithoutDates.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.getTimeRestriction().setBeforeDate(null);
-        c.getTimeRestriction().setAfterDate(null);
-      });
-    });
+    queryWithTimeRestrictionsWithoutDates.getInclusionCriteria().forEach(ic -> ic.forEach(c -> {
+      c.getTimeRestriction().setBeforeDate(null);
+      c.getTimeRestriction().setAfterDate(null);
+    }));
     assertFalse(
         validator.isValid(queryWithTimeRestrictionsWithoutDates, constraintValidatorContext));
 
     var queryWithMissingValueFilterType = buildValidQuery();
-    queryWithMissingValueFilterType.getInclusionCriteria().forEach(ic -> {
-      ic.forEach(c -> {
-        c.getValueFilter().setType(null);
-      });
-    });
+    queryWithMissingValueFilterType.getInclusionCriteria().forEach(ic -> ic.forEach(c ->
+            c.getValueFilter().setType(null)));
     assertFalse(validator.isValid(queryWithMissingValueFilterType, constraintValidatorContext));
   }
 
