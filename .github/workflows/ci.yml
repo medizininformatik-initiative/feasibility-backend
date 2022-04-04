@@ -33,7 +33,7 @@ jobs:
         with:
           servers: |
             [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-             {"id": "codex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+             {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
       - name: Run Unit Tests
         run: mvn -B test
@@ -59,7 +59,7 @@ jobs:
         with:
           servers: |
             [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-             {"id": "codex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+             {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
       - name: Run Integration Tests
         run: mvn -B -DskipUnitTests verify
@@ -130,7 +130,7 @@ jobs:
       with:
         servers: |
           [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "codex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+           {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Prepare Version
       id: prep
