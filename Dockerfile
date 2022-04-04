@@ -1,5 +1,7 @@
 FROM openjdk:17
 
+RUN microdnf upgrade
+
 WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology

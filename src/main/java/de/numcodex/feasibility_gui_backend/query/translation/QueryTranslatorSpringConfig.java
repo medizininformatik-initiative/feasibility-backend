@@ -25,7 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.*;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.FHIR;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static java.util.Map.entry;
 
 @Configuration
