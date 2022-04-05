@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.db.UiProfileRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -143,6 +144,11 @@ public class TerminologyService {
               .comparingDouble((TerminologyEntry val) -> diceCoefficientOptimized(val.getDisplay(), query)).reversed()).limit(20)
           .collect(Collectors.toList());
     }
+  }
+
+  public static TerminologyEntry getUiProfile(String system, String code, String version) {
+
+
   }
 
   public static double diceCoefficientOptimized(String s, String t)
