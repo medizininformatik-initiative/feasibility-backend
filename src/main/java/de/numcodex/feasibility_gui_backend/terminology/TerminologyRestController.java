@@ -42,4 +42,9 @@ public class TerminologyRestController {
                                                        @RequestParam(value = "categoryId", required = false) UUID categoryId) {
         return terminologyService.getSelectableEntries(query, categoryId);
     }
+
+    @GetMapping("ui_profile")
+    public TerminologyEntry getUiProfile(@RequestParam("system") String system, @RequestParam("code") String code, @RequestParam(value = "version", required = false) String version) {
+        return TerminologyService.getUiProfile(system, code, version);
+    }
 }
