@@ -25,7 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.*;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.FHIR;
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static java.util.Map.entry;
 
 @Configuration
@@ -79,7 +81,7 @@ public class QueryTranslatorSpringConfig {
         var conceptTree = jsonUtil.readValue(new File(conceptTreeFile), TermCodeNode.class);
         return Translator.of(MappingContext.of(
                 Stream.of(mappings)
-                        .collect(Collectors.toMap(Mapping::getKey, Function.identity(), (a, b) -> a)),
+                        .collect(Collectors.toMap(Mapping::key, Function.identity(), (a, b) -> a)),
                 conceptTree,
                 Map.ofEntries(entry("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "icd10"),
                         entry("http://loinc.org", "loinc"),
