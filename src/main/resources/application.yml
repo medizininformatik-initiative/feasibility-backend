@@ -21,7 +21,12 @@ spring:
               hibernate: CustomPostgreSQL95Dialect
   flyway:
     ignore-missing-migrations: true
-
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
@@ -31,6 +36,7 @@ app:
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
+  enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
@@ -66,7 +72,7 @@ app:
 
 
 keycloak:
-  enabled: ${KEYCLOAK_ENABLED:true}
+  enabled: ${KEYCLOAK_ENABLED:false}
   cors: true
   bearer-only: true
   auth-server-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}/auth
@@ -83,8 +89,8 @@ keycloak:
 
 logging:
   level:
-    de.numcodex: trace
-    org.springframework.web: trace
+    de.numcodex: ${LOG_LEVEL:warn}
+    org.springframework.web: ${LOG_LEVEL:warn}
 
 cors:
   allowedOrigins:

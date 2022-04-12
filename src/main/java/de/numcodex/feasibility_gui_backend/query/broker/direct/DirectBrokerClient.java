@@ -30,8 +30,7 @@ public class DirectBrokerClient implements BrokerClient {
     private static final String SITE_1_ID = "1";
     private static final String SITE_1_NAME = "FHIR Server";
 
-    private static final String FLARE_REQUEST_CONTENT_TYPE = "application/json";
-    private static final String FLARE_RESPONSE_ACCEPT_CONTENT_TYPE = "CSQ";
+    private static final String FLARE_REQUEST_CONTENT_TYPE = "application/sq+json";
     private static final String FLARE_QUERY_ENDPOINT_URL = "/query/execute";
 
     private final WebClient webClient;
@@ -91,10 +90,6 @@ public class DirectBrokerClient implements BrokerClient {
             webClient.post()
                     .uri(FLARE_QUERY_ENDPOINT_URL)
                     .header(HttpHeaders.CONTENT_TYPE, FLARE_REQUEST_CONTENT_TYPE)
-                    // TODO: Resolve this with the Flare team. This is NOT the header to be used.
-                    //       The accept encoding header should not change the content itself.
-                    //       Thus, it's mainly used for compression algorithms.
-                    .header(HttpHeaders.ACCEPT_ENCODING, FLARE_RESPONSE_ACCEPT_CONTENT_TYPE)
                     .bodyValue(structuredQueryContent)
                     .retrieve()
                     .bodyToMono(String.class)

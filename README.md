@@ -3,27 +3,30 @@
 
 ## Configuration Base
 
-| EnvVar | Description | Example | Default |
-|--------|-------------|---------|---------|
-|BROKER_CLIENT_MOCK_ENABLED|Enables the mock client. Possible values are `true` and `false`. | | `true` |
-|BROKER_CLIENT_DIRECT_ENABLED|Enables the direct client. Possible values are `true` and `false`. | | `false` |
-|BROKER_CLIENT_AKTIN_ENABLED|Enables the aktin client. Possible values are `true` and `false`. | | `false` |
-|BROKER_CLIENT_DSF_ENABLED|Enables the dsf client. Possible values are `true` and `false`. | | `false` |
-|KEYCLOAK_ENABLED| Enables Keycloak if set to true. Possible values are `true` and `false`. | | `true` |
-|KEYCLOAK_BASE_URL| Base URL to reach a keycloak instance. | | `http://localhost:8080` |
-|KEYCLOAK_REALM| Realm to be used for checking bearer tokens. | | `codex-develop` |
-|KEYCLOAK_CLIENT_ID| Client ID to be used for checking bearer tokens. | | `middleware-broker` |
-|KEYCLOAK_ALLOWED_ROLE| Role that has to be part of the bearer token in order for the requester to be rendered authorized. | | `CODEX_USER` |
-|FEASIBILITY_DATABASE_HOST|Host under which the Postgres feasibility database can be reached.|localhost|`localhost`|
-|FEASIBILITY_DATABASE_USER|Username to connect to the Postgres feasibility database.|codex-postgres|`codex-postgres`|
-|FEASIBILITY_DATABASE_PASSWORD|Password to connect to the Postgres feasibility database.|codex-password|`codex-password`|
-|ONTOLOGY_FILES_FOLDER_UI | | | ontology/ui_profiles |
-|MAPPINGS_FILE | | | ontology/termCodeMapping.json |
-|CONCEPT_TREE_FILE | | | ontology/conceptTree.json |
-|CQL_TRANSLATE_ENABLED | | | true |
-|FHIR_TRANSLATE_ENABLED | | | false |
-|FLARE_WEBSERVICE_BASE_URL | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path | | http://localhost:5000 |
-|API_BASE_URL| sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url|https://host/api||
+| EnvVar                        | Description                                                                                                                                                              | Example          | Default                      |
+|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|------------------------------|
+| LOG_LEVEL                     | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                        |                  | `warn`                       |
+| BROKER_CLIENT_MOCK_ENABLED    | Enables the mock client. Possible values are `true` and `false`.                                                                                                         |                  | `true`                       |
+| BROKER_CLIENT_DIRECT_ENABLED  | Enables the direct client. Possible values are `true` and `false`.                                                                                                       |                  | `false`                      |
+| BROKER_CLIENT_AKTIN_ENABLED   | Enables the aktin client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                      |
+| BROKER_CLIENT_DSF_ENABLED     | Enables the dsf client. Possible values are `true` and `false`.                                                                                                          |                  | `false`                      |
+| KEYCLOAK_ENABLED              | Enables Keycloak if set to true. Possible values are `true` and `false`.                                                                                                 |                  | `true`                       |
+| KEYCLOAK_BASE_URL             | Base URL to reach a keycloak instance.                                                                                                                                   |                  | `http://localhost:8080`      |
+| KEYCLOAK_REALM                | Realm to be used for checking bearer tokens.                                                                                                                             |                  | `codex-develop`              |
+| KEYCLOAK_CLIENT_ID            | Client ID to be used for checking bearer tokens.                                                                                                                         |                  | `middleware-broker`          |
+| KEYCLOAK_ALLOWED_ROLE         | Role that has to be part of the bearer token in order for the requester to be rendered authorized.                                                                       |                  | `CODEX_USER`                 |
+| FEASIBILITY_DATABASE_HOST     | Host under which the Postgres feasibility database can be reached.                                                                                                       | localhost        | `localhost`                  |
+| FEASIBILITY_DATABASE_USER     | Username to connect to the Postgres feasibility database.                                                                                                                | codex-postgres   | `codex-postgres`             |
+| FEASIBILITY_DATABASE_PASSWORD | Password to connect to the Postgres feasibility database.                                                                                                                | codex-password   | `codex-password`             |
+| ONTOLOGY_FILES_FOLDER_UI      |                                                                                                                                                                          |                  | ontology/ui_profiles         |
+| MAPPINGS_FILE                 |                                                                                                                                                                          |                  | ontology/termCodeMapping.json |
+| CONCEPT_TREE_FILE             |                                                                                                                                                                          |                  | ontology/conceptTree.json    |
+| CQL_TRANSLATE_ENABLED         |                                                                                                                                                                          |                  | true                         |
+| FHIR_TRANSLATE_ENABLED        |                                                                                                                                                                          |                  | false                        |
+| FLARE_WEBSERVICE_BASE_URL     | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path                                                                   |                  | http://localhost:5000        |
+| API_BASE_URL                  | sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url             | https://host/api ||
+| QUERY_VALIDATION_ENABLED      | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json`   | true / false     | true                          |
+
 
 ### Running the DIRECT path with local flare
 
@@ -36,10 +39,10 @@ instance the backend is allowed to connect to.
 
 In order to run the backend using the AKTIN broker path, the following environment variables need to be set:
 
-| EnvVar | Description | Example | Default |
-|--------|-------------|---------|---------|
-| AKTIN_BROKER_BASE_URL | Base URL for the AKTIN RESTful API | http://localhost:8080/broker/ ||
-| AKTIN_BROKER_API_KEY | API key for the broker RESTful API with admin privileges  | xxxAdmin1234 ||
+| EnvVar                | Description                                              | Example                       | Default |
+|-----------------------|----------------------------------------------------------|-------------------------------|---------|
+| AKTIN_BROKER_BASE_URL | Base URL for the AKTIN RESTful API                       | http://localhost:8080/broker/ ||
+| AKTIN_BROKER_API_KEY  | API key for the broker RESTful API with admin privileges | xxxAdmin1234                  ||
 
 When using API-key authentication, please make sure that the broker server has a
 corresponding API-key entry with `OU=admin` contained in the DN-string.
@@ -50,17 +53,17 @@ corresponding API-key entry with `OU=admin` contained in the DN-string.
 
 In order to run the backend using the DSF path, the following environment variables need to be set:
 
-| EnvVar | Description | Example | Default |
-|--------|-------------|---------|---------|
-| DSF_SECURITY_CACERT | Certificate required for secured communication with the DSF middleware. |||
-| DSF_SECURITY_KEYSTORE_P12FILE | Security archive (`PKCS #12`) carrying authentication information required for communication with the DSF middleware. |||
-| DSF_SECURITY_KEYSTORE_PASSWORD | Password required to decrypt the security archive for subsequent use. |||
-| DSF_PROXY_HOST | Proxy host to be used. |||
-| DSF_PROXY_USERNAME | Proxy username to be used. |||
-| DSF_PROXY_PASSWORD | Proxy password to be used. |||
-| DSF_WEBSERVICE_BASE_URL | Base URL pointing to the local ZARS FHIR server. | `https://zars/fhir` ||
-| DSF_WEBSOCKET_URL | URL pointing to the local ZARS FHIR server websocket endpoint. | `wss://zars/fhir/ws` ||
-| DSF_ORGANIZATION_ID | Identifier for the local organization this backend is part of. | `MY ZARS` ||
+| EnvVar                         | Description                                                                                                           | Example              | Default |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------|---------|
+| DSF_SECURITY_CACERT            | Certificate required for secured communication with the DSF middleware.                                               |||
+| DSF_SECURITY_KEYSTORE_P12FILE  | Security archive (`PKCS #12`) carrying authentication information required for communication with the DSF middleware. |||
+| DSF_SECURITY_KEYSTORE_PASSWORD | Password required to decrypt the security archive for subsequent use.                                                 |||
+| DSF_PROXY_HOST                 | Proxy host to be used.                                                                                                |||
+| DSF_PROXY_USERNAME             | Proxy username to be used.                                                                                            |||
+| DSF_PROXY_PASSWORD             | Proxy password to be used.                                                                                            |||
+| DSF_WEBSERVICE_BASE_URL        | Base URL pointing to the local ZARS FHIR server.                                                                      | `https://zars/fhir`  ||
+| DSF_WEBSOCKET_URL              | URL pointing to the local ZARS FHIR server websocket endpoint.                                                        | `wss://zars/fhir/ws` ||
+| DSF_ORGANIZATION_ID            | Identifier for the local organization this backend is part of.                                                        | `MY ZARS`            ||
 
 
 ## Setting up Development
