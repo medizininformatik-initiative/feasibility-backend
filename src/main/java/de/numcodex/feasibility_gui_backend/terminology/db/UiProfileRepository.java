@@ -5,7 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UiProfileRepository extends JpaRepository<UiProfileContent, Long> {
-    @Query("select UI_Profile from UI_PROFILE_TABLE where UI_Profile.system = :system and UI_Profile.code = :code and UI_Profile.version = :version")
+    @Query("from UI_PROFILE u where u.system = :system and u.code = :code and u.version = :version")
     UiProfileContent findUiProfileByCoding(@Param("system") String system, @Param("code") String code,
         @Param("version") String version);
+
+    @Query("from UI_PROFILE u where u.system = :system and u.code = :code")
+    UiProfileContent findUiProfileByCoding(@Param("system") String system, @Param("code") String code);
 }

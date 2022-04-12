@@ -4,9 +4,17 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
 
-public record Coding(String system, String code, String version) implements Serializable {
-  public Coding {
+public class Coding implements Serializable {
+  private String system;
+  private String code;
+  private String version;
+
+  public Coding() {}
+
+  public Coding(String system, String code, String version) {
     requireNonNull(system);
     requireNonNull(code);
+    this.system = system;
+    this.code= code;
   }
 }

@@ -4,6 +4,7 @@ package de.numcodex.feasibility_gui_backend.terminology;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,8 +44,8 @@ public class TerminologyRestController {
         return terminologyService.getSelectableEntries(query, categoryId);
     }
 
-    @GetMapping("ui_profile")
-    public TerminologyEntry getUiProfile(@RequestParam("system") String system, @RequestParam("code") String code, @RequestParam(value = "version", required = false) String version) {
-        return TerminologyService.getUiProfile(system, code, version);
+    @GetMapping(value = "ui_profile", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getUiProfile(@RequestParam("system") String system, @RequestParam("code") String code, @RequestParam(value = "version", required = false) String version) {
+        return terminologyService.getUiProfile(system, code, version);
     }
 }
