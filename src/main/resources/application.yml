@@ -19,6 +19,8 @@ spring:
           jackis:
             jsonintegration:
               hibernate: CustomPostgreSQL95Dialect
+  flyway:
+    ignore-missing-migrations: true
 
 
 app:
