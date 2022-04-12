@@ -25,6 +25,9 @@ management:
   endpoint:
     health:
       enabled: true
+  flyway:
+    ignore-missing-migrations: true
+
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
