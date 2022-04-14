@@ -85,7 +85,7 @@ jobs:
       with:
         servers: |
           [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "codex", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+           {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Maven Package
       run: mvn -B -DskipUnitTests -DskipIntegrationTests package
