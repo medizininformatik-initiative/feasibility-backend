@@ -91,7 +91,6 @@ logging:
     org.springframework.web: ${LOG_LEVEL:warn}
 
 cors:
-  allowedOrigins:
-  - "*"
+  allowedOrigins: ${ALLOWED_ORIGINS:http://localhost}
 
 
