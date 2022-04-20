@@ -92,6 +92,6 @@ logging:
 
 cors:
   allowedOrigins:
-  - "*"
+    - "*"
 
 
