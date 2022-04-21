@@ -72,6 +72,7 @@ app:
 keycloak:
   enabled: ${KEYCLOAK_ENABLED:true}
   cors: true
+  cors-exposed-headers: Location
   bearer-only: true
   auth-server-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}/auth
   realm: ${KEYCLOAK_REALM:codex-develop}
@@ -92,6 +93,6 @@ logging:
 
 cors:
   allowedOrigins:
-  - "*"
+    - "*"
 
 
