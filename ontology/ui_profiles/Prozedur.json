@@ -1,0 +1,57 @@
+{
+    "children": [
+        {
+            "children": [],
+            "display": "ExtensionDurchfuehrungsabsicht",
+            "id": "5ac58ad5-8b7f-49ed-aae6-72eda654d99b",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ExtensionDurchfuehrungsabsicht",
+                "display": "ExtensionDurchfuehrungsabsicht",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ExtensionDokumentationsdatum",
+            "id": "28a37825-e25a-4868-82d5-3a5b19310c9e",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ExtensionDokumentationsdatum",
+                "display": "ExtensionDokumentationsdatum",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileProcedureProzedur",
+            "id": "773abf17-c880-4a3c-bef9-a01677e56072",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileProcedureProzedur",
+                "display": "ProfileProcedureProzedur",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        }
+    ],
+    "display": "Prozedur",
+    "id": "6c0976dd-9e0f-4855-84be-36bacc1f62e6",
+    "leaf": false,
+    "selectable": false,
+    "termCode": {
+        "code": "Prozedur",
+        "display": "Prozedur",
+        "system": "num.abide"
+    },
+    "timeRestrictionAllowed": false,
+    "valueDefinitions": []
+}

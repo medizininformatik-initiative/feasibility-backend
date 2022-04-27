@@ -1,0 +1,147 @@
+{
+    "children": [
+        {
+            "children": [
+                {
+                    "attributeDefinitions": [
+                        {
+                            "attributeCode": {
+                                "code": "gender",
+                                "display": "Geschlecht",
+                                "system": "mii.abide"
+                            },
+                            "optional": false,
+                            "precision": 1,
+                            "selectableConcepts": [
+                                {
+                                    "code": "female",
+                                    "display": "Female",
+                                    "system": "http://hl7.org/fhir/administrative-gender"
+                                },
+                                {
+                                    "code": "male",
+                                    "display": "Male",
+                                    "system": "http://hl7.org/fhir/administrative-gender"
+                                },
+                                {
+                                    "code": "other",
+                                    "display": "Other",
+                                    "system": "http://hl7.org/fhir/administrative-gender"
+                                },
+                                {
+                                    "code": "unknown",
+                                    "display": "Unknown",
+                                    "system": "http://hl7.org/fhir/administrative-gender"
+                                }
+                            ],
+                            "type": "concept"
+                        }
+                    ],
+                    "display": "Geschlecht",
+                    "id": "10e967a5-10c0-9a2c-eaf7-a95328ebfc4b",
+                    "leaf": true,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "gender",
+                            "display": "Geschlecht",
+                            "system": "mii.abide"
+                        }
+                    ],
+                    "timeRestrictionAllowed": false
+                }
+            ],
+            "display": "PatientIn",
+            "id": "be631d51-a07b-5693-739f-f4379ec5d0cc",
+            "leaf": false,
+            "selectable": false,
+            "termCodes": [
+                {
+                    "code": "PatientIn",
+                    "display": "PatientIn",
+                    "system": "mii.abide"
+                }
+            ]
+        },
+        {
+            "display": "Todesursache",
+            "id": "f564f7fd-222c-1827-5115-5b4b11970645",
+            "leaf": false,
+            "selectable": false,
+            "termCodes": [
+                {
+                    "code": "Todesursache",
+                    "display": "Todesursache",
+                    "system": "mii.abide"
+                }
+            ],
+            "timeRestrictionAllowed": true
+        },
+        {
+            "display": "Vitalstatus",
+            "id": "71226047-2964-a183-9d15-66b1fd1878f4",
+            "leaf": true,
+            "selectable": true,
+            "termCodes": [
+                {
+                    "code": "67162-8",
+                    "display": "Vitalstatus",
+                    "system": "http://loinc.org"
+                }
+            ],
+            "timeRestrictionAllowed": true,
+            "valueDefinition": {
+                "precision": 1,
+                "selectableConcepts": [
+                    {
+                        "code": "L",
+                        "display": "Patient lebt",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    },
+                    {
+                        "code": "T",
+                        "display": "Patient verstorben",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    },
+                    {
+                        "code": "X",
+                        "display": "unbekannt",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    },
+                    {
+                        "code": "N",
+                        "display": "unbekannt, Betreuung/Nachsorge nicht mehr n\u00f6tig",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    },
+                    {
+                        "code": "B",
+                        "display": "unbekannt, Patient ist anderenorts in Betreuung",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    },
+                    {
+                        "code": "A",
+                        "display": "unbekannt, Patient nicht mehr auffindbar (lost to follow-up)",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    },
+                    {
+                        "code": "V",
+                        "display": "unbekannt, Patient verweigert weitere Betreuung",
+                        "system": "https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus"
+                    }
+                ],
+                "type": "concept"
+            }
+        }
+    ],
+    "display": "Person",
+    "id": "9f608712-996e-767e-cfa3-b2c315a01004",
+    "leaf": false,
+    "selectable": false,
+    "termCodes": [
+        {
+            "code": "Person",
+            "display": "Person",
+            "system": "mii.abide"
+        }
+    ]
+}
