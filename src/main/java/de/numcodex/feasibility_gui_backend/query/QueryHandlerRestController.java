@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.conversion.StoredQueryConverter;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
@@ -95,5 +98,33 @@ public class QueryHandlerRestController {
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.add(HttpHeaders.LOCATION, uriString);
     return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
+  }
+
+  @GetMapping(path = "/stored-query/{queryId}")
+  public ResponseEntity<Object> getStoredQuery(@PathVariable(value = "queryId") Long queryId) {
+
+    var query = queryHandlerService.getQuery(queryId);
+    try {
+      return new ResponseEntity<>(StoredQueryConverter.convertPersistenceToApi(query), HttpStatus.OK);
+    } catch (JsonProcessingException e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @GetMapping(path = "/stored-query")
+  public ResponseEntity<Object> getStoredQueryList() {
+    String authorId = "foobar"; // TODO: obviously get this from access token
+    var queries = queryHandlerService.getQueriesForAuthor(authorId);
+    var ret = new ArrayList<StoredQuery>();
+    queries.forEach(q -> {
+      try {
+        StoredQuery convertedQuery = StoredQueryConverter.convertPersistenceToApi(q);
+        convertedQuery.setStructuredQuery(null);
+        ret.add(convertedQuery);
+      } catch (JsonProcessingException e) {
+        log.error("Error converting query");
+      }
+    });
+    return new ResponseEntity<>(ret, HttpStatus.OK);
   }
 }
