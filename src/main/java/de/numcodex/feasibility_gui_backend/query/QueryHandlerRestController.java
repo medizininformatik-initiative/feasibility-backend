@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
+import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +10,7 @@ import javax.validation.Valid;
 import javax.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,5 +70,30 @@ public class QueryHandlerRestController {
   @GetMapping(path = "/result/{id}")
   public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId);
+  }
+
+  @PostMapping(path = "/stored-query")
+  public ResponseEntity<Object> storeQuery(@RequestBody StoredQuery query, @Context HttpServletRequest httpServletRequest) {
+    Long queryId;
+    try {
+      queryId = queryHandlerService.storeQuery(query);
+    } catch (JsonProcessingException e) {
+      log.error("Error while storing query", e);
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (DataIntegrityViolationException e) {
+      return new ResponseEntity<>(HttpStatus.CONFLICT);
+    }
+
+    UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
+        ? ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
+        : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
+
+    var uriString = uriBuilder.replacePath("")
+        .pathSegment("api", "v1", "query-handler", "stored-query", String.valueOf(queryId))
+        .build()
+        .toUriString();
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.add(HttpHeaders.LOCATION, uriString);
+    return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
   }
 }
