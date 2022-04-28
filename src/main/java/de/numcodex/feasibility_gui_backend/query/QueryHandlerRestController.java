@@ -26,8 +26,8 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 */
 @RequestMapping("api/v1/query-handler")
 @RestController
-@CrossOrigin
 @Slf4j
+@CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
 public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
