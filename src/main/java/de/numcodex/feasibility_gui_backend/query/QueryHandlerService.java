@@ -1,13 +1,17 @@
 package de.numcodex.feasibility_gui_backend.query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
+import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.StoredQueryRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,9 @@ public class QueryHandlerService {
 
     @NonNull
     private final ResultRepository resultRepository;
+
+    @NonNull
+    private final StoredQueryRepository storedQueryRepository;
 
     @NonNull
     private final QueryResultObfuscator queryResultObfuscator;
@@ -56,5 +63,16 @@ public class QueryHandlerService {
                 .resultLines(resultLines)
                 .totalNumberOfPatients(totalMatchesInPopulation)
                 .build();
+    }
+
+    public Long storeQuery(StoredQuery query) throws JsonProcessingException {
+        ObjectMapper jsonUtil = new ObjectMapper();
+        de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery storedQuery = new de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery();
+        storedQuery.setQueryContent(jsonUtil.writeValueAsString(query.getStructuredQuery()));
+        storedQuery.setComment(query.getComment());
+        storedQuery.setLabel(query.getLabel());
+        storedQuery.setCreatedBy("test");
+        de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery test = storedQueryRepository.save(storedQuery);
+        return test.getId();
     }
 }
