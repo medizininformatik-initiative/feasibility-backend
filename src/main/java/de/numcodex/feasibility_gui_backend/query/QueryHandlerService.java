@@ -1,7 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
@@ -14,7 +13,6 @@ import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.StoredQueryRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -69,18 +67,22 @@ public class QueryHandlerService {
     }
 
     public Long storeQuery(StoredQuery query) throws JsonProcessingException {
-        ObjectMapper jsonUtil = new ObjectMapper();
         de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery storedQuery = StoredQueryConverter.convertApiToPersistence(query);
-        // TODO: get from access token
-        storedQuery.setCreatedBy("test");
         de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery test = storedQueryRepository.save(storedQuery);
         return test.getId();
     }
 
     public de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery getQuery(
-        Long queryId) {
-        return storedQueryRepository.findById(queryId).orElseThrow();
+        Long queryId, String authorId) throws IllegalAccessException {
+        de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery storedQuery = storedQueryRepository.findById(
+            queryId).orElseThrow();
+        if (storedQuery.getCreatedBy().equalsIgnoreCase(authorId)) {
+            return storedQuery;
+        } else {
+            throw new IllegalAccessException();
+        }
     }
+
 
     public List<de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery> getQueriesForAuthor(
         String authorId) {

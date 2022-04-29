@@ -1,5 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -76,7 +80,13 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping(path = "/stored-query")
-  public ResponseEntity<Object> storeQuery(@RequestBody StoredQuery query, @Context HttpServletRequest httpServletRequest) {
+  public ResponseEntity<Object> storeQuery(@RequestBody StoredQuery query, @Context HttpServletRequest httpServletRequest, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+
+    try {
+      query.setCreatedBy(getUserIdFromAuthorizationHeader(authorizationHeader));
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
     Long queryId;
     try {
       queryId = queryHandlerService.storeQuery(query);
@@ -101,19 +111,33 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping(path = "/stored-query/{queryId}")
-  public ResponseEntity<Object> getStoredQuery(@PathVariable(value = "queryId") Long queryId) {
-
-    var query = queryHandlerService.getQuery(queryId);
+  public ResponseEntity<Object> getStoredQuery(@PathVariable(value = "queryId") Long queryId,
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+    String authorId = null;
     try {
-      return new ResponseEntity<>(StoredQueryConverter.convertPersistenceToApi(query), HttpStatus.OK);
+      authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+    try {
+      var query = queryHandlerService.getQuery(queryId, authorId);
+      return new ResponseEntity<>(StoredQueryConverter.convertPersistenceToApi(query),
+          HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
   }
 
   @GetMapping(path = "/stored-query")
-  public ResponseEntity<Object> getStoredQueryList() {
-    String authorId = "foobar"; // TODO: obviously get this from access token
+  public ResponseEntity<Object> getStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+    String authorId = null;
+    try {
+      authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
     var queries = queryHandlerService.getQueriesForAuthor(authorId);
     var ret = new ArrayList<StoredQuery>();
     queries.forEach(q -> {
@@ -126,5 +150,25 @@ public class QueryHandlerRestController {
       }
     });
     return new ResponseEntity<>(ret, HttpStatus.OK);
+  }
+
+  private String getUserIdFromAuthorizationHeader(String authorizationHeader)
+      throws IllegalAccessException {
+    if (authorizationHeader == null || authorizationHeader.isEmpty()) {
+      throw new IllegalAccessException();
+    }
+    try {
+      JWT jwt = new JWT();
+      String accessTokenString = authorizationHeader
+          .substring(authorizationHeader.indexOf(" ") + 1);
+      DecodedJWT accessToken = jwt.decodeJwt(accessTokenString);
+      return accessToken.getClaim("sub").asString();
+    } catch (NullPointerException npe) {
+      log.error("Nullpointer exception caught when trying to get user id from access token");
+      throw new IllegalAccessException();
+    } catch (JWTDecodeException e) {
+      log.error("Could not decode access token. Auth Header: " + authorizationHeader);
+      throw new IllegalAccessException();
+    }
   }
 }
