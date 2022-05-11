@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Task;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,11 +132,15 @@ public class DSFQueryManagerTest {
         List<BundleEntryComponent> bundleEntries = bundleCaptor.getValue().getEntry();
         var task = (Task) bundleEntries.stream().filter(e -> e.getResource().fhirType().equals("Task")).findFirst()
                 .orElseThrow().getResource();
-
         var businessKey = task.getInput().stream().filter(i -> i.getType().getCodingFirstRep().getCode().equals("business-key"))
                 .findFirst().orElseThrow().getValue().toString();
 
+        var library = (Library) bundleEntries.stream().filter(e -> e.getResource().fhirType().equals("Library"))
+                .findFirst().orElseThrow().getResource();
+
+
         assertEquals(businessKey, queryId);
+        assertNotNull(library.getName());
     }
 
     @Test
