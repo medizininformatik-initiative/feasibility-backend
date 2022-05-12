@@ -41,6 +41,8 @@ class DSFQueryManager implements QueryManager {
     private static final String REQUESTER_TYPE = "Organization";
     private static final String RECIPIENT_TYPE = "Organization";
 
+    private static final String LIBRARY_NAME = "Retrieve";
+
     private static final String CODE_SYSTEM_FEASIBILITY = "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REFERENCE = "measure-reference";
     private static final String CODE_SYSTEM_ORGANIZATION = "http://highmed.org/sid/organization-identifier";
@@ -210,6 +212,7 @@ class DSFQueryManager implements QueryManager {
     private Bundle addLibrary(Bundle queryBundle, Map<String, String> queryContents, UUID libraryId) {
         Bundle bundle = queryBundle.copy();
         Library library = new Library()
+                .setName(LIBRARY_NAME)
                 .setStatus(ACTIVE)
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
