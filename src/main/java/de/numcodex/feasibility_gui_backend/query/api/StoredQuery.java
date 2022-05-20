@@ -25,6 +25,6 @@ public class StoredQuery {
   @JsonProperty
   private String createdBy;
   @JsonProperty
-  private List<TermCode> outdatedTerms;
+  private List<TermCode> invalidTerms;
 
 }

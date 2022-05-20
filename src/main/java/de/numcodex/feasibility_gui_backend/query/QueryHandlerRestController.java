@@ -4,12 +4,15 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.conversion.StoredQueryConverter;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StoredQueryValidation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -41,11 +44,14 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
+
+  private final StoredQueryValidation storedQueryValidation;
   private final String apiBaseUrl;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
-      @Value("${app.apiBaseUrl}") String apiBaseUrl) {
+      StoredQueryValidation storedQueryValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
+    this.storedQueryValidation = storedQueryValidation;
     this.apiBaseUrl = apiBaseUrl;
   }
 
@@ -121,8 +127,10 @@ public class QueryHandlerRestController {
     }
     try {
       var query = queryHandlerService.getQuery(queryId, authorId);
-      return new ResponseEntity<>(StoredQueryConverter.convertPersistenceToApi(query),
-          HttpStatus.OK);
+      StoredQuery storedQuery = StoredQueryConverter.convertPersistenceToApi(query);
+      List<TermCode> invalidTermCodes = storedQueryValidation.getInvalidTermCodes(storedQuery);
+      storedQuery.setInvalidTerms(invalidTermCodes);
+      return new ResponseEntity<>(storedQuery, HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (IllegalAccessException e) {

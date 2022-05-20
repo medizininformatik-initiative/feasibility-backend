@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.terminology.db.UiProfileRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class TerminologyService {
 
   @Autowired
@@ -41,6 +43,10 @@ public class TerminologyService {
     var files = getFilePathsUiProfiles();
 
     for (var filename : files) {
+      if (!filename.toLowerCase().endsWith(".json")) {
+        log.trace("Skipping non-json file: {}", filename);
+        continue;
+      }
       var objectMapper = new ObjectMapper();
       objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
       try {
