@@ -10,9 +10,8 @@ import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.conversion.StoredQueryConverter;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
-import de.numcodex.feasibility_gui_backend.terminology.validation.StoredQueryValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -45,13 +44,13 @@ public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
 
-  private final StoredQueryValidation storedQueryValidation;
+  private final TermCodeValidation termCodeValidation;
   private final String apiBaseUrl;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
-      StoredQueryValidation storedQueryValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
+      TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
-    this.storedQueryValidation = storedQueryValidation;
+    this.termCodeValidation = termCodeValidation;
     this.apiBaseUrl = apiBaseUrl;
   }
 
@@ -86,7 +85,9 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping(path = "/stored-query")
-  public ResponseEntity<Object> storeQuery(@RequestBody StoredQuery query, @Context HttpServletRequest httpServletRequest, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+  public ResponseEntity<Object> storeQuery(@RequestBody StoredQuery query,
+      @Context HttpServletRequest httpServletRequest,
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
 
     try {
       query.setCreatedBy(getUserIdFromAuthorizationHeader(authorizationHeader));
@@ -128,7 +129,7 @@ public class QueryHandlerRestController {
     try {
       var query = queryHandlerService.getQuery(queryId, authorId);
       StoredQuery storedQuery = StoredQueryConverter.convertPersistenceToApi(query);
-      List<TermCode> invalidTermCodes = storedQueryValidation.getInvalidTermCodes(storedQuery);
+      List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(storedQuery);
       storedQuery.setInvalidTerms(invalidTermCodes);
       return new ResponseEntity<>(storedQuery, HttpStatus.OK);
     } catch (JsonProcessingException e) {

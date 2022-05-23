@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class StoredQueryValidation {
+public class TermCodeValidation {
 
   private final TerminologyService terminologyService;
 
   @Autowired
-  public StoredQueryValidation(TerminologyService terminologyService) {
+  public TermCodeValidation(TerminologyService terminologyService) {
     this.terminologyService = terminologyService;
   }
 
