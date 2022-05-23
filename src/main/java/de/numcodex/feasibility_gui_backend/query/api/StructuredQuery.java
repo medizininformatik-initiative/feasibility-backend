@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.List;
 
 @Data
-@JsonInclude(Include.NON_EMPTY)
+@JsonInclude(Include.NON_NULL)
 @StructuredQueryValidation
 public class StructuredQuery {
 

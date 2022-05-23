@@ -9,7 +9,7 @@ import javax.persistence.Column;
 import lombok.Data;
 
 @Data
-@JsonInclude(Include.NON_EMPTY)
+@JsonInclude(Include.NON_NULL)
 public class StoredQuery {
 
   @JsonProperty
