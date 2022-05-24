@@ -85,7 +85,7 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping(path = "/stored-query")
-  public ResponseEntity<Object> storeQuery(@RequestBody StoredQuery query,
+  public ResponseEntity<Object> storeQuery(@Valid @RequestBody StoredQuery query,
       @Context HttpServletRequest httpServletRequest,
       @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
 
