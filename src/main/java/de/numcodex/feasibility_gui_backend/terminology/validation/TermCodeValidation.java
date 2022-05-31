@@ -35,10 +35,16 @@ public class TermCodeValidation {
   public List<TermCode> getInvalidTermCodes(StoredQuery storedQuery) {
     var invalidTermCodes = new ArrayList<TermCode>();
 
-    List<List<Criterion>> combinedCriteria = Stream.of(
-        storedQuery.getStructuredQuery().getInclusionCriteria(),
-        storedQuery.getStructuredQuery().getExclusionCriteria()).flatMap(
-        Collection::stream).toList();
+    List<List<Criterion>> combinedCriteria;
+
+    if (storedQuery.getStructuredQuery().getExclusionCriteria() != null && !storedQuery.getStructuredQuery().getExclusionCriteria().isEmpty()) {
+      combinedCriteria = Stream.of(
+          storedQuery.getStructuredQuery().getInclusionCriteria(),
+          storedQuery.getStructuredQuery().getExclusionCriteria()).flatMap(
+          Collection::stream).toList();
+    } else {
+      combinedCriteria = storedQuery.getStructuredQuery().getInclusionCriteria();
+    }
 
     for (List<Criterion> criterionList : combinedCriteria) {
       for (Criterion criterion : criterionList) {
