@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.7</version>
+    <version>2.7.0</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>de.medizininformatik-initiative</groupId>
@@ -25,7 +25,6 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.9.3</mockwebserver.version>
     <okhttp3.version>4.9.1</okhttp3.version>
-    <log4j2.version>2.16.0</log4j2.version>
   </properties>
 
   <dependencyManagement>
