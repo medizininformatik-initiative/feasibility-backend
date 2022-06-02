@@ -55,7 +55,7 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0");
+        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.3.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
@@ -66,7 +66,7 @@ public class DSFQueryResultHandlerTest {
         task.addOutput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility")
+                                .setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility")
                                 .setCode("measure-report-reference")))
                 .setValue(new Reference().setReference("MeasureReport/dfd68241-224d-4fd8-bd1a-7675682fa608"));
 
@@ -88,7 +88,7 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0");
+        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.3.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
@@ -99,7 +99,7 @@ public class DSFQueryResultHandlerTest {
         task.addOutput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility")
+                                .setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility")
                                 .setCode("measure-report-reference")))
                 .setValue(new Reference().setReference("MeasureReport/dfd68241-224d-4fd8-bd1a-7675682fa608"));
 
@@ -107,7 +107,7 @@ public class DSFQueryResultHandlerTest {
         report.addGroup()
                 .setCode(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility")
+                                .setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility")
                                 .setCode("single")))
                 .addPopulation()
                 .setCode(new CodeableConcept()
