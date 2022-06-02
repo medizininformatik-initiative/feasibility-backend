@@ -6,8 +6,8 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,13 +134,28 @@ public class DSFQueryManagerTest {
                 .orElseThrow().getResource();
         var businessKey = task.getInput().stream().filter(i -> i.getType().getCodingFirstRep().getCode().equals("business-key"))
                 .findFirst().orElseThrow().getValue().toString();
-
         var library = (Library) bundleEntries.stream().filter(e -> e.getResource().fhirType().equals("Library"))
                 .findFirst().orElseThrow().getResource();
+        var measure = (Measure) bundleEntries.stream().filter(e -> e.getResource().fhirType().equals("Measure"))
+                .findFirst().orElseThrow().getResource();
+        var measureReferenceSystem = task.getInput().stream().filter(i -> i.getType().getCodingFirstRep()
+                        .getCode().equals("measure-reference"))
+                .findFirst().orElseThrow().getType().getCodingFirstRep().getSystem();
 
 
         assertEquals(businessKey, queryId);
         assertNotNull(library.getName());
+        assertEquals("http://medizininformatik-initiative.de/bpe/Process/requestSimpleFeasibility/0.2.0", task.getInstantiatesUri());
+        assertEquals(1, task.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
+                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-request-simple-feasibility"))
+                .count());
+        assertEquals(1, library.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
+                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-library"))
+                .count());
+        assertEquals(1, measure.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
+                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-measure"))
+                .count());
+        assertEquals("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility", measureReferenceSystem);
     }
 
     @Test

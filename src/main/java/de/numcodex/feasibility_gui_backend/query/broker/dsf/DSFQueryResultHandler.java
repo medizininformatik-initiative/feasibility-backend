@@ -13,8 +13,8 @@ import java.util.Optional;
 @Slf4j
 class DSFQueryResultHandler {
 
-    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.1.0";
-    private static final String CODE_SYSTEM_FEASIBILITY = "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility";
+    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-single-dic-result-simple-feasibility|0.2.0";
+    private static final String CODE_SYSTEM_FEASIBILITY = "http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REPORT_REF = "measure-report-reference";
     private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
     private static final String CODE_SYSTEM_BPMN_MESSAGE_VALUE_BUSINESS_KEY = "business-key";
@@ -45,8 +45,7 @@ class DSFQueryResultHandler {
      * @return The feasibility query result if there is any.
      */
     public Optional<DSFQueryResult> onResult(DomainResource resource) {
-        if (resource instanceof Task) {
-            Task task = (Task) resource;
+        if (resource instanceof Task task) {
 
             if (!hasSingleQueryResultProfile(task)) {
                 log.info("Ignoring task without single DIC query result profile.");

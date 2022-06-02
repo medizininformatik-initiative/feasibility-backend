@@ -28,10 +28,10 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
  */
 class DSFQueryManager implements QueryManager {
 
-    private static final String INSTANTIATE_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/requestSimpleFeasibility/0.1.0";
-    private static final String REQUEST_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-task-request-simple-feasibility";
-    private static final String MEASURE_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-measure";
-    private static final String LIBRARY_PROFILE = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/codex-library";
+    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/requestSimpleFeasibility/0.2.0";
+    private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-request-simple-feasibility";
+    private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-measure";
+    private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-library";
     private static final String REQUEST_URL_TASK = "Task";
     private static final String REQUEST_URL_LIBRARY = "Library";
     private static final String REQUEST_URL_MEASURE = "Measure";
@@ -43,7 +43,7 @@ class DSFQueryManager implements QueryManager {
 
     private static final String LIBRARY_NAME = "Retrieve";
 
-    private static final String CODE_SYSTEM_FEASIBILITY = "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/feasibility";
+    private static final String CODE_SYSTEM_FEASIBILITY = "http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REFERENCE = "measure-reference";
     private static final String CODE_SYSTEM_ORGANIZATION = "http://highmed.org/sid/organization-identifier";
     private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
