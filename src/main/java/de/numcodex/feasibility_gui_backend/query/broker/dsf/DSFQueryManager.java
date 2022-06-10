@@ -28,16 +28,16 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
  */
 class DSFQueryManager implements QueryManager {
 
-    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/requestSimpleFeasibility/0.3.0";
-    private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-request-simple-feasibility";
-    private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-measure";
-    private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-library";
+    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.3.0";
+    private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request";
+    private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure";
+    private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library";
     private static final String REQUEST_URL_TASK = "Task";
     private static final String REQUEST_URL_LIBRARY = "Library";
     private static final String REQUEST_URL_MEASURE = "Measure";
     private static final String MEASURE_CRITERIA_LANGUAGE = "text/cql";
     private static final String MEASURE_CRITERIA_EXPRESSION = "InInitialPopulation";
-    private static final String BPMN_REQUEST_SIMPLE_FEASIBILITY_MESSAGE = "requestSimpleFeasibilityMessage";
+    private static final String BPMN_FEASIBILITY_REQUEST_MESSAGE = "feasibilityRequestMessage";
     private static final String REQUESTER_TYPE = "Organization";
     private static final String RECIPIENT_TYPE = "Organization";
 
@@ -180,7 +180,7 @@ class DSFQueryManager implements QueryManager {
                         .addCoding(new Coding()
                                 .setSystem(CODE_SYSTEM_BPMN_MESSAGE)
                                 .setCode(CODE_SYSTEM_BPMN_MESSAGE_VALUE_MESSAGE_NAME)))
-                .setValue(new StringType(BPMN_REQUEST_SIMPLE_FEASIBILITY_MESSAGE));
+                .setValue(new StringType(BPMN_FEASIBILITY_REQUEST_MESSAGE));
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
