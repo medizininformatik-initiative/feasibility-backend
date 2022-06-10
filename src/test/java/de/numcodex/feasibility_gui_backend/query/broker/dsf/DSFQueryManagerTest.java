@@ -145,15 +145,15 @@ public class DSFQueryManagerTest {
 
         assertEquals(businessKey, queryId);
         assertNotNull(library.getName());
-        assertEquals("http://medizininformatik-initiative.de/bpe/Process/requestSimpleFeasibility/0.2.0", task.getInstantiatesUri());
+        assertEquals("http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.2.0", task.getInstantiatesUri());
         assertEquals(1, task.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
-                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-task-request-simple-feasibility"))
+                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request"))
                 .count());
         assertEquals(1, library.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
-                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-library"))
+                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library"))
                 .count());
         assertEquals(1, measure.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
-                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/codex-measure"))
+                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure"))
                 .count());
         assertEquals("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility", measureReferenceSystem);
     }
