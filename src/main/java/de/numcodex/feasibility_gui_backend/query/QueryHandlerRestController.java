@@ -43,7 +43,6 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
-
   private final TermCodeValidation termCodeValidation;
   private final String apiBaseUrl;
 
