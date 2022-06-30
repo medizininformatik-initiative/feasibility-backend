@@ -27,5 +27,7 @@ public class StoredQuery {
   private String createdBy;
   @JsonProperty
   private List<TermCode> invalidTerms;
+  @JsonProperty
+  private Boolean isValid;
 
 }

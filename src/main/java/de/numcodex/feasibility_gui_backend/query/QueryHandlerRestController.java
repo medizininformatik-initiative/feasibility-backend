@@ -160,6 +160,30 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(ret, HttpStatus.OK);
   }
 
+  @GetMapping(path = "/stored-query/validate")
+  public ResponseEntity<Object> validateStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+    String authorId = null;
+    try {
+      authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
+    } catch (IllegalAccessException e) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+    var queries = queryHandlerService.getQueriesForAuthor(authorId);
+    var ret = new ArrayList<StoredQuery>();
+    queries.forEach(q -> {
+      try {
+        StoredQuery convertedQuery = StoredQueryConverter.convertPersistenceToApi(q);
+        List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(convertedQuery);
+        convertedQuery.setIsValid(invalidTermCodes.isEmpty());
+        convertedQuery.setStructuredQuery(null);
+        ret.add(convertedQuery);
+      } catch (JsonProcessingException e) {
+        log.error("Error converting query");
+      }
+    });
+    return new ResponseEntity<>(ret, HttpStatus.OK);
+  }
+
   private String getUserIdFromAuthorizationHeader(String authorizationHeader)
       throws IllegalAccessException {
     if (authorizationHeader == null || authorizationHeader.isEmpty()) {
