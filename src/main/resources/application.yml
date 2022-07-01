@@ -19,16 +19,13 @@ spring:
           jackis:
             jsonintegration:
               hibernate: CustomPostgreSQL95Dialect
-  flyway:
-    ignore-missing-migrations: true
 management:
   endpoints:
     enabled-by-default: false
   endpoint:
     health:
       enabled: true
-  flyway:
-    ignore-missing-migrations: true
+
 
 
 app:
@@ -75,7 +72,7 @@ app:
 
 
 keycloak:
-  enabled: ${KEYCLOAK_ENABLED:false}
+  enabled: ${KEYCLOAK_ENABLED:true}
   cors: true
   cors-exposed-headers: Location
   bearer-only: true

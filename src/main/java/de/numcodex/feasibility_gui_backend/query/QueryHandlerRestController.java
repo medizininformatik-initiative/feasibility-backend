@@ -119,7 +119,7 @@ public class QueryHandlerRestController {
   @GetMapping(path = "/stored-query/{queryId}")
   public ResponseEntity<Object> getStoredQuery(@PathVariable(value = "queryId") Long queryId,
       @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-    String authorId = null;
+    String authorId;
     try {
       authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
     } catch (IllegalAccessException e) {
@@ -140,7 +140,7 @@ public class QueryHandlerRestController {
 
   @GetMapping(path = "/stored-query")
   public ResponseEntity<Object> getStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-    String authorId = null;
+    String authorId;
     try {
       authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
     } catch (IllegalAccessException e) {
@@ -162,7 +162,7 @@ public class QueryHandlerRestController {
 
   @GetMapping(path = "/stored-query/validate")
   public ResponseEntity<Object> validateStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-    String authorId = null;
+    String authorId;
     try {
       authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
     } catch (IllegalAccessException e) {
@@ -184,6 +184,8 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(ret, HttpStatus.OK);
   }
 
+
+  // TODO: We should try to get this information from the Keycloak.
   private String getUserIdFromAuthorizationHeader(String authorizationHeader)
       throws IllegalAccessException {
     if (authorizationHeader == null || authorizationHeader.isEmpty()) {
