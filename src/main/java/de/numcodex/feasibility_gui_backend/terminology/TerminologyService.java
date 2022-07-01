@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.terminology.db.UiProfileRepository;
+import javax.validation.constraints.Null;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -161,11 +162,21 @@ public class TerminologyService {
     }
   }
 
-  public String getUiProfile(String system, String code, String version) {
+  public String getUiProfile(String system, String code, String version)
+      throws NullPointerException {
     if (Objects.nonNull(version)) {
-      return uiProfileRepository.findUiProfileByCoding(system, code, version).getUiProfile();
+      if (uiProfileRepository.findUiProfileByCoding(system, code, version).size() > 0) {
+        return uiProfileRepository.findUiProfileByCoding(system, code, version).get(0)
+            .getUiProfile();
+      } else {
+        throw new NullPointerException("UI Profile not found");
+      }
     } else {
-      return uiProfileRepository.findUiProfileByCoding(system, code).getUiProfile();
+      if (uiProfileRepository.findUiProfileByCoding(system, code).size() > 0) {
+        return uiProfileRepository.findUiProfileByCoding(system, code).get(0).getUiProfile();
+      } else {
+        throw new NullPointerException("UI Profile not found");
+      }
     }
 
   }
