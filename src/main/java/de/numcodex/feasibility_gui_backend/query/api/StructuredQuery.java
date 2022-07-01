@@ -11,9 +11,7 @@ import java.net.URI;
 import java.util.List;
 
 @Data
-// TODO: This most definitely should be (Include.NON_EMPTY) requires front-end changes.
-// Also change accordingy in QueryHandlerRestControllerIT.java
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.NON_EMPTY)
 @StructuredQueryValidation
 public class StructuredQuery {
 

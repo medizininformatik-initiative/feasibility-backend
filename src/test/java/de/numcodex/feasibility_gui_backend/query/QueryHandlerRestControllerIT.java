@@ -75,8 +75,7 @@ public class QueryHandlerRestControllerIT {
 
         var testQuery = new StructuredQuery();
         testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
-        // TODO: This should be List.of() once feasibility_gui_backend/query/api/StructuredQuery is fixed
-        testQuery.setExclusionCriteria(null);
+        testQuery.setExclusionCriteria(List.of());
         testQuery.setDisplay("foo");
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
