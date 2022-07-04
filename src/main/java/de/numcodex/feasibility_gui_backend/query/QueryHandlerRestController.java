@@ -11,6 +11,7 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.conversion.StoredQueryConverter;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +46,9 @@ public class QueryHandlerRestController {
   private final QueryHandlerService queryHandlerService;
   private final TermCodeValidation termCodeValidation;
   private final String apiBaseUrl;
+
+  @Value("${keycloak.enabled}")
+  private boolean keycloakEnabled;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
@@ -86,12 +90,16 @@ public class QueryHandlerRestController {
   @PostMapping(path = "/stored-query")
   public ResponseEntity<Object> storeQuery(@Valid @RequestBody StoredQuery query,
       @Context HttpServletRequest httpServletRequest,
-      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
 
-    try {
-      query.setCreatedBy(getUserIdFromAuthorizationHeader(authorizationHeader));
-    } catch (IllegalAccessException e) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    if (keycloakEnabled) {
+      query.setCreatedBy(principal.getName());
+    } else {
+      try {
+        query.setCreatedBy(getUserIdFromAuthorizationHeader(authorizationHeader));
+      } catch (IllegalAccessException e) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      }
     }
     Long queryId;
     try {
@@ -118,12 +126,17 @@ public class QueryHandlerRestController {
 
   @GetMapping(path = "/stored-query/{queryId}")
   public ResponseEntity<Object> getStoredQuery(@PathVariable(value = "queryId") Long queryId,
-      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
     String authorId;
-    try {
-      authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
-    } catch (IllegalAccessException e) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+    if (keycloakEnabled) {
+      authorId = principal.getName();
+    } else {
+      try {
+        authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
+      } catch (IllegalAccessException e) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      }
     }
     try {
       var query = queryHandlerService.getQuery(queryId, authorId);
@@ -139,12 +152,17 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping(path = "/stored-query")
-  public ResponseEntity<Object> getStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+  public ResponseEntity<Object> getStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
     String authorId;
-    try {
-      authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
-    } catch (IllegalAccessException e) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+    if (keycloakEnabled) {
+      authorId = principal.getName();
+    } else {
+      try {
+        authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
+      } catch (IllegalAccessException e) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      }
     }
     var queries = queryHandlerService.getQueriesForAuthor(authorId);
     var ret = new ArrayList<StoredQuery>();
@@ -161,12 +179,17 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping(path = "/stored-query/validate")
-  public ResponseEntity<Object> validateStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+  public ResponseEntity<Object> validateStoredQueryList(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
     String authorId;
-    try {
-      authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
-    } catch (IllegalAccessException e) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+    if (keycloakEnabled) {
+      authorId = principal.getName();
+    } else {
+      try {
+        authorId = getUserIdFromAuthorizationHeader(authorizationHeader);
+      } catch (IllegalAccessException e) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      }
     }
     var queries = queryHandlerService.getQueriesForAuthor(authorId);
     var ret = new ArrayList<StoredQuery>();
@@ -184,8 +207,9 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(ret, HttpStatus.OK);
   }
 
-
-  // TODO: We should try to get this information from the Keycloak.
+  /**
+   * Read the subject id from a Authorization header with a JWT.
+   */
   private String getUserIdFromAuthorizationHeader(String authorizationHeader)
       throws IllegalAccessException {
     if (authorizationHeader == null || authorizationHeader.isEmpty()) {
