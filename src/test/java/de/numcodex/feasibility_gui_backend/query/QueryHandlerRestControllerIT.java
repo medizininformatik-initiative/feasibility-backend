@@ -35,7 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(
         controllers = QueryHandlerRestController.class,
         properties = {
-                "app.enableQueryValidation=true"
+                "app.enableQueryValidation=true",
+                "keycloak.enabled=false"
         }
 )
 @SuppressWarnings("NewClassNamingConvention")
