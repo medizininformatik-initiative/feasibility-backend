@@ -37,7 +37,7 @@ class DSFQueryManager implements QueryManager {
     private static final String REQUEST_URL_MEASURE = "Measure";
     private static final String MEASURE_CRITERIA_LANGUAGE = "text/cql";
     private static final String MEASURE_CRITERIA_EXPRESSION = "InInitialPopulation";
-    private static final String BPMN_REQUEST_SIMPLE_FEASIBILITY_MESSAGE = "requestSimpleFeasibilityMessage";
+    private static final String BPMN_FEASIBILITY_REQUEST_MESSAGE = "feasibilityRequestMessage";
     private static final String REQUESTER_TYPE = "Organization";
     private static final String RECIPIENT_TYPE = "Organization";
 
@@ -180,7 +180,7 @@ class DSFQueryManager implements QueryManager {
                         .addCoding(new Coding()
                                 .setSystem(CODE_SYSTEM_BPMN_MESSAGE)
                                 .setCode(CODE_SYSTEM_BPMN_MESSAGE_VALUE_MESSAGE_NAME)))
-                .setValue(new StringType(BPMN_REQUEST_SIMPLE_FEASIBILITY_MESSAGE));
+                .setValue(new StringType(BPMN_FEASIBILITY_REQUEST_MESSAGE));
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
