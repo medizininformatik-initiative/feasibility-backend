@@ -1,6 +1,6 @@
-FROM openjdk:17
+FROM eclipse-temurin:17-jre
 
-RUN microdnf upgrade
+RUN apt update -yqq && apt upgrade -yqq
 
 WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar
