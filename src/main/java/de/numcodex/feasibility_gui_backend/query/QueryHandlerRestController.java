@@ -64,7 +64,7 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
   }
 
-  @GetMapping(path = "/result/{id}")
+  @GetMapping(path = "/{id}/result")
   public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId);
   }
