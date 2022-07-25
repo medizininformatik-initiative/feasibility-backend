@@ -80,6 +80,6 @@ public class QueryHandlerRestControllerIT {
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(LOCATION, "/api/v1/query-handler/result/1"));
+                .andExpect(header().string(LOCATION, "/api/v1/query-handler/1/result"));
     }
 }
