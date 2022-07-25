@@ -56,7 +56,7 @@ public class QueryHandlerRestController {
         : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uriString = uriBuilder.replacePath("")
-        .pathSegment("api", "v1", "query-handler", "result", String.valueOf(queryId))
+        .pathSegment("api", "v1", "query-handler", String.valueOf(queryId), "result")
         .build()
         .toUriString();
     HttpHeaders httpHeaders = new HttpHeaders();
