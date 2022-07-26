@@ -1,5 +1,6 @@
-package de.numcodex.feasibility_gui_backend.query;
+package de.numcodex.feasibility_gui_backend.query.v2;
 
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
@@ -24,7 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.
 */
-@RequestMapping("api/v1/query-handler")
+@RequestMapping("api/v2/query")
 @RestController
 @Slf4j
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
@@ -39,7 +40,7 @@ public class QueryHandlerRestController {
     this.apiBaseUrl = apiBaseUrl;
   }
 
-  @PostMapping("run-query")
+  @PostMapping("")
   public ResponseEntity<Object> runQuery(
       @Valid @RequestBody StructuredQuery query, @Context HttpServletRequest httpServletRequest) {
 
@@ -56,7 +57,7 @@ public class QueryHandlerRestController {
         : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uriString = uriBuilder.replacePath("")
-        .pathSegment("api", "v1", "query-handler", String.valueOf(queryId), "result")
+        .pathSegment("api", "v2", "query", String.valueOf(queryId), "result")
         .build()
         .toUriString();
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -64,7 +65,7 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
   }
 
-  @GetMapping(path = "/{id}/result")
+  @GetMapping("/{id}/result")
   public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId);
   }

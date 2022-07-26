@@ -1,8 +1,9 @@
-package de.numcodex.feasibility_gui_backend.query;
+package de.numcodex.feasibility_gui_backend.query.v1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import org.junit.jupiter.api.Tag;
@@ -80,6 +81,6 @@ public class QueryHandlerRestControllerIT {
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(LOCATION, "/api/v1/query-handler/1/result"));
+                .andExpect(header().string(LOCATION, "/api/v1/query-handler/result/1"));
     }
 }
