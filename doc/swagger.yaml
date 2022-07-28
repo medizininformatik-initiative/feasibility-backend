@@ -1,27 +1,29 @@
 openapi: 3.0.3
 info:
-  title: CODEX Feasibility Backend REST API
+  title: MII Feasibility Backend REST API
   description: todo
   contact:
     email: noreply@todo.de
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.0.1
+  version: 0.0.2
 externalDocs:
   description: Check out the github repository
-  url: https://github.com/num-codex/codex-feasibility-backend
+  url: https://github.com/medizininformatik-initiative/feasibility-backend
 servers:
   - url: https://to.be.defined
     variables:
       basePath:
-        default: /rest/v2
+        default: /api/v2
 tags:
   - name: query
     description: CRUD operations for queries
     externalDocs:
       description: More information
       url: http://link.to.confluence
+  - name: query content
+    description: Operations referring only to the structured query part of a query
   - name: query results
     description: limited CRUD operations for query results (read and update only)
   - name: intrinsics
@@ -87,12 +89,12 @@ paths:
         - feasibility_auth:
             - write:query
       x-codegen-request-body-name: body
-  /query/findByUser:
+  /query/find-by-user:
     get:
       tags:
         - query
-      summary: Finds All queries of one or more users
-      description: User identification is done via auth id or email (to be decided)
+      summary: Finds query summary (id, label, lastModified) of all queries of one user
+      description: User identification is done via auth id
       operationId: findQueriesByUser
       parameters:
         - name: user
@@ -102,9 +104,7 @@ paths:
           style: form
           explode: true
           schema:
-            type: array
-            items:
-              type: string
+            type: string
       responses:
         200:
           description: successful operation
@@ -113,7 +113,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Query'
+                  $ref: '#/components/schemas/QuerySimple'
         401:
           description: Unauthorized - please login first
           content: {}
@@ -124,31 +124,30 @@ paths:
           description: User not found
           content: {}
       security:
-        - feasibility_auth:
+        - fdpg_auth:
             - read:all
   /query/{queryId}:
     get:
       tags:
         - query
       summary: Read query by ID
-      description: Returns a single query
+      description: Returns a single query. Contains everything known about the query, including results and structured query
       operationId: getQueryById
       parameters:
-      - name: queryId
-        in: path
-        description: ID of query to return
-        required: true
-        schema:
-          type: integer
-          format: int64
+        - name: queryId
+          in: path
+          description: ID of query to return
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Query'
+                $ref: '#/components/schemas/Query'
         401:
           description: Unauthorized - please login first
           content: { }
@@ -271,6 +270,40 @@ paths:
       security:
         - feasibility_auth:
             - write:query
+  /query/{queryId}/content:
+    get:
+      tags:
+        - query content
+      summary: Read structured query of a query by the query id
+      description: Returns the structured query of a single query.
+      operationId: getQueryContentByQueryId
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the contents shall be returned
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StructuredQuery'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - read:query
   /query/{queryId}/result:
     get:
       tags:
@@ -294,8 +327,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/QueryResult'
+                $ref: '#/components/schemas/QueryResult'
         401:
           description: Unauthorized - please login first
           content: { }
@@ -365,13 +397,24 @@ paths:
         - intrinsics
 components:
   schemas:
+    QuerySimple:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+        last_modified:
+          type: string
+          format: 'date-time'
     Query:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        criteria:
+        content:
           type: string
         label:
           type: string
@@ -411,6 +454,113 @@ components:
         errorMessage:
           type: string
           description: if the status is error, specify the cause of the error
+    StructuredQuery:
+      type: object
+      properties:
+        version:
+          type: string
+          description: The json schema version
+          example: http://to_be_decided.com/draft-1/schema#
+        display:
+          type: string
+          example: foobar
+        inclusionCriteria:
+          type: array
+          items:
+            $ref: "#/components/schemas/CriterionList"
+        exclusionCriteria:
+          type: array
+          items:
+            $ref: "#/components/schemas/CriterionList"
+    TermCode:
+      description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
+      type: object
+      properties:
+        code:
+          type: string
+          example: 119373006
+        system:
+          type: string
+          example: http://snomed.info/sct
+        version:
+          type: string
+          example: http://snomed.info/sct/900000000000207008/version/20210731
+        display:
+          type: string
+          example: Amniotic fluid specimen (specimen)
+    TimeRestriction:
+      type: object
+      properties:
+        beforeDate:
+          type: string
+          format: date-time
+        afterDate:
+          type: string
+          format: date-time
+    Unit:
+      type: object
+      properties:
+        code:
+          type: string
+        display:
+          type: string
+    AttributeFilter:
+      type: object
+      properties:
+        attributeCode:
+          $ref: "#/components/schemas/TermCode"
+    ValueFilter:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - concept
+            - quantity-comparator
+            - quantity-range
+        selectedConcepts:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+        comparator:
+          type: string
+          enum:
+            - eq
+            - ue
+            - le
+            - lt
+            - ge
+            - gt
+        unit:
+          $ref: "#/components/schemas/Unit"
+        value:
+          type: number
+          format: double
+        minValue:
+          type: number
+          format: double
+        maxValue:
+          type: number
+          format: double
+    Criterion:
+      type: object
+      properties:
+        termCodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+        attributeFilters:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeFilter"
+        valueFilter:
+          $ref: "#/components/schemas/ValueFilter"
+        timeRestriction:
+          $ref: "#/components/schemas/TimeRestriction"
+    CriterionList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Criterion"
   securitySchemes:
     feasibility_auth:
       type: oauth2
@@ -426,3 +576,11 @@ components:
             write:result: write a result for a query/site combination
             read:result: read the results of a query
             delete:result: delete the result of a query
+    fdpg_auth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: http://to.be.defined/auth/realms/tbd/protocol/openid-connect/token",
+          scopes:
+            read:all: read all queries
+
