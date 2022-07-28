@@ -26,6 +26,8 @@ management:
     health:
       enabled: true
 
+
+
 app:
   # AKTIN or DSF or MOCK or DIRECT
   ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_profiles}
