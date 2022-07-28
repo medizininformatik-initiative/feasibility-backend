@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -12,11 +11,11 @@ import org.json.JSONObject;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Validator for {@link StructuredQuery} that does an actual check based on a JSON schema.
  */
-@RequiredArgsConstructor
 @Slf4j
 public class StructuredQueryValidator implements ConstraintValidator<StructuredQueryValidation, StructuredQuery> {
 
@@ -25,6 +24,16 @@ public class StructuredQueryValidator implements ConstraintValidator<StructuredQ
 
   @NonNull
   private ObjectMapper jsonUtil;
+
+  /**
+   * Required args constructor.
+   *
+   * Lombok annotation had to be removed since it could not take the necessary Schema Qualifier
+   */
+  public StructuredQueryValidator(@Qualifier(value = "validation") Schema jsonSchema, ObjectMapper jsonUtil) {
+    this.jsonSchema = jsonSchema;
+    this.jsonUtil = jsonUtil;
+  }
 
   /**
    * Validate the submitted {@link StructuredQuery} against the json query schema.
