@@ -136,14 +136,15 @@ public class QueryHandlerRestController {
     }
     try {
       var query = queryHandlerService.getQuery(queryId, authorId);
+      if (query == null) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      }
       StoredQuery storedQuery = StoredQueryConverter.convertPersistenceToApi(query);
       List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(storedQuery);
       storedQuery.setInvalidTerms(invalidTermCodes);
       return new ResponseEntity<>(storedQuery, HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    } catch (IllegalAccessException e) {
-      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
   }
 

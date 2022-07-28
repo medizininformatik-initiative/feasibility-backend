@@ -73,13 +73,13 @@ public class QueryHandlerService {
     }
 
     public de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery getQuery(
-        Long queryId, String authorId) throws IllegalAccessException {
+        Long queryId, String authorId)  {
         de.numcodex.feasibility_gui_backend.query.persistence.StoredQuery storedQuery = storedQueryRepository.findById(
             queryId).orElseThrow();
         if (storedQuery.getCreatedBy().equalsIgnoreCase(authorId)) {
             return storedQuery;
         } else {
-            throw new IllegalAccessException();
+            return null;
         }
     }
 
