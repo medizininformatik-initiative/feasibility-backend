@@ -15,66 +15,43 @@ servers:
   - url: https://to.be.defined
     variables:
       basePath:
-        default: /api/v2
+        default: /api/v1/query-handler
 tags:
   - name: query
-    description: CRUD operations for queries
+    description: operations for queries
     externalDocs:
       description: More information
       url: http://link.to.confluence
-  - name: query content
-    description: Operations referring only to the structured query part of a query
-  - name: query results
-    description: limited CRUD operations for query results (read and update only)
+  - name: templates
+    description: operations to work with query templates
   - name: intrinsics
     description: Offers intrinsic information about this application.
+  - name: draft
+    description: These endpoints are not yet implemented and are subject to discussion
 paths:
-  /query:
-    get:
-      tags:
-        - query
-      summary: Read all your own queries from the broker
-      description: This returns all queries you created.
-      operationId: listQueries
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Query'
-        401:
-          description: Unauthorized - please login first
-          content: { }
-      security:
-        - feasibility_auth:
-            - read:query
-      x-codegen-request-body-name: body
+  /run-query:
     post:
       tags:
         - query
       summary: Create a query in the broker
-      description: The query will be spawned in the 'created' state and will not be
-        published until modified accordingly
-      operationId: createQuery
+      description: The query will be spawned in the broker and directly be dispatched
+      operationId: runQuery
       requestBody:
-        description: Query criteria that will be stored in the broker
+        description: Structured query to create and dispatch
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Query'
+              $ref: '#/components/schemas/StructuredQuery'
         required: true
       responses:
         201:
-          description: Query successfully created
+          description: Query successfully dispatched
           headers:
             Location:
-              description: Path to your newly created query resource
+              description: Path to the result of your newly created query
               schema:
                 type: string
-                example: "https://to.be.defined/rest/v2/query/42"
+                example: "https://to.be.defined/api/v1/query-handler/result/42"
           content: {}
         401:
           description: Unauthorized - please login first
@@ -85,6 +62,9 @@ paths:
         422:
           description: Invalid input
           content: {}
+        500:
+          description: Dispatch error
+          content: {}
       security:
         - feasibility_auth:
             - write:query
@@ -92,7 +72,7 @@ paths:
   /query/by-user/{userId}:
     get:
       tags:
-        - query
+        - draft
       summary: Finds query summary (id, label, lastModified) of all queries of one user
       description: User identification is done via auth id
       operationId: findQueriesByUser
@@ -127,7 +107,7 @@ paths:
   /query/{queryId}:
     get:
       tags:
-        - query
+        - draft
       summary: Read query by ID
       description: Returns a single query. Contains everything known about the query, including results and structured query
       operationId: getQueryById
@@ -158,120 +138,10 @@ paths:
       security:
         - feasibility_auth:
             - read:query
-    put:
-      tags:
-        - query
-      summary: Update a query in the broker
-      description: The query will be updated in the broker. Not sure if this will be allowed at all. If it will be allowed, only in the 'created' state.
-      operationId: updateQuery
-      parameters:
-        - name: queryId
-          in: path
-          description: ID of query to return
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        description: Query criteria that will be updated in the broker
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Query'
-        required: true
-      responses:
-        204:
-          description: Query successfully updated
-          content: {}
-        401:
-          description: Unauthorized - please login first
-          content: {}
-        403:
-          description: Forbidden - insufficient access rights
-          content: {}
-        404:
-          description: Query not found
-          content: {}
-        422:
-          description: Invalid input
-          content: {}
-      security:
-        - feasibility_auth:
-            - write:query
-      x-codegen-request-body-name: body
-    delete:
-      tags:
-        - query
-      summary: Deletes a query
-      operationId: deleteQuery
-      parameters:
-        - name: queryId
-          in: path
-          description: ID of query to return
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        204:
-          description: Query successfully deleted
-          content: {}
-        401:
-          description: Unauthorized - please login first
-          content: {}
-        403:
-          description: Forbidden - insufficient access rights
-          content: {}
-        404:
-          description: Query not found
-          content: {}
-      security:
-        - feasibility_auth:
-            - delete:query
-    patch:
-      tags:
-        - query
-      summary: Updates query status
-      operationId: updateQueryStatus
-      parameters:
-        - name: queryId
-          in: path
-          description: ID of query that needs to be updated
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                name:
-                  type: string
-                  description: Status to transition to
-      responses:
-        204:
-          description: Query status successfully updated
-          content: {}
-        401:
-          description: Unauthorized - please login first
-          content: {}
-        403:
-          description: Forbidden - insufficient access rights
-          content: {}
-        404:
-          description: Query not found
-          content: {}
-        409:
-          description: Invalid status transition requested
-          content: {}
-      security:
-        - feasibility_auth:
-            - write:query
   /query/{queryId}/content:
     get:
       tags:
-        - query content
+        - draft
       summary: Read structured query of a query by the query id
       description: Returns the structured query of a single query.
       operationId: getQueryContentByQueryId
@@ -302,10 +172,10 @@ paths:
       security:
         - feasibility_auth:
             - read:query
-  /query/{queryId}/result:
+  /query/result/{queryId}:
     get:
       tags:
-        - query results
+        - query
       summary: Read query result by ID
       description: Returns either your own result for this query
         (if you are authorized by your token) or all results if you got admin rights.
@@ -339,42 +209,151 @@ paths:
         - feasibility_auth:
             - read:result
             - read:all
-    delete:
+  /query/{queryId}/result:
+    get:
       tags:
-        - query results
-      summary: Delete single query result by query and "responder" ID
-      description: Delete the response of one site/client for a query
-      operationId: deleteQueryResultsByQueryId
+        - draft
+      summary: Read query result by ID
+      description: Returns either your own result for this query
+        (if you are authorized by your token) or all results if you got admin rights.
+        The query results might also be an aggregated one. This is not decided yet.
+      operationId: getQueryResultsByQueryId2
       parameters:
         - name: queryId
           in: path
-          description: ID of query for which the result shall be deleted
+          description: ID of query for which the results are requested
           required: true
           schema:
             type: integer
             format: int64
-        - name: clientIdentifier
-          in: query
-          description: identify the client whose result shall be deleted
-          required: true
-          schema:
-            type: string
       responses:
-        204:
-          description: Query successfully deleted
-          content: {}
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResult'
         401:
           description: Unauthorized - please login first
-          content: {}
+          content: { }
         403:
           description: Forbidden - insufficient access rights
           content: {}
         404:
-          description: Query not found or response not found
+          description: Query not found
           content: {}
       security:
         - feasibility_auth:
-            - delete:result
+            - read:result
+            - read:all
+  /stored-query:
+    post:
+      tags:
+        - templates
+      summary: Store a structured query with additional label and comment
+      operationId: storeQuery
+      requestBody:
+        description: Stored query to persist
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoredQuery'
+        required: true
+      responses:
+        201:
+          description: Query successfully stored
+          headers:
+            Location:
+              description: Path to the newly stored query
+              schema:
+                type: string
+                example: "https://to.be.defined/api/v1/query-handler/stored-query/42"
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        409:
+          description: Query with the same label exists for this user
+          content: {}
+      security:
+        - feasibility_auth:
+            - write:query
+    get:
+      tags:
+        - templates
+      summary: Read list of stored queries
+      description: Returns the list of all queries of the current user
+      operationId: getStoredQueryList
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/StoredQuery'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+      security:
+        - feasibility_auth:
+            - read:query
+  /stored-query/{queryId}:
+    get:
+      tags:
+        - templates
+      summary: Read a stored query
+      description: Returns he stored query with the given id
+      operationId: getStoredQuery
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of the requested stored query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/StoredQuery'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        404:
+          description: Query not found (or user has no access)
+          content: { }
+      security:
+        - feasibility_auth:
+            - read:query
+  /stored-query/validate:
+    get:
+      tags:
+        - templates
+      summary: Check all own queries for invalid or outdated termcodes
+      description: Returns a list of stored queries with the additional info if a query is valid
+      operationId: validateStoredQueryList
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/StoredQuery'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+      security:
+        - feasibility_auth:
+            - read:query
   /actuator/health:
     get:
       summary: Offers health information about this application.
@@ -452,6 +431,29 @@ components:
         errorMessage:
           type: string
           description: if the status is error, specify the cause of the error
+    StoredQuery:
+      type: object
+      properties:
+        label:
+          type: string
+          description: The 'name' of the query. Is assigned by the user via GUI.
+          example: my-query-1
+        comment:
+          type: string
+          description: A more detailed information about the query. Is also assigned by the user via GUI.
+          example: I wanted to see how many patients I could find for my study XYZ
+        structuredQuery:
+          $ref: "#/components/schemas/StructuredQuery"
+        lastModified:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          description: Keycloak id of the user who created the query
+        invalidTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
     StructuredQuery:
       type: object
       properties:
