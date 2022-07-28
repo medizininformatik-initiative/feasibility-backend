@@ -89,7 +89,7 @@ paths:
         - feasibility_auth:
             - write:query
       x-codegen-request-body-name: body
-  /query/find-by-user:
+  /query/by-user/{userId}:
     get:
       tags:
         - query
@@ -97,12 +97,10 @@ paths:
       description: User identification is done via auth id
       operationId: findQueriesByUser
       parameters:
-        - name: user
-          in: query
+        - name: userId
+          in: path
           description: User to filter by
           required: true
-          style: form
-          explode: true
           schema:
             type: string
       responses:
