@@ -376,6 +376,9 @@ components:
   schemas:
     QuerySimple:
       type: object
+      required:
+        - id
+        - label
       properties:
         id:
           type: integer
@@ -387,6 +390,9 @@ components:
           format: 'date-time'
     Query:
       type: object
+      required:
+        - id
+        - content
       properties:
         id:
           type: integer
@@ -395,44 +401,36 @@ components:
           $ref: "#/components/schemas/StructuredQuery"
         label:
           type: string
-        status:
-          type: string
-          description: Query Status
-          enum:
-            - new
-            - running
-            - completed
         results:
           $ref: "#/components/schemas/QueryResult"
     QueryResult:
       type: object
       properties:
+        totalNumberOfPatients:
+          type: integer
+          format: int64
         queryId:
           type: string
-        results:
+        resultLines:
           type: array
           items:
             $ref: "#/components/schemas/QueryResultLine"
     QueryResultLine:
       type: object
+      required:
+        - siteName
+        - numberOfPatients
       properties:
-        clientId:
+        siteName:
           type: string
-          description: distinct identifier for a client. Either a site or more precisely one client of a site
-        status:
-          type: string
-          description: Query Result Status
-          enum:
-            - success
-            - error
         numberOfPatients:
           type: integer
           format: int64
-        errorMessage:
-          type: string
-          description: if the status is error, specify the cause of the error
     StoredQuery:
       type: object
+      required:
+        - label
+        - structuredQuery
       properties:
         label:
           type: string
@@ -456,6 +454,9 @@ components:
             $ref: "#/components/schemas/TermCode"
     StructuredQuery:
       type: object
+      required:
+        - version
+        - inclusionCriteria
       properties:
         version:
           type: string
@@ -475,6 +476,10 @@ components:
     TermCode:
       description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
       type: object
+      required:
+        - code
+        - system
+        - display
       properties:
         code:
           type: string
@@ -488,17 +493,21 @@ components:
         display:
           type: string
           example: Amniotic fluid specimen (specimen)
+    beforeDate:
+      type: string
+      format: date-time
+    afterDate:
+      type: string
+      format: date-time
     TimeRestriction:
-      type: object
-      properties:
-        beforeDate:
-          type: string
-          format: date-time
-        afterDate:
-          type: string
-          format: date-time
+      anyOf:
+        - $ref: "#/components/schemas/beforeDate"
+        - $ref: "#/components/schemas/afterDate"
     Unit:
       type: object
+      required:
+        - code
+        - display
       properties:
         code:
           type: string
@@ -506,11 +515,17 @@ components:
           type: string
     AttributeFilter:
       type: object
+      description: An AttributeFilter requires different properties, depending on the type. Please refer to the JSON Schema for this.
+      required:
+        - type
       properties:
         attributeCode:
           $ref: "#/components/schemas/TermCode"
     ValueFilter:
       type: object
+      description: A ValueFilter requires different properties, depending on the type. Please refer to the JSON Schema for this.
+      required:
+        - type
       properties:
         type:
           type: string
@@ -544,6 +559,8 @@ components:
           format: double
     Criterion:
       type: object
+      required:
+        - termCodes
       properties:
         termCodes:
           type: array
