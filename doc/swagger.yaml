@@ -460,6 +460,7 @@ components:
       properties:
         version:
           type: string
+          format: uri
           description: The json schema version
           example: http://to_be_decided.com/draft-1/schema#
         display:
