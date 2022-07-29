@@ -74,12 +74,11 @@ paths:
       tags:
         - draft
       summary: Finds query summary (id, label, lastModified) of all queries of one user
-      description: User identification is done via auth id
       operationId: findQueriesByUser
       parameters:
         - name: userId
           in: path
-          description: User to filter by
+          description: User to filter by (keycloak id)
           required: true
           schema:
             type: string
