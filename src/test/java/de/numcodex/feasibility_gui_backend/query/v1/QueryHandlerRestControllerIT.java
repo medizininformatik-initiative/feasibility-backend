@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
+import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(
         controllers = QueryHandlerRestController.class,
         properties = {
-                "app.enableQueryValidation=true"
+                "app.enableQueryValidation=true",
+                "keycloak.enabled=false"
         }
 )
 @SuppressWarnings("NewClassNamingConvention")
@@ -48,6 +51,9 @@ public class QueryHandlerRestControllerIT {
 
     @MockBean
     private QueryHandlerService queryHandlerService;
+
+    @MockBean
+    private TermCodeValidation termCodeValidation;
 
     @Test
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
@@ -76,6 +82,8 @@ public class QueryHandlerRestControllerIT {
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
         when(queryHandlerService.runQuery(any(StructuredQuery.class))).thenReturn(1L);
+        when(termCodeValidation.getInvalidTermCodes(any(StoredQuery.class))).thenReturn(new ArrayList<>());
+
 
         mockMvc.perform(post(URI.create("/api/v1/query-handler/run-query"))
                         .contentType(APPLICATION_JSON)
