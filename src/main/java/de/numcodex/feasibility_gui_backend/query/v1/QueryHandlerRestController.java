@@ -1,5 +1,6 @@
-package de.numcodex.feasibility_gui_backend.query;
+package de.numcodex.feasibility_gui_backend.query.v1;
 
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
