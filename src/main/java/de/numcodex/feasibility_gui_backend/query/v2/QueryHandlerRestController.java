@@ -26,7 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 Rest Interface for the UI to send queries from the ui to the ui backend.
 */
 @RequestMapping("api/v2/query")
-@RestController
+@RestController("QueryHandlerRestController-v2")
 @Slf4j
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
 public class QueryHandlerRestController {

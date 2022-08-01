@@ -39,7 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 Rest Interface for the UI to send queries from the ui to the ui backend.
 */
 @RequestMapping("api/v1/query-handler")
-@RestController
+@RestController("QueryHandlerRestController-v1")
 @Slf4j
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
 public class QueryHandlerRestController {
