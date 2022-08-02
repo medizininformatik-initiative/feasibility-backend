@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -80,20 +81,36 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
   }
 
+  @GetMapping("")
+  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
+  public Query getQueryList(@RequestParam("filter") String filter, Principal principal) {
+//    return queryHandlerService.getQuery();
+    // TODO
+    return new Query();
+  }
+
+  @GetMapping("/by-user/{userId}")
+  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
+  public Query getQueryList(@PathVariable("userId") String userId, @RequestParam("filter") String filter, Principal principal) {
+//    return queryHandlerService.getQuery();
+    // TODO
+    return new Query();
+  }
+
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole({T(de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController).KEYCLOAK_ALLOWED_ROLE})")
+  @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
   public Query getQuery(@PathVariable("id") Long queryId) throws JsonProcessingException {
     return queryHandlerService.getQuery(queryId);
   }
 
-  @GetMapping("/{id}/result/obfuscated")
-  @PreAuthorize("hasRole({T(de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController).KEYCLOAK_ALLOWED_ROLE})")
+  @GetMapping("/{id}/result/detailed")
+  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
   public QueryResult getQueryResultObfuscated(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId);
   }
 
   @GetMapping("/{id}/result")
-  @PreAuthorize("principal.name == {T(de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController).FDPG_CLIENT_ID}")
+  @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
   public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId);
   }
