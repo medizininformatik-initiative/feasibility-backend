@@ -77,24 +77,18 @@ public class QueryHandlerService {
     }
 
     public de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate getQueryTemplate(
-        Long queryId, String authorId)  {
+        Long queryId, String authorId) throws QueryTemplateException {
         de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate = queryTemplateRepository.findById(
-            queryId).orElseThrow();
-        if (queryTemplate.getQuery().getCreatedBy().equalsIgnoreCase(authorId)) {
-            return queryTemplate;
-        } else {
-            return null;
+            queryId).orElseThrow(QueryTemplateException::new);
+        if (!queryTemplate.getQuery().getCreatedBy().equalsIgnoreCase(authorId)) {
+            throw new QueryTemplateException();
         }
+        return queryTemplate;
     }
 
     public List<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> getQueryTemplatesForAuthor(
         String authorId) {
         return queryTemplateRepository.findByAuthor(authorId);
-    }
-
-    public de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate convertTemplateApiToPersistence(
-        QueryTemplate in, Long queryId) {
-        return queryTemplateHandler.convertApiToPersistence(in, queryId);
     }
 
     public QueryTemplate convertTemplatePersistenceToApi(

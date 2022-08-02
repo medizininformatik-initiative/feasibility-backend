@@ -3,6 +3,13 @@ package de.numcodex.feasibility_gui_backend.query.templates;
 public class QueryTemplateException extends Exception {
 
   /**
+   * Constructs a new {@link QueryTemplateException} without further details.
+   */
+  public QueryTemplateException() {
+    super();
+  }
+
+  /**
    * Constructs a new {@link QueryTemplateException} with the specified detail message.
    *
    * @param message The detail message.

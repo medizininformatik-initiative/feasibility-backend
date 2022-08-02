@@ -172,15 +172,14 @@ public class QueryHandlerRestController {
     }
     try {
       var query = queryHandlerService.getQueryTemplate(queryId, authorId);
-      if (query == null) {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-      }
       QueryTemplate queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
       List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(queryTemplate);
       queryTemplate.setInvalidTerms(invalidTermCodes);
       return new ResponseEntity<>(queryTemplate, HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (QueryTemplateException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 
