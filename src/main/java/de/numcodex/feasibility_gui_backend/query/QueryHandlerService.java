@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
@@ -8,6 +10,8 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplateRepository;
@@ -34,6 +38,12 @@ public class QueryHandlerService {
     private final QueryTemplateHandler queryTemplateHandler;
 
     @NonNull
+    private final QueryRepository queryRepository;
+
+    @NonNull
+    private final QueryContentRepository queryContentRepository;
+
+    @NonNull
     private final ResultRepository resultRepository;
 
     @NonNull
@@ -41,6 +51,9 @@ public class QueryHandlerService {
 
     @NonNull
     private final QueryResultObfuscator queryResultObfuscator;
+
+    @NonNull
+    private ObjectMapper jsonUtil;
 
     public Long runQuery(StructuredQuery structuredQuery, String userId)
         throws QueryDispatchException {
@@ -71,6 +84,24 @@ public class QueryHandlerService {
                 .build();
     }
 
+    public Query getQuery(Long queryId) throws JsonProcessingException {
+        var query = queryRepository.findById(queryId);
+        if (query.isPresent()) {
+            return convertQueryToApi(query.get());
+        } else {
+            return null;
+        }
+    }
+
+    public StructuredQuery getQueryContent(Long queryId) throws JsonProcessingException {
+        var queryContent = queryContentRepository.findByQueryId(queryId);
+        if (queryContent.isPresent()) {
+            return jsonUtil.readValue(queryContent.get().getQueryContent(), StructuredQuery.class);
+        } else {
+            return null;
+        }
+    }
+
     public Long storeQueryTemplate(QueryTemplate queryTemplate, String userId)
         throws QueryTemplateException {
         return queryTemplateHandler.storeTemplate(queryTemplate, userId);
@@ -95,5 +126,16 @@ public class QueryHandlerService {
         de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate in)
         throws JsonProcessingException {
         return queryTemplateHandler.convertPersistenceToApi(in);
+    }
+
+    private Query convertQueryToApi(de.numcodex.feasibility_gui_backend.query.persistence.Query in)
+        throws JsonProcessingException {
+        Query out = new Query();
+        out.setId(in.getId());
+        out.setContent(
+            jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class));
+        out.setLabel("todo");
+        out.setResults(getQueryResult(in.getId()));
+        return out;
     }
 }
