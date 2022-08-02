@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @JsonInclude(Include.NON_NULL)
 @StoredQueryValidation
-public class StoredQuery {
+public class QueryTemplate {
 
   @JsonProperty
   private long id;

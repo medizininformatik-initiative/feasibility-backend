@@ -37,6 +37,9 @@ app:
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
+  # Client ID of the external application that may read all queries
+  fdpgClientId: ${FDPG_CLIENT_ID}
+  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:CODEX_USER}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
@@ -80,13 +83,6 @@ keycloak:
   realm: ${KEYCLOAK_REALM:codex-develop}
   ssl-required: external
   resource: ${KEYCLOAK_CLIENT_ID:feasibility-gui}
-  security-constraints:
-  - auth-roles:
-    - ${KEYCLOAK_ALLOWED_ROLE:CODEX_USER}
-    security-collections:
-    - name: "Secured endpoints"
-      patterns:
-      - "/api/*"
 
 logging:
   level:

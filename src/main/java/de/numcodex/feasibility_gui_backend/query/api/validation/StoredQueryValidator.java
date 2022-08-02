@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.api.validation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import lombok.NonNull;
@@ -13,10 +13,10 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Validator for {@link StoredQuery} that does an actual check based on a JSON schema.
+ * Validator for {@link QueryTemplate} that does an actual check based on a JSON schema.
  */
 @Slf4j
-public class StoredQueryValidator implements ConstraintValidator<StoredQueryValidation, StoredQuery> {
+public class StoredQueryValidator implements ConstraintValidator<StoredQueryValidation, QueryTemplate> {
 
   @NonNull
   private Schema jsonSchema;
@@ -35,15 +35,15 @@ public class StoredQueryValidator implements ConstraintValidator<StoredQueryVali
   }
 
   /**
-   * Validate the submitted {@link StoredQuery} against the json query schema.
+   * Validate the submitted {@link QueryTemplate} against the json query schema.
    *
-   * @param storedQuery the {@link StoredQuery} to validate
+   * @param queryTemplate the {@link QueryTemplate} to validate
    */
   @Override
-  public boolean isValid(StoredQuery storedQuery,
+  public boolean isValid(QueryTemplate queryTemplate,
       ConstraintValidatorContext constraintValidatorContext) {
     try {
-      var jsonSubject = new JSONObject(jsonUtil.writeValueAsString(storedQuery));
+      var jsonSubject = new JSONObject(jsonUtil.writeValueAsString(queryTemplate));
       jsonSchema.validate(jsonSubject);
       return true;
     } catch (ValidationException | JsonProcessingException e) {

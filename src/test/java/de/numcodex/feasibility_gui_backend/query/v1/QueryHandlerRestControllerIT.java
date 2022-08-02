@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
-import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
@@ -81,8 +81,8 @@ public class QueryHandlerRestControllerIT {
         testQuery.setDisplay("foo");
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
-        when(queryHandlerService.runQuery(any(StructuredQuery.class))).thenReturn(1L);
-        when(termCodeValidation.getInvalidTermCodes(any(StoredQuery.class))).thenReturn(new ArrayList<>());
+        when(queryHandlerService.runQuery(any(StructuredQuery.class), "test")).thenReturn(1L);
+        when(termCodeValidation.getInvalidTermCodes(any(QueryTemplate.class))).thenReturn(new ArrayList<>());
 
 
         mockMvc.perform(post(URI.create("/api/v1/query-handler/run-query"))

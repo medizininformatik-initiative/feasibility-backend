@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
-import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import java.net.URI;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class StoredQueryPassValidatorTest {
         testQuery.setDisplay("foo");
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
-        var testStoredQuery = new StoredQuery();
+        var testStoredQuery = new QueryTemplate();
         testStoredQuery.setStructuredQuery(testQuery);
         testStoredQuery.setLabel("test");
 
@@ -56,7 +56,7 @@ public class StoredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_invalidQueryPasses() {
-        var testStoredQuery = new StoredQuery();
+        var testStoredQuery = new QueryTemplate();
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testStoredQuery, ctx));
         assertTrue(validationResult);

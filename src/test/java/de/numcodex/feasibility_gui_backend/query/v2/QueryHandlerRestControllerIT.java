@@ -74,12 +74,12 @@ public class QueryHandlerRestControllerIT {
         testQuery.setDisplay("foo");
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
-        when(queryHandlerService.runQuery(any(StructuredQuery.class))).thenReturn(1L);
+        when(queryHandlerService.runQuery(any(StructuredQuery.class), "test")).thenReturn(1L);
 
         mockMvc.perform(post(URI.create("/api/v2/query"))
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(LOCATION, "/api/v2/query/1/result"));
+                .andExpect(header().string(LOCATION, "/api/v2/query/1/result/obfuscated"));
     }
 }

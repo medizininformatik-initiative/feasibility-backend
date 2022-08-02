@@ -3,21 +3,25 @@ package de.numcodex.feasibility_gui_backend.query.persistence;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.Data;
 
 @Data
 @Entity
-public class StoredQuery {
+public class QueryTemplate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "structured_query", nullable = false)
-    private String queryContent;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName = "id", name = "query_id")
+    private Query query;
 
     @Column(name = "label", nullable = false)
     private String label;
@@ -27,7 +31,4 @@ public class StoredQuery {
 
     @Column(name = "last_modified", insertable = false)
     private Timestamp lastModified;
-
-    @Column(name = "created_by")
-    private String createdBy;
 }

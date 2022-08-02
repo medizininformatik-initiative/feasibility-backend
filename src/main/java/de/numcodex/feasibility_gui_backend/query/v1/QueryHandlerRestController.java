@@ -4,6 +4,7 @@ import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
+import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
@@ -41,12 +42,16 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("run-query")
-  public ResponseEntity<Object> runQuery(
-      @Valid @RequestBody StructuredQuery query, @Context HttpServletRequest httpServletRequest) {
+  public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
+      @Context HttpServletRequest httpServletRequest, Principal principal) {
+
+    if (principal == null) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
     Long queryId;
     try {
-      queryId = queryHandlerService.runQuery(query);
+      queryId = queryHandlerService.runQuery(query, principal.getName());
     } catch (QueryDispatchException e) {
       log.error("Error while running query", e);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

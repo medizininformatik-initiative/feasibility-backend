@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Unit;
-import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
@@ -79,7 +79,7 @@ public class StoredQueryValidatorTest {
     assertFalse(validator.isValid(queryWithMalformedStructuredQuery, constraintValidatorContext));
   }
 
-  private StoredQuery buildValidQuery() {
+  private QueryTemplate buildValidQuery() {
     var bodyWeightTermCode = new TermCode();
     bodyWeightTermCode.setSystem("http://snomed.info/sct");
     bodyWeightTermCode.setDisplay("Body weight (observable entity)");
@@ -111,7 +111,7 @@ public class StoredQueryValidatorTest {
     testQuery.setInclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
     testQuery.setExclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
 
-    var testStoredQuery = new StoredQuery();
+    var testStoredQuery = new QueryTemplate();
     testStoredQuery.setStructuredQuery(testQuery);
     testStoredQuery.setLabel("testquery");
     testStoredQuery.setComment("this is just a test query");
