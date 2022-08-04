@@ -6,18 +6,23 @@ import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
+import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryIdAndCreatedAt;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplateRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.SavedQueryRepository;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -48,6 +53,9 @@ public class QueryHandlerService {
 
     @NonNull
     private final QueryTemplateRepository queryTemplateRepository;
+
+    @NonNull
+    private final SavedQueryRepository savedQueryRepository;
 
     @NonNull
     private final QueryResultObfuscator queryResultObfuscator;
@@ -107,6 +115,11 @@ public class QueryHandlerService {
         return queryTemplateHandler.storeTemplate(queryTemplate, userId);
     }
 
+    public Long saveQuery(Long queryId, SavedQuery savedQueryApi) {
+        de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery savedQuery = convertSavedQueryApiToPersistence(savedQueryApi, queryId);
+        return savedQueryRepository.save(savedQuery).getId();
+    }
+
     public de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate getQueryTemplate(
         Long queryId, String authorId) throws QueryTemplateException {
         de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate = queryTemplateRepository.findById(
@@ -137,5 +150,25 @@ public class QueryHandlerService {
         out.setLabel("todo");
         out.setResults(getQueryResult(in.getId()));
         return out;
+    }
+
+    private de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery convertSavedQueryApiToPersistence(
+        SavedQuery in, Long queryId) {
+        var out = new de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery();
+        out.setQuery(queryRepository.getReferenceById(queryId));
+        out.setComment(in.getComment());
+        out.setLabel(in.getLabel());
+        return out;
+    }
+
+    public List<QueryIdAndCreatedAt> getQueryListForAuthor(
+        String userId) {
+        Optional<List<QueryIdAndCreatedAt>> queries = queryRepository.findByAuthor(
+            userId);
+        return queries.orElseGet(ArrayList::new);
+    }
+
+    public String getAuthorId(Long queryId) {
+        return queryRepository.getAuthor(queryId).orElse(null);
     }
 }

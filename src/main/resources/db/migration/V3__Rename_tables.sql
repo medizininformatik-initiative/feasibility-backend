@@ -11,9 +11,9 @@ ALTER TABLE query
 CREATE TABLE saved_query
 (
     ID       SERIAL PRIMARY KEY,
-    query_id INTEGER NOT NULL,
+    query_id INTEGER UNIQUE NOT NULL,
     deleted  boolean DEFAULT FALSE,
-    label    text    NOT NULL,
+    label    text           NOT NULL,
     comment  text
 );
 

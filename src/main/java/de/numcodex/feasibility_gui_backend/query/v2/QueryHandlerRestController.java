@@ -4,15 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
+import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryIdAndCreatedAt;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.security.Principal;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,10 +61,6 @@ public class QueryHandlerRestController {
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
 
-    if (principal == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
     Long queryId;
     try {
       queryId = queryHandlerService.runQuery(query, principal.getName());
@@ -73,7 +74,7 @@ public class QueryHandlerRestController {
         : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uriString = uriBuilder.replacePath("")
-        .pathSegment("api", "v2", "query", String.valueOf(queryId), "result", "obfuscated")
+        .pathSegment("api", "v2", "query", String.valueOf(queryId), "result")
         .build()
         .toUriString();
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -83,18 +84,37 @@ public class QueryHandlerRestController {
 
   @GetMapping("")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
-  public Query getQueryList(@RequestParam("filter") String filter, Principal principal) {
-//    return queryHandlerService.getQuery();
-    // TODO
-    return new Query();
+  public List<QueryIdAndCreatedAt> getQueryList(@RequestParam(name = "filter", required = false) String filter, Principal principal) {
+    var userId = principal.getName();
+    // TODO filter
+    return queryHandlerService.getQueryListForAuthor(userId);
   }
 
-  @GetMapping("/by-user/{userId}")
+  @PostMapping("/{id}/saved")
+  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
+  public ResponseEntity<Object> saveQuery(@PathVariable("id") Long queryId,
+      @RequestBody SavedQuery savedQuery,  Principal principal) {
+
+    String authorId = queryHandlerService.getAuthorId(queryId);
+    if (authorId == null) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } else if (!authorId.equalsIgnoreCase(principal.getName())) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    } else {
+      try {
+        queryHandlerService.saveQuery(queryId, savedQuery);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      } catch (DataIntegrityViolationException e) {
+        return new ResponseEntity<>(HttpStatus.CONFLICT);
+      }
+    }
+  }
+
+  @GetMapping("/by-user/{id}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
-  public Query getQueryList(@PathVariable("userId") String userId, @RequestParam("filter") String filter, Principal principal) {
-//    return queryHandlerService.getQuery();
-    // TODO
-    return new Query();
+  public List<QueryIdAndCreatedAt> getQueryListForUser(@PathVariable("id") String userId, @RequestParam("filter") String filter) {
+    // TODO filter
+    return queryHandlerService.getQueryListForAuthor(userId);
   }
 
   @GetMapping("/{id}")
