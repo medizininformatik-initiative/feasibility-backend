@@ -72,11 +72,16 @@ public class QueryHandlerService {
 
     @Transactional
     public QueryResult getQueryResult(Long queryId) {
+        return getQueryResult(queryId, true);
+    }
+
+    @Transactional
+    public QueryResult getQueryResult(Long queryId, boolean obfuscateSites) {
         var singleSiteResults = resultRepository.findByQueryAndStatus(queryId, SUCCESS);
 
         var resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                        .siteName(queryResultObfuscator.tokenizeSiteName(ssr))
+                        .siteName(obfuscateSites ? queryResultObfuscator.tokenizeSiteName(ssr) : ssr.getSite().getSiteName())
                         .numberOfPatients(ssr.getResult())
                         .build())
                 .collect(Collectors.toList());
