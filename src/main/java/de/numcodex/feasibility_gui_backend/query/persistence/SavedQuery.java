@@ -19,8 +19,8 @@ public class SavedQuery {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @JoinColumn(referencedColumnName = "id", name = "query_id", nullable = false)
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(referencedColumnName = "id", name = "query_id")
   private Query query;
 
   @Column(name = "deleted")

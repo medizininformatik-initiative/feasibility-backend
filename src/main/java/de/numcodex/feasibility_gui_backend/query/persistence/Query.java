@@ -26,4 +26,7 @@ public class Query {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id", name = "query_content_id")
     private QueryContent queryContent;
+
+    @OneToOne(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private SavedQuery savedQuery;
 }

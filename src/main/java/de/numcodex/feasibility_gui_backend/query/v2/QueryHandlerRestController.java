@@ -3,16 +3,15 @@ package de.numcodex.feasibility_gui_backend.query.v2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
+import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryIdAndCreatedAt;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.security.Principal;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -84,10 +83,12 @@ public class QueryHandlerRestController {
 
   @GetMapping("")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
-  public List<QueryIdAndCreatedAt> getQueryList(@RequestParam(name = "filter", required = false) String filter, Principal principal) {
+  public List<QueryListEntry> getQueryList(@RequestParam(name = "filter", required = false) String filter, Principal principal) {
     var userId = principal.getName();
     // TODO filter
-    return queryHandlerService.getQueryListForAuthor(userId);
+    var queryList = queryHandlerService.getQueryListForAuthor(userId);
+    var queries = queryHandlerService.convertQueriesToQueryListEntries(queryList);
+    return queries;
   }
 
   @PostMapping("/{id}/saved")
@@ -112,9 +113,11 @@ public class QueryHandlerRestController {
 
   @GetMapping("/by-user/{id}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
-  public List<QueryIdAndCreatedAt> getQueryListForUser(@PathVariable("id") String userId, @RequestParam("filter") String filter) {
+  public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam("filter") String filter) {
     // TODO filter
-    return queryHandlerService.getQueryListForAuthor(userId);
+    var queryList =  queryHandlerService.getQueryListForAuthor(userId);
+    var queries = queryHandlerService.convertQueriesToQueryListEntries(queryList);
+    return queries;
   }
 
   @GetMapping("/{id}")

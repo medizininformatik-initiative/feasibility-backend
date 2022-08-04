@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
+import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
@@ -12,7 +13,6 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryIdAndCreatedAt;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
@@ -161,14 +161,30 @@ public class QueryHandlerService {
         return out;
     }
 
-    public List<QueryIdAndCreatedAt> getQueryListForAuthor(
+    public List<de.numcodex.feasibility_gui_backend.query.persistence.Query> getQueryListForAuthor(
         String userId) {
-        Optional<List<QueryIdAndCreatedAt>> queries = queryRepository.findByAuthor(
+        Optional<List<de.numcodex.feasibility_gui_backend.query.persistence.Query>> queries = queryRepository.findByAuthor(
             userId);
         return queries.orElseGet(ArrayList::new);
     }
 
     public String getAuthorId(Long queryId) {
         return queryRepository.getAuthor(queryId).orElse(null);
+    }
+
+    public List<QueryListEntry> convertQueriesToQueryListEntries(List<de.numcodex.feasibility_gui_backend.query.persistence.Query> queryList) {
+        var ret = new ArrayList<QueryListEntry>();
+
+        queryList.forEach(q -> {
+            if (q.getSavedQuery() != null) {
+                ret.add(
+                    new QueryListEntry(q.getId(), q.getSavedQuery().getLabel(), q.getCreatedAt()));
+            } else {
+                ret.add(
+                    new QueryListEntry(q.getId(), null, q.getCreatedAt()));
+            }
+        });
+
+        return ret;
     }
 }
