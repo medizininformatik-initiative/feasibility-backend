@@ -162,9 +162,15 @@ public class QueryHandlerService {
     }
 
     public List<de.numcodex.feasibility_gui_backend.query.persistence.Query> getQueryListForAuthor(
-        String userId) {
-        Optional<List<de.numcodex.feasibility_gui_backend.query.persistence.Query>> queries = queryRepository.findByAuthor(
-            userId);
+        String userId, boolean savedOnly) {
+        Optional<List<de.numcodex.feasibility_gui_backend.query.persistence.Query>> queries;
+
+        if (savedOnly) {
+            queries = queryRepository.findSavedQueriesByAuthor(userId);
+        } else {
+            queries = queryRepository.findByAuthor(userId);
+        }
+
         return queries.orElseGet(ArrayList::new);
     }
 

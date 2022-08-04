@@ -9,6 +9,9 @@ public interface QueryRepository extends JpaRepository<Query, Long> {
   @org.springframework.data.jpa.repository.Query("SELECT t FROM Query t WHERE t.createdBy = ?1")
   Optional<List<Query>> findByAuthor(String authorId);
 
+  @org.springframework.data.jpa.repository.Query("SELECT t FROM Query t left join SavedQuery s on t.id = s.query.id WHERE t.createdBy = ?1 AND s.id IS NOT NULL")
+  Optional<List<Query>> findSavedQueriesByAuthor(String authorId);
+
   @org.springframework.data.jpa.repository.Query("SELECT t.createdBy FROM Query t WHERE t.id = ?1")
   Optional<String> getAuthor(Long queryId);
 }

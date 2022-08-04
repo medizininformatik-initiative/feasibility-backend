@@ -85,8 +85,8 @@ public class QueryHandlerRestController {
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public List<QueryListEntry> getQueryList(@RequestParam(name = "filter", required = false) String filter, Principal principal) {
     var userId = principal.getName();
-    // TODO filter
-    var queryList = queryHandlerService.getQueryListForAuthor(userId);
+    var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
+    var queryList = queryHandlerService.getQueryListForAuthor(userId, savedOnly);
     var queries = queryHandlerService.convertQueriesToQueryListEntries(queryList);
     return queries;
   }
@@ -114,8 +114,8 @@ public class QueryHandlerRestController {
   @GetMapping("/by-user/{id}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
   public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam("filter") String filter) {
-    // TODO filter
-    var queryList =  queryHandlerService.getQueryListForAuthor(userId);
+    var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
+    var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
     var queries = queryHandlerService.convertQueriesToQueryListEntries(queryList);
     return queries;
   }
