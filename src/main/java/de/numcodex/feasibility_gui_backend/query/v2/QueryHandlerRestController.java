@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.query.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
-import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -11,10 +10,14 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -45,8 +48,8 @@ public class QueryHandlerRestController {
   private final TermCodeValidation termCodeValidation;
   private final String apiBaseUrl;
 
-  @Value("${keycloak.enabled}")
-  private boolean keycloakEnabled;
+  @Value("${app.keycloakAdminRole}")
+  private String keycloakAdminRole;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
@@ -122,8 +125,14 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
-  public Query getQuery(@PathVariable("id") Long queryId) throws JsonProcessingException {
-    return queryHandlerService.getQuery(queryId);
+  public ResponseEntity<Object> getQuery(@PathVariable("id") Long queryId,
+      KeycloakAuthenticationToken keycloakAuthenticationToken) throws JsonProcessingException {
+    if (!hasAccess(queryId, keycloakAuthenticationToken)) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+    var query = queryHandlerService.getQuery(queryId);
+
+    return new ResponseEntity<>(query, HttpStatus.OK);
   }
 
   @GetMapping("/{id}/result/detailed")
@@ -134,14 +143,35 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}/result")
   @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
-  public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
-    return queryHandlerService.getQueryResult(queryId);
+  public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
+      KeycloakAuthenticationToken keycloakAuthenticationToken) {
+    if (!hasAccess(queryId, keycloakAuthenticationToken)) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+    var queryResult = queryHandlerService.getQueryResult(queryId);
+    return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
 
   @GetMapping("/{id}/content")
   @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
-  public StructuredQuery getQueryContent(@PathVariable("id") Long queryId)
+  public ResponseEntity<Object> getQueryContent(@PathVariable("id") Long queryId,
+      KeycloakAuthenticationToken keycloakAuthenticationToken)
       throws JsonProcessingException {
-    return queryHandlerService.getQueryContent(queryId);
+
+    if (!hasAccess(queryId, keycloakAuthenticationToken)) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+    var queryContent = queryHandlerService.getQueryContent(queryId);
+    return new ResponseEntity<>(queryContent, HttpStatus.OK);
+  }
+
+  private boolean hasAccess(Long queryId, KeycloakAuthenticationToken keycloakAuthenticationToken) {
+    KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) keycloakAuthenticationToken.getPrincipal();
+    RefreshableKeycloakSecurityContext keycloakSecurityContext =
+        (RefreshableKeycloakSecurityContext) keycloakPrincipal.getKeycloakSecurityContext();
+    Set<String> roles = keycloakSecurityContext.getToken().getRealmAccess().getRoles();
+
+    return (roles.contains(keycloakAdminRole) || queryHandlerService.getAuthorId(queryId)
+        .equalsIgnoreCase(keycloakPrincipal.getName()));
   }
 }
