@@ -116,7 +116,7 @@ public class QueryHandlerRestController {
 
   @GetMapping("/by-user/{id}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
-  public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam("filter") String filter) {
+  public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
     var queries = queryHandlerService.convertQueriesToQueryListEntries(queryList);

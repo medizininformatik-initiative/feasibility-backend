@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
-import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
+import de.numcodex.feasibility_gui_backend.query.dispatch.QueryHashCalculator;
 import de.numcodex.feasibility_gui_backend.query.persistence.Query;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContent;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;

@@ -11,7 +11,7 @@ import java.security.MessageDigest;
  * Provides functionality for calculating the hash value of a serialized query body.
  */
 @RequiredArgsConstructor
-class QueryHashCalculator {
+public class QueryHashCalculator {
 
     @NonNull
     private MessageDigest hashFn;
@@ -22,7 +22,7 @@ class QueryHashCalculator {
      * @param queryBody The serialized query whose hash value shall be calculated.
      * @return The calculated hash value in hex format.
      */
-    String calculateSerializedQueryBodyHash(@NotNull  String queryBody) {
+    public String calculateSerializedQueryBodyHash(@NotNull String queryBody) {
         if (queryBody == null) {
             throw new IllegalArgumentException("query body must not be null");
         }
