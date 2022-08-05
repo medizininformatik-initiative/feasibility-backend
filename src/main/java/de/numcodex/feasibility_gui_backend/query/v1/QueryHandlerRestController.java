@@ -1,7 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.v1;
 
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import java.security.Principal;
@@ -9,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -70,7 +71,14 @@ public class QueryHandlerRestController {
 
   @GetMapping(path = "/result/{id}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
-  public QueryResult getQueryResult(@PathVariable("id") Long queryId) {
-    return queryHandlerService.getQueryResult(queryId);
+  public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
+      KeycloakAuthenticationToken keycloakAuthenticationToken) {
+
+    KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) keycloakAuthenticationToken.getPrincipal();
+    if (queryHandlerService.getAuthorId(queryId).equalsIgnoreCase(keycloakPrincipal.getName())) {
+      return new ResponseEntity<>(queryHandlerService.getQueryResult(queryId), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
   }
 }
