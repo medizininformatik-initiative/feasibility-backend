@@ -15,7 +15,7 @@ servers:
   - url: https://to.be.defined
     variables:
       basePath:
-        default: /api/v2
+        default: /api
 tags:
   - name: query
     description: operations for queries
@@ -24,10 +24,89 @@ tags:
       url: http://link.to.confluence
   - name: templates
     description: operations to work with query templates
+  - name: deprecated
+    description: operations from earlier api versions
   - name: intrinsics
     description: Offers intrinsic information about this application.
 paths:
-  /query:
+  /v1/run-query:
+    post:
+      tags:
+        - deprecated
+      summary: Create a query in the broker
+      description: The query will be spawned in the broker and directly be dispatched. This endpoint is deprecated. Please use POST /v2/query instead
+      operationId: runQueryV1
+      requestBody:
+        description: Structured query to create and dispatch
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredQuery'
+        required: true
+      responses:
+        201:
+          description: Query successfully dispatched
+          headers:
+            Location:
+              description: Path to the result of your newly created query
+              schema:
+                type: string
+                example: "https://to.be.defined/api/v1/query-handler/result/42"
+          content: { }
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: { }
+        422:
+          description: Invalid input
+          content: { }
+        500:
+          description: Dispatch error
+          content: { }
+      security:
+        - feasibility_auth:
+            - user
+      x-codegen-request-body-name: body
+  /v1/query/result/{queryId}:
+    get:
+      tags:
+        - deprecated
+      summary: Read obfuscated query result by ID
+      description: Returns all results to query with the site names obfuscated
+        The query results might also be an aggregated one. This is not decided yet.
+        This endpoint is deprecated. Please use GET /v2/query/{queryId}/result instead
+      operationId: getQueryResultsByQueryId
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultObfuscated'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+            - user
+  /v2/query:
     post:
       tags:
         - query
@@ -97,7 +176,7 @@ paths:
       security:
         - feasibility_auth:
             - user
-  /query/by-user/{userId}:
+  /v2/query/by-user/{userId}:
     get:
       tags:
         - query
@@ -139,7 +218,7 @@ paths:
       security:
         - feasibility_auth:
             - admin
-  /query/{queryId}:
+  /v2/query/{queryId}:
     get:
       tags:
         - query
@@ -174,7 +253,7 @@ paths:
         - feasibility_auth:
             - user
             - admin
-  /query/{queryId}/content:
+  /v2/query/{queryId}/content:
     get:
       tags:
         - query
@@ -209,13 +288,13 @@ paths:
         - feasibility_auth:
             - admin
             - user
-  /query/{queryId}/result/detailed:
+  /v2/query/{queryId}/result/detailed:
     get:
       tags:
         - query
       summary: Read query result by ID
       description: Returns results to query with the real site names - admin rights required
-      operationId: getQueryResultsByQueryId0
+      operationId: getQueryResultDetailed
       parameters:
         - name: queryId
           in: path
@@ -243,14 +322,14 @@ paths:
       security:
         - feasibility_auth:
             - admin
-  /query/{queryId}/result:
+  /v2/query/{queryId}/result:
     get:
       tags:
         - query
       summary: Read obfuscated query result by ID
       description: Returns all results to query with the site names obfuscated
         The query results might also be an aggregated one. This is not decided yet.
-      operationId: getQueryResultsByQueryId2
+      operationId: getQueryResults
       parameters:
         - name: queryId
           in: path
@@ -279,7 +358,7 @@ paths:
         - feasibility_auth:
             - admin
             - user
-  /query/{queryId}/saved:
+  /v2/query/{queryId}/saved:
     post:
       tags:
         - query
@@ -319,7 +398,7 @@ paths:
       security:
         - feasibility_auth:
             - user
-  /query/template:
+  /v2/query/template:
     post:
       tags:
         - templates
@@ -374,7 +453,7 @@ paths:
       security:
         - feasibility_auth:
             - user
-  /query/template/{queryId}:
+  /v2/query/template/{queryId}:
     get:
       tags:
         - templates
@@ -406,7 +485,7 @@ paths:
       security:
         - feasibility_auth:
             - user
-  /query/template/validate:
+  /v2/query/template/validate:
     get:
       tags:
         - templates

@@ -137,7 +137,7 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}/result/detailed")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
-  public QueryResult getQueryResultObfuscated(@PathVariable("id") Long queryId) {
+  public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId, false);
   }
 

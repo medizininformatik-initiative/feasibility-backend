@@ -45,6 +45,7 @@ public class QueryHandlerRestController {
 
   @PostMapping("run-query")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
+  @Deprecated
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
 
@@ -71,6 +72,7 @@ public class QueryHandlerRestController {
 
   @GetMapping(path = "/result/{id}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
+  @Deprecated
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
       KeycloakAuthenticationToken keycloakAuthenticationToken) {
 
