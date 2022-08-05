@@ -65,10 +65,6 @@ public class QueryTemplateHandlerRestController {
     String authorId = keycloakEnabled ? principal.getName()
         : getUserIdFromAuthorizationHeader(authorizationHeader);
 
-    if (authorId == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
     Long queryId;
     try {
       queryId = queryHandlerService.storeQueryTemplate(queryTemplate, authorId);
@@ -100,9 +96,6 @@ public class QueryTemplateHandlerRestController {
     String authorId = keycloakEnabled ? principal.getName()
         : getUserIdFromAuthorizationHeader(authorizationHeader);
 
-    if (authorId == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
     try {
       var query = queryHandlerService.getQueryTemplate(queryId, authorId);
       QueryTemplate queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
@@ -122,10 +115,6 @@ public class QueryTemplateHandlerRestController {
 
     String authorId = keycloakEnabled ? principal.getName()
         : getUserIdFromAuthorizationHeader(authorizationHeader);
-
-    if (authorId == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
 
     var queries = queryHandlerService.getQueryTemplatesForAuthor(authorId);
     var ret = new ArrayList<QueryTemplate>();
@@ -148,10 +137,6 @@ public class QueryTemplateHandlerRestController {
 
     String authorId = keycloakEnabled ? principal.getName()
         : getUserIdFromAuthorizationHeader(authorizationHeader);
-
-    if (authorId == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
 
     var queries = queryHandlerService.getQueryTemplatesForAuthor(authorId);
     var ret = new ArrayList<QueryTemplate>();
