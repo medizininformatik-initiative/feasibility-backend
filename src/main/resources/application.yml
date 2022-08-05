@@ -19,6 +19,10 @@ spring:
           jackis:
             jsonintegration:
               hibernate: CustomPostgreSQL95Dialect
+
+springdoc:
+  swagger-ui:
+    url: /swagger.yaml
 management:
   endpoints:
     enabled-by-default: false
