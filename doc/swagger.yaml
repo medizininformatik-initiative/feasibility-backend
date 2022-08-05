@@ -285,6 +285,14 @@ paths:
         - query
       summary: Store additional information to an executed query
       operationId: saveQuery
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query to which the additional information shall be saved
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
         description: The additionally needed information to save a query
         content:
