@@ -308,6 +308,9 @@ paths:
         409:
           description: Query has already been saved
           content: {}
+      security:
+        - feasibility_auth:
+            - user
   /query/template:
     post:
       tags:
