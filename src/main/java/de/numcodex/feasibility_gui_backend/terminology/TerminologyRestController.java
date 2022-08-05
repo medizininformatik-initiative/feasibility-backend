@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 
 
-@RequestMapping("api/v1/terminology")
+@RequestMapping({"api/v1/terminology", "api/v2/terminology"})
 @RestController
 @CrossOrigin
 public class TerminologyRestController {
