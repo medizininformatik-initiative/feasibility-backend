@@ -128,7 +128,7 @@ paths:
               description: Path to the result of your newly created query
               schema:
                 type: string
-                example: "https://to.be.defined/api/v1/query-handler/result/42"
+                example: "https://to.be.defined/api/v2/query/42"
           content: {}
         401:
           description: Unauthorized - please login first
