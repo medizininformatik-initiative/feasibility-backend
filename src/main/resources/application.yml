@@ -76,7 +76,6 @@ app:
 
 
 keycloak:
-  enabled: ${KEYCLOAK_ENABLED:true}
   cors: true
   cors-exposed-headers: Location
   bearer-only: true

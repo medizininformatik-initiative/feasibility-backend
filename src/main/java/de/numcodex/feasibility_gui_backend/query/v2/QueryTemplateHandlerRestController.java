@@ -1,8 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query.v2;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
@@ -27,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -46,9 +42,6 @@ public class QueryTemplateHandlerRestController {
   private final TermCodeValidation termCodeValidation;
   private final String apiBaseUrl;
 
-  @Value("${keycloak.enabled}")
-  private boolean keycloakEnabled;
-
   public QueryTemplateHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
@@ -59,15 +52,11 @@ public class QueryTemplateHandlerRestController {
   @PostMapping(path = "")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> storeQueryTemplate(@Valid @RequestBody QueryTemplate queryTemplate,
-      @Context HttpServletRequest httpServletRequest,
-      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
-
-    String authorId = keycloakEnabled ? principal.getName()
-        : getUserIdFromAuthorizationHeader(authorizationHeader);
+      @Context HttpServletRequest httpServletRequest, Principal principal) {
 
     Long queryId;
     try {
-      queryId = queryHandlerService.storeQueryTemplate(queryTemplate, authorId);
+      queryId = queryHandlerService.storeQueryTemplate(queryTemplate, principal.getName());
     } catch (QueryTemplateException e) {
       log.error("Error while storing queryTemplate", e);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -91,13 +80,10 @@ public class QueryTemplateHandlerRestController {
   @GetMapping(path = "/{queryId}")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> getQueryTemplate(@PathVariable(value = "queryId") Long queryId,
-      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
-
-    String authorId = keycloakEnabled ? principal.getName()
-        : getUserIdFromAuthorizationHeader(authorizationHeader);
+      Principal principal) {
 
     try {
-      var query = queryHandlerService.getQueryTemplate(queryId, authorId);
+      var query = queryHandlerService.getQueryTemplate(queryId, principal.getName());
       QueryTemplate queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
       List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(queryTemplate);
       queryTemplate.setInvalidTerms(invalidTermCodes);
@@ -111,12 +97,9 @@ public class QueryTemplateHandlerRestController {
 
   @GetMapping(path = "")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
-  public ResponseEntity<Object> getQueryTemplates(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
+  public ResponseEntity<Object> getQueryTemplates(Principal principal) {
 
-    String authorId = keycloakEnabled ? principal.getName()
-        : getUserIdFromAuthorizationHeader(authorizationHeader);
-
-    var queries = queryHandlerService.getQueryTemplatesForAuthor(authorId);
+    var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());
     var ret = new ArrayList<QueryTemplate>();
     queries.forEach(q -> {
       try {
@@ -132,13 +115,9 @@ public class QueryTemplateHandlerRestController {
 
   @GetMapping(path = "/validate")
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
-  public ResponseEntity<Object> validateTemplates(
-      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, Principal principal) {
+  public ResponseEntity<Object> validateTemplates(Principal principal) {
 
-    String authorId = keycloakEnabled ? principal.getName()
-        : getUserIdFromAuthorizationHeader(authorizationHeader);
-
-    var queries = queryHandlerService.getQueryTemplatesForAuthor(authorId);
+    var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());
     var ret = new ArrayList<QueryTemplate>();
     queries.forEach(q -> {
       try {
@@ -154,25 +133,4 @@ public class QueryTemplateHandlerRestController {
     return new ResponseEntity<>(ret, HttpStatus.OK);
   }
 
-  /**
-   * Read the subject id from a Authorization header with a JWT.
-   */
-  private String getUserIdFromAuthorizationHeader(String authorizationHeader) {
-    if (authorizationHeader == null || authorizationHeader.isEmpty()) {
-      return null;
-    }
-    try {
-      JWT jwt = new JWT();
-      String accessTokenString = authorizationHeader
-          .substring(authorizationHeader.indexOf(" ") + 1);
-      DecodedJWT accessToken = jwt.decodeJwt(accessTokenString);
-      return accessToken.getClaim("sub").asString();
-    } catch (NullPointerException npe) {
-      log.error("Nullpointer exception caught when trying to get user id from access token");
-      return null;
-    } catch (JWTDecodeException e) {
-      log.error("Could not decode access token. Auth Header: " + authorizationHeader);
-      return null;
-    }
-  }
 }
