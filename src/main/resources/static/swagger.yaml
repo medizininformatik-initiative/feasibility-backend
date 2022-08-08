@@ -555,6 +555,10 @@ components:
           type: string
         results:
           $ref: "#/components/schemas/QueryResult"
+        invalidTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
     QueryResultObfuscated:
       type: object
       properties:
