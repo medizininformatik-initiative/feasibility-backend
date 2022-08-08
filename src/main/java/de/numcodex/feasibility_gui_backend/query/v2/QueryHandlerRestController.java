@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
@@ -131,7 +132,9 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var query = queryHandlerService.getQuery(queryId);
-
+    List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
+        query.getContent());
+    query.setInvalidTerms(invalidTermCodes);
     return new ResponseEntity<>(query, HttpStatus.OK);
   }
 

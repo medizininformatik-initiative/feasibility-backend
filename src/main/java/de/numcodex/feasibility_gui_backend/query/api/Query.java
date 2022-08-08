@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -14,5 +16,7 @@ public class Query {
   private String label;
   @JsonProperty
   private QueryResult results;
+  @JsonProperty
+  private List<TermCode> invalidTerms;
 
 }
