@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class QueryTemplateValidatorSpringConfig {
 
-  private static final String JSON_SCHEMA = "/query/stored-query-schema.json";
+  private static final String JSON_SCHEMA = "/query/query-template-schema.json";
 
   @Value("${app.enableQueryValidation}")
   private boolean enabled;
