@@ -73,7 +73,10 @@ app:
     baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
     readTimeout: 20000
     connectTimeout: 2000
-
+  security:
+    nqueries:
+      amount: ${SECURITY_NQUERIES_AMOUNT:3}
+      perminutes: ${SECURITY_NQUERIES_PERMINUTES:1}
 
 keycloak:
   cors: true

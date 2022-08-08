@@ -198,4 +198,8 @@ public class QueryHandlerService {
 
         return ret;
     }
+
+    public Long getAmountOfQueriesByUserAndInterval(String userId, int minutes) {
+        return queryRepository.countQueriesByAuthorInTheLastNMinutes(userId, minutes);
+    }
 }

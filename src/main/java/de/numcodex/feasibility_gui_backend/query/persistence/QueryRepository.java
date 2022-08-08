@@ -14,4 +14,8 @@ public interface QueryRepository extends JpaRepository<Query, Long> {
 
   @org.springframework.data.jpa.repository.Query("SELECT t.createdBy FROM Query t WHERE t.id = ?1")
   Optional<String> getAuthor(Long queryId);
+
+  @org.springframework.data.jpa.repository.Query(value = """
+    SELECT count (*) FROM query WHERE created_by = ?1 AND created_at > (current_timestamp - (?2 * interval '1 minute'))""", nativeQuery = true)
+  Long countQueriesByAuthorInTheLastNMinutes(String authorId, int minutes);
 }

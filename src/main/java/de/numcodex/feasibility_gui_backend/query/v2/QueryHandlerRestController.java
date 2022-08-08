@@ -52,6 +52,12 @@ public class QueryHandlerRestController {
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
 
+  @Value("${app.security.nqueries.amount}")
+  private int nQueriesAmount;
+
+  @Value("${app.security.nqueries.perminutes}")
+  private int nQueriesPerMinute;
+
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
@@ -63,6 +69,10 @@ public class QueryHandlerRestController {
   @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
+
+    if (nQueriesAmount < queryHandlerService.getAmountOfQueriesByUserAndInterval(principal.getName(), nQueriesPerMinute)) {
+      return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+    }
 
     Long queryId;
     try {
