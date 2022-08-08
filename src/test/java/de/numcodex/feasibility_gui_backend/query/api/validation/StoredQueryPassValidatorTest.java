@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class StoredQueryPassValidatorTest {
 
     @Spy
-    private StoredQueryPassValidator validator;
+    private QueryTemplatePassValidator validator;
 
     @Mock
     private ConstraintValidatorContext ctx;

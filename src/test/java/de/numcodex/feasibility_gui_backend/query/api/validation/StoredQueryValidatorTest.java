@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Tag("validation-stored")
 @ExtendWith(MockitoExtension.class)
 public class StoredQueryValidatorTest {
-  public static StoredQueryValidator validator;
+  public static QueryTemplateValidator validator;
 
   @Mock
   private ConstraintValidatorContext constraintValidatorContext;
@@ -43,7 +43,7 @@ public class StoredQueryValidatorTest {
   @BeforeAll
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
-    InputStream inputStream = StoredQueryValidator.class.getResourceAsStream(
+    InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(
         "/query/stored-query-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
@@ -53,7 +53,7 @@ public class StoredQueryValidatorTest {
         .draftV7Support()
         .build();
     var schema = loader.load().build();
-    validator = new StoredQueryValidator(schema, jsonUtil);
+    validator = new QueryTemplateValidator(schema, jsonUtil);
   }
 
   @Test

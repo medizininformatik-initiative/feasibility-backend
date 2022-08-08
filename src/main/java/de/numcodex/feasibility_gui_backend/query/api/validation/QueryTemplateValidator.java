@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * Validator for {@link QueryTemplate} that does an actual check based on a JSON schema.
  */
 @Slf4j
-public class StoredQueryValidator implements ConstraintValidator<StoredQueryValidation, QueryTemplate> {
+public class QueryTemplateValidator implements ConstraintValidator<QueryTemplateValidation, QueryTemplate> {
 
   @NonNull
   private Schema jsonSchema;
@@ -29,7 +29,7 @@ public class StoredQueryValidator implements ConstraintValidator<StoredQueryVali
    *
    * Lombok annotation had to be removed since it could not take the necessary Schema Qualifier
    */
-  public StoredQueryValidator(@Qualifier(value = "validation-stored") Schema jsonSchema, ObjectMapper jsonUtil) {
+  public QueryTemplateValidator(@Qualifier(value = "validation-stored") Schema jsonSchema, ObjectMapper jsonUtil) {
     this.jsonSchema = jsonSchema;
     this.jsonUtil = jsonUtil;
   }

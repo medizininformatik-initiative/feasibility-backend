@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.terminology.validation;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,26 +25,26 @@ public class TermCodeValidation {
   }
 
   /**
-   * Check a stored query for invalid/outdated termcodes.
+   * Check a structured query for invalid/outdated termcodes.
    *
    * For now, just check if the term codes still exist in the current ui profiles. Further
    * iterations may contain checking for availability of values and units of the term codes as well.
    *
-   * @param queryTemplate the stored query to check
+   * @param structuredQuery the structured query to check
    * @return a list of term codes that are no longer valid (or have never been)
    */
-  public List<TermCode> getInvalidTermCodes(QueryTemplate queryTemplate) {
+  public List<TermCode> getInvalidTermCodes(StructuredQuery structuredQuery) {
     var invalidTermCodes = new ArrayList<TermCode>();
 
     List<List<Criterion>> combinedCriteria;
 
-    if (queryTemplate.getStructuredQuery().getExclusionCriteria() != null && !queryTemplate.getStructuredQuery().getExclusionCriteria().isEmpty()) {
+    if (structuredQuery.getExclusionCriteria() != null && !structuredQuery.getExclusionCriteria().isEmpty()) {
       combinedCriteria = Stream.of(
-          queryTemplate.getStructuredQuery().getInclusionCriteria(),
-          queryTemplate.getStructuredQuery().getExclusionCriteria()).flatMap(
+          structuredQuery.getInclusionCriteria(),
+          structuredQuery.getExclusionCriteria()).flatMap(
           Collection::stream).toList();
     } else {
-      combinedCriteria = queryTemplate.getStructuredQuery().getInclusionCriteria();
+      combinedCriteria = structuredQuery.getInclusionCriteria();
     }
 
     for (List<Criterion> criterionList : combinedCriteria) {

@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 /**
  * Validator for {@link QueryTemplate} that always passes no matter what instance gets checked.
  */
-public class StoredQueryPassValidator implements ConstraintValidator<StoredQueryValidation, QueryTemplate> {
+public class QueryTemplatePassValidator implements ConstraintValidator<QueryTemplateValidation, QueryTemplate> {
     @Override
     public boolean isValid(QueryTemplate queryTemplate, ConstraintValidatorContext constraintValidatorContext) {
         return true;

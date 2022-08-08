@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class StoredQueryValidatorSpringConfig {
+public class QueryTemplateValidatorSpringConfig {
 
   private static final String JSON_SCHEMA = "/query/stored-query-schema.json";
 
@@ -25,17 +25,17 @@ public class StoredQueryValidatorSpringConfig {
   private boolean enabled;
 
   @Bean
-  public ConstraintValidator<StoredQueryValidation, QueryTemplate> createStoredQueryValidator(
+  public ConstraintValidator<QueryTemplateValidation, QueryTemplate> createStoredQueryValidator(
           @Qualifier("validation-stored") Schema schema) {
     return enabled
-            ? new StoredQueryValidator(schema, new ObjectMapper())
-            : new StoredQueryPassValidator();
+            ? new QueryTemplateValidator(schema, new ObjectMapper())
+            : new QueryTemplatePassValidator();
   }
 
   @Qualifier("validation-stored")
   @Bean
   public Schema createStoredQueryValidatorJsonSchema() {
-      InputStream inputStream = StoredQueryValidator.class.getResourceAsStream(JSON_SCHEMA);
+      InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(JSON_SCHEMA);
       var jsonSchema = new JSONObject(new JSONTokener(inputStream));
       SchemaLoader loader = SchemaLoader.builder()
           .schemaClient(SchemaClient.classPathAwareClient())

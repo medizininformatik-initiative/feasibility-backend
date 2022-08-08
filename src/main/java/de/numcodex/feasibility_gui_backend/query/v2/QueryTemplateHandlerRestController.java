@@ -85,7 +85,8 @@ public class QueryTemplateHandlerRestController {
     try {
       var query = queryHandlerService.getQueryTemplate(queryId, principal.getName());
       QueryTemplate queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
-      List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(queryTemplate);
+      List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
+          queryTemplate.getStructuredQuery());
       queryTemplate.setInvalidTerms(invalidTermCodes);
       return new ResponseEntity<>(queryTemplate, HttpStatus.OK);
     } catch (JsonProcessingException e) {
@@ -122,7 +123,8 @@ public class QueryTemplateHandlerRestController {
     queries.forEach(q -> {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
-        List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(convertedQuery);
+        List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
+            convertedQuery.getStructuredQuery());
         convertedQuery.setIsValid(invalidTermCodes.isEmpty());
         convertedQuery.setStructuredQuery(null);
         ret.add(convertedQuery);

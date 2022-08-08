@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
-import de.numcodex.feasibility_gui_backend.query.api.validation.StoredQueryValidation;
+import de.numcodex.feasibility_gui_backend.query.api.validation.QueryTemplateValidation;
 import java.util.List;
 import lombok.Data;
 
 @Data
 @JsonInclude(Include.NON_NULL)
-@StoredQueryValidation
+@QueryTemplateValidation
 public class QueryTemplate {
 
   @JsonProperty

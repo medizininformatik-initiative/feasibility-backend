@@ -9,8 +9,8 @@ import javax.validation.Payload;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = StoredQueryValidator.class)
-public @interface StoredQueryValidation {
+@Constraint(validatedBy = QueryTemplateValidator.class)
+public @interface QueryTemplateValidation {
     String message() default "Stored query is invalid";
 
     Class<?>[] groups() default {};

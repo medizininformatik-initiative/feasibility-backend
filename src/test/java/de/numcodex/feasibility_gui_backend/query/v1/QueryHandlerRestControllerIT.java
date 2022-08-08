@@ -82,7 +82,7 @@ public class QueryHandlerRestControllerIT {
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
         when(queryHandlerService.runQuery(any(StructuredQuery.class), "test")).thenReturn(1L);
-        when(termCodeValidation.getInvalidTermCodes(any(QueryTemplate.class))).thenReturn(new ArrayList<>());
+        when(termCodeValidation.getInvalidTermCodes(any(StructuredQuery.class))).thenReturn(new ArrayList<>());
 
 
         mockMvc.perform(post(URI.create("/api/v1/query-handler/run-query"))
