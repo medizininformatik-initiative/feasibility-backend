@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Tag("api")
 @Tag("validation-stored")
 @ExtendWith(MockitoExtension.class)
-public class StoredQueryPassValidatorTest {
+public class QueryTemplatePassValidatorTest {
 
     @Spy
     private QueryTemplatePassValidator validator;

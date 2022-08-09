@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Tag("api")
 @Tag("validation-stored")
 @ExtendWith(MockitoExtension.class)
-public class StoredQueryValidatorTest {
+public class QueryTemplateValidatorTest {
   public static QueryTemplateValidator validator;
 
   @Mock
@@ -44,7 +44,7 @@ public class StoredQueryValidatorTest {
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
     InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(
-        "/query/stored-query-schema.json");
+        "/query/query-template-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
         .schemaClient(SchemaClient.classPathAwareClient())
