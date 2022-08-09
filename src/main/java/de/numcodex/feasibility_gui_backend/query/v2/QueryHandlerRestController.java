@@ -24,7 +24,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +59,6 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
 
@@ -86,7 +84,6 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public List<QueryListEntry> getQueryList(@RequestParam(name = "filter", required = false) String filter, Principal principal) {
     var userId = principal.getName();
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
@@ -96,7 +93,6 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("/{id}/saved")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> saveQuery(@PathVariable("id") Long queryId,
       @RequestBody SavedQuery savedQuery,  Principal principal) {
 
@@ -116,7 +112,6 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/by-user/{id}")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
   public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
@@ -125,7 +120,6 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
   public ResponseEntity<Object> getQuery(@PathVariable("id") Long queryId,
       KeycloakAuthenticationToken keycloakAuthenticationToken) throws JsonProcessingException {
     if (!hasAccess(queryId, keycloakAuthenticationToken)) {
@@ -139,13 +133,11 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}/result/detailed")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAdminRole'))")
   public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId, false);
   }
 
   @GetMapping("/{id}/result")
-  @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
       KeycloakAuthenticationToken keycloakAuthenticationToken) {
     if (!hasAccess(queryId, keycloakAuthenticationToken)) {
@@ -156,7 +148,6 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}/content")
-  @PreAuthorize("hasAnyRole(@environment.getProperty('app.keycloakAllowedRole'), @environment.getProperty('app.keycloakAdminRole'))")
   public ResponseEntity<Object> getQueryContent(@PathVariable("id") Long queryId,
       KeycloakAuthenticationToken keycloakAuthenticationToken)
       throws JsonProcessingException {

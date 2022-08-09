@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,7 +43,6 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("run-query")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   @Deprecated
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
@@ -71,7 +69,6 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping(path = "/result/{id}")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   @Deprecated
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
       KeycloakAuthenticationToken keycloakAuthenticationToken) {
