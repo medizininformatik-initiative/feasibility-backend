@@ -53,6 +53,7 @@ public class QueryResultObfuscationIT {
         var testQueryA = new Query();
         testQueryA.setQueryContent(testQueryContent);
         testQueryA.setCreatedAt(Timestamp.from(Instant.now()));
+        testQueryA.setCreatedBy("someone");
         queryRepository.save(testQueryA);
 
         var testQueryB = new Query();
@@ -98,6 +99,7 @@ public class QueryResultObfuscationIT {
         var testQueryA = new Query();
         testQueryA.setQueryContent(testQueryContent);
         testQueryA.setCreatedAt(Timestamp.from(Instant.now()));
+        testQueryA.setCreatedBy("someone");
         queryRepository.save(testQueryA);
 
         var testSite = new Site();
