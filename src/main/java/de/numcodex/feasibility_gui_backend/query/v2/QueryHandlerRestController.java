@@ -70,7 +70,8 @@ public class QueryHandlerRestController {
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
 
-    if (nQueriesAmount < queryHandlerService.getAmountOfQueriesByUserAndInterval(principal.getName(), nQueriesPerMinute)) {
+    if (nQueriesAmount < queryHandlerService.getAmountOfQueriesByUserAndInterval(
+        principal.getName(), nQueriesPerMinute)) {
       return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
     }
 

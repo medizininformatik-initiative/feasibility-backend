@@ -37,6 +37,12 @@ public class QueryHandlerRestController {
   private final QueryHandlerService queryHandlerService;
   private final String apiBaseUrl;
 
+  @Value("${app.security.nqueries.amount}")
+  private int nQueriesAmount;
+
+  @Value("${app.security.nqueries.perminutes}")
+  private int nQueriesPerMinute;
+
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
@@ -48,6 +54,11 @@ public class QueryHandlerRestController {
   @Deprecated
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
+
+    if (nQueriesAmount < queryHandlerService.getAmountOfQueriesByUserAndInterval(
+        principal.getName(), nQueriesPerMinute)) {
+      return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+    }
 
     Long queryId;
     try {
