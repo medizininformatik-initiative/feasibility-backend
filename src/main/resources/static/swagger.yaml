@@ -644,7 +644,7 @@ components:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
           example: I wanted to see how many patients I could find for my study XYZ
-        structuredQuery:
+        content:
           $ref: "#/components/schemas/StructuredQuery"
         lastModified:
           type: string

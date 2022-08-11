@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @Tag("query")
 @Tag("api")
-@Tag("validation-stored")
+@Tag("validation-template")
 @ExtendWith(MockitoExtension.class)
 public class QueryTemplatePassValidatorTest {
 
@@ -47,7 +47,7 @@ public class QueryTemplatePassValidatorTest {
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
         var testStoredQuery = new QueryTemplate();
-        testStoredQuery.setStructuredQuery(testQuery);
+        testStoredQuery.setContent(testQuery);
         testStoredQuery.setLabel("test");
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testStoredQuery, ctx));

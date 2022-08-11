@@ -11,7 +11,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = QueryTemplateValidator.class)
 public @interface QueryTemplateValidation {
-    String message() default "Stored query is invalid";
+    String message() default "Query template is invalid";
 
     Class<?>[] groups() default {};
 

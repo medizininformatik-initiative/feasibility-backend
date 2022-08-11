@@ -26,13 +26,13 @@ public class QueryTemplateValidatorSpringConfig {
 
   @Bean
   public ConstraintValidator<QueryTemplateValidation, QueryTemplate> createStoredQueryValidator(
-          @Qualifier("validation-stored") Schema schema) {
+          @Qualifier("validation-template") Schema schema) {
     return enabled
             ? new QueryTemplateValidator(schema, new ObjectMapper())
             : new QueryTemplatePassValidator();
   }
 
-  @Qualifier("validation-stored")
+  @Qualifier("validation-template")
   @Bean
   public Schema createStoredQueryValidatorJsonSchema() {
       InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(JSON_SCHEMA);

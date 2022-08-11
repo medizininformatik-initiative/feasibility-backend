@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @Tag("query")
 @Tag("api")
-@Tag("validation-stored")
+@Tag("validation-template")
 @ExtendWith(MockitoExtension.class)
 public class QueryTemplateValidatorTest {
   public static QueryTemplateValidator validator;
@@ -58,8 +58,8 @@ public class QueryTemplateValidatorTest {
 
   @Test
   public void testValidate_validQueryOk() {
-    var storedQuery = buildValidQuery();
-    assertTrue(validator.isValid(storedQuery, constraintValidatorContext));
+    var queryTemplate = buildValidQuery();
+    assertTrue(validator.isValid(queryTemplate, constraintValidatorContext));
   }
 
   @Test
@@ -69,13 +69,13 @@ public class QueryTemplateValidatorTest {
     assertFalse(validator.isValid(queryWithoutLabel, constraintValidatorContext));
 
     var queryWithoutStructuredQuery = buildValidQuery();
-    queryWithoutStructuredQuery.setStructuredQuery(null);
+    queryWithoutStructuredQuery.setContent(null);
     assertFalse(validator.isValid(queryWithoutStructuredQuery, constraintValidatorContext));
 
     var queryWithMalformedStructuredQuery = buildValidQuery();
-    var malformedStructuredQuery = queryWithMalformedStructuredQuery.getStructuredQuery();
+    var malformedStructuredQuery = queryWithMalformedStructuredQuery.getContent();
     malformedStructuredQuery.setInclusionCriteria(null);
-    queryWithMalformedStructuredQuery.setStructuredQuery(malformedStructuredQuery);
+    queryWithMalformedStructuredQuery.setContent(malformedStructuredQuery);
     assertFalse(validator.isValid(queryWithMalformedStructuredQuery, constraintValidatorContext));
   }
 
@@ -111,13 +111,13 @@ public class QueryTemplateValidatorTest {
     testQuery.setInclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
     testQuery.setExclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
 
-    var testStoredQuery = new QueryTemplate();
-    testStoredQuery.setStructuredQuery(testQuery);
-    testStoredQuery.setLabel("testquery");
-    testStoredQuery.setComment("this is just a test query");
-    testStoredQuery.setCreatedBy("foo-bar-1234");
+    var testQueryTemplate = new QueryTemplate();
+    testQueryTemplate.setContent(testQuery);
+    testQueryTemplate.setLabel("testquery");
+    testQueryTemplate.setComment("this is just a test query");
+    testQueryTemplate.setCreatedBy("foo-bar-1234");
 
-    return testStoredQuery;
+    return testQueryTemplate;
   }
 
 }

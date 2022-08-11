@@ -16,7 +16,7 @@ public class QueryTemplate {
   @JsonProperty
   private long id;
   @JsonProperty
-  private StructuredQuery structuredQuery;
+  private StructuredQuery content;
   @JsonProperty
   private String label;
   @JsonProperty
