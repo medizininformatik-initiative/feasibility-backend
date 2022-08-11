@@ -29,7 +29,7 @@ tags:
   - name: intrinsics
     description: Offers intrinsic information about this application.
 paths:
-  /v1/run-query:
+  /v1/query-handler/run-query:
     post:
       tags:
         - deprecated
@@ -69,7 +69,7 @@ paths:
         - feasibility_auth:
             - user
       x-codegen-request-body-name: body
-  /v1/query/result/{queryId}:
+  /v1/query-handler/result/{queryId}:
     get:
       tags:
         - deprecated
