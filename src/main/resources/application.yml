@@ -19,14 +19,16 @@ spring:
           jackis:
             jsonintegration:
               hibernate: CustomPostgreSQL95Dialect
+
+springdoc:
+  swagger-ui:
+    url: /swagger.yaml
 management:
   endpoints:
     enabled-by-default: false
   endpoint:
     health:
       enabled: true
-
-
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
@@ -37,6 +39,8 @@ app:
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
+  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FEASIBILITY_USER}
+  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FEASIBILITY_ADMIN}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
@@ -72,7 +76,6 @@ app:
 
 
 keycloak:
-  enabled: ${KEYCLOAK_ENABLED:true}
   cors: true
   cors-exposed-headers: Location
   bearer-only: true
@@ -80,13 +83,6 @@ keycloak:
   realm: ${KEYCLOAK_REALM:codex-develop}
   ssl-required: external
   resource: ${KEYCLOAK_CLIENT_ID:feasibility-gui}
-  security-constraints:
-  - auth-roles:
-    - ${KEYCLOAK_ALLOWED_ROLE:CODEX_USER}
-    security-collections:
-    - name: "Secured endpoints"
-      patterns:
-      - "/api/*"
 
 logging:
   level:

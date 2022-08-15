@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Unit;
-import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
@@ -32,10 +32,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @Tag("query")
 @Tag("api")
-@Tag("validation-stored")
+@Tag("validation-template")
 @ExtendWith(MockitoExtension.class)
-public class StoredQueryValidatorTest {
-  public static StoredQueryValidator validator;
+public class QueryTemplateValidatorTest {
+  public static QueryTemplateValidator validator;
 
   @Mock
   private ConstraintValidatorContext constraintValidatorContext;
@@ -43,8 +43,8 @@ public class StoredQueryValidatorTest {
   @BeforeAll
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
-    InputStream inputStream = StoredQueryValidator.class.getResourceAsStream(
-        "/query/stored-query-schema.json");
+    InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(
+        "/query/query-template-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
         .schemaClient(SchemaClient.classPathAwareClient())
@@ -53,13 +53,13 @@ public class StoredQueryValidatorTest {
         .draftV7Support()
         .build();
     var schema = loader.load().build();
-    validator = new StoredQueryValidator(schema, jsonUtil);
+    validator = new QueryTemplateValidator(schema, jsonUtil);
   }
 
   @Test
   public void testValidate_validQueryOk() {
-    var storedQuery = buildValidQuery();
-    assertTrue(validator.isValid(storedQuery, constraintValidatorContext));
+    var queryTemplate = buildValidQuery();
+    assertTrue(validator.isValid(queryTemplate, constraintValidatorContext));
   }
 
   @Test
@@ -69,17 +69,17 @@ public class StoredQueryValidatorTest {
     assertFalse(validator.isValid(queryWithoutLabel, constraintValidatorContext));
 
     var queryWithoutStructuredQuery = buildValidQuery();
-    queryWithoutStructuredQuery.setStructuredQuery(null);
+    queryWithoutStructuredQuery.setContent(null);
     assertFalse(validator.isValid(queryWithoutStructuredQuery, constraintValidatorContext));
 
     var queryWithMalformedStructuredQuery = buildValidQuery();
-    var malformedStructuredQuery = queryWithMalformedStructuredQuery.getStructuredQuery();
+    var malformedStructuredQuery = queryWithMalformedStructuredQuery.getContent();
     malformedStructuredQuery.setInclusionCriteria(null);
-    queryWithMalformedStructuredQuery.setStructuredQuery(malformedStructuredQuery);
+    queryWithMalformedStructuredQuery.setContent(malformedStructuredQuery);
     assertFalse(validator.isValid(queryWithMalformedStructuredQuery, constraintValidatorContext));
   }
 
-  private StoredQuery buildValidQuery() {
+  private QueryTemplate buildValidQuery() {
     var bodyWeightTermCode = new TermCode();
     bodyWeightTermCode.setSystem("http://snomed.info/sct");
     bodyWeightTermCode.setDisplay("Body weight (observable entity)");
@@ -111,13 +111,13 @@ public class StoredQueryValidatorTest {
     testQuery.setInclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
     testQuery.setExclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
 
-    var testStoredQuery = new StoredQuery();
-    testStoredQuery.setStructuredQuery(testQuery);
-    testStoredQuery.setLabel("testquery");
-    testStoredQuery.setComment("this is just a test query");
-    testStoredQuery.setCreatedBy("foo-bar-1234");
+    var testQueryTemplate = new QueryTemplate();
+    testQueryTemplate.setContent(testQuery);
+    testQueryTemplate.setLabel("testquery");
+    testQueryTemplate.setComment("this is just a test query");
+    testQueryTemplate.setCreatedBy("foo-bar-1234");
 
-    return testStoredQuery;
+    return testQueryTemplate;
   }
 
 }

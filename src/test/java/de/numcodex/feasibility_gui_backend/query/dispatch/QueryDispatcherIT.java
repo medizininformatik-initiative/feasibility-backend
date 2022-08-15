@@ -82,7 +82,7 @@ public class QueryDispatcherIT {
         var serializedTestQuery = jsonUtil.writeValueAsString(testQuery);
         var serializedTestQueryHash = queryHashCalculator.calculateSerializedQueryBodyHash(serializedTestQuery);
 
-        assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery));
+        assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
 
         var queryContent = queryContentRepository.findByHash(serializedTestQueryHash);
         assertEquals(2, queryContentRepository.count());
@@ -100,7 +100,7 @@ public class QueryDispatcherIT {
         queryContent.setHash(serializedTestQueryHash);
         queryContentRepository.save(queryContent);
 
-        assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery));
+        assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
         assertEquals(1, queryContentRepository.count());
     }
 
@@ -110,7 +110,7 @@ public class QueryDispatcherIT {
         var serializedTestQuery = jsonUtil.writeValueAsString(testQuery);
         var serializedTestQueryHash = queryHashCalculator.calculateSerializedQueryBodyHash(serializedTestQuery);
 
-        assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery));
+        assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
 
         var enqueuedQueries = queryRepository.findAll();
         assertEquals(1, enqueuedQueries.size());
@@ -132,7 +132,7 @@ public class QueryDispatcherIT {
     public void testDispatchEnqueuedQuery() {
         var testQuery = new StructuredQuery();
 
-        var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery));
+        var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
         assertDoesNotThrow(() -> queryDispatcher.dispatchEnqueuedQuery(queryId));
 
         var dispatches = queryDispatchRepository.findAll();

@@ -57,11 +57,11 @@ public class QueryDispatcher {
      * the database as a side effect.
      *
      * @param query The query that shall be enqueued.
+     * @param userId keycloak auth id of the author of the query
      * @return Identifier of the enqueued query. This acts as a reference when trying to publish it.
      * @throws QueryDispatchException If an error occurs while enqueueing the query.
      */
-    // TODO: Pass in audit information! (actor)
-    public Long enqueueNewQuery(StructuredQuery query) throws QueryDispatchException {
+    public Long enqueueNewQuery(StructuredQuery query, String userId) throws QueryDispatchException {
         var querySerialized = serializedStructuredQuery(query);
 
         var queryHash = queryHashCalculator.calculateSerializedQueryBodyHash(querySerialized);
@@ -72,7 +72,7 @@ public class QueryDispatcher {
                     return queryContentRepository.save(freshQueryBody);
                 });
 
-        var queryId = persistEnqueuedQuery(queryBody);
+        var queryId = persistEnqueuedQuery(queryBody, userId);
         log.info("enqueued query '%s'".formatted(queryId));
         return queryId;
     }
@@ -116,9 +116,10 @@ public class QueryDispatcher {
         }
     }
 
-    private Long persistEnqueuedQuery(QueryContent queryBody) {
+    private Long persistEnqueuedQuery(QueryContent queryBody, String userId) {
         var feasibilityQuery = new Query();
         feasibilityQuery.setCreatedAt(Timestamp.from(Instant.now()));
+        feasibilityQuery.setCreatedBy(userId);
         feasibilityQuery.setQueryContent(queryBody);
         return queryRepository.save(feasibilityQuery).getId();
     }

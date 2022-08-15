@@ -64,6 +64,7 @@ class QueryStatusListenerImplIT {
 
         var testQuery = new Query();
         testQuery.setQueryContent(fakeContent);
+        testQuery.setCreatedBy("testuser");
         testBackendQueryId = queryRepository.save(testQuery).getId();
 
         var testSite = new Site();

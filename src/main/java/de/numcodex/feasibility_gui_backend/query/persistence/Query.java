@@ -20,7 +20,13 @@ public class Query {
     @Column(name = "created_at", insertable = false, updatable = false)
     private Timestamp createdAt;
 
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id", name = "query_content_id")
     private QueryContent queryContent;
+
+    @OneToOne(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private SavedQuery savedQuery;
 }

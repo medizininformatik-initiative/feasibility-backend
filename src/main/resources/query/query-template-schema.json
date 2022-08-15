@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "classpath://query/stored.query.schema.json",
-  "title": "Stored Query",
+  "$id": "classpath://query/query-template-schema.json",
+  "title": "Query Template",
   "description": "A structured query, along with few more metadata to be persisted in the database",
   "type": "object",
   "properties": {
@@ -13,7 +13,7 @@
       "type": "string",
       "description": "A more detailed information about the query. Is also assigned by the user via GUI."
     },
-    "structuredQuery": {
+    "content": {
       "$ref": "query-schema.json#queryDefinition",
       "description": "The structured query itself."
     },
@@ -36,6 +36,6 @@
   },
   "required": [
     "label",
-    "structuredQuery"
+    "content"
   ]
 }

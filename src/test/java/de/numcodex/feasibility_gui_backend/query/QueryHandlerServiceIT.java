@@ -8,6 +8,7 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringCon
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryObfuscationSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,8 @@ import static org.junit.jupiter.api.Assertions.*;
         QueryDispatchSpringConfig.class,
         QueryCollectSpringConfig.class,
         QueryHandlerService.class,
-        QueryObfuscationSpringConfig.class
+        QueryObfuscationSpringConfig.class,
+        QueryTemplateHandler.class
 })
 @DataJpaTest(
         properties = {
@@ -74,7 +76,7 @@ public class QueryHandlerServiceIT {
     public void testRunQuery() {
         var testStructuredQuery = new StructuredQuery();
 
-        assertDoesNotThrow(() -> queryHandlerService.runQuery(testStructuredQuery));
+        assertDoesNotThrow(() -> queryHandlerService.runQuery(testStructuredQuery, "test"));
         assertEquals(1, queryRepository.count());
         assertEquals(1, queryDispatchRepository.count());
     }
@@ -102,6 +104,7 @@ public class QueryHandlerServiceIT {
         var testQuery = new Query();
         testQuery.setQueryContent(testQueryContent);
         testQuery.setCreatedAt(Timestamp.from(Instant.now()));
+        testQuery.setCreatedBy("someone");
         var testQueryId = queryRepository.save(testQuery).getId();
 
         var testSiteA = new Site();
@@ -154,6 +157,7 @@ public class QueryHandlerServiceIT {
         var testQuery = new Query();
         testQuery.setQueryContent(testQueryContent);
         testQuery.setCreatedAt(Timestamp.from(Instant.now()));
+        testQuery.setCreatedBy("someone");
         var testQueryId = queryRepository.save(testQuery).getId();
 
         var testSiteA = new Site();

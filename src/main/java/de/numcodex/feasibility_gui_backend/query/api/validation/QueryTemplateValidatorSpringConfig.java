@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.api.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.query.api.StoredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import java.io.InputStream;
 import javax.validation.ConstraintValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -17,25 +17,25 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class StoredQueryValidatorSpringConfig {
+public class QueryTemplateValidatorSpringConfig {
 
-  private static final String JSON_SCHEMA = "/query/stored-query-schema.json";
+  private static final String JSON_SCHEMA = "/query/query-template-schema.json";
 
   @Value("${app.enableQueryValidation}")
   private boolean enabled;
 
   @Bean
-  public ConstraintValidator<StoredQueryValidation, StoredQuery> createStoredQueryValidator(
-          @Qualifier("validation-stored") Schema schema) {
+  public ConstraintValidator<QueryTemplateValidation, QueryTemplate> createStoredQueryValidator(
+          @Qualifier("validation-template") Schema schema) {
     return enabled
-            ? new StoredQueryValidator(schema, new ObjectMapper())
-            : new StoredQueryPassValidator();
+            ? new QueryTemplateValidator(schema, new ObjectMapper())
+            : new QueryTemplatePassValidator();
   }
 
-  @Qualifier("validation-stored")
+  @Qualifier("validation-template")
   @Bean
   public Schema createStoredQueryValidatorJsonSchema() {
-      InputStream inputStream = StoredQueryValidator.class.getResourceAsStream(JSON_SCHEMA);
+      InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(JSON_SCHEMA);
       var jsonSchema = new JSONObject(new JSONTokener(inputStream));
       SchemaLoader loader = SchemaLoader.builder()
           .schemaClient(SchemaClient.classPathAwareClient())
