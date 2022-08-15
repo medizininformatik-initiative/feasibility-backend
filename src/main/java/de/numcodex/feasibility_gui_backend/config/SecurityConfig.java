@@ -62,7 +62,7 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/api/v1/**").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/query").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/query/{id:\\d+}/saved").hasRole(keycloakAllowedRole)
-        .antMatchers("/api/v2/query/by-user/{id:\\w+}").hasRole(keycloakAdminRole)
+        .antMatchers("/api/v2/query/by-user/{id:[\\w-]+}").hasRole(keycloakAdminRole)
         .antMatchers("/api/v2/query/{id:\\d+}").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
         .antMatchers("/api/v2/query/{id:\\d+}/result/detailed").hasRole(keycloakAdminRole)
         .antMatchers("/api/v2/query/{id:\\d+}/result").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
