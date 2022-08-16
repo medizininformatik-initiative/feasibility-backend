@@ -76,6 +76,7 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
                 proxyContext.getPassword(),
                 webserviceConnectTimeout,
                 webserviceReadTimeout,
+                true,
                 null,
                 fhirContext,
                 cleaner);
