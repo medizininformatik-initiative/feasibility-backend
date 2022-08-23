@@ -26,8 +26,8 @@ public class TerminologyService {
   private UiProfileRepository uiProfileRepository;
 
   private String uiProfilePath;
-  private static final List<String> SORTED_CATEGORIES = List.of("Einwilligung", "Biobank",
-      "Diagnose", "Fall", "Laborbefund", "Medikation", "Person", "Prozedur", "GECCO");
+  private static final List<String> SORTED_CATEGORIES = List.of("Einwilligung", "Bioproben",
+      "Diagnose", "Fall", "Laboruntersuchung", "Medikamentenverabreichungen", "Person", "Prozedur", "GECCO");
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
   private List<CategoryEntry> categoryEntries = new ArrayList<>();
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
