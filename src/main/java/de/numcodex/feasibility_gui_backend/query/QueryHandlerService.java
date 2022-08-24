@@ -207,4 +207,8 @@ public class QueryHandlerService {
     public Long getAmountOfQueriesByUserAndInterval(String userId, int minutes) {
         return queryRepository.countQueriesByAuthorInTheLastNMinutes(userId, minutes);
     }
+
+    public Long getRetryAfterTime(String userId, int offset, long interval) {
+        return 60 * interval - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+    }
 }

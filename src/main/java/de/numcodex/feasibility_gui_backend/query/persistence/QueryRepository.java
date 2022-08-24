@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.persistence;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,8 @@ public interface QueryRepository extends JpaRepository<Query, Long> {
   @org.springframework.data.jpa.repository.Query(value = """
     SELECT count (*) FROM query WHERE created_by = ?1 AND created_at > (current_timestamp - (?2 * interval '1 minute'))""", nativeQuery = true)
   Long countQueriesByAuthorInTheLastNMinutes(String authorId, int minutes);
+
+  @org.springframework.data.jpa.repository.Query(value = """
+    SELECT EXTRACT (EPOCH from ( SELECT (current_timestamp - created_at) from query WHERE created_by = ?1 ORDER BY created_at desc LIMIT 1 OFFSET ?2))""", nativeQuery = true)
+  Long getAgeOfNToLastQueryInSeconds(String authorId, int offset);
 }

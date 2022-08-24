@@ -68,9 +68,16 @@ public class QueryHandlerRestController {
   public ResponseEntity<Object> runQuery(@Valid @RequestBody StructuredQuery query,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
 
-    if (nQueriesAmount < queryHandlerService.getAmountOfQueriesByUserAndInterval(
-        principal.getName(), nQueriesPerMinute)) {
-      return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+    Long amountOfQueriesByUserAndInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
+        principal.getName(), nQueriesPerMinute);
+    log.error("amount: " + amountOfQueriesByUserAndInterval);
+    if (nQueriesAmount <= amountOfQueriesByUserAndInterval) {
+      Long retryAfter = queryHandlerService.getRetryAfterTime(principal.getName(),
+          nQueriesAmount - 1, nQueriesPerMinute);
+      log.error("retry after: " + retryAfter);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
+      return new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS);
     }
 
     Long queryId;
