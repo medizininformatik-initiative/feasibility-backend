@@ -4,9 +4,10 @@ import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
@@ -15,8 +16,22 @@ import org.springframework.security.web.authentication.session.RegisterSessionAu
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
 @KeycloakConfiguration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@ConditionalOnProperty(name = "security.config.use-keycloak", havingValue = "true", matchIfMissing = true)
 class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+
+  @Value("${app.keycloakAllowedRole}")
+  private String keycloakAllowedRole;
+
+  @Value("${app.keycloakAdminRole}")
+  private String keycloakAdminRole;
+
+  public static void configureApiSecurity(HttpSecurity http) throws Exception {
+    http
+        .authorizeRequests()
+        .anyRequest().authenticated()
+        .and()
+        .csrf().disable();
+  }
 
   @Autowired
   public void configureGlobal(
@@ -44,6 +59,14 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     http.authorizeRequests()
+        .antMatchers("/api/v1/**").hasRole(keycloakAllowedRole)
+        .antMatchers("/api/v2/query").hasRole(keycloakAllowedRole)
+        .antMatchers("/api/v2/query/{id:\\d+}/saved").hasRole(keycloakAllowedRole)
+        .antMatchers("/api/v2/query/by-user/{id:[\\w-]+}").hasRole(keycloakAdminRole)
+        .antMatchers("/api/v2/query/{id:\\d+}").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
+        .antMatchers("/api/v2/query/{id:\\d+}/result/detailed").hasRole(keycloakAdminRole)
+        .antMatchers("/api/v2/query/{id:\\d+}/result").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
+        .antMatchers("/api/v2/query/{id:\\d+}/content").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
         .anyRequest()
         .permitAll()
         .and()

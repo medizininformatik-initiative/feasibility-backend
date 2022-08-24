@@ -42,7 +42,7 @@ public class QueryTemplateHandler {
   public Long storeTemplate(QueryTemplate queryTemplateApi, String userId)
       throws QueryTemplateException {
 
-    Long queryId = storeNewQuery(queryTemplateApi.getStructuredQuery(), userId);
+    Long queryId = storeNewQuery(queryTemplateApi.getContent(), userId);
     de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate
         = convertApiToPersistence(queryTemplateApi, queryId);
     queryTemplate = queryTemplateRepository.save(queryTemplate);
@@ -114,7 +114,7 @@ public class QueryTemplateHandler {
     ObjectMapper jsonUtil = new ObjectMapper();
     out.setComment(in.getComment());
     out.setLabel(in.getLabel());
-    out.setStructuredQuery(jsonUtil.readValue(in.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class));
+    out.setContent(jsonUtil.readValue(in.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class));
     out.setLastModified(in.getLastModified().toString());
     out.setCreatedBy(in.getQuery().getCreatedBy());
     out.setId(in.getId());

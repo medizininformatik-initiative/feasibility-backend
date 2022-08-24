@@ -99,8 +99,9 @@ public class QueryHandlerService {
 
     public Query getQuery(Long queryId) throws JsonProcessingException {
         var query = queryRepository.findById(queryId);
+        var savedQuery = savedQueryRepository.findByQueryId(queryId);
         if (query.isPresent()) {
-            return convertQueryToApi(query.get());
+            return convertQueryToApi(query.get(), savedQuery);
         } else {
             return null;
         }
@@ -146,13 +147,17 @@ public class QueryHandlerService {
         return queryTemplateHandler.convertPersistenceToApi(in);
     }
 
-    private Query convertQueryToApi(de.numcodex.feasibility_gui_backend.query.persistence.Query in)
+    private Query convertQueryToApi(de.numcodex.feasibility_gui_backend.query.persistence.Query in,
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQuery)
         throws JsonProcessingException {
         Query out = new Query();
         out.setId(in.getId());
         out.setContent(
             jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class));
-        out.setLabel("todo");
+        if (savedQuery.isPresent()) {
+            out.setLabel(savedQuery.get().getLabel());
+            out.setComment(savedQuery.get().getComment());
+        }
         out.setResults(getQueryResult(in.getId()));
         return out;
     }

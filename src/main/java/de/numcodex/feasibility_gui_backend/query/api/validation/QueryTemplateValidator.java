@@ -29,7 +29,7 @@ public class QueryTemplateValidator implements ConstraintValidator<QueryTemplate
    *
    * Lombok annotation had to be removed since it could not take the necessary Schema Qualifier
    */
-  public QueryTemplateValidator(@Qualifier(value = "validation-stored") Schema jsonSchema, ObjectMapper jsonUtil) {
+  public QueryTemplateValidator(@Qualifier(value = "validation-template") Schema jsonSchema, ObjectMapper jsonUtil) {
     this.jsonSchema = jsonSchema;
     this.jsonUtil = jsonUtil;
   }
