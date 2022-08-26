@@ -7,8 +7,12 @@ import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchReposi
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,17 +21,19 @@ import java.util.List;
 @Configuration
 public class QueryDispatchSpringConfig {
 
+    // Keep the dispatcher a singleton instance since it uses a task executor.
+    // Without this you may use more threads than intended.
     @Bean
     public QueryDispatcher createQueryDispatcher(
-            @Qualifier("brokerClients") List<BrokerClient> brokerClients,
+            @Qualifier("brokerClients") List<BrokerClient> queryBrokerClients,
             QueryTranslationComponent queryTranslationComponent,
             QueryHashCalculator queryHashCalculator,
             @Qualifier("translation") ObjectMapper jsonUtil,
             QueryRepository queryRepository,
             QueryContentRepository queryContentRepository,
             QueryDispatchRepository queryDispatchRepository) {
-        return new QueryDispatcher(brokerClients, queryTranslationComponent, queryHashCalculator, jsonUtil,
-                queryRepository, queryContentRepository, queryDispatchRepository);
+        return new QueryDispatcher(queryBrokerClients, queryTranslationComponent, queryHashCalculator, jsonUtil, queryRepository,
+                queryContentRepository, queryDispatchRepository);
     }
 
     @Bean
