@@ -43,3 +43,7 @@ mvnw.cmd
 
 ### GoogeCodingStyle ###
 googleCodeStyle.xml
+
+
+### ui-profiles ###
+/ontology/ui_profiles/

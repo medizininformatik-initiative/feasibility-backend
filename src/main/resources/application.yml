@@ -19,6 +19,8 @@ spring:
           jackis:
             jsonintegration:
               hibernate: CustomPostgreSQL95Dialect
+  flyway:
+    locations: filesystem:${ONTOLOGY_DB_MIGRATION_FOLDER},classpath:db/migration
 
 springdoc:
   swagger-ui:
