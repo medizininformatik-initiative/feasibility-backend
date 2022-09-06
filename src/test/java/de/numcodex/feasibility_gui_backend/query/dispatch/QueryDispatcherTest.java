@@ -189,6 +189,32 @@ public class QueryDispatcherTest {
     }
 
     @Test
+    public void testDispatchEnqueuedQuery_BrokerAfterFirstSuccessfulOneAreCalled() throws IOException,
+            QueryNotFoundException {
+        var failingBrokerClient = mock(BrokerClient.class);
+        var succeedingBrokerClient = mock(BrokerClient.class);
+        var queryDispatcher = createQueryDispatcher(List.of(succeedingBrokerClient, failingBrokerClient));
+
+        var testQueryId = 99999L;
+        var testQuery = new Query();
+        testQuery.setId(testQueryId);
+        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(new StructuredQuery()));
+        testQuery.setQueryContent(testQueryContent);
+
+        doReturn(Optional.of(testQuery)).when(queryRepository).findById(testQueryId);
+        doReturn("1").when(succeedingBrokerClient).createQuery(testQueryId);
+        doReturn("1").when(failingBrokerClient).createQuery(testQueryId);
+        doThrow(IOException.class).when(failingBrokerClient).publishQuery(anyString());
+
+
+        StepVerifier.create(queryDispatcher.dispatchEnqueuedQuery(testQueryId))
+                .expectComplete()
+                .verify();
+        verify(failingBrokerClient, times(1)).publishQuery("1");
+        verify(succeedingBrokerClient, times(1)).publishQuery("1");
+    }
+
+    @Test
     public void testDispatchEnqueuedQuery_DoesFailIfAllBrokersFail() throws IOException, QueryNotFoundException {
         var failingBrokerClient = mock(BrokerClient.class);
         var anotherFailingBrokerClient = mock(BrokerClient.class);
