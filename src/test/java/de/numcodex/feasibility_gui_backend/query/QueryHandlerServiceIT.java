@@ -76,7 +76,7 @@ public class QueryHandlerServiceIT {
     public void testRunQuery() {
         var testStructuredQuery = new StructuredQuery();
 
-        assertDoesNotThrow(() -> queryHandlerService.runQuery(testStructuredQuery, "test"));
+        queryHandlerService.runQuery(testStructuredQuery, "test").block();
         assertEquals(1, queryRepository.count());
         assertEquals(1, queryDispatchRepository.count());
     }

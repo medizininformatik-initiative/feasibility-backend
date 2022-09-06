@@ -6,6 +6,7 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -14,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -24,12 +27,11 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Tag("query")
 @ExtendWith(SpringExtension.class)
@@ -37,8 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(
         controllers = QueryHandlerRestController.class,
         properties = {
-                "app.enableQueryValidation=true",
-                "keycloak.enabled=false"
+                "app.enableQueryValidation=true"
         }
 )
 @SuppressWarnings("NewClassNamingConvention")
@@ -53,9 +54,6 @@ public class QueryHandlerRestControllerIT {
     @MockBean
     private QueryHandlerService queryHandlerService;
 
-    @MockBean
-    private TermCodeValidation termCodeValidation;
-
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
@@ -68,7 +66,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testRunQueryEndpoint_SucceedsOnValidStructuredQueryWith201() throws Exception {
         var termCode = new TermCode();
         termCode.setCode("LL2191-6");
@@ -84,14 +82,48 @@ public class QueryHandlerRestControllerIT {
         testQuery.setDisplay("foo");
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
-        when(queryHandlerService.runQuery(any(StructuredQuery.class), eq("test"))).thenReturn(1L);
-        when(termCodeValidation.getInvalidTermCodes(any(StructuredQuery.class))).thenReturn(new ArrayList<>());
+        doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
 
-
-        mockMvc.perform(post(URI.create("/api/v1/query-handler/run-query"))
+        var mvcResult = mockMvc.perform(post(URI.create("/api/v1/query-handler/run-query"))
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(LOCATION, "/api/v1/query-handler/result/0"));
+                .andExpect(header().exists("location"))
+                .andExpect(header().string("location", "/api/v1/query-handler/result/1"));
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    public void testRunQueryEndpoint_FailsOnDownstreamServiceError() throws Exception {
+        var termCode = new TermCode();
+        termCode.setCode("LL2191-6");
+        termCode.setSystem("http://loinc.org");
+        termCode.setDisplay("Geschlecht");
+
+        var inclusionCriterion = new Criterion();
+        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
+
+        var testQuery = new StructuredQuery();
+        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
+        testQuery.setExclusionCriteria(List.of());
+        testQuery.setDisplay("foo");
+        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
+
+        var dispatchError = new QueryDispatchException("something went wrong");
+
+        doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
+
+        var mvcResult = mockMvc.perform(post(URI.create("/api/v1/query-handler/run-query"))
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonUtil.writeValueAsString(testQuery)))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 }

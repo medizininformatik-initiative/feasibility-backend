@@ -3,13 +3,16 @@ package de.numcodex.feasibility_gui_backend.query.dispatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.broker.mock.MockBrokerClient;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContent;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +21,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.test.StepVerifier;
 
 import java.net.URI;
+import java.util.List;
 
 import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType.MOCK;
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,6 +70,9 @@ public class QueryDispatcherIT {
 
     @Autowired
     private QueryHashCalculator queryHashCalculator;
+
+    @Autowired
+    private List<BrokerClient> queryBrokerClients;
 
     @Test
     public void testEnqueueNewQuery_QueryContentGetsCreatedIfNotAlreadyPresent() throws JsonProcessingException {
@@ -124,7 +132,9 @@ public class QueryDispatcherIT {
     public void testDispatchEnqueuedQuery_UnknownQueryIdDoesNotLeadToPersistedDispatchEntry() {
         var unknownQueryId = 9999999L;
 
-        assertThrows(QueryDispatchException.class, () -> queryDispatcher.dispatchEnqueuedQuery(unknownQueryId));
+        StepVerifier.create(queryDispatcher.dispatchEnqueuedQuery(unknownQueryId))
+                .expectError(QueryDispatchException.class)
+                .verify();
         assertEquals(0, queryDispatchRepository.count());
     }
 
@@ -133,7 +143,11 @@ public class QueryDispatcherIT {
         var testQuery = new StructuredQuery();
 
         var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
-        assertDoesNotThrow(() -> queryDispatcher.dispatchEnqueuedQuery(queryId));
+
+        var queries = queryRepository.findAll();
+
+        StepVerifier.create(queryDispatcher.dispatchEnqueuedQuery(queryId))
+                .verifyComplete();
 
         var dispatches = queryDispatchRepository.findAll();
         assertEquals(1, dispatches.size());
@@ -142,6 +156,4 @@ public class QueryDispatcherIT {
         assertNotNull(dispatches.get(0).getDispatchedAt());
         assertNotNull(dispatches.get(0).getQuery());
     }
-
-    // TODO: single dispatch entry per configured broker client --> discuss in review!!!
 }
