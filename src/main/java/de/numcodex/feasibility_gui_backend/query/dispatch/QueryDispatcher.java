@@ -15,13 +15,13 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -87,7 +87,7 @@ public class QueryDispatcher {
      *
      * @param queryId Identifies the backend query that shall be dispatched.
      * @return A {@link Mono} in complete state if at least a single broker managed to publish the query. If all brokers
-     *         failed to publish the query then a {@link Mono} in an error state is returned.
+     * failed to publish the query then a {@link Mono} in an error state is returned.
      */
     // TODO: Pass in audit information! (actor)
     public Mono<Void> dispatchEnqueuedQuery(Long queryId) {
@@ -98,10 +98,11 @@ public class QueryDispatcher {
 
             var dispatchable = new Dispatchable(enqueuedQuery, translatedQueryBodyFormats);
 
-            return Flux.fromIterable(queryBrokerClients)
-                    // do not try to make this parallel - it breaks transaction propagation!
-                    .flatMap(client -> dispatchAsynchronously(dispatchable, client))
-                    .all(Predicate.isEqual(false))
+            var dispatches = queryBrokerClients.stream()
+                    .map(c -> dispatchAsynchronously(dispatchable, c)).toList();
+
+            return Mono.zip(dispatches, dispatchResults -> Arrays.stream(dispatchResults)
+                            .allMatch(Predicate.isEqual(false)))
                     .flatMap(allDispatchesFailed -> {
                         if (allDispatchesFailed) {
                             return Mono.error(new QueryDispatchException(("cannot dispatch query with id '%s'. " +
