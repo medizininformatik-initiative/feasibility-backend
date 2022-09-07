@@ -3,31 +3,24 @@ package de.numcodex.feasibility_gui_backend.query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
-import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
-import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
-import de.numcodex.feasibility_gui_backend.query.persistence.Result;
-import de.numcodex.feasibility_gui_backend.query.persistence.ResultRepository;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplateRepository;
-import de.numcodex.feasibility_gui_backend.query.persistence.SavedQueryRepository;
+import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
@@ -63,11 +56,14 @@ public class QueryHandlerService {
     @NonNull
     private ObjectMapper jsonUtil;
 
-    public Long runQuery(StructuredQuery structuredQuery, String userId)
-        throws QueryDispatchException {
-        var queryId = queryDispatcher.enqueueNewQuery(structuredQuery, userId);
-        queryDispatcher.dispatchEnqueuedQuery(queryId);
-        return queryId;
+    public Mono<Long> runQuery(StructuredQuery structuredQuery, String userId) {
+        try {
+            var queryId = queryDispatcher.enqueueNewQuery(structuredQuery, userId);
+            return queryDispatcher.dispatchEnqueuedQuery(queryId)
+                    .thenReturn(queryId);
+        } catch (QueryDispatchException e) {
+            return Mono.error(e);
+        }
     }
 
     @Transactional
@@ -117,7 +113,7 @@ public class QueryHandlerService {
     }
 
     public Long storeQueryTemplate(QueryTemplate queryTemplate, String userId)
-        throws QueryTemplateException {
+            throws QueryTemplateException {
         return queryTemplateHandler.storeTemplate(queryTemplate, userId);
     }
 
@@ -127,9 +123,9 @@ public class QueryHandlerService {
     }
 
     public de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate getQueryTemplate(
-        Long queryId, String authorId) throws QueryTemplateException {
+            Long queryId, String authorId) throws QueryTemplateException {
         de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate = queryTemplateRepository.findById(
-            queryId).orElseThrow(QueryTemplateException::new);
+                queryId).orElseThrow(QueryTemplateException::new);
         if (!queryTemplate.getQuery().getCreatedBy().equalsIgnoreCase(authorId)) {
             throw new QueryTemplateException();
         }
@@ -137,23 +133,23 @@ public class QueryHandlerService {
     }
 
     public List<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> getQueryTemplatesForAuthor(
-        String authorId) {
+            String authorId) {
         return queryTemplateRepository.findByAuthor(authorId);
     }
 
     public QueryTemplate convertTemplatePersistenceToApi(
-        de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate in)
-        throws JsonProcessingException {
+            de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate in)
+            throws JsonProcessingException {
         return queryTemplateHandler.convertPersistenceToApi(in);
     }
 
     private Query convertQueryToApi(de.numcodex.feasibility_gui_backend.query.persistence.Query in,
-        Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQuery)
-        throws JsonProcessingException {
+                                    Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQuery)
+            throws JsonProcessingException {
         Query out = new Query();
         out.setId(in.getId());
         out.setContent(
-            jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class));
+                jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class));
         if (savedQuery.isPresent()) {
             out.setLabel(savedQuery.get().getLabel());
             out.setComment(savedQuery.get().getComment());
@@ -163,7 +159,7 @@ public class QueryHandlerService {
     }
 
     private de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery convertSavedQueryApiToPersistence(
-        SavedQuery in, Long queryId) {
+            SavedQuery in, Long queryId) {
         var out = new de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery();
         out.setQuery(queryRepository.getReferenceById(queryId));
         out.setComment(in.getComment());
@@ -172,7 +168,7 @@ public class QueryHandlerService {
     }
 
     public List<de.numcodex.feasibility_gui_backend.query.persistence.Query> getQueryListForAuthor(
-        String userId, boolean savedOnly) {
+            String userId, boolean savedOnly) {
         Optional<List<de.numcodex.feasibility_gui_backend.query.persistence.Query>> queries;
 
         if (savedOnly) {
@@ -194,10 +190,10 @@ public class QueryHandlerService {
         queryList.forEach(q -> {
             if (q.getSavedQuery() != null) {
                 ret.add(
-                    new QueryListEntry(q.getId(), q.getSavedQuery().getLabel(), q.getCreatedAt()));
+                        new QueryListEntry(q.getId(), q.getSavedQuery().getLabel(), q.getCreatedAt()));
             } else {
                 ret.add(
-                    new QueryListEntry(q.getId(), null, q.getCreatedAt()));
+                        new QueryListEntry(q.getId(), null, q.getCreatedAt()));
             }
         });
 
