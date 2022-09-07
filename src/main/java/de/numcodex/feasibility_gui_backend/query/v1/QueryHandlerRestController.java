@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,12 @@ public class QueryHandlerRestController {
   private final QueryHandlerService queryHandlerService;
   private final String apiBaseUrl;
 
+  @Value("${app.security.nqueries.amount}")
+  private int nQueriesAmount;
+
+  @Value("${app.security.nqueries.perminutes}")
+  private int nQueriesPerMinute;
+
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
@@ -40,19 +47,32 @@ public class QueryHandlerRestController {
   @PostMapping(value = "run-query")
   @Deprecated
   public Mono<ResponseEntity<Object>> runQuery(@Valid @RequestBody StructuredQuery query,
-                                               @Context HttpServletRequest request,
-                                               Principal principal) {
+      @Context HttpServletRequest request,
+      Principal principal) {
+
+    Long amountOfQueriesByUserAndInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
+        principal.getName(), nQueriesPerMinute);
+    log.error("amount: " + amountOfQueriesByUserAndInterval);
+    if (nQueriesAmount <= amountOfQueriesByUserAndInterval) {
+      Long retryAfter = queryHandlerService.getRetryAfterTime(principal.getName(),
+          nQueriesAmount - 1, nQueriesPerMinute);
+      log.error("retry after: " + retryAfter);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
+      return Mono.just(new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS));
+      //return new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS);
+    }
     // Note: this is using a ResponseEntity instead of a ServerResponse since this is a
     //       @Controller annotated class. This can be adjusted as soon as we switch to the new
     //       functional web framework (if ever).
     return queryHandlerService.runQuery(query, principal.getName())
-            .map(queryId -> buildResultLocationUri(request, queryId))
-            .map(resultLocation -> ResponseEntity.created(resultLocation).build())
-            .onErrorResume(e -> {
-                log.error("running a query for '%s' failed".formatted(principal.getName()), e);
-                return Mono.just(ResponseEntity.internalServerError()
-                                .body(e.getMessage()));
-            });
+        .map(queryId -> buildResultLocationUri(request, queryId))
+        .map(resultLocation -> ResponseEntity.created(resultLocation).build())
+        .onErrorResume(e -> {
+          log.error("running a query for '%s' failed".formatted(principal.getName()), e);
+          return Mono.just(ResponseEntity.internalServerError()
+              .body(e.getMessage()));
+        });
   }
 
   private URI buildResultLocationUri(HttpServletRequest httpServletRequest,

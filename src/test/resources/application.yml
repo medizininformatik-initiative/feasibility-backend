@@ -4,3 +4,9 @@ spring:
 security:
   config:
     use-keycloak: false
+
+app:
+  security:
+    nqueries:
+      amount: 3
+      perminutes: 1
