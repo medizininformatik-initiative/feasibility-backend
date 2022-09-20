@@ -88,7 +88,7 @@ public class CqlQueryTranslatorTest {
     @Disabled("Needs to be enabled if the new version of sq2cl is available and compatible with structured query v2.")
     @Test
     public void testTranslate_EverythingSucceeds() throws QueryTranslationException {
-        /*var termCode = new TermCode();
+        var termCode = new TermCode();
         termCode.setCode("LL2191-6");
         termCode.setSystem("http://loinc.org");
         termCode.setDisplay("Geschlecht");
@@ -103,12 +103,12 @@ public class CqlQueryTranslatorTest {
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
         var resultLibraryMock = mock(Library.class);
-        when(resultLibraryMock.print(any())).thenReturn("bar");
+        when(resultLibraryMock.print()).thenReturn("bar");
         when(translator.toCql(any(de.numcodex.sq2cql.model.structured_query.StructuredQuery.class)))
                 .thenReturn(resultLibraryMock);
 
         var translationResult = cqlQueryTranslator.translate(testQuery);
         assertEquals("bar", translationResult);
-        */
+
     }
 }
