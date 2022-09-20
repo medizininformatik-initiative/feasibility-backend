@@ -88,7 +88,7 @@ public class CqlQueryTranslatorTest {
     @Disabled("Needs to be enabled if the new version of sq2cl is available and compatible with structured query v2.")
     @Test
     public void testTranslate_EverythingSucceeds() throws QueryTranslationException {
-        var termCode = new TermCode();
+        /*var termCode = new TermCode();
         termCode.setCode("LL2191-6");
         termCode.setSystem("http://loinc.org");
         termCode.setDisplay("Geschlecht");
@@ -109,5 +109,6 @@ public class CqlQueryTranslatorTest {
 
         var translationResult = cqlQueryTranslator.translate(testQuery);
         assertEquals("bar", translationResult);
+        */
     }
 }

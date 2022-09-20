@@ -31,7 +31,7 @@ class CqlQueryTranslator implements QueryTranslator {
         }
 
         try {
-            return translator.toCql(structuredQuery).print(PrintContext.ZERO);
+            return translator.toCql(structuredQuery).print();
         } catch (Exception e) {
             throw new QueryTranslationException("cannot translate structured query to CQL format", e);
         }
