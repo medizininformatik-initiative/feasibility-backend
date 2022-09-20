@@ -67,14 +67,6 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
-    <!-- This dependency is only added to address a vulnerability in  org.springframework.boot-->
-    <!-- Remove this once the vulnerability is adressed in the next version -->
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.32</version>
-    </dependency>
-
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-spring-boot-starter</artifactId>
@@ -215,6 +207,14 @@
       <artifactId>spring-security-test</artifactId>
       <version>5.7.2</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- This dependency is only added to address a vulnerability in  org.springframework.boot-->
+    <!-- Remove this once the vulnerability is adressed in the next version -->
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.32</version>
     </dependency>
 
     <dependency>
