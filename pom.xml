@@ -67,11 +67,20 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+    <!-- This dependency is only added to address a vulnerability in  org.springframework.boot-->
+    <!-- Remove this once the vulnerability is adressed in the next version -->
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.32</version>
+    </dependency>
+
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-spring-boot-starter</artifactId>
       <version>18.0.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
@@ -157,7 +166,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>0.1.20</version>
+      <version>0.1.24</version>
     </dependency>
 
     <dependency>
