@@ -59,6 +59,7 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     http.authorizeRequests()
+        .antMatchers("/actuator/health").permitAll()
         .antMatchers("/api/v1/**").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/terminology/**").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/query").hasRole(keycloakAllowedRole)
