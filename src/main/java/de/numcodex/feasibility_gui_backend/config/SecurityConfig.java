@@ -60,6 +60,7 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
     http.authorizeRequests()
         .antMatchers("/api/v1/**").hasRole(keycloakAllowedRole)
+        .antMatchers("/api/v2/terminology/**").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/query").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/query/{id:\\d+}/saved").hasRole(keycloakAllowedRole)
         .antMatchers("/api/v2/query/by-user/{id:[\\w-]+}").hasRole(keycloakAdminRole)
@@ -67,8 +68,7 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/api/v2/query/{id:\\d+}/result/detailed").hasRole(keycloakAdminRole)
         .antMatchers("/api/v2/query/{id:\\d+}/result").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
         .antMatchers("/api/v2/query/{id:\\d+}/content").hasAnyRole(keycloakAdminRole, keycloakAllowedRole)
-        .anyRequest()
-        .permitAll()
+        .anyRequest().authenticated()
         .and()
         .csrf().disable();
   }
