@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NewClassNamingConvention")
 public class DSFQueryResultCollectorIT {
 
-    private static final String SINGLE_DIC_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.3.0";
+    private static final String SINGLE_DIC_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.4.0";
 
     @Mock
     private DSFBrokerClient brokerClient;
@@ -60,7 +60,7 @@ public class DSFQueryResultCollectorIT {
                 .setStatus(COMPLETED)
                 .setIntent(ORDER)
                 .setAuthoredOn(new Date())
-                .setInstantiatesUri("http://highmed.org/bpe/Process/feasibilityRequest/0.3.0");
+                .setInstantiatesUri("http://highmed.org/bpe/Process/feasibilityRequest/0.4.0");
 
         task.getRequester()
                 .setType("Organization")
