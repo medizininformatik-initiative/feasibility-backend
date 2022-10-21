@@ -137,10 +137,26 @@
       <version>1.3.2</version>
     </dependency>
 
+    <!--
+      This is for fixing an RCE vulnerability in commons-text <1.10.0. The dependency comes with the
+      dsf-fhir-webservice-client which cannot update the transitive dependency itself due to breaking
+      changes.
+    -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>1.10.0</version>
+    </dependency>
     <dependency>
       <groupId>org.highmed.dsf</groupId>
       <artifactId>dsf-fhir-webservice-client</artifactId>
       <version>0.9.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-text</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
