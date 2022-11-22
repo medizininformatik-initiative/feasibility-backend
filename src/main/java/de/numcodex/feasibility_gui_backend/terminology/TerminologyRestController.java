@@ -3,6 +3,8 @@ package de.numcodex.feasibility_gui_backend.terminology;
 
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.references.ReferenceCandidateRequest;
+import de.numcodex.feasibility_gui_backend.terminology.references.ReferenceCandidateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,5 +54,11 @@ public class TerminologyRestController {
     @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
     public String getUiProfile(@RequestParam("system") String system, @RequestParam("code") String code, @RequestParam(value = "version", required = false) String version) {
         return terminologyService.getUiProfile(system, code, version);
+    }
+
+    @GetMapping(value = "reference-options", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
+    public ReferenceCandidateResponse getReferenceOptions(@RequestBody ReferenceCandidateRequest referenceCandidateRequest) {
+        return terminologyService.checkReferenceCandidates(referenceCandidateRequest);
     }
 }

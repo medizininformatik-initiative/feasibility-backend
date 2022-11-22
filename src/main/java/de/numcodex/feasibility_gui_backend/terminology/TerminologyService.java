@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.terminology.db.UiProfileRepository;
-import javax.validation.constraints.Null;
+import de.numcodex.feasibility_gui_backend.terminology.references.ReferenceCandidateRequest;
+import de.numcodex.feasibility_gui_backend.terminology.references.ReferenceCandidateResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,8 @@ import java.util.stream.Stream;
 @Slf4j
 public class TerminologyService {
 
+  public static final String ALLOWED_PARENT_TERMCODE_SYSTEM = "http://snomed.info/sct";
+  public static final String ALLOWED_CHILD_TERMCODE_SYSTEM = "http://fhir.de/CodeSystem/bfarm/icd-10-gm";
   @Autowired
   private UiProfileRepository uiProfileRepository;
 
@@ -293,5 +296,31 @@ public class TerminologyService {
             .anyMatch(var -> var.startsWith(query.toLowerCase())) ||
         (terminologyEntry.getTermCodes().stream().anyMatch(termCode -> termCode.getCode()
             .startsWith(query)));
+  }
+
+  /**
+   * Check which of the submitted options may be linked to the submitted parent.
+   *
+   * This is currently a very basic implementation that only allows specimen to be linked with icd10
+   * diagnosis. More work is required to implement a better check for allowed references, but for
+   * now this serves as a first version to implement the GUI against.
+   *
+   * @param referenceCandidateRequest contains a parent object and a list of candidates to check
+   * @return a list of ids that can be linked to the parent element
+   */
+  public ReferenceCandidateResponse checkReferenceCandidates(ReferenceCandidateRequest referenceCandidateRequest) {
+    ReferenceCandidateResponse referenceCandidateResponse = new ReferenceCandidateResponse();
+    List<String> ids = new ArrayList<>();
+
+    if (ALLOWED_PARENT_TERMCODE_SYSTEM.equals(referenceCandidateRequest.getParent().getTermCode().getSystem())) {
+      referenceCandidateRequest.getReferenceCandidates().forEach(rc -> {
+        if (ALLOWED_CHILD_TERMCODE_SYSTEM.equals(rc.getTermCode().getSystem())) {
+          ids.add(rc.getId());
+        }
+      });
+    }
+
+    referenceCandidateResponse.setReferenceCandidateIds(ids);
+    return referenceCandidateResponse;
   }
 }
