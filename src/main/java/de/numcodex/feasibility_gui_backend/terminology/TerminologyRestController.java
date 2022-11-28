@@ -56,7 +56,7 @@ public class TerminologyRestController {
         return terminologyService.getUiProfile(system, code, version);
     }
 
-    @GetMapping(value = "reference-options", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "reference-options", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
     public ReferenceCandidateResponse getReferenceOptions(@RequestBody ReferenceCandidateRequest referenceCandidateRequest) {
         return terminologyService.checkReferenceCandidates(referenceCandidateRequest);
