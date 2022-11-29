@@ -28,7 +28,7 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
  */
 class DSFQueryManager implements QueryManager {
 
-    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.3.0";
+    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.5.0";
     private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request";
     private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure";
     private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library";
@@ -42,6 +42,7 @@ class DSFQueryManager implements QueryManager {
     private static final String RECIPIENT_TYPE = "Organization";
 
     private static final String LIBRARY_NAME = "Retrieve";
+    private static final String LIBRARY_VERSION = "1.0.0";
 
     private static final String CODE_SYSTEM_FEASIBILITY = "http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REFERENCE = "measure-reference";
@@ -213,6 +214,7 @@ class DSFQueryManager implements QueryManager {
         Bundle bundle = queryBundle.copy();
         Library library = new Library()
                 .setName(LIBRARY_NAME)
+                .setVersion(LIBRARY_VERSION)
                 .setStatus(ACTIVE)
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()

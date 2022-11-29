@@ -103,11 +103,12 @@ public class CqlQueryTranslatorTest {
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
 
         var resultLibraryMock = mock(Library.class);
-        when(resultLibraryMock.print(any())).thenReturn("bar");
+        when(resultLibraryMock.print()).thenReturn("bar");
         when(translator.toCql(any(de.numcodex.sq2cql.model.structured_query.StructuredQuery.class)))
                 .thenReturn(resultLibraryMock);
 
         var translationResult = cqlQueryTranslator.translate(testQuery);
         assertEquals("bar", translationResult);
+
     }
 }
