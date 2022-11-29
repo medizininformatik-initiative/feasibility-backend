@@ -55,7 +55,7 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.4.0");
+        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.5.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
@@ -88,7 +88,7 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.4.0");
+        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.5.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
