@@ -20,18 +20,17 @@ import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMP
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpHeaders.ACCEPT_ENCODING;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NewClassNamingConvention")
-class DirectBrokerClientIT {
+class DirectBrokerClientFlareIT {
 
     private static final int ASYNC_TIMEOUT_WAIT_MS = 2000;
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
-    DirectBrokerClient client;
+    DirectBrokerClientFlare client;
     WebClient webClient;
     MockWebServer mockWebServer;
 
@@ -40,7 +39,7 @@ class DirectBrokerClientIT {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         webClient = WebClient.create(mockWebServer.url("/").toString());
-        client = new DirectBrokerClient(webClient);
+        client = new DirectBrokerClientFlare(webClient);
     }
 
     @AfterEach
@@ -85,7 +84,7 @@ class DirectBrokerClientIT {
 
         var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", FAILED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                statusUpdate);
+            statusUpdate);
     }
 
     @Test
@@ -101,6 +100,6 @@ class DirectBrokerClientIT {
 
         var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", FAILED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                statusUpdate);
+            statusUpdate);
     }
 }

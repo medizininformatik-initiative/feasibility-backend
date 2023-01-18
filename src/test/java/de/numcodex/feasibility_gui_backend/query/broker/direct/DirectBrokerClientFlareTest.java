@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class DirectBrokerClientTest {
+class DirectBrokerClientFlareTest {
 
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
@@ -21,7 +21,7 @@ class DirectBrokerClientTest {
     WebClient webClient;
 
     @InjectMocks
-    DirectBrokerClient client;
+    DirectBrokerClientFlare client;
 
     @Test
     void testPublishNonExistingQuery() {
@@ -39,6 +39,7 @@ class DirectBrokerClientTest {
         assertEquals("FHIR Server", client.getSiteName("1"));
         assertTrue(client.getSiteName("foo").isEmpty());
         assertTrue(client.getSiteName("something-else").isEmpty());
+        assertTrue(client.getSiteName("CQL Server").isEmpty());
     }
 
     @Test
