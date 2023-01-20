@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -19,8 +20,6 @@ import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAIL
  */
 @Slf4j
 public class DirectBrokerClientFlare extends DirectBrokerClient {
-
-  private static final String SITE_1_NAME = "FHIR Server";
   private static final String FLARE_QUERY_ENDPOINT_URL = "/query/execute";
   private final WebClient webClient;
 
@@ -38,13 +37,11 @@ public class DirectBrokerClientFlare extends DirectBrokerClient {
   }
 
   @Override
-  public void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException {
+  public void publishQuery(String brokerQueryId) throws QueryNotFoundException, QueryDefinitionNotFoundException, IOException {
     var query = findQuery(brokerQueryId);
     var structuredQueryContent = Optional.ofNullable(query.getQueryDefinition(STRUCTURED_QUERY))
-        .orElseThrow(() -> new IllegalStateException("Query with ID "
-            + brokerQueryId
-            + " does not contain a query definition for the mandatory type: "
-            + STRUCTURED_QUERY
+        .orElseThrow(() -> new QueryDefinitionNotFoundException(brokerQueryId,
+            STRUCTURED_QUERY.getRepresentation()
         ));
 
     try {
@@ -60,17 +57,12 @@ public class DirectBrokerClientFlare extends DirectBrokerClient {
             updateQueryStatus(brokerQueryId, FAILED);
           })
           .subscribe(val -> {
-            query.registerSiteResults(SITE_1_ID, obfuscateResultCount ? obfuscate(val) : val);
+            query.setResult(obfuscateResultCount ? obfuscate(val) : val);
             updateQueryStatus(brokerQueryId, COMPLETED);
           });
     } catch (Exception e) {
       throw new IOException("An error occurred while publishing the query with ID: " + brokerQueryId, e);
     }
-  }
-
-  @Override
-  public String getSiteName(String siteId) {
-    return siteId.equals(SITE_1_ID) ? SITE_1_NAME : "";
   }
 
 }

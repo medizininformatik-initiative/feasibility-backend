@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -31,12 +32,12 @@ class DirectBrokerClientFlareTest {
     @Test
     void testPublishExistingQueryWithoutStructuredQueryDefinition() {
         var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        assertThrows(IllegalStateException.class, () -> client.publishQuery(queryId));
+        assertThrows(QueryDefinitionNotFoundException.class, () -> client.publishQuery(queryId));
     }
 
     @Test
     void testGetSiteName() {
-        assertEquals("FHIR Server", client.getSiteName("1"));
+        assertEquals("Local Server", client.getSiteName("1"));
         assertTrue(client.getSiteName("foo").isEmpty());
         assertTrue(client.getSiteName("something-else").isEmpty());
         assertTrue(client.getSiteName("CQL Server").isEmpty());

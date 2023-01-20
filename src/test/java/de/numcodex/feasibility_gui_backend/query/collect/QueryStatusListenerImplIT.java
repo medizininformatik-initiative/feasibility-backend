@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.collect;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
@@ -144,7 +145,7 @@ class QueryStatusListenerImplIT {
         }
 
         @Override
-        public void addQueryDefinition(String brokerQueryId, String mediaType, String content) {
+        public void addQueryDefinition(String brokerQueryId, QueryMediaType queryMediaType, String content) {
             // NO-OP
         }
 

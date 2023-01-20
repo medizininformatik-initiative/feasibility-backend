@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Spring configuration for providing a {@link DirectBrokerClientCql} instance.
+ * Spring configuration for providing a {@link DirectBrokerClient} implementation instance.
+ * Either {@link DirectBrokerClientCql} or {@link DirectBrokerClientFlare}
  */
 @Lazy
 @Configuration

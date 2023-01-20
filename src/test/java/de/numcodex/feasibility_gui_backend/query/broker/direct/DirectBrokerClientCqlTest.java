@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
 class DirectBrokerClientCqlTest {
@@ -25,6 +25,7 @@ class DirectBrokerClientCqlTest {
     @Mock
     FhirContext fhirContext;
 
+    @SuppressWarnings("unused")
     @Mock
     IGenericClient fhirClient;
 
@@ -39,12 +40,12 @@ class DirectBrokerClientCqlTest {
     @Test
     void testPublishExistingQueryWithoutStructuredQueryDefinition() {
         var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        assertThrows(IllegalStateException.class, () -> client.publishQuery(queryId));
+        assertThrows(QueryDefinitionNotFoundException.class, () -> client.publishQuery(queryId));
     }
 
     @Test
     void testGetSiteName() {
-        assertEquals("CQL Server", client.getSiteName("1"));
+        assertEquals("Local Server", client.getSiteName("1"));
         assertTrue(client.getSiteName("foo").isEmpty());
         assertTrue(client.getSiteName("something-else").isEmpty());
         assertTrue(client.getSiteName("FHIR Server").isEmpty());

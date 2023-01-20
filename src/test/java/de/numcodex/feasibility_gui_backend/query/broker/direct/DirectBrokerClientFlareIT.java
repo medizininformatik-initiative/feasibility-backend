@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
@@ -48,9 +49,10 @@ class DirectBrokerClientFlareIT {
     }
 
     @Test
-    void testPublishQuery() throws QueryNotFoundException, IOException, InterruptedException, SiteNotFoundException {
+    void testPublishQuery()
+        throws QueryNotFoundException, IOException, InterruptedException, SiteNotFoundException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY.getRepresentation(), "foo");
+        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
         mockWebServer.enqueue(new MockResponse().setBody("123").setHeader(CONTENT_TYPE, "internal/json"));
 
@@ -72,9 +74,10 @@ class DirectBrokerClientFlareIT {
     }
 
     @Test
-    void testPublishQueryServerError() throws QueryNotFoundException, IOException {
+    void testPublishQueryServerError()
+        throws QueryNotFoundException, IOException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY.getRepresentation(), "foo");
+        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
         mockWebServer.enqueue(new MockResponse().setStatus(INTERNAL_SERVER_ERROR.toString()));
 
@@ -88,9 +91,10 @@ class DirectBrokerClientFlareIT {
     }
 
     @Test
-    void testPublishQueryUnexpectedResponseBody() throws QueryNotFoundException, IOException {
+    void testPublishQueryUnexpectedResponseBody()
+        throws QueryNotFoundException, IOException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY.getRepresentation(), "foo");
+        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
         mockWebServer.enqueue(new MockResponse().setBody("not-a-number").setHeader(CONTENT_TYPE, "internal/json"));
 

@@ -10,8 +10,7 @@ import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +18,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 
 public abstract class DirectBrokerClient implements BrokerClient {
 
-  static final String SITE_1_ID = "1";
+  static final String SITE_ID_LOCAL = "1";
+
+  static final String SITE_1_NAME = "Local Server";
 
   protected List<QueryStatusListener> listeners;
   protected Map<String, DirectQuery> brokerQueries;
@@ -53,12 +55,9 @@ public abstract class DirectBrokerClient implements BrokerClient {
   }
 
   @Override
-  public void addQueryDefinition(String brokerQueryId, String mediaType, String content) throws QueryNotFoundException {
-    findQuery(brokerQueryId).addQueryDefinition(mediaType, content);
+  public void addQueryDefinition(String brokerQueryId, QueryMediaType queryMediaType, String content) throws QueryNotFoundException {
+    findQuery(brokerQueryId).addQueryDefinition(queryMediaType, content);
   }
-
-  @Override
-  public abstract void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException;
 
   @Override
   public void closeQuery(String brokerQueryId) throws QueryNotFoundException {
@@ -69,16 +68,18 @@ public abstract class DirectBrokerClient implements BrokerClient {
 
   @Override
   public int getResultFeasibility(String brokerQueryId, String siteId) throws QueryNotFoundException, SiteNotFoundException {
-    return findQuery(brokerQueryId).getSiteResult(siteId);
+    return findQuery(brokerQueryId).getResult();
   }
 
   @Override
   public List<String> getResultSiteIds(String brokerQueryId) throws QueryNotFoundException {
-    return findQuery(brokerQueryId).getSiteIdsWithResult();
+    return findQuery(brokerQueryId).hasResult() ? Collections.singletonList(SITE_ID_LOCAL) : Collections.emptyList();
   }
 
-  @Override
-  public abstract String getSiteName(String siteId);
+  public String getSiteName(String siteId) {
+    return SITE_ID_LOCAL.equals(siteId) ? SITE_1_NAME : "";
+  }
+
 
   /**
    * Searches for a {@link DirectQuery} within this broker. The specified query ID identifies the
@@ -99,8 +100,8 @@ public abstract class DirectBrokerClient implements BrokerClient {
    * @return The obfuscated result, or 0 if the obfuscated result is < 5
    */
   protected int obfuscate(int resultCount) {
-    int randomNum = ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE);
-    int obfuscatedResultCount = resultCount + (randomNum % 11) - 5;
+    int obfuscatedResultCount =
+        resultCount + ThreadLocalRandom.current().nextInt(11) - 5;
     if (obfuscatedResultCount < 5) {
       return 0;
     } else {
@@ -114,7 +115,7 @@ public abstract class DirectBrokerClient implements BrokerClient {
    * @param queryStatus the {@link QueryStatus} to publish to the listeners
    */
   protected void updateQueryStatus(String queryId, QueryStatus queryStatus) {
-    var statusUpdate = new QueryStatusUpdate(this, queryId, SITE_1_ID, queryStatus);
+    var statusUpdate = new QueryStatusUpdate(this, queryId, SITE_ID_LOCAL, queryStatus);
     var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(queryId);
     listeners.forEach(
         l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate)
@@ -137,13 +138,13 @@ public abstract class DirectBrokerClient implements BrokerClient {
 
     @Getter
     private final String queryId;
-    private final Map<String, String> queryDefinitions;
-    private final Map<String, Integer> resultsBySite;
+    private final Map<QueryMediaType, String> queryDefinitions;
+    @Setter
+    private Integer result;
 
     private DirectQuery(String queryId) {
       this.queryId = queryId;
       queryDefinitions = new HashMap<>();
-      resultsBySite = new HashMap<>();
     }
 
     /**
@@ -160,56 +161,43 @@ public abstract class DirectBrokerClient implements BrokerClient {
      * query / CQL). The specified mime type defines the format of the query itself. When invoked
      * multiple times for a single mime type, any already existing query content associated with
      * this mime type gets overwritten.
-     * <p>
-     * For more information on available mime types see {@link QueryMediaType}.
      *
-     * @param mimeType The mime type defining the format of the query.
+     * @param queryMediaType The {@link QueryMediaType} defining the format of the query.
      * @param content The actual query in its string representation.
      */
-    public void addQueryDefinition(String mimeType, String content) {
-      queryDefinitions.put(mimeType, content);
+    public void addQueryDefinition(QueryMediaType queryMediaType, String content) {
+      queryDefinitions.put(queryMediaType, content);
     }
 
     /**
      * Gets a single query definition associated with the given mime type.
      *
-     * @param mimeType The mime type (query format) of the query.
+     * @param queryMediaType The {@link QueryMediaType} of the query.
      * @return The query in its string representation or null if there is no query definition
      * associated with the specified mime type.
      */
-    public String getQueryDefinition(QueryMediaType mimeType) {
-      return queryDefinitions.get(mimeType.getRepresentation());
+    public String getQueryDefinition(QueryMediaType queryMediaType) {
+      return queryDefinitions.get(queryMediaType);
     }
 
     /**
-     * Adds the feasibility result of a single site.
+     * Gets the feasibility result of the local site.
      *
-     * @param siteId Identifies the site the feasibility result is linked to.
-     * @param feasibility The feasibility result.
-     */
-    public void registerSiteResults(String siteId, int feasibility) {
-      resultsBySite.put(siteId, feasibility);
-    }
-
-    /**
-     * Gets the feasibility result of a single site.
-     *
-     * @param siteId Identifies the site in question.
-     * @return The feasibility result of the site identified by the specified identifier.
+     * @return The feasibility result of the local site identified by the specified identifier.
      * @throws SiteNotFoundException If the ID does not identify a known site.
      */
-    public int getSiteResult(String siteId) throws SiteNotFoundException {
-      return Optional.ofNullable(resultsBySite.get(siteId))
-          .orElseThrow(() -> new SiteNotFoundException(queryId, siteId));
+    public int getResult() throws SiteNotFoundException {
+      return Optional.ofNullable(result)
+          .orElseThrow(() -> new SiteNotFoundException(queryId, SITE_ID_LOCAL));
     }
 
     /**
-     * Gets all site identifiers which already reported a feasibility result.
+     * Returns whether the local site has a reported result.
      *
-     * @return A list of identifiers of sites.
+     * @return true if a result is available, false otherwise
      */
-    public List<String> getSiteIdsWithResult() {
-      return new ArrayList<>(resultsBySite.keySet());
+    public boolean hasResult() {
+      return result != null;
     }
   }
 }

@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -24,7 +26,7 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
 /**
  * Manager for feasibility queries.
  * <p>
- * Can be used to setup queries and publish them.
+ * Can be used to set up queries and publish them.
  */
 class DSFQueryManager implements QueryManager {
 
@@ -89,9 +91,9 @@ class DSFQueryManager implements QueryManager {
     }
 
     @Override
-    public void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException,
+    public void addQueryDefinition(String queryId, QueryMediaType queryMediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException {
-        var translatedMediaType = mediaTypeTranslator.translate(mediaType);
+        var translatedMediaType = mediaTypeTranslator.translate(queryMediaType);
 
         var query = queryHeap.get(queryId);
         if (query == null) {
@@ -102,7 +104,7 @@ class DSFQueryManager implements QueryManager {
     }
 
     @Override
-    public void publishQuery(String queryId) throws QueryNotFoundException, IOException {
+    public void publishQuery(String queryId) throws QueryNotFoundException, QueryDefinitionNotFoundException, IOException {
         var query = queryHeap.get(queryId);
         if (query == null) {
             throw new QueryNotFoundException(queryId);
@@ -110,7 +112,7 @@ class DSFQueryManager implements QueryManager {
 
         var queryContents = query.getContentByType();
         if (queryContents.isEmpty()) {
-            throw new IllegalStateException("Query with ID '" + queryId + "' does not contain query definition yet.");
+            throw new QueryDefinitionNotFoundException(queryId, "any");
         }
 
         if (fhirWebserviceClient == null) {

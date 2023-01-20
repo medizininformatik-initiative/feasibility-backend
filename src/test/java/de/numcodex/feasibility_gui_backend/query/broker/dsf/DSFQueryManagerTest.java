@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
 import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,23 +62,16 @@ public class DSFQueryManagerTest {
 
     @Test
     public void testAddQueryDefinition_QueryNotFound() {
-        assertThrows(QueryNotFoundException.class, () -> queryHandler.addQueryDefinition(unknownQueryId, "text/cql", ""));
-    }
-
-    @Test
-    public void testAddQueryDefinition_UnsupportedMediaType() {
-        var queryId = queryHandler.createQuery();
-        assertThrows(UnsupportedMediaTypeException.class,
-                () -> queryHandler.addQueryDefinition(queryId, "something/unsupported", ""));
+        assertThrows(QueryNotFoundException.class, () -> queryHandler.addQueryDefinition(unknownQueryId, CQL, ""));
     }
 
     @Test
     public void testAddQueryDefinition_AddingContentForExistingMediaTypeOverwritesExistingContent()
-            throws UnsupportedMediaTypeException, QueryNotFoundException, FhirWebClientProvisionException, IOException {
+        throws UnsupportedMediaTypeException, QueryNotFoundException, FhirWebClientProvisionException, IOException, QueryDefinitionNotFoundException {
         var queryId = queryHandler.createQuery();
         var finalContent = "{\"foo\":\"bar\"}";
-        queryHandler.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), "{}");
-        queryHandler.addQueryDefinition(queryId, STRUCTURED_QUERY.getRepresentation(), finalContent);
+        queryHandler.addQueryDefinition(queryId, STRUCTURED_QUERY, "{}");
+        queryHandler.addQueryDefinition(queryId, STRUCTURED_QUERY, finalContent);
 
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirWebserviceClient);
         when(fhirWebserviceClient.getBaseUrl()).thenReturn("http://localhost/fhir");
@@ -103,14 +98,14 @@ public class DSFQueryManagerTest {
     public void testPublishQuery_QueryHasNoQueryDefinitionYet() {
         var queryId = queryHandler.createQuery();
 
-        IllegalStateException e = assertThrows(IllegalStateException.class, () -> queryHandler.publishQuery(queryId));
-        assertEquals("Query with ID '" + queryId + "' does not contain query definition yet.", e.getMessage());
+        QueryDefinitionNotFoundException e = assertThrows(QueryDefinitionNotFoundException.class, () -> queryHandler.publishQuery(queryId));
+        assertEquals("Query with ID '" + queryId + "' does not contain a query definition for the mandatory type: any", e.getMessage());
     }
 
     @Test
     public void testPublishQuery_PublishFailed() throws UnsupportedMediaTypeException, QueryNotFoundException {
         var queryId = queryHandler.createQuery();
-        queryHandler.addQueryDefinition(queryId, "text/cql", "");
+        queryHandler.addQueryDefinition(queryId, CQL, "");
 
         when(fhirWebserviceClient.postBundle(any(Bundle.class))).thenThrow();
 
@@ -118,9 +113,10 @@ public class DSFQueryManagerTest {
     }
 
     @Test
-    public void testPublishQuery() throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, FhirWebClientProvisionException {
+    public void testPublishQuery()
+        throws UnsupportedMediaTypeException, QueryNotFoundException, IOException, FhirWebClientProvisionException, QueryDefinitionNotFoundException {
         var queryId = queryHandler.createQuery();
-        queryHandler.addQueryDefinition(queryId, "text/cql", "");
+        queryHandler.addQueryDefinition(queryId, CQL, "");
 
         when(fhirWebClientProvider.provideFhirWebserviceClient()).thenReturn(fhirWebserviceClient);
         when(fhirWebserviceClient.getBaseUrl()).thenReturn("http://localhost/fhir");

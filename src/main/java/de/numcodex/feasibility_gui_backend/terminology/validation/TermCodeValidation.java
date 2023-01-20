@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.terminology.validation;
 
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
-import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import java.util.ArrayList;

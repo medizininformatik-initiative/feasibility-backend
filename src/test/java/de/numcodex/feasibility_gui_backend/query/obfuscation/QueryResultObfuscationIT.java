@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.query.obfuscation;
 
 
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,15 +2,14 @@ package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -35,8 +34,6 @@ import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
  */
 @Slf4j
 public class DirectBrokerClientCql extends DirectBrokerClient {
-
-    private static final String SITE_1_NAME = "CQL Server";
     private final FhirContext fhirContext;
     private final IGenericClient fhirClient;
 
@@ -56,38 +53,36 @@ public class DirectBrokerClientCql extends DirectBrokerClient {
     }
 
     @Override
-    public void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException {
+    public void publishQuery(String brokerQueryId)
+        throws QueryNotFoundException, IOException, QueryDefinitionNotFoundException {
         var query = findQuery(brokerQueryId);
         var queryContent = Optional.ofNullable(query.getQueryDefinition(CQL))
-            .orElseThrow(() -> new IllegalStateException("Query with ID "
-                + query.getQueryId()
-                + " does not contain a query definition for the mandatory type: "
-                + CQL
-            ));
-        try {
-            updateQueryStatus(query, QueryStatus.EXECUTING);
-            var measureUri = createMeasureAndLibrary(queryContent);
-            var report = evaluateMeasure(measureUri);
-            var resultCount = report.getGroupFirstRep().getPopulationFirstRep().getCount();
-            query.registerSiteResults(SITE_1_ID, obfuscateResultCount ? obfuscate(resultCount) : resultCount);
-            updateQueryStatus(query, COMPLETED);
-        } catch (Exception e) {
-            updateQueryStatus(query, FAILED);
-            throw new IOException("An error occurred while publishing the query with ID: " + query.getQueryId(), e);
-        }
-    }
+            .orElseThrow(() -> new QueryDefinitionNotFoundException(query.getQueryId(),
+                CQL.getRepresentation())
+            );
 
-    @Override
-    public String getSiteName(String siteId) {
-        return siteId.equals(SITE_1_ID) ? SITE_1_NAME : "";
+        updateQueryStatus(query, QueryStatus.EXECUTING);
+        String measureUri;
+        try {
+            measureUri = createMeasureAndLibrary(queryContent);
+        } catch (IOException e) {
+            updateQueryStatus(query, FAILED);
+            throw new IOException(
+                "An error occurred while publishing the query with ID: " + query.getQueryId()
+                    + " while trying to create measure and library", e);
+        }
+        var measureReport = evaluateMeasure(measureUri);
+        var resultCount = measureReport.getGroupFirstRep().getPopulationFirstRep().getCount();
+        query.setResult(obfuscateResultCount ? obfuscate(resultCount) : resultCount);
+        updateQueryStatus(query, COMPLETED);
     }
 
     /**
-     * Create FHIR {@link Measure} and {@link Library} Resources and transmit them in a bundled transaction.
+     * Create FHIR {@link Measure} and {@link Library} resources and transmit them in a bundled transaction.
      * @param cql the plaintext cql definition
      * @return the randomly generated identifier of the {@link Measure} resource
      */
-    private String createMeasureAndLibrary(String cql) {
+    private String createMeasureAndLibrary(String cql) throws IOException {
         var libraryUri = "urn:uuid" + UUID.randomUUID();
         var library = appendCql(parseResource(Library.class,
             getResourceFileAsString("query/cql/Library.json")).setUrl(libraryUri), cql);
@@ -98,7 +93,11 @@ public class DirectBrokerClientCql extends DirectBrokerClient {
             .addLibrary(libraryUri);
         var bundle = createBundle(library, measure);
 
-        fhirClient.transaction().withBundle(bundle).execute();
+        try {
+            fhirClient.transaction().withBundle(bundle).execute();
+        } catch (FhirClientConnectionException e) {
+            throw new IOException(e);
+        }
 
         return measureUri;
     }
@@ -125,13 +124,12 @@ public class DirectBrokerClientCql extends DirectBrokerClient {
      * @param fileName name of the resource file
      * @return the String contents of the file
      */
-    public static String getResourceFileAsString(String fileName) {
+    public static String getResourceFileAsString(String fileName) throws IOException {
         InputStream is = getResourceFileAsInputStream(fileName);
         if (is != null) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            return new String(is.readAllBytes(), UTF_8);
         } else {
-            throw new RuntimeException("resource not found");
+            throw new RuntimeException("File not found in classpath: " + fileName);
         }
     }
 

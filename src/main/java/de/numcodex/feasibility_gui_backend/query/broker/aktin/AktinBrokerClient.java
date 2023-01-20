@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.aktin;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
@@ -71,9 +72,9 @@ public class AktinBrokerClient implements BrokerClient {
     }
 
 	@Override
-	public void addQueryDefinition(String brokerQueryId, String mediaType, String content)
+	public void addQueryDefinition(String brokerQueryId, QueryMediaType queryMediaType, String content)
 			throws QueryNotFoundException, UnsupportedMediaTypeException, IOException {
-		delegate.putRequestDefinition(unwrapQueryId(brokerQueryId), mediaType, content);
+		delegate.putRequestDefinition(unwrapQueryId(brokerQueryId), queryMediaType.getRepresentation(), content);
 
 	}
 
