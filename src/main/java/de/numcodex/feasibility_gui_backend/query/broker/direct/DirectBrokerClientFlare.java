@@ -33,16 +33,12 @@ public class DirectBrokerClientFlare extends DirectBrokerClient {
     this.webClient = Objects.requireNonNull(webClient);
     listeners = new ArrayList<>();
     brokerQueries = new HashMap<>();
-    brokerToBackendQueryIdMapping = new HashMap<>();
   }
 
   @Override
   public void publishQuery(String brokerQueryId) throws QueryNotFoundException, QueryDefinitionNotFoundException, IOException {
     var query = findQuery(brokerQueryId);
-    var structuredQueryContent = Optional.ofNullable(query.getQueryDefinition(STRUCTURED_QUERY))
-        .orElseThrow(() -> new QueryDefinitionNotFoundException(brokerQueryId,
-            STRUCTURED_QUERY.getRepresentation()
-        ));
+    var structuredQueryContent = query.getQueryDefinition(STRUCTURED_QUERY);
 
     try {
       webClient.post()
@@ -54,11 +50,11 @@ public class DirectBrokerClientFlare extends DirectBrokerClient {
           .map(Integer::valueOf)
           .doOnError(error -> {
             log.error(error.getMessage(), error);
-            updateQueryStatus(brokerQueryId, FAILED);
+            updateQueryStatus(query, FAILED);
           })
           .subscribe(val -> {
             query.setResult(obfuscateResultCount ? obfuscate(val) : val);
-            updateQueryStatus(brokerQueryId, COMPLETED);
+            updateQueryStatus(query, COMPLETED);
           });
     } catch (Exception e) {
       throw new IOException("An error occurred while publishing the query with ID: " + brokerQueryId, e);

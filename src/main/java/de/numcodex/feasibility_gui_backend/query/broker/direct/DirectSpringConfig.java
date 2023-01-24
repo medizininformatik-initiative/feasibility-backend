@@ -29,18 +29,19 @@ public class DirectSpringConfig {
 
     @Qualifier("direct")
     @Bean
-    public BrokerClient directBrokerClient(WebClient directWebClient) {
+    public BrokerClient directBrokerClient(WebClient directWebClientFlare) {
         if (useCql) {
             FhirContext fhirContext = FhirContext.forR4();
             IGenericClient fhirClient = fhirContext.newRestfulGenericClient(cqlBaseUrl);
-            return new DirectBrokerClientCql(fhirContext, fhirClient);
+            FhirConnector fhirConnector = new FhirConnector(fhirContext, fhirClient);
+            return new DirectBrokerClientCql(fhirConnector);
         } else {
-            return new DirectBrokerClientFlare(directWebClient);
+            return new DirectBrokerClientFlare(directWebClientFlare);
         }
     }
 
     @Bean
-    public WebClient directWebClient() {
+    public WebClient directWebClientFlare() {
         return WebClient.create(flareBaseUrl);
     }
 

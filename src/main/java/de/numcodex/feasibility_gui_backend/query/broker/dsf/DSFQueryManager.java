@@ -112,7 +112,7 @@ class DSFQueryManager implements QueryManager {
 
         var queryContents = query.getContentByType();
         if (queryContents.isEmpty()) {
-            throw new QueryDefinitionNotFoundException(queryId, "any");
+            throw new QueryDefinitionNotFoundException(queryId);
         }
 
         if (fhirWebserviceClient == null) {

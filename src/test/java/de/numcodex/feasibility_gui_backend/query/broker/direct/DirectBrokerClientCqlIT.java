@@ -54,15 +54,15 @@ class DirectBrokerClientCqlIT {
 
     DirectBrokerClientCql client;
     private final FhirContext fhirContext = FhirContext.forR4();
-    private IGenericClient fhirClient;
 
     @BeforeAll
     void setUp() {
         blaze.start();
         fhirContext.getRestfulClientFactory().setSocketTimeout(200 * 1000);
-        fhirClient = fhirContext.newRestfulGenericClient(
+        IGenericClient fhirClient = fhirContext.newRestfulGenericClient(
             format("http://localhost:%d/fhir", blaze.getFirstMappedPort()));
-        client = new DirectBrokerClientCql(fhirContext, fhirClient);
+        FhirConnector fhirConnector = new FhirConnector(fhirContext, fhirClient);
+        client = new DirectBrokerClientCql(fhirConnector);
 
         createDummyPatient(fhirClient, Enumerations.AdministrativeGender.MALE, "Curie", "Pierre");
         createDummyPatient(fhirClient, Enumerations.AdministrativeGender.FEMALE, "Curie", "Marie");
@@ -78,7 +78,7 @@ class DirectBrokerClientCqlIT {
     void testExecuteQueryMale()
         throws QueryNotFoundException, IOException, SiteNotFoundException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        var cqlString = DirectBrokerClientCql.getResourceFileAsString("cql/gender-male.cql");
+        var cqlString = FhirConnector.getResourceFileAsString("gender-male.cql");
         client.addQueryDefinition(brokerQueryId, CQL, cqlString);
 
         var statusListener = mock(QueryStatusListener.class);
@@ -96,7 +96,7 @@ class DirectBrokerClientCqlIT {
     void testExecuteQueryFemale()
         throws QueryNotFoundException, IOException, SiteNotFoundException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        var cqlString = DirectBrokerClientCql.getResourceFileAsString("cql/gender-female.cql");
+        var cqlString = FhirConnector.getResourceFileAsString("gender-female.cql");
         client.addQueryDefinition(brokerQueryId, CQL, cqlString);
 
         var statusListener = mock(QueryStatusListener.class);
@@ -110,7 +110,7 @@ class DirectBrokerClientCqlIT {
         assertEquals(1, client.getResultFeasibility(brokerQueryId, "1"));
     }
 
-    private Bundle createDummyPatient(IGenericClient client, AdministrativeGender gender, String lastName, String firstName) {
+    private void createDummyPatient(IGenericClient client, AdministrativeGender gender, String lastName, String firstName) {
         String patientIdentifier = Integer.toString(ThreadLocalRandom.current().nextInt(99999));
         Patient patient = new Patient();
         patient.addIdentifier()
@@ -134,7 +134,7 @@ class DirectBrokerClientCqlIT {
             .setIfNoneExist("identifier=http://acme.org/mrns|" + patientIdentifier)
             .setMethod(Bundle.HTTPVerb.POST);
 
-        return client.transaction().withBundle(bundle).execute();
+        client.transaction().withBundle(bundle).execute();
     }
 
 }

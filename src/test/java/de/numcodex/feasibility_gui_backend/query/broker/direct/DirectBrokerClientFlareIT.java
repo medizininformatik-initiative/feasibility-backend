@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ class DirectBrokerClientFlareIT {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
-        mockWebServer.enqueue(new MockResponse().setBody("123").setHeader(CONTENT_TYPE, "internal/json"));
+        mockWebServer.enqueue(new MockResponse().setBody("123").setHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
         var statusListener = mock(QueryStatusListener.class);
         client.addQueryStatusListener(statusListener);
@@ -96,7 +97,7 @@ class DirectBrokerClientFlareIT {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
         client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
-        mockWebServer.enqueue(new MockResponse().setBody("not-a-number").setHeader(CONTENT_TYPE, "internal/json"));
+        mockWebServer.enqueue(new MockResponse().setBody("not-a-number").setHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
         var statusListener = mock(QueryStatusListener.class);
         client.addQueryStatusListener(statusListener);

@@ -4,6 +4,7 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClient
 
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
@@ -11,7 +12,7 @@ import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,13 +24,12 @@ import org.springframework.beans.factory.annotation.Value;
 
 public abstract class DirectBrokerClient implements BrokerClient {
 
-  static final String SITE_ID_LOCAL = "1";
+  private static final String SITE_ID_LOCAL = "1";
 
-  static final String SITE_1_NAME = "Local Server";
+  private static final String SITE_NAME_LOCAL = "Local Server";
 
   protected List<QueryStatusListener> listeners;
   protected Map<String, DirectQuery> brokerQueries;
-  protected Map<String, Long> brokerToBackendQueryIdMapping;
 
   @Value("${app.broker.direct.obfuscateResultCount:false}")
   protected boolean obfuscateResultCount;
@@ -46,10 +46,9 @@ public abstract class DirectBrokerClient implements BrokerClient {
 
   @Override
   public String createQuery(Long backendQueryId) {
-    var brokerQuery = DirectQuery.create();
+    var brokerQuery = DirectQuery.create(backendQueryId);
     var brokerQueryId = brokerQuery.getQueryId();
     brokerQueries.put(brokerQueryId, brokerQuery);
-    brokerToBackendQueryIdMapping.put(brokerQueryId, backendQueryId);
 
     return brokerQueryId;
   }
@@ -76,8 +75,12 @@ public abstract class DirectBrokerClient implements BrokerClient {
     return findQuery(brokerQueryId).hasResult() ? Collections.singletonList(SITE_ID_LOCAL) : Collections.emptyList();
   }
 
-  public String getSiteName(String siteId) {
-    return SITE_ID_LOCAL.equals(siteId) ? SITE_1_NAME : "";
+  public String getSiteName(String siteId) throws SiteNotFoundException {
+    if (SITE_ID_LOCAL.equals(siteId)) {
+      return SITE_NAME_LOCAL;
+    } else {
+      throw new SiteNotFoundException("No site with id " + siteId + " found." );
+    }
   }
 
 
@@ -111,24 +114,14 @@ public abstract class DirectBrokerClient implements BrokerClient {
 
   /**
    * Updates a query status in all registered listeners.
-   * @param queryId the id of the query to update
-   * @param queryStatus the {@link QueryStatus} to publish to the listeners
-   */
-  protected void updateQueryStatus(String queryId, QueryStatus queryStatus) {
-    var statusUpdate = new QueryStatusUpdate(this, queryId, SITE_ID_LOCAL, queryStatus);
-    var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(queryId);
-    listeners.forEach(
-        l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate)
-    );
-  }
-
-  /**
-   * Updates a query status in all registered listeners.
    * @param query the query to update
    * @param queryStatus the {@link QueryStatus} to publish to the listeners
    */
   protected void updateQueryStatus(DirectQuery query, QueryStatus queryStatus) {
-    updateQueryStatus(query.getQueryId(), queryStatus);
+    var statusUpdate = new QueryStatusUpdate(this, query.getQueryId(), SITE_ID_LOCAL, queryStatus);
+    listeners.forEach(
+        l -> l.onClientUpdate(query.getBackendQueryId(), statusUpdate)
+    );
   }
 
   /**
@@ -138,22 +131,26 @@ public abstract class DirectBrokerClient implements BrokerClient {
 
     @Getter
     private final String queryId;
+    @Getter
+    private final Long backendQueryId;
     private final Map<QueryMediaType, String> queryDefinitions;
     @Setter
     private Integer result;
 
-    private DirectQuery(String queryId) {
+    private DirectQuery(String queryId, Long backendQueryId) {
       this.queryId = queryId;
-      queryDefinitions = new HashMap<>();
+      this.backendQueryId = backendQueryId;
+      queryDefinitions = new EnumMap<>(QueryMediaType.class);
     }
 
     /**
      * Creates a new {@link DirectQuery} with a random UUID as a query ID.
      *
+     * @param backendQueryId The query id in the backend
      * @return The created query.
      */
-    public static DirectQuery create() {
-      return new DirectQuery(UUID.randomUUID().toString());
+    public static DirectQuery create(Long backendQueryId) {
+      return new DirectQuery(UUID.randomUUID().toString(), backendQueryId);
     }
 
     /**
@@ -176,8 +173,11 @@ public abstract class DirectBrokerClient implements BrokerClient {
      * @return The query in its string representation or null if there is no query definition
      * associated with the specified mime type.
      */
-    public String getQueryDefinition(QueryMediaType queryMediaType) {
-      return queryDefinitions.get(queryMediaType);
+    public String getQueryDefinition(QueryMediaType queryMediaType)
+        throws QueryDefinitionNotFoundException {
+      return Optional.ofNullable(queryDefinitions.get(queryMediaType))
+          .orElseThrow(() -> new QueryDefinitionNotFoundException(queryId, queryMediaType)
+          );
     }
 
     /**

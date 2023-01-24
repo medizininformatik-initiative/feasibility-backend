@@ -99,7 +99,7 @@ public class DSFQueryManagerTest {
         var queryId = queryHandler.createQuery();
 
         QueryDefinitionNotFoundException e = assertThrows(QueryDefinitionNotFoundException.class, () -> queryHandler.publishQuery(queryId));
-        assertEquals("Query with ID '" + queryId + "' does not contain a query definition for the mandatory type: any", e.getMessage());
+        assertEquals("Query with ID '" + queryId + "' does not contain any query definitions of a known type.", e.getMessage());
     }
 
     @Test

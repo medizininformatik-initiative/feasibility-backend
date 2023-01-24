@@ -37,10 +37,10 @@ class DirectBrokerClientFlareTest {
 
     @Test
     void testGetSiteName() {
-        assertEquals("Local Server", client.getSiteName("1"));
-        assertTrue(client.getSiteName("foo").isEmpty());
-        assertTrue(client.getSiteName("something-else").isEmpty());
-        assertTrue(client.getSiteName("CQL Server").isEmpty());
+        assertDoesNotThrow(() -> assertEquals("Local Server", client.getSiteName("1")));
+        assertThrows(SiteNotFoundException.class, () -> client.getSiteName("foo"));
+        assertThrows(SiteNotFoundException.class, () -> client.getSiteName("something-else"));
+        assertThrows(SiteNotFoundException.class, () -> client.getSiteName("CQL Server"));
     }
 
     @Test
