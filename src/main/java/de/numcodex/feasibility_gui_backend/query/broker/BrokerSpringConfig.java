@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @Slf4j
@@ -41,6 +42,7 @@ public class BrokerSpringConfig {
   // and does not call this method anymore - rendering the enable-switches moot.
 
   @Bean
+  @Lazy
   FhirContext fhirContext() {
     return FhirContext.forR4();
   }
