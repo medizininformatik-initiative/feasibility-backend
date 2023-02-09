@@ -57,7 +57,7 @@ class DirectBrokerClientCqlTest {
         Bundle testBundle = new Bundle();
         MeasureReport measureReport = new MeasureReport();
         measureReport.addGroup().addPopulation().setCount(MEASURE_COUNT);
-        when(fhirHelper.createBundle(EXAMPLE_CQL, any(String.class), any(String.class))).thenReturn(testBundle);
+        when(fhirHelper.createBundle(eq(EXAMPLE_CQL), any(String.class), any(String.class))).thenReturn(testBundle);
         when(fhirConnector.evaluateMeasure(any(String.class))).thenReturn(measureReport);
 
         client.publishQuery(queryId);
@@ -75,7 +75,7 @@ class DirectBrokerClientCqlTest {
         Bundle testBundle = new Bundle();
         MeasureReport measureReport = new MeasureReport();
         measureReport.addGroup().addPopulation().setCount(MEASURE_COUNT);
-        when(fhirHelper.createBundle(EXAMPLE_CQL, any(String.class), any(String.class))).thenReturn(testBundle);
+        when(fhirHelper.createBundle(eq(EXAMPLE_CQL), any(String.class), any(String.class))).thenReturn(testBundle);
         when(fhirConnector.evaluateMeasure(any(String.class))).thenReturn(measureReport);
 
         client.publishQuery(queryId);

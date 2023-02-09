@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.query.broker.direct;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,8 +22,13 @@ class DirectBrokerClientFlareTest {
     @Mock
     WebClient webClient;
 
-    @InjectMocks
     DirectBrokerClientFlare client;
+
+    @BeforeEach
+    void setUp() {
+        client = new DirectBrokerClientFlare(webClient, false);
+
+    }
 
     @Test
     void testPublishNonExistingQuery() {
