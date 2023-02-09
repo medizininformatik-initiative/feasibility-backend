@@ -22,15 +22,21 @@ import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAIL
 @Slf4j
 public class DirectBrokerClientCql extends DirectBrokerClient {
     private final FhirConnector fhirConnector;
+    private final FhirHelper fhirHelper;
 
     /**
      * Creates a new {@link DirectBrokerClientCql} instance that uses the given web client to
      * communicate with a CQL capable FHIR server instance.
      *
      * @param fhirConnector A FHIR connector.
+     * @param fhirHelper
      */
-    public DirectBrokerClientCql(FhirConnector fhirConnector) {
+    public DirectBrokerClientCql(FhirConnector fhirConnector,
+        boolean obfuscateResultCount,
+        FhirHelper fhirHelper) {
+        super(obfuscateResultCount);
         this.fhirConnector = Objects.requireNonNull(fhirConnector);
+        this.fhirHelper = fhirHelper;
         listeners = new ArrayList<>();
         brokerQueries = new HashMap<>();
     }
@@ -46,12 +52,12 @@ public class DirectBrokerClientCql extends DirectBrokerClient {
         var measureUri = "urn:uuid" + UUID.randomUUID();
         MeasureReport measureReport;
         try {
-            Bundle bundle = fhirConnector.createBundle(queryContent, libraryUri, measureUri);
+            Bundle bundle = fhirHelper.createBundle(queryContent, libraryUri, measureUri);
             fhirConnector.transmitBundle(bundle);
             measureReport = fhirConnector.evaluateMeasure(measureUri);
         } catch (IOException e) {
             updateQueryStatus(query, FAILED);
-            throw (e);
+            throw e;
         }
 
         var resultCount = measureReport.getGroupFirstRep().getPopulationFirstRep().getCount();

@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker;
 
+import ca.uhn.fhir.context.FhirContext;
 import de.numcodex.feasibility_gui_backend.query.broker.mock.MockBrokerClient;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,12 @@ public class BrokerSpringConfig {
 
   // Do NOT remove the qualifier annotation, since spring attempts to initialize ALL broker clients
   // and does not call this method anymore - rendering the enable-switches moot.
+
+  @Bean
+  FhirContext fhirContext() {
+    return FhirContext.forR4();
+  }
+
   @Qualifier("brokerClients")
   @Bean
   public List<BrokerClient> createBrokerClients(QueryStatusListener statusListener) throws IOException {

@@ -61,8 +61,9 @@ class DirectBrokerClientCqlIT {
         fhirContext.getRestfulClientFactory().setSocketTimeout(200 * 1000);
         IGenericClient fhirClient = fhirContext.newRestfulGenericClient(
             format("http://localhost:%d/fhir", blaze.getFirstMappedPort()));
-        FhirConnector fhirConnector = new FhirConnector(fhirContext, fhirClient);
-        client = new DirectBrokerClientCql(fhirConnector);
+        FhirConnector fhirConnector = new FhirConnector(fhirClient);
+        FhirHelper fhirHelper = new FhirHelper(fhirContext);
+        client = new DirectBrokerClientCql(fhirConnector, false, fhirHelper);
 
         createDummyPatient(fhirClient, Enumerations.AdministrativeGender.MALE, "Curie", "Pierre");
         createDummyPatient(fhirClient, Enumerations.AdministrativeGender.FEMALE, "Curie", "Marie");
@@ -78,7 +79,7 @@ class DirectBrokerClientCqlIT {
     void testExecuteQueryMale()
         throws QueryNotFoundException, IOException, SiteNotFoundException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        var cqlString = FhirConnector.getResourceFileAsString("gender-male.cql");
+        var cqlString = FhirHelper.getResourceFileAsString("gender-male.cql");
         client.addQueryDefinition(brokerQueryId, CQL, cqlString);
 
         var statusListener = mock(QueryStatusListener.class);
@@ -96,7 +97,7 @@ class DirectBrokerClientCqlIT {
     void testExecuteQueryFemale()
         throws QueryNotFoundException, IOException, SiteNotFoundException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        var cqlString = FhirConnector.getResourceFileAsString("gender-female.cql");
+        var cqlString = FhirHelper.getResourceFileAsString("gender-female.cql");
         client.addQueryDefinition(brokerQueryId, CQL, cqlString);
 
         var statusListener = mock(QueryStatusListener.class);

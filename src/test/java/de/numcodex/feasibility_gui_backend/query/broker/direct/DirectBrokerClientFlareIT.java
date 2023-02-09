@@ -41,7 +41,7 @@ class DirectBrokerClientFlareIT {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         webClient = WebClient.create(mockWebServer.url("/").toString());
-        client = new DirectBrokerClientFlare(webClient);
+        client = new DirectBrokerClientFlare(webClient, false);
     }
 
     @AfterEach

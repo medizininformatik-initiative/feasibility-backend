@@ -29,7 +29,8 @@ public class DirectBrokerClientFlare extends DirectBrokerClient {
    *
    * @param webClient A web client to communicate with a Flare instance.
    */
-  public DirectBrokerClientFlare(WebClient webClient) {
+  public DirectBrokerClientFlare(WebClient webClient, boolean obfuscateResultCount) {
+    super(obfuscateResultCount);
     this.webClient = Objects.requireNonNull(webClient);
     listeners = new ArrayList<>();
     brokerQueries = new HashMap<>();

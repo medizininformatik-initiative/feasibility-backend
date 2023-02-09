@@ -24,15 +24,19 @@ import org.springframework.beans.factory.annotation.Value;
 
 public abstract class DirectBrokerClient implements BrokerClient {
 
-  private static final String SITE_ID_LOCAL = "1";
+  static final String SITE_ID_LOCAL = "1";
 
   private static final String SITE_NAME_LOCAL = "Local Server";
 
   protected List<QueryStatusListener> listeners;
   protected Map<String, DirectQuery> brokerQueries;
 
-  @Value("${app.broker.direct.obfuscateResultCount:false}")
+
   protected boolean obfuscateResultCount;
+
+  protected DirectBrokerClient(boolean obfuscateResultCount) {
+    this.obfuscateResultCount = obfuscateResultCount;
+  }
 
   @Override
   public final BrokerClientType getBrokerType() {
