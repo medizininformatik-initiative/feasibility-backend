@@ -8,7 +8,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
@@ -17,11 +16,8 @@ import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Enumerations;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -65,9 +61,11 @@ class DirectBrokerClientCqlIT {
         FhirHelper fhirHelper = new FhirHelper(fhirContext);
         client = new DirectBrokerClientCql(fhirConnector, false, fhirHelper);
 
-        createDummyPatient(fhirClient, Enumerations.AdministrativeGender.MALE, "Curie", "Pierre");
-        createDummyPatient(fhirClient, Enumerations.AdministrativeGender.FEMALE, "Curie", "Marie");
-        createDummyPatient(fhirClient, Enumerations.AdministrativeGender.MALE, "Zuse", "Konrad");
+        Stream.of(
+            new Patient().setGender(AdministrativeGender.MALE),
+            new Patient().setGender(AdministrativeGender.MALE),
+            new Patient().setGender(AdministrativeGender.FEMALE))
+            .forEach( (patient) -> fhirClient.create().resource(patient).execute());
     }
 
     @AfterAll
@@ -109,33 +107,6 @@ class DirectBrokerClientCqlIT {
 
         assertThat(client.getResultSiteIds(brokerQueryId)).containsExactly("1");
         assertEquals(1, client.getResultFeasibility(brokerQueryId, "1"));
-    }
-
-    private void createDummyPatient(IGenericClient client, AdministrativeGender gender, String lastName, String firstName) {
-        String patientIdentifier = Integer.toString(ThreadLocalRandom.current().nextInt(99999));
-        Patient patient = new Patient();
-        patient.addIdentifier()
-            .setSystem("http://acme.org/mrns")
-            .setValue(patientIdentifier);
-        patient.addName()
-            .setFamily(lastName)
-            .addGiven(firstName);
-        patient.setGender(gender);
-        patient.setId(IdType.newRandomUuid());
-
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.TRANSACTION);
-
-
-        bundle.addEntry()
-            .setFullUrl(patient.getIdElement().getValue())
-            .setResource(patient)
-            .getRequest()
-            .setUrl("Patient")
-            .setIfNoneExist("identifier=http://acme.org/mrns|" + patientIdentifier)
-            .setMethod(Bundle.HTTPVerb.POST);
-
-        client.transaction().withBundle(bundle).execute();
     }
 
 }

@@ -26,6 +26,7 @@ public class FhirConnectorTest {
 
 
   private static final String MEASURE_URI = "uri:1-measure-example-uri";
+  private static final int MEASURE_COUNT = 8723132;
 
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   IGenericClient client;
@@ -41,8 +42,6 @@ public class FhirConnectorTest {
   @Test
   void testTransmitBundleSuccess() throws Exception {
     Bundle bundle = new Bundle();
-    BaseServerResponseException e = BaseServerResponseException.newInstance(200, "test");
-    Mockito.when(client.transaction().withBundle(bundle).execute()).thenReturn(bundle);
 
     fhirConnector.transmitBundle(bundle);
 
@@ -51,7 +50,7 @@ public class FhirConnectorTest {
 
 
   @Test
-  void testTransmitBundleIOException() throws Exception {
+  void testTransmitBundleIOException() {
     Bundle bundle = new Bundle();
 
     BaseServerResponseException e = BaseServerResponseException.newInstance(200, "test");
@@ -62,9 +61,8 @@ public class FhirConnectorTest {
 
   @Test
   void testEvaluateMeasureSuccess() throws Exception {
-    Bundle bundle = new Bundle();
-    BaseServerResponseException e = BaseServerResponseException.newInstance(200, "test");
     MeasureReport measureReport = new MeasureReport();
+    measureReport.addGroup().addPopulation().setCount(MEASURE_COUNT);
 
     Mockito.when(client.operation()
         .onType(Measure.class)
@@ -76,22 +74,12 @@ public class FhirConnectorTest {
         .returnResourceType(MeasureReport.class)
         .execute()).thenReturn(measureReport);
 
-    assertEquals(measureReport, fhirConnector.evaluateMeasure(MEASURE_URI));
-    verify(client.operation()
-        .onType(Measure.class)
-        .named("evaluate-measure")
-        .withSearchParameter(Parameters.class, "measure", new StringParam(MEASURE_URI))
-        .andSearchParameter("periodStart", new DateParam("1900"))
-        .andSearchParameter("periodEnd", new DateParam("2100"))
-        .useHttpGet()
-        .returnResourceType(MeasureReport.class)
-        ).execute();
+    assertEquals(MEASURE_COUNT, fhirConnector.evaluateMeasure(MEASURE_URI).getGroup().get(0).getPopulationFirstRep().getCount());
+
   }
 
   @Test
-  void testEvaluateMeasureIOException() throws Exception {
-
-    Bundle bundle = new Bundle();
+  void testEvaluateMeasureIOException() {
     BaseServerResponseException e = BaseServerResponseException.newInstance(200, "test");
     Mockito.when(client.operation()
         .onType(Measure.class)
@@ -104,7 +92,6 @@ public class FhirConnectorTest {
         .execute()).thenThrow(e);
 
     assertThrows(IOException.class, () -> fhirConnector.evaluateMeasure(MEASURE_URI));
-
   }
 
 }
