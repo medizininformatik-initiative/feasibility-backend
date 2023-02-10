@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.mock;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +21,13 @@ class MockBrokerClientTest {
 
     @Test
     void testAddQueryDefinitionToNonExistingQuery() {
-        assertDoesNotThrow(() -> client.addQueryDefinition("does-not-exist", "application/json", ""));
+        assertDoesNotThrow(() -> client.addQueryDefinition("does-not-exist", QueryMediaType.JSON, ""));
     }
 
     @Test
     void testAddQueryDefinitionToExistingQuery() {
         var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        assertDoesNotThrow(() -> client.addQueryDefinition(queryId, "application/json", ""));
+        assertDoesNotThrow(() -> client.addQueryDefinition(queryId, QueryMediaType.JSON, ""));
     }
 
     @Test

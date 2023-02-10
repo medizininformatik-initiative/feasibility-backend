@@ -48,6 +48,8 @@ app:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
     direct:
       enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
+      useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
+      obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
     aktin:
       enabled: ${BROKER_CLIENT_AKTIN_ENABLED:false}
       broker:
@@ -75,6 +77,8 @@ app:
     baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
     readTimeout: 20000
     connectTimeout: 2000
+  cql:
+    baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
   security:
     nqueries:
       amount: ${SECURITY_NQUERIES_AMOUNT:3}

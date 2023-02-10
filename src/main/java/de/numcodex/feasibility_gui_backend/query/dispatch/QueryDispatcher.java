@@ -133,7 +133,7 @@ public class QueryDispatcher {
                 var brokerQueryId = broker.createQuery(dispatchable.query.getId());
 
                 for (Entry<QueryMediaType, String> queryBodyFormats : dispatchable.serializedQueryByFormat.entrySet()) {
-                    broker.addQueryDefinition(brokerQueryId, queryBodyFormats.getKey().getRepresentation(),
+                    broker.addQueryDefinition(brokerQueryId, queryBodyFormats.getKey(),
                             queryBodyFormats.getValue());
                 }
                 broker.publishQuery(brokerQueryId);

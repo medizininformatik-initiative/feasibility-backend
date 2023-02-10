@@ -1,7 +1,9 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class DirectBrokerClientTest {
+class DirectBrokerClientFlareTest {
 
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
@@ -20,8 +22,13 @@ class DirectBrokerClientTest {
     @Mock
     WebClient webClient;
 
-    @InjectMocks
-    DirectBrokerClient client;
+    DirectBrokerClientFlare client;
+
+    @BeforeEach
+    void setUp() {
+        client = new DirectBrokerClientFlare(webClient, false);
+
+    }
 
     @Test
     void testPublishNonExistingQuery() {
@@ -31,14 +38,15 @@ class DirectBrokerClientTest {
     @Test
     void testPublishExistingQueryWithoutStructuredQueryDefinition() {
         var queryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        assertThrows(IllegalStateException.class, () -> client.publishQuery(queryId));
+        assertThrows(QueryDefinitionNotFoundException.class, () -> client.publishQuery(queryId));
     }
 
     @Test
     void testGetSiteName() {
-        assertEquals("FHIR Server", client.getSiteName("1"));
-        assertTrue(client.getSiteName("foo").isEmpty());
-        assertTrue(client.getSiteName("something-else").isEmpty());
+        assertDoesNotThrow(() -> assertEquals("Local Server", client.getSiteName("1")));
+        assertThrows(SiteNotFoundException.class, () -> client.getSiteName("foo"));
+        assertThrows(SiteNotFoundException.class, () -> client.getSiteName("something-else"));
+        assertThrows(SiteNotFoundException.class, () -> client.getSiteName("CQL Server"));
     }
 
     @Test

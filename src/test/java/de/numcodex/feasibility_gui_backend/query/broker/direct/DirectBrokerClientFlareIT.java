@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
@@ -20,18 +22,17 @@ import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMP
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpHeaders.ACCEPT_ENCODING;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NewClassNamingConvention")
-class DirectBrokerClientIT {
+class DirectBrokerClientFlareIT {
 
     private static final int ASYNC_TIMEOUT_WAIT_MS = 2000;
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
-    DirectBrokerClient client;
+    DirectBrokerClientFlare client;
     WebClient webClient;
     MockWebServer mockWebServer;
 
@@ -40,7 +41,7 @@ class DirectBrokerClientIT {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         webClient = WebClient.create(mockWebServer.url("/").toString());
-        client = new DirectBrokerClient(webClient);
+        client = new DirectBrokerClientFlare(webClient, false);
     }
 
     @AfterEach
@@ -49,11 +50,12 @@ class DirectBrokerClientIT {
     }
 
     @Test
-    void testPublishQuery() throws QueryNotFoundException, IOException, InterruptedException, SiteNotFoundException {
+    void testPublishQuery()
+        throws QueryNotFoundException, IOException, InterruptedException, SiteNotFoundException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY.getRepresentation(), "foo");
+        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
-        mockWebServer.enqueue(new MockResponse().setBody("123").setHeader(CONTENT_TYPE, "internal/json"));
+        mockWebServer.enqueue(new MockResponse().setBody("123").setHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
         var statusListener = mock(QueryStatusListener.class);
         client.addQueryStatusListener(statusListener);
@@ -73,9 +75,10 @@ class DirectBrokerClientIT {
     }
 
     @Test
-    void testPublishQueryServerError() throws QueryNotFoundException, IOException {
+    void testPublishQueryServerError()
+        throws QueryNotFoundException, IOException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY.getRepresentation(), "foo");
+        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
         mockWebServer.enqueue(new MockResponse().setStatus(INTERNAL_SERVER_ERROR.toString()));
 
@@ -85,15 +88,16 @@ class DirectBrokerClientIT {
 
         var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", FAILED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                statusUpdate);
+            statusUpdate);
     }
 
     @Test
-    void testPublishQueryUnexpectedResponseBody() throws QueryNotFoundException, IOException {
+    void testPublishQueryUnexpectedResponseBody()
+        throws QueryNotFoundException, IOException, QueryDefinitionNotFoundException {
         var brokerQueryId = client.createQuery(TEST_BACKEND_QUERY_ID);
-        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY.getRepresentation(), "foo");
+        client.addQueryDefinition(brokerQueryId, STRUCTURED_QUERY, "foo");
 
-        mockWebServer.enqueue(new MockResponse().setBody("not-a-number").setHeader(CONTENT_TYPE, "internal/json"));
+        mockWebServer.enqueue(new MockResponse().setBody("not-a-number").setHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
         var statusListener = mock(QueryStatusListener.class);
         client.addQueryStatusListener(statusListener);
@@ -101,6 +105,6 @@ class DirectBrokerClientIT {
 
         var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", FAILED);
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                statusUpdate);
+            statusUpdate);
     }
 }

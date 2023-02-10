@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.WebSocket.Builder;
 

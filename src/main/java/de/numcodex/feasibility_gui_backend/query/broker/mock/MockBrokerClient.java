@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.mock;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
@@ -68,7 +69,7 @@ public class MockBrokerClient implements BrokerClient {
     }
 
     @Override
-    public void addQueryDefinition(String brokerQueryId, String mediaType, String content) {
+    public void addQueryDefinition(String brokerQueryId, QueryMediaType queryMediaType, String content) {
         // No-Op since this is irrelevant.
     }
 

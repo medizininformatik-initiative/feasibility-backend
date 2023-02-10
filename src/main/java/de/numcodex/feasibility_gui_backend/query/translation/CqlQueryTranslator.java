@@ -3,7 +3,6 @@ package de.numcodex.feasibility_gui_backend.query.translation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
-import de.numcodex.sq2cql.PrintContext;
 import de.numcodex.sq2cql.Translator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

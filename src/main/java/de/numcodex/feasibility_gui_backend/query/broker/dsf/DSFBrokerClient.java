@@ -1,7 +1,9 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
@@ -54,13 +56,14 @@ public final class DSFBrokerClient implements BrokerClient {
     }
 
     @Override
-    public void addQueryDefinition(String brokerQueryId, String mediaType, String content) throws QueryNotFoundException,
+    public void addQueryDefinition(String brokerQueryId, QueryMediaType queryMediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException {
-        queryManager.addQueryDefinition(brokerQueryId, mediaType, content);
+        queryManager.addQueryDefinition(brokerQueryId, queryMediaType, content);
     }
 
     @Override
-    public void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException {
+    public void publishQuery(String brokerQueryId)
+        throws QueryNotFoundException, IOException, QueryDefinitionNotFoundException {
         queryManager.publishQuery(brokerQueryId);
     }
 
