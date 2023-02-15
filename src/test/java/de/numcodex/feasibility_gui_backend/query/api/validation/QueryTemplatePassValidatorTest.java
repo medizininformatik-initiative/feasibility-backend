@@ -10,7 +10,7 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

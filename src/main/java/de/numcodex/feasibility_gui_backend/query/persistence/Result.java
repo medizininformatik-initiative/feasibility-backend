@@ -1,10 +1,16 @@
 package de.numcodex.feasibility_gui_backend.query.persistence;
 
-import lombok.Data;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.sql.Timestamp;
+import lombok.Data;
 
 @Data
 @Entity
@@ -28,9 +34,8 @@ public class Result {
     @ManyToOne(fetch = FetchType.LAZY)
     private Site site;
 
-    @Enumerated(EnumType.STRING)
-    @Type(type = "result_type")
     @Column(columnDefinition = "result_type")
+    @Convert(converter = ResultTypeConverter.class)
     private ResultType resultType;
 
     private Integer result;

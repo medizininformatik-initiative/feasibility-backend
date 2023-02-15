@@ -1,8 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query.api.validation;
 
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator for {@link QueryTemplate} that always passes no matter what instance gets checked.

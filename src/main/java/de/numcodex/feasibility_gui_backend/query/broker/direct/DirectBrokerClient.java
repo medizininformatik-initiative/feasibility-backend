@@ -20,7 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 
 public abstract class DirectBrokerClient implements BrokerClient {
 
