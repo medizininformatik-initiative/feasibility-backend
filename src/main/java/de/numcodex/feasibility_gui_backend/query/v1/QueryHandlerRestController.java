@@ -3,20 +3,19 @@ package de.numcodex.feasibility_gui_backend.query.v1;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.ws.rs.core.Context;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.core.Context;
 import java.net.URI;
 import java.security.Principal;
 
@@ -90,10 +89,9 @@ public class QueryHandlerRestController {
   @GetMapping(path = "/result/{id}")
   @Deprecated
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
-      KeycloakAuthenticationToken keycloakAuthenticationToken) {
+      Authentication authentication) {
 
-    KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) keycloakAuthenticationToken.getPrincipal();
-    if (queryHandlerService.getAuthorId(queryId).equalsIgnoreCase(keycloakPrincipal.getName())) {
+    if (queryHandlerService.getAuthorId(queryId).equalsIgnoreCase(authentication.getName())) {
       return new ResponseEntity<>(queryHandlerService.getQueryResult(queryId), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);

@@ -8,23 +8,23 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.ws.rs.core.Context;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.core.Context;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
@@ -137,8 +137,8 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}")
   public ResponseEntity<Object> getQuery(@PathVariable("id") Long queryId,
-      KeycloakAuthenticationToken keycloakAuthenticationToken) throws JsonProcessingException {
-    if (!hasAccess(queryId, keycloakAuthenticationToken)) {
+      Authentication authentication) throws JsonProcessingException {
+    if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var query = queryHandlerService.getQuery(queryId);
@@ -155,8 +155,8 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}/result")
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
-      KeycloakAuthenticationToken keycloakAuthenticationToken) {
-    if (!hasAccess(queryId, keycloakAuthenticationToken)) {
+      Authentication authentication) {
+    if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var queryResult = queryHandlerService.getQueryResult(queryId);
@@ -165,23 +165,21 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}/content")
   public ResponseEntity<Object> getQueryContent(@PathVariable("id") Long queryId,
-      KeycloakAuthenticationToken keycloakAuthenticationToken)
+      Authentication authentication)
       throws JsonProcessingException {
 
-    if (!hasAccess(queryId, keycloakAuthenticationToken)) {
+    if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var queryContent = queryHandlerService.getQueryContent(queryId);
     return new ResponseEntity<>(queryContent, HttpStatus.OK);
   }
 
-  private boolean hasAccess(Long queryId, KeycloakAuthenticationToken keycloakAuthenticationToken) {
-    KeycloakPrincipal keycloakPrincipal = (KeycloakPrincipal) keycloakAuthenticationToken.getPrincipal();
-    RefreshableKeycloakSecurityContext keycloakSecurityContext =
-        (RefreshableKeycloakSecurityContext) keycloakPrincipal.getKeycloakSecurityContext();
-    Set<String> roles = keycloakSecurityContext.getToken().getRealmAccess().getRoles();
+  private boolean hasAccess(Long queryId, Authentication authentication) {
+    Set<String> roles = authentication.getAuthorities().stream()
+        .map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
     return (roles.contains(keycloakAdminRole) || queryHandlerService.getAuthorId(queryId)
-        .equalsIgnoreCase(keycloakPrincipal.getName()));
+        .equalsIgnoreCase(authentication.getName()));
   }
 }

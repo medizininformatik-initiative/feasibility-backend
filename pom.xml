@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.8</version>
+    <version>3.0.2</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -26,21 +26,9 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <spring-security.version>5.8.1</spring-security.version>
-    <spring-security-test.version>5.8.1</spring-security-test.version>
+    <spring-security.version>6.0.2</spring-security.version>
+    <spring-security-test.version>6.0.2</spring-security-test.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.keycloak.bom</groupId>
-        <artifactId>keycloak-adapter-bom</artifactId>
-        <version>20.0.3</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -65,12 +53,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-spring-boot-starter</artifactId>
-      <version>20.0.3</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
@@ -88,6 +70,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+      <version>3.0.2</version>
     </dependency>
 
     <dependency>
@@ -133,8 +121,9 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-client</artifactId>
-      <version>5.7.9</version>
+      <version>6.2.5</version>
     </dependency>
+
 
     <!--
       This is for fixing an RCE vulnerability in commons-text <1.10.0. The dependency comes with the
@@ -148,9 +137,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.highmed.dsf</groupId>
+      <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>dsf-fhir-webservice-client</artifactId>
-      <version>0.9.0</version>
+      <version>0.9.0-jakarta</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.commons</groupId>
@@ -166,9 +155,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.highmed.dsf</groupId>
+      <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>dsf-fhir-rest-adapter</artifactId>
-      <version>0.9.0</version>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>

@@ -1,20 +1,11 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
-import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION;
-import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
-
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.io.IOException;
-import java.io.InputStream;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;

@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -62,7 +63,7 @@ public class QueryHandlerRestControllerIT {
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
         var testQuery = new StructuredQuery();
 
-        mockMvc.perform(post(URI.create("/api/v2/query"))
+        mockMvc.perform(post(URI.create("/api/v2/query")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(status().isBadRequest());
@@ -88,7 +89,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v2/query"))
+        var mvcResult = mockMvc.perform(post(URI.create("/api/v2/query")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(request().asyncStarted())
@@ -122,7 +123,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v2/query"))
+        var mvcResult = mockMvc.perform(post(URI.create("/api/v2/query")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(request().asyncStarted())

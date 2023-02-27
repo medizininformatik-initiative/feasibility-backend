@@ -15,12 +15,15 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        dialect=com:
-          jackis:
-            jsonintegration:
-              hibernate: CustomPostgreSQL95Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     locations: filesystem:${ONTOLOGY_DB_MIGRATION_FOLDER:ontology/migration},classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_BASE_URL:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
@@ -83,15 +86,6 @@ app:
     nqueries:
       amount: ${SECURITY_NQUERIES_AMOUNT:3}
       perminutes: ${SECURITY_NQUERIES_PERMINUTES:1}
-
-keycloak:
-  cors: true
-  cors-exposed-headers: Location
-  bearer-only: true
-  auth-server-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}/auth
-  realm: ${KEYCLOAK_REALM:codex-develop}
-  ssl-required: external
-  resource: ${KEYCLOAK_CLIENT_ID:feasibility-gui}
 
 logging:
   level:
