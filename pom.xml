@@ -157,7 +157,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>dsf-fhir-rest-adapter</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.9.0-jakarta</version>
     </dependency>
 
     <dependency>
