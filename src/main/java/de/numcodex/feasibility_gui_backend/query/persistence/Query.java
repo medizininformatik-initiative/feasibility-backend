@@ -23,9 +23,6 @@ public class Query {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Result> results;
-
     @Column(name = "created_at", insertable = false, updatable = false)
     private Timestamp createdAt;
 

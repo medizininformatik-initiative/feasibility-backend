@@ -8,6 +8,9 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringCon
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryObfuscationSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import org.junit.jupiter.api.Tag;
@@ -34,7 +37,8 @@ import static org.junit.jupiter.api.Assertions.*;
         QueryCollectSpringConfig.class,
         QueryHandlerService.class,
         QueryObfuscationSpringConfig.class,
-        QueryTemplateHandler.class
+        QueryTemplateHandler.class,
+        ResultServiceSpringConfig.class
 })
 @DataJpaTest(
         properties = {
@@ -48,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-@SuppressWarnings("NewClassNamingConvention")
 public class QueryHandlerServiceIT {
 
     @Autowired
@@ -64,10 +67,7 @@ public class QueryHandlerServiceIT {
     private QueryDispatchRepository queryDispatchRepository;
 
     @Autowired
-    private SiteRepository siteRepository;
-
-    @Autowired
-    private ResultRepository resultRepository;
+    private ResultService resultService;
 
     @Autowired
     private QueryResultObfuscator queryResultObfuscator;
@@ -107,39 +107,24 @@ public class QueryHandlerServiceIT {
         testQuery.setCreatedBy("someone");
         var testQueryId = queryRepository.save(testQuery).getId();
 
-        var testSiteA = new Site();
-        testSiteA.setSiteName("A");
-        siteRepository.save(testSiteA);
-
-        var testSiteB = new Site();
-        testSiteB.setSiteName("B");
-        siteRepository.save(testSiteB);
+        var testSiteA = "A";
+        var testSiteB = "B";
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
 
-        var testSiteAResult = new Result();
-        testSiteAResult.setSite(testSiteA);
-        testSiteAResult.setQuery(testQuery);
-        testSiteAResult.setResult(10);
-        testSiteAResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult);
+        var testSiteAResult = new ResultLine(testSiteA, SUCCESS, 10L);
+        resultService.addResultLine(testQuery.getId(), testSiteAResult);
 
-        var testSiteBResult = new Result();
-        testSiteBResult.setSite(testSiteB);
-        testSiteBResult.setQuery(testQuery);
-        testSiteBResult.setResult(20);
-        testSiteBResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteBResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteBResult);
+        var testSiteBResult = new ResultLine(testSiteB, SUCCESS, 20L);
+        resultService.addResultLine(testQuery.getId(), testSiteBResult);
 
         var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
 
-        var testSiteAResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testSiteAResult);
+        var testSiteAResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testQuery.getId(), testSiteA);
         var siteAResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
                 .equals(testSiteAResultTokenizedSiteName)).findFirst().orElseThrow();
 
-        var testSiteBResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testSiteBResult);
+        var testSiteBResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testQuery.getId(), testSiteB);
         var siteBResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
                 .equals(testSiteBResultTokenizedSiteName)).findFirst().orElseThrow();
 
@@ -160,31 +145,16 @@ public class QueryHandlerServiceIT {
         testQuery.setCreatedBy("someone");
         var testQueryId = queryRepository.save(testQuery).getId();
 
-        var testSiteA = new Site();
-        testSiteA.setSiteName("A");
-        siteRepository.save(testSiteA);
-
-        var testSiteB = new Site();
-        testSiteB.setSiteName("B");
-        siteRepository.save(testSiteB);
+        var testSiteA = "A";
+        var testSiteB = "B";
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
 
-        var testSiteAResult = new Result();
-        testSiteAResult.setSite(testSiteA);
-        testSiteAResult.setQuery(testQuery);
-        testSiteAResult.setResult(10);
-        testSiteAResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult);
+        var testSiteAResult = new ResultLine(testSiteA, SUCCESS, 10L);
+        resultService.addResultLine(testQuery.getId(), testSiteAResult);
 
-        var testSiteBResult = new Result();
-        testSiteBResult.setSite(testSiteB);
-        testSiteBResult.setQuery(testQuery);
-        testSiteBResult.setResult(20);
-        testSiteBResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteBResult.setResultType(ERROR);
-        resultRepository.save(testSiteBResult);
+        var testSiteBResult = new ResultLine(testSiteB, ERROR, 20L);
+        resultService.addResultLine(testQuery.getId(), testSiteBResult);
 
         var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
 

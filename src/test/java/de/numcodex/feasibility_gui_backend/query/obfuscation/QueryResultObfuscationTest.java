@@ -23,6 +23,6 @@ public class QueryResultObfuscationTest {
 
     @Test
     public void testTokenizeSiteName_NullResultThrows() {
-        assertThrows(IllegalArgumentException.class, () -> queryResultObfuscator.tokenizeSiteName(null));
+        assertThrows(IllegalArgumentException.class, () -> queryResultObfuscator.tokenizeSiteName(null, null));
     }
 }

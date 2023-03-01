@@ -46,6 +46,7 @@ app:
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
   keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FEASIBILITY_USER}
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FEASIBILITY_ADMIN}
+  queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
