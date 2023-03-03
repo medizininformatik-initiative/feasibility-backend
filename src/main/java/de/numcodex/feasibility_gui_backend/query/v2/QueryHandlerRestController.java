@@ -3,11 +3,13 @@ package de.numcodex.feasibility_gui_backend.query.v2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +53,9 @@ public class QueryHandlerRestController {
 
   @Value("${app.security.nqueries.perminutes}")
   private int nQueriesPerMinute;
+
+  @Value("${app.privacy.threshold.minRespondingSites}")
+  private int privacyThresholdSites;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
@@ -148,9 +153,19 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(query, HttpStatus.OK);
   }
 
+  @GetMapping("/{id}/result/with-sitenames")
+  public QueryResult getQueryResultWithSitenames(@PathVariable("id") Long queryId) {
+    return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_WITH_SITENAMES);
+  }
+
   @GetMapping("/{id}/result/detailed")
   public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
-    return queryHandlerService.getQueryResult(queryId, false);
+    QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
+        ResultDetail.DETAILED_OBFUSCATED_SITENAMES);
+    if (queryResult.getResultLines().size() < privacyThresholdSites) {
+      queryResult.setResultLines(new ArrayList<>());
+    }
+    return queryResult;
   }
 
   @GetMapping("/{id}/result")
@@ -159,7 +174,7 @@ public class QueryHandlerRestController {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
-    var queryResult = queryHandlerService.getQueryResult(queryId);
+    var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY_ONLY);
     return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
 

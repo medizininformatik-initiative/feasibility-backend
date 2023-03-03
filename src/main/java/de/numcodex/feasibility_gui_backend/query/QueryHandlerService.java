@@ -31,6 +31,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QueryHandlerService {
 
+    public enum ResultDetail {
+        SUMMARY_ONLY,
+        DETAILED_OBFUSCATED_SITENAMES,
+        DETAILED_WITH_SITENAMES
+    }
+
     @NonNull
     private final QueryDispatcher queryDispatcher;
 
@@ -69,29 +75,27 @@ public class QueryHandlerService {
     }
 
     @Transactional
-    public QueryResult getQueryResult(Long queryId) {
-        return getQueryResult(queryId, true);
-    }
-
-    @Transactional
-    public QueryResult getQueryResult(Long queryId, boolean obfuscateSites) {
+    public QueryResult getQueryResult(Long queryId, ResultDetail resultDetail) {
         var singleSiteResults = resultService.findSuccessfulByQuery(queryId);
+        List<QueryResultLine> resultLines = new ArrayList<>();
 
-        var resultLines = singleSiteResults.stream()
+        if (resultDetail != ResultDetail.SUMMARY_ONLY) {
+            var resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                        .siteName(obfuscateSites ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
-                        .numberOfPatients(ssr.result())
-                        .build())
-                .collect(Collectors.toList());
+                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED_SITENAMES ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
+                    .numberOfPatients(ssr.result())
+                    .build())
+                .toList();
+        }
 
         var totalMatchesInPopulation = singleSiteResults.stream()
-                .mapToLong(ResultLine::result).sum();
+            .mapToLong(ResultLine::result).sum();
 
         return QueryResult.builder()
-                .queryId(queryId)
-                .resultLines(resultLines)
-                .totalNumberOfPatients(totalMatchesInPopulation)
-                .build();
+            .queryId(queryId)
+            .resultLines(resultLines)
+            .totalNumberOfPatients(totalMatchesInPopulation)
+            .build();
     }
 
     public Query getQuery(Long queryId) throws JsonProcessingException {
@@ -155,7 +159,6 @@ public class QueryHandlerService {
             out.setLabel(savedQuery.get().getLabel());
             out.setComment(savedQuery.get().getComment());
         }
-        out.setResults(getQueryResult(in.getId()));
         return out;
     }
 

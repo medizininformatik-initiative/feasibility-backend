@@ -20,8 +20,6 @@ public class Query {
   @JsonProperty
   private String comment;
   @JsonProperty
-  private QueryResult results;
-  @JsonProperty
   private List<TermCode> invalidTerms;
 
 }

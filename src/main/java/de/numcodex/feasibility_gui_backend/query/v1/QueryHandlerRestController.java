@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.v1;
 
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,7 +93,9 @@ public class QueryHandlerRestController {
       Authentication authentication) {
 
     if (queryHandlerService.getAuthorId(queryId).equalsIgnoreCase(authentication.getName())) {
-      return new ResponseEntity<>(queryHandlerService.getQueryResult(queryId), HttpStatus.OK);
+      return new ResponseEntity<>(
+          queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_OBFUSCATED_SITENAMES),
+          HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }

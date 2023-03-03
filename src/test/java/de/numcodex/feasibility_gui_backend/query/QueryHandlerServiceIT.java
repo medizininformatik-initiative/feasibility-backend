@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query;
 
 
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
@@ -88,7 +89,7 @@ public class QueryHandlerServiceIT {
     public void testGetQueryResult_UnknownQueryIdLeadsToResultWithZeroMatchesInPopulation() {
         var unknownQueryId = 9999999L;
 
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(unknownQueryId));
+        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(unknownQueryId, ResultDetail.DETAILED_OBFUSCATED_SITENAMES));
         assertNotNull(queryResult);
         assertEquals(unknownQueryId, queryResult.getQueryId());
         assertEquals(0, queryResult.getTotalNumberOfPatients());
@@ -118,7 +119,7 @@ public class QueryHandlerServiceIT {
         var testSiteBResult = new ResultLine(testSiteB, SUCCESS, 20L);
         resultService.addResultLine(testQuery.getId(), testSiteBResult);
 
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
+        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId, ResultDetail.DETAILED_OBFUSCATED_SITENAMES));
 
         var testSiteAResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testQuery.getId(), testSiteA);
         var siteAResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
@@ -156,7 +157,7 @@ public class QueryHandlerServiceIT {
         var testSiteBResult = new ResultLine(testSiteB, ERROR, 20L);
         resultService.addResultLine(testQuery.getId(), testSiteBResult);
 
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
+        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId, ResultDetail.DETAILED_OBFUSCATED_SITENAMES));
 
         assertEquals(10, queryResult.getTotalNumberOfPatients());
         assertEquals(1, queryResult.getResultLines().size());
