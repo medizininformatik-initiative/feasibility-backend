@@ -39,6 +39,9 @@ public class QueryHandlerRestController {
   @Value("${app.security.nqueries.perminutes}")
   private int nQueriesPerMinute;
 
+  @Value("${PRIVACY_THRESHOLD_RESULTS:20}")
+  private int privacyThresholdResults;
+
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
@@ -101,9 +104,12 @@ public class QueryHandlerRestController {
     }
 
     if (authorId.equalsIgnoreCase(authentication.getName())) {
-      return new ResponseEntity<>(
-          queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_OBFUSCATED),
-          HttpStatus.OK);
+      var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY);
+      if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      } else {
+        return new ResponseEntity<>(queryResult, HttpStatus.OK);
+      }
     } else {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
