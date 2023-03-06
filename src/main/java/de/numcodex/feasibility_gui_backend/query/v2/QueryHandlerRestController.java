@@ -9,7 +9,6 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +53,7 @@ public class QueryHandlerRestController {
   @Value("${app.security.nqueries.perminutes}")
   private int nQueriesPerMinute;
 
-  @Value("${app.privacy.threshold.minRespondingSites}")
+  @Value("${PRIVACY_THRESHOLD_SITES:3}")
   private int privacyThresholdSites;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
@@ -153,17 +152,17 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(query, HttpStatus.OK);
   }
 
-  @GetMapping("/{id}/result/with-sitenames")
-  public QueryResult getQueryResultWithSitenames(@PathVariable("id") Long queryId) {
-    return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_WITH_SITENAMES);
+  @GetMapping("/{id}/cleartext-result")
+  public QueryResult getQueryResultCleartext(@PathVariable("id") Long queryId) {
+    return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_CLEARTEXT_SITE_NAMES);
   }
 
-  @GetMapping("/{id}/result/detailed")
+  @GetMapping("/{id}/detailed-result")
   public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
-        ResultDetail.DETAILED_OBFUSCATED_SITENAMES);
+        ResultDetail.DETAILED_OBFUSCATED_SITE_NAMES);
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
-      queryResult.setResultLines(new ArrayList<>());
+      queryResult.setResultLines(List.of());
     }
     return queryResult;
   }

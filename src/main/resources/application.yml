@@ -87,9 +87,6 @@ app:
     nqueries:
       amount: ${SECURITY_NQUERIES_AMOUNT:3}
       perminutes: ${SECURITY_NQUERIES_PERMINUTES:1}
-  privacy:
-    threshold:
-      minRespondingSites: ${PRIVACY_THRESHOLD_SITES:3}
 
 logging:
   level:

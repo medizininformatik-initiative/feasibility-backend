@@ -1,7 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query;
 
-import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
@@ -33,8 +31,8 @@ public class QueryHandlerService {
 
     public enum ResultDetail {
         SUMMARY_ONLY,
-        DETAILED_OBFUSCATED_SITENAMES,
-        DETAILED_WITH_SITENAMES
+        DETAILED_OBFUSCATED_SITE_NAMES,
+        DETAILED_CLEARTEXT_SITE_NAMES
     }
 
     @NonNull
@@ -80,7 +78,7 @@ public class QueryHandlerService {
         List<QueryResultLine> resultLines = new ArrayList<>();
 
         if (resultDetail != ResultDetail.SUMMARY_ONLY) {
-            var resultLines = singleSiteResults.stream()
+            resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
                     .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED_SITENAMES ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
                     .numberOfPatients(ssr.result())

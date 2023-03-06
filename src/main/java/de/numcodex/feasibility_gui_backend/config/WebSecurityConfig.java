@@ -37,9 +37,9 @@ public class WebSecurityConfig {
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
   public static final String PATH_RESULT = "/result";
   public static final String PATH_SAVED = "/saved";
-  public static final String PATH_DETAILED = "/detailed";
   public static final String PATH_CONTENT = "/content";
-  public static final String PATH_SITENAMES = "/with-sitenames";
+  public static final String PATH_DETAILED_RESULT = "/detailed-result";
+  public static final String PATH_CLEARTEXT_RESULT = "/cleartext-result";
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
 
@@ -105,8 +105,8 @@ public class WebSecurityConfig {
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_SAVED).hasAuthority(keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_RESULT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_RESULT + PATH_DETAILED).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_RESULT + PATH_SITENAMES).hasAuthority(keycloakAdminRole)
+        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_DETAILED_RESULT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_CLEARTEXT_RESULT).hasAuthority(keycloakAdminRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_CONTENT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
         .anyRequest()
         .permitAll()
