@@ -16,6 +16,8 @@ import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -161,5 +163,52 @@ public class QueryHandlerServiceIT {
 
         assertEquals(10, queryResult.getTotalNumberOfPatients());
         assertEquals(1, queryResult.getResultLines().size());
+    }
+
+    @ParameterizedTest
+    @EnumSource(ResultDetail.class)
+    public void testGetQueryResult_getCorrectResultDetail(ResultDetail resultDetail) {
+        var testQueryContent = new QueryContent("irrelevant-for-this-test");
+        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
+        queryContentRepository.save(testQueryContent);
+
+        var testQuery = new Query();
+        testQuery.setQueryContent(testQueryContent);
+        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
+        testQuery.setCreatedBy("someone");
+        var testQueryId = queryRepository.save(testQuery).getId();
+
+        var testSiteA = "A";
+        var testSiteB = "B";
+
+        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
+
+        var testSiteAResult = new ResultLine(testSiteA, SUCCESS, 10L);
+        resultService.addResultLine(testQuery.getId(), testSiteAResult);
+
+        var testSiteBResult = new ResultLine(testSiteB, SUCCESS, 20L);
+        resultService.addResultLine(testQuery.getId(), testSiteBResult);
+
+        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId, resultDetail));
+
+        switch(resultDetail) {
+            case SUMMARY -> {
+                assertEquals(30, queryResult.getTotalNumberOfPatients());
+                assertEquals(0, queryResult.getResultLines().size());
+            }
+            case DETAILED_OBFUSCATED -> {
+                assertEquals(30, queryResult.getTotalNumberOfPatients());
+                assertEquals(2, queryResult.getResultLines().size());
+                assertEquals(0, queryResult.getResultLines().stream().filter(rl -> testSiteA.equals(rl.getSiteName())).toList().size());
+                assertEquals(0, queryResult.getResultLines().stream().filter(rl -> testSiteB.equals(rl.getSiteName())).toList().size());
+            }
+            case DETAILED -> {
+                assertEquals(30, queryResult.getTotalNumberOfPatients());
+                assertEquals(2, queryResult.getResultLines().size());
+                assertEquals(1, queryResult.getResultLines().stream().filter(rl -> testSiteA.equals(rl.getSiteName())).toList().size());
+                assertEquals(1, queryResult.getResultLines().stream().filter(rl -> testSiteB.equals(rl.getSiteName())).toList().size());
+            }
+        }
+
     }
 }
