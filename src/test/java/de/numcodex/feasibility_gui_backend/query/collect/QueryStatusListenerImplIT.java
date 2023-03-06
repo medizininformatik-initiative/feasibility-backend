@@ -4,6 +4,8 @@ import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -27,11 +29,14 @@ import static org.junit.jupiter.api.Assertions.*;
 // TODO: maybe we should check the whole setup at this point - dispatch, process, collect? -> discuss in review
 @Tag("query")
 @Tag("collect")
-@Import(QueryCollectSpringConfig.class)
+@Tag("peristence")
+@Import({
+    QueryCollectSpringConfig.class,
+    ResultServiceSpringConfig.class
+})
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-@SuppressWarnings("NewClassNamingConvention")
 class QueryStatusListenerImplIT {
 
     @Autowired
@@ -41,10 +46,7 @@ class QueryStatusListenerImplIT {
     private QueryRepository queryRepository;
 
     @Autowired
-    private SiteRepository siteRepository;
-
-    @Autowired
-    private ResultRepository resultRepository;
+    private ResultService resultService;
 
     @Autowired
     private QueryStatusListener queryStatusListener;
@@ -54,7 +56,6 @@ class QueryStatusListenerImplIT {
     private static final String BROKER_QUERY_ID = "37ff21b1-3d5f-49b0-ac09-063c94eac7aa";
     private static final BrokerClientType FAKE_BROKER_CLIENT_TYPE = DIRECT;
 
-    private String testSiteId;
     private Long testBackendQueryId;
 
     @BeforeEach
@@ -68,10 +69,6 @@ class QueryStatusListenerImplIT {
         testQuery.setCreatedBy("testuser");
         testBackendQueryId = queryRepository.save(testQuery).getId();
 
-        var testSite = new Site();
-        testSite.setSiteName(TEST_SITE_NAME);
-        testSiteId = String.valueOf(siteRepository.save(testSite).getId());
-
         // Dispatch Table setup has been left out for brevity (will be filled at runtime but is not important for any of
         // the test cases).
     }
@@ -83,9 +80,9 @@ class QueryStatusListenerImplIT {
     public void testPersistResult_NonTerminatingStatusChangesDoesNotLeadToPersistedResult(QueryStatus status) {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, testSiteId, status);
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, status);
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
-        assertEquals(0, resultRepository.count());
+        assertEquals(0, resultService.findSuccessfulByQuery(testBackendQueryId).size());
     }
 
     @Test
@@ -93,37 +90,37 @@ class QueryStatusListenerImplIT {
         var fakeBrokerClient = new FakeBrokerClient();
         var unknownBrokerQueryId = "some_unknown_id";
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, unknownBrokerQueryId, testSiteId, COMPLETED);
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, unknownBrokerQueryId, TEST_SITE_NAME, COMPLETED);
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
-        assertEquals(0, resultRepository.count());
+        assertEquals(0, resultService.findSuccessfulByQuery(testBackendQueryId).size());
     }
 
     @Test
     public void testPersistResult_CompleteStatusLeadsToPersistedResultWithMatchesInPopulation() {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, testSiteId, COMPLETED);
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, COMPLETED);
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
-        var registeredResults = resultRepository.findAll();
+        var registeredResults = resultService.findSuccessfulByQuery(testBackendQueryId);
         assertEquals(1, registeredResults.size());
-        assertEquals(SUCCESS, registeredResults.get(0).getResultType());
-        assertEquals(TEST_SITE_NAME, registeredResults.get(0).getSite().getSiteName());
-        assertEquals(TEST_MATCHES_IN_POPULATION, registeredResults.get(0).getResult());
+        assertEquals(SUCCESS, registeredResults.get(0).type());
+        assertEquals(TEST_SITE_NAME, registeredResults.get(0).siteName());
+        assertEquals(TEST_MATCHES_IN_POPULATION, registeredResults.get(0).result());
     }
 
     @Test
     public void testPersistResult_FailedStatusLeadsToPersistedResultWithoutMatchesInPopulation() {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, testSiteId, FAILED);
+        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, FAILED);
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
-        var registeredResults = resultRepository.findAll();
+        var registeredResults = resultService.findSuccessfulByQuery(testBackendQueryId);
         assertEquals(1, registeredResults.size());
-        assertEquals(ERROR, registeredResults.get(0).getResultType());
-        assertEquals(TEST_SITE_NAME, registeredResults.get(0).getSite().getSiteName());
-        assertNull(registeredResults.get(0).getResult());
+        assertEquals(ERROR, registeredResults.get(0).type());
+        assertEquals(TEST_SITE_NAME, registeredResults.get(0).siteName());
+        assertEquals(0, registeredResults.get(0).result());
     }
 
     private static class FakeBrokerClient implements BrokerClient {

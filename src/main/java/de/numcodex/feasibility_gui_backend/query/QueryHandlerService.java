@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query;
 
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
@@ -10,6 +12,8 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import lombok.NonNull;
@@ -22,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class QueryHandlerService {
     private final QueryContentRepository queryContentRepository;
 
     @NonNull
-    private final ResultRepository resultRepository;
+    private final ResultService resultService;
 
     @NonNull
     private final QueryTemplateRepository queryTemplateRepository;
@@ -73,18 +75,17 @@ public class QueryHandlerService {
 
     @Transactional
     public QueryResult getQueryResult(Long queryId, boolean obfuscateSites) {
-        var singleSiteResults = resultRepository.findByQueryAndStatus(queryId, SUCCESS);
+        var singleSiteResults = resultService.findSuccessfulByQuery(queryId);
 
         var resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                        .siteName(obfuscateSites ? queryResultObfuscator.tokenizeSiteName(ssr) : ssr.getSite().getSiteName())
-                        .numberOfPatients(ssr.getResult())
+                        .siteName(obfuscateSites ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
+                        .numberOfPatients(ssr.result())
                         .build())
                 .collect(Collectors.toList());
 
         var totalMatchesInPopulation = singleSiteResults.stream()
-                .map(Result::getResult)
-                .reduce(0, Integer::sum);
+                .mapToLong(ResultLine::result).sum();
 
         return QueryResult.builder()
                 .queryId(queryId)

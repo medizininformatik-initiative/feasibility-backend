@@ -6,6 +6,7 @@ security:
     use-keycloak: false
 
 app:
+  queryResultCacheExpiryMinutes: 1
   security:
     nqueries:
       amount: 3

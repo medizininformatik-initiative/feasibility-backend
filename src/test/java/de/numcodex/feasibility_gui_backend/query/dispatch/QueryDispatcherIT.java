@@ -10,6 +10,8 @@ import de.numcodex.feasibility_gui_backend.query.persistence.QueryContent;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,8 @@ import static org.junit.jupiter.api.Assertions.*;
         QueryTranslatorSpringConfig.class,
         QueryDispatchSpringConfig.class,
         QueryCollectSpringConfig.class,
-        BrokerSpringConfig.class
+        BrokerSpringConfig.class,
+        ResultServiceSpringConfig.class
 })
 @DataJpaTest(
         properties = {
@@ -61,6 +64,10 @@ public class QueryDispatcherIT {
 
     @Autowired
     private QueryContentRepository queryContentRepository;
+
+
+    @Autowired
+    private ResultService resultService;
 
     @Autowired
     @Qualifier("translation")
@@ -123,7 +130,6 @@ public class QueryDispatcherIT {
         assertEquals(serializedTestQuery, enqueuedQueries.get(0).getQueryContent().getQueryContent());
         assertEquals(serializedTestQueryHash, enqueuedQueries.get(0).getQueryContent().getHash());
         assertNotNull(enqueuedQueries.get(0).getCreatedAt());
-        assertNull(enqueuedQueries.get(0).getResults());
     }
 
     @Test

@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class QueryResult {
-    private int totalNumberOfPatients;
+    private long totalNumberOfPatients;
     private Long queryId;
     private List<QueryResultLine> resultLines;
 }
