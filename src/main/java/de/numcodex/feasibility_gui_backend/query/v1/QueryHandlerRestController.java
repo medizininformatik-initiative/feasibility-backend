@@ -94,7 +94,7 @@ public class QueryHandlerRestController {
 
     if (queryHandlerService.getAuthorId(queryId).equalsIgnoreCase(authentication.getName())) {
       return new ResponseEntity<>(
-          queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_OBFUSCATED_SITE_NAMES),
+          queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_OBFUSCATED),
           HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);

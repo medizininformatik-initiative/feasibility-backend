@@ -23,16 +23,15 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class QueryHandlerService {
 
     public enum ResultDetail {
-        SUMMARY_ONLY,
-        DETAILED_OBFUSCATED_SITE_NAMES,
-        DETAILED_CLEARTEXT_SITE_NAMES
+        SUMMARY,
+        DETAILED_OBFUSCATED,
+        DETAILED
     }
 
     @NonNull
@@ -77,10 +76,10 @@ public class QueryHandlerService {
         var singleSiteResults = resultService.findSuccessfulByQuery(queryId);
         List<QueryResultLine> resultLines = new ArrayList<>();
 
-        if (resultDetail != ResultDetail.SUMMARY_ONLY) {
+        if (resultDetail != ResultDetail.SUMMARY) {
             resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED_SITENAMES ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
+                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
                     .numberOfPatients(ssr.result())
                     .build())
                 .toList();

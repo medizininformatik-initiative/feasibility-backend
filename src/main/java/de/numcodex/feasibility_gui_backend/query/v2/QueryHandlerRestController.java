@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
@@ -131,7 +132,7 @@ public class QueryHandlerRestController {
     }
   }
 
-  @GetMapping("/by-user/{id}")
+  @GetMapping( "/by-user/{id}")
   public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
@@ -152,32 +153,32 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(query, HttpStatus.OK);
   }
 
-  @GetMapping("/{id}/cleartext-result")
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
   public QueryResult getQueryResultCleartext(@PathVariable("id") Long queryId) {
-    return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_CLEARTEXT_SITE_NAMES);
+    return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED);
   }
 
-  @GetMapping("/{id}/detailed-result")
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)
   public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
-        ResultDetail.DETAILED_OBFUSCATED_SITE_NAMES);
+        ResultDetail.DETAILED_OBFUSCATED);
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
       queryResult.setResultLines(List.of());
     }
     return queryResult;
   }
 
-  @GetMapping("/{id}/result")
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
       Authentication authentication) {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
-    var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY_ONLY);
+    var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY);
     return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
 
-  @GetMapping("/{id}/content")
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_CONTENT)
   public ResponseEntity<Object> getQueryContent(@PathVariable("id") Long queryId,
       Authentication authentication)
       throws JsonProcessingException {
