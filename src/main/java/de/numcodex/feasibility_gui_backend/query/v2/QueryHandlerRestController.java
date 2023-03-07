@@ -154,12 +154,12 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
-  public QueryResult getQueryResultCleartext(@PathVariable("id") Long queryId) {
+  public QueryResult getDetailedQueryResult(@PathVariable("id") Long queryId) {
     return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)
-  public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
+  public QueryResult getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId) {
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.DETAILED_OBFUSCATED);
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
@@ -169,7 +169,7 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)
-  public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
+  public ResponseEntity<Object> getSummaryQueryResult(@PathVariable("id") Long queryId,
       Authentication authentication) {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
