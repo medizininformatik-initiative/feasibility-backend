@@ -2,7 +2,9 @@ package de.numcodex.feasibility_gui_backend.query.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -51,6 +53,9 @@ public class QueryHandlerRestController {
 
   @Value("${app.security.nqueries.perminutes}")
   private int nQueriesPerMinute;
+
+  @Value("${PRIVACY_THRESHOLD_SITES:3}")
+  private int privacyThresholdSites;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
@@ -127,7 +132,7 @@ public class QueryHandlerRestController {
     }
   }
 
-  @GetMapping("/by-user/{id}")
+  @GetMapping( "/by-user/{id}")
   public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
@@ -148,22 +153,32 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(query, HttpStatus.OK);
   }
 
-  @GetMapping("/{id}/result/detailed")
-  public QueryResult getQueryResultDetailed(@PathVariable("id") Long queryId) {
-    return queryHandlerService.getQueryResult(queryId, false);
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
+  public QueryResult getDetailedQueryResult(@PathVariable("id") Long queryId) {
+    return queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED);
   }
 
-  @GetMapping("/{id}/result")
-  public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)
+  public QueryResult getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId) {
+    QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
+        ResultDetail.DETAILED_OBFUSCATED);
+    if (queryResult.getResultLines().size() < privacyThresholdSites) {
+      queryResult.setResultLines(List.of());
+    }
+    return queryResult;
+  }
+
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)
+  public ResponseEntity<Object> getSummaryQueryResult(@PathVariable("id") Long queryId,
       Authentication authentication) {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
-    var queryResult = queryHandlerService.getQueryResult(queryId);
+    var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY);
     return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
 
-  @GetMapping("/{id}/content")
+  @GetMapping("/{id}" + WebSecurityConfig.PATH_CONTENT)
   public ResponseEntity<Object> getQueryContent(@PathVariable("id") Long queryId,
       Authentication authentication)
       throws JsonProcessingException {

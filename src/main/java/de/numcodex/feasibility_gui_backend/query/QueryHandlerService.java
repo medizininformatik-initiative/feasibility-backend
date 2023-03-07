@@ -1,7 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query;
 
-import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
@@ -25,11 +23,16 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class QueryHandlerService {
+
+    public enum ResultDetail {
+        SUMMARY,
+        DETAILED_OBFUSCATED,
+        DETAILED
+    }
 
     @NonNull
     private final QueryDispatcher queryDispatcher;
@@ -69,29 +72,27 @@ public class QueryHandlerService {
     }
 
     @Transactional
-    public QueryResult getQueryResult(Long queryId) {
-        return getQueryResult(queryId, true);
-    }
-
-    @Transactional
-    public QueryResult getQueryResult(Long queryId, boolean obfuscateSites) {
+    public QueryResult getQueryResult(Long queryId, ResultDetail resultDetail) {
         var singleSiteResults = resultService.findSuccessfulByQuery(queryId);
+        List<QueryResultLine> resultLines = new ArrayList<>();
 
-        var resultLines = singleSiteResults.stream()
+        if (resultDetail != ResultDetail.SUMMARY) {
+            resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                        .siteName(obfuscateSites ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
-                        .numberOfPatients(ssr.result())
-                        .build())
-                .collect(Collectors.toList());
+                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
+                    .numberOfPatients(ssr.result())
+                    .build())
+                .toList();
+        }
 
         var totalMatchesInPopulation = singleSiteResults.stream()
-                .mapToLong(ResultLine::result).sum();
+            .mapToLong(ResultLine::result).sum();
 
         return QueryResult.builder()
-                .queryId(queryId)
-                .resultLines(resultLines)
-                .totalNumberOfPatients(totalMatchesInPopulation)
-                .build();
+            .queryId(queryId)
+            .resultLines(resultLines)
+            .totalNumberOfPatients(totalMatchesInPopulation)
+            .build();
     }
 
     public Query getQuery(Long queryId) throws JsonProcessingException {
@@ -155,7 +156,6 @@ public class QueryHandlerService {
             out.setLabel(savedQuery.get().getLabel());
             out.setComment(savedQuery.get().getComment());
         }
-        out.setResults(getQueryResult(in.getId()));
         return out;
     }
 
