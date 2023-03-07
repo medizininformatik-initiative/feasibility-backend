@@ -1,13 +1,12 @@
 package de.numcodex.feasibility_gui_backend.query;
 
-
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
+import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryObfuscationSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
@@ -24,12 +23,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-
+import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED;
+import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED;
+import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.SUMMARY;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("query")
 @Tag("handler")
@@ -57,11 +56,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 public class QueryHandlerServiceIT {
 
-    @Autowired
-    private QueryHandlerService queryHandlerService;
+    public static final String SITE_NAME_1 = "site-name-114606";
+    public static final String SITE_NAME_2 = "site-name-114610";
+    public static final String CREATOR = "creator-114634";
+    public static final long UNKNOWN_QUERY_ID = 9999999L;
 
     @Autowired
-    private QueryContentRepository queryContentRepository;
+    private QueryHandlerService queryHandlerService;
 
     @Autowired
     private QueryRepository queryRepository;
@@ -72,16 +73,14 @@ public class QueryHandlerServiceIT {
     @Autowired
     private ResultService resultService;
 
-    @Autowired
-    private QueryResultObfuscator queryResultObfuscator;
-
     @Test
     public void testRunQuery() {
         var testStructuredQuery = new StructuredQuery();
 
         queryHandlerService.runQuery(testStructuredQuery, "test").block();
-        assertEquals(1, queryRepository.count());
-        assertEquals(1, queryDispatchRepository.count());
+
+        assertThat(queryRepository.count()).isOne();
+        assertThat(queryDispatchRepository.count()).isOne();
     }
 
     // This behavior seems to be necessary since the UI is polling constantly.
@@ -89,126 +88,72 @@ public class QueryHandlerServiceIT {
     // TODO: We should discuss this with the UI team. Maybe a better solution can be identified.
     @Test
     public void testGetQueryResult_UnknownQueryIdLeadsToResultWithZeroMatchesInPopulation() {
-        var unknownQueryId = 9999999L;
+        var queryResult = queryHandlerService.getQueryResult(UNKNOWN_QUERY_ID, DETAILED_OBFUSCATED);
 
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(unknownQueryId, ResultDetail.DETAILED_OBFUSCATED));
-        assertNotNull(queryResult);
-        assertEquals(unknownQueryId, queryResult.getQueryId());
-        assertEquals(0, queryResult.getTotalNumberOfPatients());
-        assertTrue(queryResult.getResultLines().isEmpty());
-    }
-
-    @Test
-    public void testGetQueryResult_MatchesInPopulationGetAccumulated() {
-        var testQueryContent = new QueryContent("irrelevant-for-this-test");
-        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
-        queryContentRepository.save(testQueryContent);
-
-        var testQuery = new Query();
-        testQuery.setQueryContent(testQueryContent);
-        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
-        testQuery.setCreatedBy("someone");
-        var testQueryId = queryRepository.save(testQuery).getId();
-
-        var testSiteA = "A";
-        var testSiteB = "B";
-
-        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
-
-        var testSiteAResult = new ResultLine(testSiteA, SUCCESS, 10L);
-        resultService.addResultLine(testQuery.getId(), testSiteAResult);
-
-        var testSiteBResult = new ResultLine(testSiteB, SUCCESS, 20L);
-        resultService.addResultLine(testQuery.getId(), testSiteBResult);
-
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId, ResultDetail.DETAILED_OBFUSCATED));
-
-        var testSiteAResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testQuery.getId(), testSiteA);
-        var siteAResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
-                .equals(testSiteAResultTokenizedSiteName)).findFirst().orElseThrow();
-
-        var testSiteBResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testQuery.getId(), testSiteB);
-        var siteBResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
-                .equals(testSiteBResultTokenizedSiteName)).findFirst().orElseThrow();
-
-        assertEquals(30, queryResult.getTotalNumberOfPatients());
-        assertEquals(10, siteAResultLine.getNumberOfPatients());
-        assertEquals(20, siteBResultLine.getNumberOfPatients());
-    }
-
-    @Test
-    public void testGetQueryResult_FailedResultsDoNotAffectResult() {
-        var testQueryContent = new QueryContent("irrelevant-for-this-test");
-        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
-        queryContentRepository.save(testQueryContent);
-
-        var testQuery = new Query();
-        testQuery.setQueryContent(testQueryContent);
-        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
-        testQuery.setCreatedBy("someone");
-        var testQueryId = queryRepository.save(testQuery).getId();
-
-        var testSiteA = "A";
-        var testSiteB = "B";
-
-        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
-
-        var testSiteAResult = new ResultLine(testSiteA, SUCCESS, 10L);
-        resultService.addResultLine(testQuery.getId(), testSiteAResult);
-
-        var testSiteBResult = new ResultLine(testSiteB, ERROR, 20L);
-        resultService.addResultLine(testQuery.getId(), testSiteBResult);
-
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId, ResultDetail.DETAILED_OBFUSCATED));
-
-        assertEquals(10, queryResult.getTotalNumberOfPatients());
-        assertEquals(1, queryResult.getResultLines().size());
+        assertThat(queryResult.getQueryId()).isEqualTo(UNKNOWN_QUERY_ID);
+        assertThat(queryResult.getTotalNumberOfPatients()).isZero();
+        assertThat(queryResult.getResultLines()).isEmpty();
     }
 
     @ParameterizedTest
-    @EnumSource(ResultDetail.class)
-    public void testGetQueryResult_getCorrectResultDetail(ResultDetail resultDetail) {
-        var testQueryContent = new QueryContent("irrelevant-for-this-test");
-        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
-        queryContentRepository.save(testQueryContent);
+    @EnumSource
+    public void testGetQueryResult_ErrorResultsAreIgnored(ResultDetail resultDetail) {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, ERROR, 0L));
 
-        var testQuery = new Query();
-        testQuery.setQueryContent(testQueryContent);
-        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
-        testQuery.setCreatedBy("someone");
-        var testQueryId = queryRepository.save(testQuery).getId();
+        var queryResult = queryHandlerService.getQueryResult(queryId, resultDetail);
 
-        var testSiteA = "A";
-        var testSiteB = "B";
+        assertThat(queryResult.getResultLines()).isEmpty();
+    }
 
-        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
+    @Test
+    public void testGetQueryResult_SummaryContainsOnlyTheTotal() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
 
-        var testSiteAResult = new ResultLine(testSiteA, SUCCESS, 10L);
-        resultService.addResultLine(testQuery.getId(), testSiteAResult);
+        var queryResult = queryHandlerService.getQueryResult(queryId, SUMMARY);
 
-        var testSiteBResult = new ResultLine(testSiteB, SUCCESS, 20L);
-        resultService.addResultLine(testQuery.getId(), testSiteBResult);
+        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.getResultLines()).isEmpty();
+    }
 
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId, resultDetail));
+    @Test
+    public void testGetQueryResult_DetailedObfuscatedDoesNotContainTheSiteNames() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
 
-        switch(resultDetail) {
-            case SUMMARY -> {
-                assertEquals(30, queryResult.getTotalNumberOfPatients());
-                assertEquals(0, queryResult.getResultLines().size());
-            }
-            case DETAILED_OBFUSCATED -> {
-                assertEquals(30, queryResult.getTotalNumberOfPatients());
-                assertEquals(2, queryResult.getResultLines().size());
-                assertEquals(0, queryResult.getResultLines().stream().filter(rl -> testSiteA.equals(rl.getSiteName())).toList().size());
-                assertEquals(0, queryResult.getResultLines().stream().filter(rl -> testSiteB.equals(rl.getSiteName())).toList().size());
-            }
-            case DETAILED -> {
-                assertEquals(30, queryResult.getTotalNumberOfPatients());
-                assertEquals(2, queryResult.getResultLines().size());
-                assertEquals(1, queryResult.getResultLines().stream().filter(rl -> testSiteA.equals(rl.getSiteName())).toList().size());
-                assertEquals(1, queryResult.getResultLines().stream().filter(rl -> testSiteB.equals(rl.getSiteName())).toList().size());
-            }
-        }
+        var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED_OBFUSCATED);
 
+        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.getResultLines()).hasSize(2);
+        assertThat(queryResult.getResultLines().stream().map(QueryResultLine::getSiteName))
+            .doesNotContain(SITE_NAME_1, SITE_NAME_2);
+        assertThat(queryResult.getResultLines().stream().map(QueryResultLine::getNumberOfPatients))
+            .contains(10L, 20L);
+    }
+
+    @Test
+    public void testGetQueryResult_DetailedContainsTheSiteNames() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
+
+        var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED);
+
+        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.getResultLines())
+            .hasSize(2)
+            .contains(QueryResultLine.builder().siteName(SITE_NAME_1).numberOfPatients(10L).build(),
+                QueryResultLine.builder().siteName(SITE_NAME_2).numberOfPatients(20L).build());
     }
 }
