@@ -22,7 +22,6 @@ import java.util.List;
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.FAILED;
 import static de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType.DIRECT;
-import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -110,17 +109,14 @@ class QueryStatusListenerImplIT {
     }
 
     @Test
-    public void testPersistResult_FailedStatusLeadsToPersistedResultWithoutMatchesInPopulation() {
+    public void testPersistResult_FailedStatusLeadsToNoSuccessfulQueryResult() {
         var fakeBrokerClient = new FakeBrokerClient();
 
         var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, FAILED);
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
         var registeredResults = resultService.findSuccessfulByQuery(testBackendQueryId);
-        assertEquals(1, registeredResults.size());
-        assertEquals(ERROR, registeredResults.get(0).type());
-        assertEquals(TEST_SITE_NAME, registeredResults.get(0).siteName());
-        assertEquals(0, registeredResults.get(0).result());
+        assertEquals(0, registeredResults.size());
     }
 
     private static class FakeBrokerClient implements BrokerClient {
