@@ -5,6 +5,7 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
+import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -117,10 +118,14 @@ public class QueryHandlerRestController {
   public ResponseEntity<Object> saveQuery(@PathVariable("id") Long queryId,
       @RequestBody SavedQuery savedQuery,  Principal principal) {
 
-    String authorId = queryHandlerService.getAuthorId(queryId);
-    if (authorId == null) {
+    String authorId;
+    try {
+      authorId = queryHandlerService.getAuthorId(queryId);
+    } catch (QueryNotFoundException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    } else if (!authorId.equalsIgnoreCase(principal.getName())) {
+    }
+
+    if (!authorId.equalsIgnoreCase(principal.getName())) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } else {
       try {
@@ -194,7 +199,11 @@ public class QueryHandlerRestController {
     Set<String> roles = authentication.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
-    return (roles.contains(keycloakAdminRole) || queryHandlerService.getAuthorId(queryId)
-        .equalsIgnoreCase(authentication.getName()));
+    try {
+      return (roles.contains(keycloakAdminRole) || queryHandlerService.getAuthorId(queryId)
+          .equalsIgnoreCase(authentication.getName()));
+    } catch (QueryNotFoundException e) {
+      return false;
+    }
   }
 }
