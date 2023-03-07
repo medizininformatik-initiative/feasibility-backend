@@ -81,11 +81,20 @@ public class QueryTemplateHandlerRestController {
 
     try {
       var query = queryHandlerService.getQueryTemplate(queryId, principal.getName());
-      QueryTemplate queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
+      var queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
       List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
-          queryTemplate.getContent());
-      queryTemplate.setInvalidTerms(invalidTermCodes);
-      return new ResponseEntity<>(queryTemplate, HttpStatus.OK);
+          queryTemplate.content());
+      var queryTemplateWithInvalidTermCodes = new QueryTemplate(
+          queryTemplate.id(),
+          queryTemplate.content(),
+          queryTemplate.label(),
+          queryTemplate.comment(),
+          queryTemplate.lastModified(),
+          queryTemplate.createdBy(),
+          invalidTermCodes,
+          queryTemplate.isValid()
+      );
+      return new ResponseEntity<>(queryTemplateWithInvalidTermCodes, HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (QueryTemplateException e) {
@@ -101,8 +110,17 @@ public class QueryTemplateHandlerRestController {
     queries.forEach(q -> {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
-        convertedQuery.setContent(null);
-        ret.add(convertedQuery);
+        QueryTemplate convertedQueryWithoutContent = new QueryTemplate(
+            convertedQuery.id(),
+            null,
+            convertedQuery.label(),
+            convertedQuery.comment(),
+            convertedQuery.lastModified(),
+            convertedQuery.createdBy(),
+            convertedQuery.invalidTerms(),
+            convertedQuery.isValid()
+        );
+        ret.add(convertedQueryWithoutContent);
       } catch (JsonProcessingException e) {
         log.error("Error converting query");
       }
@@ -119,10 +137,18 @@ public class QueryTemplateHandlerRestController {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
         List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
-            convertedQuery.getContent());
-        convertedQuery.setIsValid(invalidTermCodes.isEmpty());
-        convertedQuery.setContent(null);
-        ret.add(convertedQuery);
+            convertedQuery.content());
+        QueryTemplate convertedQueryWithoutContent = new QueryTemplate(
+            convertedQuery.id(),
+            null,
+            convertedQuery.label(),
+            convertedQuery.comment(),
+            convertedQuery.lastModified(),
+            convertedQuery.createdBy(),
+            convertedQuery.invalidTerms(),
+            invalidTermCodes.isEmpty()
+        );
+        ret.add(convertedQueryWithoutContent);
       } catch (JsonProcessingException e) {
         log.error("Error converting query");
       }

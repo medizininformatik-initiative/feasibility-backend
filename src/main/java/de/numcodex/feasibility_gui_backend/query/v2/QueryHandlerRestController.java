@@ -6,6 +6,7 @@ import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
+import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
@@ -176,11 +177,8 @@ public class QueryHandlerRestController {
       Principal principal) {
     var userId = principal.getName();
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
-    var queryList = queryHandlerService.getQueryListForAuthor(userId,
-        savedOnly);
-    var queries = queryHandlerService.convertQueriesToQueryListEntries(
-        queryList);
-    return queries;
+    var queryList = queryHandlerService.getQueryListForAuthor(userId, savedOnly);
+    return queryHandlerService.convertQueriesToQueryListEntries(queryList);
   }
 
   @PostMapping("/{id}/saved")
@@ -211,11 +209,8 @@ public class QueryHandlerRestController {
       @PathVariable("id") String userId,
       @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
-    var queryList = queryHandlerService.getQueryListForAuthor(userId,
-        savedOnly);
-    var queries = queryHandlerService.convertQueriesToQueryListEntries(
-        queryList);
-    return queries;
+    var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
+    return queryHandlerService.convertQueriesToQueryListEntries(queryList);
   }
 
   @GetMapping("/{id}")
@@ -226,9 +221,10 @@ public class QueryHandlerRestController {
     }
     var query = queryHandlerService.getQuery(queryId);
     List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
-        query.getContent());
-    query.setInvalidTerms(invalidTermCodes);
-    return new ResponseEntity<>(query, HttpStatus.OK);
+        query.content());
+    var queryWithInvalidTerms = new Query(query.id(), query.content(), query.label(),
+        query.comment(), invalidTermCodes);
+    return new ResponseEntity<>(queryWithInvalidTerms, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
@@ -242,19 +238,16 @@ public class QueryHandlerRestController {
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.DETAILED_OBFUSCATED);
 
-    if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+    if (queryResult.totalNumberOfPatients() < privacyThresholdResults) {
       return new ResponseEntity<>(
-          List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE),
-          HttpStatus.OK);
+              List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE),
+              HttpStatus.OK);
     }
     HttpHeaders headers = new HttpHeaders();
-    if (queryResult.getResultLines().size() < privacyThresholdSites) {
+    if (queryResult.resultLines().size() < privacyThresholdSites) {
       return new ResponseEntity<>(
-          List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES),
-          HttpStatus.OK);
-    }
-    if (queryResult.getResultLines().isEmpty()) {
-      headers.add(HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY, "true");
+              List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES),
+              HttpStatus.OK);
     }
     return new ResponseEntity<>(queryResult, headers, HttpStatus.OK);
   }
@@ -284,7 +277,7 @@ public class QueryHandlerRestController {
     var queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.SUMMARY);
 
-    if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+    if (queryResult.totalNumberOfPatients() < privacyThresholdResults) {
       return new ResponseEntity<>(
           List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE),
           HttpStatus.OK);

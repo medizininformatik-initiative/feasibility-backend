@@ -5,21 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import java.util.List;
-import lombok.Data;
 
-@Data
 @JsonInclude(Include.NON_NULL)
-public class Query {
-
-  @JsonProperty
-  private long id;
-  @JsonProperty
-  private StructuredQuery content;
-  @JsonProperty
-  private String label;
-  @JsonProperty
-  private String comment;
-  @JsonProperty
-  private List<TermCode> invalidTerms;
+public record Query(
+    @JsonProperty long id,
+    @JsonProperty StructuredQuery content,
+    @JsonProperty String label,
+    @JsonProperty String comment,
+    @JsonProperty List<TermCode> invalidTerms
+) {
 
 }

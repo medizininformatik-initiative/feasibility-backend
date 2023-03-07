@@ -41,7 +41,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.empty;
@@ -109,7 +108,7 @@ public class QueryHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
 
         mockMvc.perform(post(URI.create("/api/v2/query")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -173,6 +172,30 @@ public class QueryHandlerRestControllerIT {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
+        StructuredQuery testQuery = createValidStructuredQuery();
+
+        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+
+        mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
+                .contentType(APPLICATION_JSON)
+                .content(jsonUtil.writeValueAsString(testQuery)))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
+        var testQuery = new StructuredQuery(null, null, null, null);
+
+        mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
+                .contentType(APPLICATION_JSON)
+                .content(jsonUtil.writeValueAsString(testQuery)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

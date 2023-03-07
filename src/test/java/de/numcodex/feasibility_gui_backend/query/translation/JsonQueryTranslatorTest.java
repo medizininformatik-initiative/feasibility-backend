@@ -27,7 +27,7 @@ public class JsonQueryTranslatorTest {
 
     @Test
     public void testTranslate_TranslationFails() throws JsonProcessingException {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         doThrow(JsonProcessingException.class).when(jsonUtil).writeValueAsString(testQuery);
 
         assertThrows(QueryTranslationException.class, () -> jsonQueryTranslator.translate(testQuery));
@@ -35,7 +35,7 @@ public class JsonQueryTranslatorTest {
 
     @Test
     public void testTranslate_TranslationSucceeds() {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         assertDoesNotThrow(() -> jsonQueryTranslator.translate(testQuery));
     }
 }

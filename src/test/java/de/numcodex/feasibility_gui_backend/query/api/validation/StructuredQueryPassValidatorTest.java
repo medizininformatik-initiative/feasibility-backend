@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.validation.ConstraintValidatorContext;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -32,19 +31,9 @@ public class StructuredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_validQueryPasses() {
-        var termCode = new TermCode();
-        termCode.setCode("LL2191-6");
-        termCode.setSystem("http://loinc.org");
-        termCode.setDisplay("Geschlecht");
-
-        var inclusionCriterion = new Criterion();
-        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
-
-        var testQuery = new StructuredQuery();
-        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
-        testQuery.setExclusionCriteria(List.of());
-        testQuery.setDisplay("foo");
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
+        var termCode = new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
+        var inclusionCriterion = new Criterion(List.of(termCode), null, null, null);
+        var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"), List.of(List.of(inclusionCriterion)), List.of(), "foo");
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testQuery, ctx));
         assertTrue(validationResult);
@@ -52,7 +41,7 @@ public class StructuredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_invalidQueryPasses() {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testQuery, ctx));
         assertTrue(validationResult);
     }
