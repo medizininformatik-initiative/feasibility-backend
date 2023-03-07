@@ -7,7 +7,11 @@ security:
 
 app:
   queryResultExpiryMinutes: 1
-  security:
-    nqueries:
-      amount: 3
-      perminutes: 1
+  privacy:
+    quota:
+      create:
+        amount: 3
+        intervalMinutes: 1
+      read:
+        any:
+          pollingIntervalSeconds: 0

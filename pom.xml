@@ -130,6 +130,12 @@
       <version>6.4.2</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.bucket4j</groupId>
+      <artifactId>bucket4j-core</artifactId>
+      <version>8.2.0</version>
+    </dependency>
+
 
     <!--
       This is for fixing an RCE vulnerability in commons-text <1.10.0. The dependency comes with the
