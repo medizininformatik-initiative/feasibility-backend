@@ -10,7 +10,6 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -68,9 +67,8 @@ public class QueryHandlerRestControllerIT {
     @MockBean
     private RateLimitingInterceptor rateLimitingInterceptor;
 
-    @SneakyThrows
     @BeforeEach
-    void initTest() {
+    void initTest() throws Exception {
         when(rateLimitingInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 

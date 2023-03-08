@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
-import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.Jwt2AuthoritiesConverter;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -25,7 +22,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
   private static final String HEADER_RETRY_AFTER = "X-Rate-Limit-Retry-After-Seconds";
   private final RateLimitingService rateLimitingService;
 
-  private final Jwt2AuthoritiesConverter jwt2AuthoritiesConverter;
+  private final PrincipalHelper principalHelper;
 
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
@@ -34,38 +31,36 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
   private String keycloakAdminRole;
 
   @Autowired
-  public RateLimitingInterceptor(RateLimitingService rateLimitingService, Jwt2AuthoritiesConverter jwt2AuthoritiesConverter) {
+  public RateLimitingInterceptor(RateLimitingService rateLimitingService, PrincipalHelper principalHelper) {
     this.rateLimitingService = rateLimitingService;
-    this.jwt2AuthoritiesConverter = jwt2AuthoritiesConverter;
+    this.principalHelper = principalHelper;
   }
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    var principal = (Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
     if (principal == null) {
       response.sendError(HttpStatus.UNAUTHORIZED.value());
       return false;
     }
-    JwtAuthenticationToken jwtAuthenticationToken
-        = new JwtAuthenticationToken(principal, jwt2AuthoritiesConverter.convert(principal));
 
-    if (jwtAuthenticationToken.getAuthorities().stream().anyMatch(ga -> keycloakAdminRole.equals(ga.getAuthority()))) {
+    if (principalHelper.hasAuthority(principal, keycloakAdminRole)) {
       return true;
-    } else if (jwtAuthenticationToken.getAuthorities().stream().noneMatch(ga -> keycloakAllowedRole.equals(ga.getAuthority()))) {
+    } else if (!principalHelper.hasAuthority(principal, keycloakAllowedRole)) {
       response.sendError(HttpStatus.FORBIDDEN.value());
       return false;
     }
 
-    Bucket tokenBucket = rateLimitingService.resolveBucket(jwtAuthenticationToken.getName());
+    Bucket tokenBucket = rateLimitingService.resolveBucket(principalHelper.getName(principal));
     ConsumptionProbe probe = tokenBucket.tryConsumeAndReturnRemaining(1);
     if (probe.isConsumed()) {
-      response.addHeader(HEADER_LIMIT_REMAINING, String.valueOf(probe.getRemainingTokens()));
+      response.addHeader(HEADER_LIMIT_REMAINING, Long.toString(probe.getRemainingTokens()));
       return true;
     } else {
       long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-      response.addHeader(HEADER_RETRY_AFTER, String.valueOf(waitForRefill));
+      response.addHeader(HEADER_RETRY_AFTER, Long.toString(waitForRefill));
       response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
           "You have exhausted your API Request Quota");
       return false;

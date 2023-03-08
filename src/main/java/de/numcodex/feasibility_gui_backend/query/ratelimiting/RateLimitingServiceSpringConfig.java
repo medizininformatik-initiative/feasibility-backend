@@ -1,6 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
-import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

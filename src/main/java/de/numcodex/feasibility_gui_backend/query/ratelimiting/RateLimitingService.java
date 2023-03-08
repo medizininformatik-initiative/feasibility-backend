@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implement a rate-limiting service via a {@link Bucket} on a per-user basis.
- *
+ * <p>
  * The limit is defined via application.yaml or env variable.
  */
 public class RateLimitingService {

@@ -7,6 +7,8 @@ security:
 
 app:
   queryResultExpiryMinutes: 1
+  keycloakAllowedRole: "FEASIBILITY_TEST_USER"
+  keycloakAdminRole: "FEASIBILITY_TEST_ADMIN"
   privacy:
     quota:
       create:
