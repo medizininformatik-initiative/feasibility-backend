@@ -58,6 +58,9 @@ public class QueryHandlerRestController {
   @Value("${PRIVACY_THRESHOLD_SITES:3}")
   private int privacyThresholdSites;
 
+  @Value("${PRIVACY_THRESHOLD_RESULTS:20}")
+  private int privacyThresholdResults;
+
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
@@ -137,7 +140,7 @@ public class QueryHandlerRestController {
     }
   }
 
-  @GetMapping( "/by-user/{id}")
+  @GetMapping("/by-user/{id}")
   public List<QueryListEntry> getQueryListForUser(@PathVariable("id") String userId, @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
@@ -180,6 +183,9 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY);
+    if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
     return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
 
