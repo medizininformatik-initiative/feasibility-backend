@@ -181,8 +181,8 @@ public class QueryHandlerService {
         return queries.orElseGet(ArrayList::new);
     }
 
-    public String getAuthorId(Long queryId) {
-        return queryRepository.getAuthor(queryId).orElse(null);
+    public String getAuthorId(Long queryId) throws QueryNotFoundException {
+        return queryRepository.getAuthor(queryId).orElseThrow(QueryNotFoundException::new);
     }
 
     public List<QueryListEntry> convertQueriesToQueryListEntries(List<de.numcodex.feasibility_gui_backend.query.persistence.Query> queryList) {

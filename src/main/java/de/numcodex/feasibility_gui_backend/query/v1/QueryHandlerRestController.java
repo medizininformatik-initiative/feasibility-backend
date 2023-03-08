@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.v1;
 
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
+import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,7 +93,14 @@ public class QueryHandlerRestController {
   public ResponseEntity<Object> getQueryResult(@PathVariable("id") Long queryId,
       Authentication authentication) {
 
-    if (queryHandlerService.getAuthorId(queryId).equalsIgnoreCase(authentication.getName())) {
+    String authorId;
+    try {
+      authorId = queryHandlerService.getAuthorId(queryId);
+    } catch (QueryNotFoundException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    if (authorId.equalsIgnoreCase(authentication.getName())) {
       return new ResponseEntity<>(
           queryHandlerService.getQueryResult(queryId, ResultDetail.DETAILED_OBFUSCATED),
           HttpStatus.OK);

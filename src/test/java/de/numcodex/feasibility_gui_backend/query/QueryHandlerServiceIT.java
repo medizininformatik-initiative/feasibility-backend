@@ -29,6 +29,7 @@ import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.Resu
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("query")
 @Tag("handler")
@@ -155,5 +156,11 @@ public class QueryHandlerServiceIT {
             .hasSize(2)
             .contains(QueryResultLine.builder().siteName(SITE_NAME_1).numberOfPatients(10L).build(),
                 QueryResultLine.builder().siteName(SITE_NAME_2).numberOfPatients(20L).build());
+    }
+
+    @Test
+    public void testGetAuthorId_UnknownQueryIdThrows() {
+        assertThrows(QueryNotFoundException.class,
+            () -> queryHandlerService.getAuthorId(UNKNOWN_QUERY_ID));
     }
 }
