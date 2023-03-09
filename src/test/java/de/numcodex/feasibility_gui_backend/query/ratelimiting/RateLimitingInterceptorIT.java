@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -62,41 +63,45 @@ public class RateLimitingInterceptorIT {
   @MockBean
   AuthenticationHelper authenticationHelper;
 
+  @BeforeEach
+  void setupMockBehaviour() throws InvalidAuthenticationException {
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+    doReturn(createTestQueryResult(ResultDetail.SUMMARY)).when(queryHandlerService)
+        .getQueryResult(any(Long.class), eq(ResultDetail.SUMMARY));
+    doReturn(createTestQueryResult(ResultDetail.DETAILED)).when(queryHandlerService)
+        .getQueryResult(any(Long.class), eq(ResultDetail.DETAILED));
+    doReturn(createTestQueryResult(ResultDetail.DETAILED_OBFUSCATED)).when(queryHandlerService)
+        .getQueryResult(any(Long.class), eq(ResultDetail.DETAILED_OBFUSCATED));
+  }
+
   @ParameterizedTest
   @EnumSource
   public void testGetResult_SucceedsOnFirstCall(ResultDetail resultDetail) throws Exception {
-    String authorName;
-    URI requestUri;
+    var authorName = UUID.randomUUID().toString();
+    var requestUri = "/api/v2/query/1";
     boolean isAdmin = false;
 
     switch (resultDetail) {
+      case SUMMARY -> {
+        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      }
       case DETAILED_OBFUSCATED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create(
-            "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT);
+        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       }
       case DETAILED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_RESULT);
+        requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_RESULT;
         isAdmin = true;
-      }
-      default -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT);
       }
     }
 
-    doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
     doReturn(isAdmin).when(authenticationHelper)
         .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
-    doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
-        .getQueryResult(any(Long.class), any(ResultDetail.class));
 
     mockMvc
         .perform(
-            get(requestUri).with(csrf())
+            get(URI.create(requestUri)).with(csrf())
                 .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
         )
         .andExpect(status().isOk());
@@ -106,32 +111,25 @@ public class RateLimitingInterceptorIT {
   @ParameterizedTest
   @EnumSource
   public void testGetResult_FailsOnImmediateSecondCall(ResultDetail resultDetail) throws Exception {
-    String authorName;
-    URI requestUri;
+    var authorName = UUID.randomUUID().toString();
+    var requestUri = "/api/v2/query/1";
 
     switch (resultDetail) {
+      case SUMMARY -> {
+        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      }
       case DETAILED_OBFUSCATED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create(
-            "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT);
+        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       }
       case DETAILED -> {
         // This endpoint is only available for admin users, which are not affected by rate limiting
         return;
       }
-      default -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT);
-      }
     }
 
-    doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
     doReturn(false).when(authenticationHelper)
         .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
-    doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
-        .getQueryResult(any(Long.class), any(ResultDetail.class));
 
     mockMvc
         .perform(
@@ -151,32 +149,25 @@ public class RateLimitingInterceptorIT {
   @ParameterizedTest
   @EnumSource
   public void testGetResult_SucceedsOnDelayedSecondCall(ResultDetail resultDetail) throws Exception {
-    String authorName;
-    URI requestUri;
+    var authorName = UUID.randomUUID().toString();
+    var requestUri = "/api/v2/query/1";
 
     switch (resultDetail) {
+      case SUMMARY -> {
+        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      }
       case DETAILED_OBFUSCATED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create(
-            "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT);
+        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       }
       case DETAILED -> {
         // This endpoint is only available for admin users, which are not affected by rate limiting
         return;
       }
-      default -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT);
-      }
     }
 
-    doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
     doReturn(false).when(authenticationHelper)
         .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
-    doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
-        .getQueryResult(any(Long.class), any(ResultDetail.class));
 
     mockMvc
         .perform(
@@ -199,32 +190,25 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_SucceedsOnImmediateMultipleCallsAsAdmin(ResultDetail resultDetail)
       throws Exception {
-    String authorName;
-    URI requestUri;
+
+    var authorName = UUID.randomUUID().toString();
+    var requestUri = "/api/v2/query/1";
 
     switch (resultDetail) {
+      case SUMMARY -> {
+        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      }
       case DETAILED_OBFUSCATED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create(
-            "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT);
+        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       }
       case DETAILED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_RESULT);
-      }
-      default -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT);
+        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_RESULT;
       }
     }
 
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
-    doReturn(true).when(authenticationHelper)
         .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
-    doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
-        .getQueryResult(any(Long.class), any(ResultDetail.class));
 
     for (int i = 0; i < 10; ++i) {
       mockMvc
@@ -240,32 +224,25 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_SucceedsOnImmediateSecondCallAsOtherUser(ResultDetail resultDetail)
       throws Exception {
-    String authorName;
-    URI requestUri;
+    var authorName = UUID.randomUUID().toString();
+    var requestUri = "/api/v2/query/1";
 
     switch (resultDetail) {
+      case SUMMARY -> {
+        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      }
       case DETAILED_OBFUSCATED -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create(
-            "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT);
+        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       }
       case DETAILED -> {
         // This endpoint is only available for admin users, which are not affected by rate limiting
         return;
       }
-      default -> {
-        authorName = UUID.randomUUID().toString();
-        requestUri = URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT);
-      }
     }
 
-    doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
     doReturn(false).when(authenticationHelper)
         .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
-    doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
-        .getQueryResult(any(Long.class), any(ResultDetail.class));
 
     mockMvc
         .perform(
