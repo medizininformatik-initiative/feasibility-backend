@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -59,7 +60,7 @@ public class RateLimitingInterceptorIT {
   private TermCodeValidation termCodeValidation;
 
   @MockBean
-  PrincipalHelper principalHelper;
+  AuthenticationHelper authenticationHelper;
 
   @ParameterizedTest
   @EnumSource
@@ -85,11 +86,10 @@ public class RateLimitingInterceptorIT {
       }
     }
 
-    doReturn(authorName).when(principalHelper).getName(any(Object.class));
-    doReturn(true).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_USER"));
-    doReturn(isAdmin).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_ADMIN"));
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+    doReturn(isAdmin).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
     doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
         .getQueryResult(any(Long.class), any(ResultDetail.class));
@@ -125,11 +125,10 @@ public class RateLimitingInterceptorIT {
       }
     }
 
-    doReturn(authorName).when(principalHelper).getName(any(Object.class));
-    doReturn(true).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_USER"));
-    doReturn(false).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_ADMIN"));
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+    doReturn(false).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
     doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
         .getQueryResult(any(Long.class), any(ResultDetail.class));
@@ -171,11 +170,10 @@ public class RateLimitingInterceptorIT {
       }
     }
 
-    doReturn(authorName).when(principalHelper).getName(any(Object.class));
-    doReturn(true).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_USER"));
-    doReturn(false).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_ADMIN"));
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+    doReturn(false).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
     doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
         .getQueryResult(any(Long.class), any(ResultDetail.class));
@@ -220,11 +218,10 @@ public class RateLimitingInterceptorIT {
       }
     }
 
-    doReturn(authorName).when(principalHelper).getName(any(Object.class));
-    doReturn(true).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_USER"));
-    doReturn(true).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_ADMIN"));
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
     doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
         .getQueryResult(any(Long.class), any(ResultDetail.class));
@@ -262,11 +259,10 @@ public class RateLimitingInterceptorIT {
       }
     }
 
-    doReturn(authorName).when(principalHelper).getName(any(Object.class));
-    doReturn(true).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_USER"));
-    doReturn(false).when(principalHelper)
-        .hasAuthority(any(Object.class), eq("FEASIBILITY_TEST_ADMIN"));
+    doReturn(true).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+    doReturn(false).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
     doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService)
         .getQueryResult(any(Long.class), any(ResultDetail.class));
@@ -279,7 +275,6 @@ public class RateLimitingInterceptorIT {
         .andExpect(status().isOk());
 
     authorName = UUID.randomUUID().toString();
-    doReturn(authorName).when(principalHelper).getName(any(Object.class));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc

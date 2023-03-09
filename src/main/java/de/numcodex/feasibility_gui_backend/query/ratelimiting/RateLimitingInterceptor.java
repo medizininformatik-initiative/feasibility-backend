@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -22,7 +23,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
   private static final String HEADER_RETRY_AFTER = "X-Rate-Limit-Retry-After-Seconds";
   private final RateLimitingService rateLimitingService;
 
-  private final PrincipalHelper principalHelper;
+  private final AuthenticationHelper authenticationHelper;
 
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
@@ -31,29 +32,29 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
   private String keycloakAdminRole;
 
   @Autowired
-  public RateLimitingInterceptor(RateLimitingService rateLimitingService, PrincipalHelper principalHelper) {
+  public RateLimitingInterceptor(RateLimitingService rateLimitingService, AuthenticationHelper authenticationHelper) {
     this.rateLimitingService = rateLimitingService;
-    this.principalHelper = principalHelper;
+    this.authenticationHelper = authenticationHelper;
   }
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (principal == null) {
+    if (authentication == null) {
       response.sendError(HttpStatus.UNAUTHORIZED.value());
       return false;
     }
 
-    if (principalHelper.hasAuthority(principal, keycloakAdminRole)) {
+    if (authenticationHelper.hasAuthority(authentication, keycloakAdminRole)) {
       return true;
-    } else if (!principalHelper.hasAuthority(principal, keycloakAllowedRole)) {
+    } else if (!authenticationHelper.hasAuthority(authentication, keycloakAllowedRole)) {
       response.sendError(HttpStatus.FORBIDDEN.value());
       return false;
     }
 
-    Bucket tokenBucket = rateLimitingService.resolveBucket(principalHelper.getName(principal));
+    Bucket tokenBucket = rateLimitingService.resolveBucket(authentication.getName());
     ConsumptionProbe probe = tokenBucket.tryConsumeAndReturnRemaining(1);
     if (probe.isConsumed()) {
       response.addHeader(HEADER_LIMIT_REMAINING, Long.toString(probe.getRemainingTokens()));
