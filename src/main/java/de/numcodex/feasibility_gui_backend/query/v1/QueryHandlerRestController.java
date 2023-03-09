@@ -33,11 +33,11 @@ public class QueryHandlerRestController {
   private final QueryHandlerService queryHandlerService;
   private final String apiBaseUrl;
 
-  @Value("${app.security.nqueries.amount}")
-  private int nQueriesAmount;
+  @Value("${app.privacy.quota.create.amount}")
+  private int quotaCreateAmount;
 
-  @Value("${app.security.nqueries.perminutes}")
-  private int nQueriesPerMinute;
+  @Value("${app.privacy.quota.create.intervalMinutes}")
+  private int quotaCreateIntervalMinutes;
 
   @Value("${PRIVACY_THRESHOLD_RESULTS:20}")
   private int privacyThresholdResults;
@@ -55,11 +55,11 @@ public class QueryHandlerRestController {
       Principal principal) {
 
     Long amountOfQueriesByUserAndInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
-        principal.getName(), nQueriesPerMinute);
+        principal.getName(), quotaCreateIntervalMinutes);
     log.error("amount: " + amountOfQueriesByUserAndInterval);
-    if (nQueriesAmount <= amountOfQueriesByUserAndInterval) {
+    if (quotaCreateAmount <= amountOfQueriesByUserAndInterval) {
       Long retryAfter = queryHandlerService.getRetryAfterTime(principal.getName(),
-          nQueriesAmount - 1, nQueriesPerMinute);
+          quotaCreateAmount - 1, quotaCreateIntervalMinutes);
       log.error("retry after: " + retryAfter);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));

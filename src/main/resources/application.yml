@@ -83,10 +83,14 @@ app:
     connectTimeout: 2000
   cql:
     baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
-  security:
-    nqueries:
-      amount: ${SECURITY_NQUERIES_AMOUNT:3}
-      perminutes: ${SECURITY_NQUERIES_PERMINUTES:1}
+  privacy:
+    quota:
+      create:
+        amount: ${PRIVACY_QUOTA_CREATE_AMOUNT:3}
+        intervalMinutes: ${PRIVACY_QUOTA_CREATE_INTERVALMINUTES:1}
+      read:
+        any:
+          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_ANY_POLLINGINTERVALSECONDS:10}
 
 logging:
   level:

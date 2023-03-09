@@ -49,11 +49,11 @@ public class QueryHandlerRestController {
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
 
-  @Value("${app.security.nqueries.amount}")
-  private int nQueriesAmount;
+  @Value("${app.privacy.quota.create.amount}")
+  private int quotaCreateAmount;
 
-  @Value("${app.security.nqueries.perminutes}")
-  private int nQueriesPerMinute;
+  @Value("${app.privacy.quota.create.intervalminutes}")
+  private int quotaCreateIntervalMinutes;
 
   @Value("${PRIVACY_THRESHOLD_SITES:3}")
   private int privacyThresholdSites;
@@ -74,10 +74,10 @@ public class QueryHandlerRestController {
                                                Principal principal) {
 
     Long amountOfQueriesByUserAndInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
-        principal.getName(), nQueriesPerMinute);
-    if (nQueriesAmount <= amountOfQueriesByUserAndInterval) {
+        principal.getName(), quotaCreateIntervalMinutes);
+    if (quotaCreateAmount <= amountOfQueriesByUserAndInterval) {
       Long retryAfter = queryHandlerService.getRetryAfterTime(principal.getName(),
-          nQueriesAmount - 1, nQueriesPerMinute);
+          quotaCreateAmount - 1, quotaCreateIntervalMinutes);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
       return Mono.just(new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS));

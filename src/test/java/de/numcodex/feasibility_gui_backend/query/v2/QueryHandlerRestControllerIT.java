@@ -7,7 +7,10 @@ import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
+import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
+import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +31,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
@@ -36,7 +40,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Tag("query")
 @ExtendWith(SpringExtension.class)
-@Import({StructuredQueryValidatorSpringConfig.class})
+@Import({StructuredQueryValidatorSpringConfig.class,
+        RateLimitingServiceSpringConfig.class
+})
 @WebMvcTest(
         controllers = QueryHandlerRestController.class,
         properties = {
@@ -57,6 +63,14 @@ public class QueryHandlerRestControllerIT {
 
     @MockBean
     private TermCodeValidation termCodeValidation;
+
+    @MockBean
+    private RateLimitingInterceptor rateLimitingInterceptor;
+
+    @BeforeEach
+    void initTest() throws Exception {
+        when(rateLimitingInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
