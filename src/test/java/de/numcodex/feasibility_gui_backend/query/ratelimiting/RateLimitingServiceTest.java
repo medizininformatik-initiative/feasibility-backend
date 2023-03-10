@@ -16,27 +16,30 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RateLimitingServiceTest {
 
   private final Duration interval = Duration.ofSeconds(1);
+  private final int amountDetailedObfuscated = 2;
+  private final Duration intervalDetailedObfuscated = Duration.ofSeconds(2);
 
   private RateLimitingService rateLimitingService;
 
   @BeforeEach
   void setUp() {
-    this.rateLimitingService = new RateLimitingService(interval);
+    this.rateLimitingService = new RateLimitingService(interval, amountDetailedObfuscated,
+        intervalDetailedObfuscated);
   }
 
   @Test
   void testResolveBucket() {
-    Bucket bucketSomeone = rateLimitingService.resolveBucket("someone");
+    Bucket bucketSomeone = rateLimitingService.resolveAnyResultBucket("someone");
     assertNotNull(bucketSomeone);
-    Bucket bucketSomeoneElse = rateLimitingService.resolveBucket("someone-else");
+    Bucket bucketSomeoneElse = rateLimitingService.resolveAnyResultBucket("someone-else");
     assertNotNull(bucketSomeoneElse);
     assertNotEquals(bucketSomeone, bucketSomeoneElse);
-    assertEquals(bucketSomeone, rateLimitingService.resolveBucket("someone"));
+    assertEquals(bucketSomeone, rateLimitingService.resolveAnyResultBucket("someone"));
   }
 
   @Test
   void testResolveBucketRefill() throws InterruptedException {
-    Bucket bucketSomeone = rateLimitingService.resolveBucket("someone");
+    Bucket bucketSomeone = rateLimitingService.resolveAnyResultBucket("someone");
     assertTrue(bucketSomeone.tryConsume(1));
     assertFalse(bucketSomeone.tryConsume(1));
     Thread.sleep(TimeUnit.MILLISECONDS.convert(interval));

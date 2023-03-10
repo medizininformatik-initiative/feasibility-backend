@@ -10,6 +10,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingService;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,8 @@ public class QueryHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
   private final TermCodeValidation termCodeValidation;
+
+  private final RateLimitingService rateLimitingService;
   private final String apiBaseUrl;
 
   @Value("${app.keycloakAdminRole}")
@@ -62,9 +65,11 @@ public class QueryHandlerRestController {
   private int privacyThresholdResults;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
-      TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
+      TermCodeValidation termCodeValidation, RateLimitingService rateLimitingService,
+      @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
     this.termCodeValidation = termCodeValidation;
+    this.rateLimitingService = rateLimitingService;
     this.apiBaseUrl = apiBaseUrl;
   }
 
@@ -167,13 +172,23 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)
-  public QueryResult getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId) {
+  public ResponseEntity<Object> getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId, Authentication authentication) {
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.DETAILED_OBFUSCATED);
+
+    // If the detailed obfuscated result was not returned because any of the thresholds is not met,
+    // put 1 token back to the users bucket
+    if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+      rateLimitingService.addTokensToDetailedObfuscatedResultBucket(authentication.getName(), 1);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
       queryResult.setResultLines(List.of());
     }
-    return queryResult;
+    if (queryResult.getResultLines().isEmpty()) {
+      rateLimitingService.addTokensToDetailedObfuscatedResultBucket(authentication.getName(), 1);
+    }
+    return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)

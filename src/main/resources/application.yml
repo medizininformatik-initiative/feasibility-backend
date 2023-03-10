@@ -91,6 +91,9 @@ app:
       read:
         any:
           pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_ANY_POLLINGINTERVALSECONDS:10}
+        detailedObfuscated:
+          amount: ${PRIVACY_QUOTA_READ_DETAILEDOBFUSCATED_AMOUNT:3}
+          intervalMinutes: ${PRIVACY_QUOTA_READ_DETAILEDOBFUSCATED_INTERVALMINUTES:120}
 
 logging:
   level:

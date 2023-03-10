@@ -17,3 +17,6 @@ app:
       read:
         any:
           pollingIntervalSeconds: 0
+        detailedObfuscated:
+          amount: 999
+          intervalMinutes: 0
