@@ -1,17 +1,16 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.ConsumptionProbe;
+import de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * This Interceptor checks whether a user may use the requested endpoint at this moment.
@@ -44,7 +43,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null) {
       response.sendError(HttpStatus.UNAUTHORIZED.value());
@@ -58,13 +57,13 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
       return false;
     }
 
-    Bucket anyResultTokenBucket = rateLimitingService.resolveAnyResultBucket(authentication.getName());
-    ConsumptionProbe anyResultProbe = anyResultTokenBucket.tryConsumeAndReturnRemaining(1);
+    var anyResultTokenBucket = rateLimitingService.resolveAnyResultBucket(authentication.getName());
+    var anyResultProbe = anyResultTokenBucket.tryConsumeAndReturnRemaining(1);
     if (anyResultProbe.isConsumed()) {
       if (request.getRequestURI().endsWith(WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)) {
-        Bucket detailedObfuscatedResultTokenBucket = rateLimitingService.resolveDetailedObfuscatedResultBucket(
+        var detailedObfuscatedResultTokenBucket = rateLimitingService.resolveDetailedObfuscatedResultBucket(
             authentication.getName());
-        ConsumptionProbe detailedObfuscatedResultProbe = detailedObfuscatedResultTokenBucket.tryConsumeAndReturnRemaining(
+        var detailedObfuscatedResultProbe = detailedObfuscatedResultTokenBucket.tryConsumeAndReturnRemaining(
             1);
         if (detailedObfuscatedResultProbe.isConsumed()) {
           response.addHeader(HEADER_LIMIT_REMAINING_DETAILED_OBFUSCATED_RESULTS, Long.toString(detailedObfuscatedResultProbe.getRemainingTokens()));
@@ -84,6 +83,23 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
       response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
           "You have exhausted your API Request Quota");
       return false;
+    }
+  }
+
+  @Override
+  public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+      Object handler, Exception ex) throws Exception {
+    HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+
+    if (request.getRequestURI().endsWith(WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT) && (
+        response.getStatus() != 200 || response.containsHeader(
+            QueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY))) {
+      var authentication = SecurityContextHolder.getContext().getAuthentication();
+      var detailedObfuscatedResultTokenBucket = rateLimitingService.resolveDetailedObfuscatedResultBucket(
+          authentication.getName());
+      detailedObfuscatedResultTokenBucket.addTokens(1);
+      response.setHeader(QueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY,
+          null);
     }
   }
 }
