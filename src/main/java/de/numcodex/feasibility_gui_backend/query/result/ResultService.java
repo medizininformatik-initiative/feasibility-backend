@@ -108,6 +108,7 @@ public class ResultService {
   public void addResultLine(Long queryId, ResultLine result) {
     queryResultCache.asMap()
         .merge(queryId, QueryResult.ofResultLine(result), QueryResult::merge);
+    log.info("{};{};{}", queryId, result.siteName(), result.result());
   }
 
   /**
