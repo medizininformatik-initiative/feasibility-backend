@@ -60,6 +60,7 @@ class DSFQueryResultHandler {
 
             try {
                 MeasureReport report = fetchMeasureReport(measureReportUrl.getIdPart());
+                deleteMeasureReport(measureReportUrl.getIdPart());
                 int measureCount = extractMeasureCount(report);
                 return Optional.of(new DSFQueryResult(queryId, siteId, measureCount));
             } catch (Exception e) {
@@ -124,6 +125,19 @@ class DSFQueryResultHandler {
             fhirWebserviceClient = fhirWebClientProvider.provideFhirWebserviceClient();
         }
         return fhirWebserviceClient.read(MeasureReport.class, measureReportId);
+    }
+
+    /**
+     * Deletes a specific measure report in DSF.
+     *
+     * @param measureReportId Identifies the measure report that shall be deleted.
+     */
+    private void deleteMeasureReport(String measureReportId) throws FhirWebClientProvisionException {
+        if (fhirWebserviceClient == null) {
+            fhirWebserviceClient = fhirWebClientProvider.provideFhirWebserviceClient();
+        }
+        fhirWebserviceClient.delete(MeasureReport.class, measureReportId);
+        fhirWebserviceClient.deletePermanently(MeasureReport.class, measureReportId);
     }
 
     /**
