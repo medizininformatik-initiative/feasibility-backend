@@ -30,25 +30,19 @@ public class WebSecurityConfig {
   public static final String KEY_RESOURCE_ACCESS = "resource_access";
   public static final String KEY_SPRING_ADDONS_CONFIDENTIAL = "spring-addons-confidential";
   public static final String KEY_SPRING_ADDONS_PUBLIC = "spring-addons-public";
+  public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
   public static final String PATH_API_V1 = "/api/v1";
   public static final String PATH_API_V2 = "/api/v2";
   public static final String PATH_QUERY = "/query";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
-  public static final String PATH_QUERY_ID_MATCHER = "/{queryId:\\d+}";
   public static final String PATH_SAVED = "/saved";
   public static final String PATH_CONTENT = "/content";
   public static final String PATH_SUMMARY_RESULT = "/summary-result";
   public static final String PATH_DETAILED_OBFUSCATED_RESULT = "/detailed-obfuscated-result";
   public static final String PATH_DETAILED_RESULT = "/detailed-result";
   public static final String PATH_TERMINOLOGY = "/terminology";
-  public static final String PATH_ROOT_ENTRIES = "/root-entries";
-  public static final String PATH_ENTRIES = "/entries";
-  public static final String PATH_NODE_ID_MATCHER = "/{nodeId:\\d+}";
-  public static final String PATH_SELECTABLE_ENTRIES = "/selectable-entries";
-  public static final String PATH_UI_PROFILE = "/ui_profile";
   public static final String PATH_TEMPLATE = "/template";
-  public static final String PATH_VALIDATE = "/validate";
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
 
@@ -108,24 +102,18 @@ public class WebSecurityConfig {
     }
 
     http.authorizeHttpRequests()
-        .requestMatchers(PATH_API_V1 + "/**").hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + "/**").hasAuthority(keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY).hasAuthority(keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_USER_ID_MATCHER).hasAuthority(keycloakAdminRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_SUMMARY_RESULT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_OBFUSCATED_RESULT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT).hasAuthority(keycloakAdminRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_CONTENT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_ROOT_ENTRIES).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_ENTRIES + PATH_NODE_ID_MATCHER).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_SELECTABLE_ENTRIES).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_UI_PROFILE).hasAuthority(keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE + PATH_QUERY_ID_MATCHER).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE + PATH_VALIDATE).hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE + "/*").hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + "/**").hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+        .requestMatchers(PATH_API_V1 + "/**").hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
         .anyRequest()
-        .permitAll()
+        .denyAll()
         .and()
         .csrf().disable();
 
