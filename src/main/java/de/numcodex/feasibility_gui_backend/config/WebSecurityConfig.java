@@ -113,6 +113,7 @@ public class WebSecurityConfig {
         .and()
         .csrf().disable();
 
+    http.cors();
     return http.build();
   }
 }
