@@ -40,6 +40,12 @@ public class WebSecurityConfig {
   public static final String PATH_SUMMARY_RESULT = "/summary-result";
   public static final String PATH_DETAILED_OBFUSCATED_RESULT = "/detailed-obfuscated-result";
   public static final String PATH_DETAILED_RESULT = "/detailed-result";
+  public static final String PATH_TERMINOLOGY = "/terminology";
+  public static final String PATH_ROOT_ENTRIES = "/root-entries";
+  public static final String PATH_ENTRIES = "/entries";
+  public static final String PATH_NODE_ID_MATCHER = "/{nodeId:\\d+}";
+  public static final String PATH_SELECTABLE_ENTRIES = "/selectable-entries";
+  public static final String PATH_UI_PROFILE = "/ui_profile";
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
 
@@ -108,6 +114,10 @@ public class WebSecurityConfig {
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_DETAILED_OBFUSCATED_RESULT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_DETAILED_RESULT).hasAuthority(keycloakAdminRole)
         .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_CONTENT).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_ROOT_ENTRIES).hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_ENTRIES + PATH_NODE_ID_MATCHER).hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_SELECTABLE_ENTRIES).hasAuthority(keycloakAllowedRole)
+        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + PATH_UI_PROFILE).hasAuthority(keycloakAllowedRole)
         .anyRequest()
         .permitAll()
         .and()
