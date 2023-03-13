@@ -3,7 +3,7 @@ package de.numcodex.feasibility_gui_backend.config;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API_V2;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_QUERY;
-import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_QUERY_ID_MATCHER;
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_ID_MATCHER;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_SUMMARY_RESULT;
 
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
@@ -23,7 +23,7 @@ public class RateLimitingConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(interceptor)
-        .addPathPatterns(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_SUMMARY_RESULT)
-        .addPathPatterns(PATH_API_V2 + PATH_QUERY + PATH_QUERY_ID_MATCHER + PATH_DETAILED_OBFUSCATED_RESULT);
+        .addPathPatterns(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_SUMMARY_RESULT)
+        .addPathPatterns(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_OBFUSCATED_RESULT);
   }
 }

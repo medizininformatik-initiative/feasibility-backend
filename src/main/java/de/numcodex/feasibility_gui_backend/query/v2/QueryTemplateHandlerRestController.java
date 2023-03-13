@@ -18,7 +18,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +49,6 @@ public class QueryTemplateHandlerRestController {
   }
 
   @PostMapping(path = "")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> storeQueryTemplate(@Valid @RequestBody QueryTemplate queryTemplate,
       @Context HttpServletRequest httpServletRequest, Principal principal) {
 
@@ -78,7 +76,6 @@ public class QueryTemplateHandlerRestController {
   }
 
   @GetMapping(path = "/{queryId}")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> getQueryTemplate(@PathVariable(value = "queryId") Long queryId,
       Principal principal) {
 
@@ -97,7 +94,6 @@ public class QueryTemplateHandlerRestController {
   }
 
   @GetMapping(path = "")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> getQueryTemplates(Principal principal) {
 
     var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());
@@ -115,7 +111,6 @@ public class QueryTemplateHandlerRestController {
   }
 
   @GetMapping(path = "/validate")
-  @PreAuthorize("hasRole(@environment.getProperty('app.keycloakAllowedRole'))")
   public ResponseEntity<Object> validateTemplates(Principal principal) {
 
     var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());
