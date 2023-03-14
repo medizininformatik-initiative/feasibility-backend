@@ -2,12 +2,17 @@ package de.numcodex.feasibility_gui_backend.query.result;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.aktin.broker.client2.BrokerAdmin2;
 
 /**
  * Stores results of queries volatile.
@@ -20,16 +25,44 @@ import lombok.extern.slf4j.Slf4j;
 public class ResultService {
 
   private final Cache<Long, QueryResult> queryResultCache;
+  private final BrokerAdmin2 delegate;
+
+  @NonNull
+  private final QueryDispatchRepository queryDispatchRepository;
 
   /**
    * Creates a new ResultService.
    *
    * @param resultExpiry the duration after which a result shouldn't be available anymore
    */
-  public ResultService(Duration resultExpiry) {
+  public ResultService(Duration resultExpiry, BrokerAdmin2 delegate, QueryDispatchRepository queryDispatchRepository) {
+    this.queryDispatchRepository = queryDispatchRepository;
+    this.delegate = Objects.requireNonNull(delegate);
     this.queryResultCache = Caffeine.newBuilder()
         .expireAfterWrite(resultExpiry)
+        .removalListener((key, value, cause) -> onRemoval(key) )
         .build();
+  }
+
+  /**
+   * Deletes Query from AKTIN broker if the query has been dispatched to AKTIN Broker.
+   *
+   * @param key the query id as saved in the cache
+   */
+  private void onRemoval(Object key){
+    Long queryId = (Long) key;
+    var queryDispatch = queryDispatchRepository.findByQueryIdAndBrokerType(String.valueOf(queryId), BrokerClientType.AKTIN);
+
+    queryDispatch.ifPresent((queryDispatchResult) -> {
+      String externalQueryId  = queryDispatchResult.getId().getExternalId();
+      log.debug("Deleting query with internal ID {} and AKTIN ID {} from AKTIN broker", queryId, externalQueryId);
+      try {
+        delegate.deleteRequest(Integer.valueOf(externalQueryId));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    });
+
   }
 
   /**
