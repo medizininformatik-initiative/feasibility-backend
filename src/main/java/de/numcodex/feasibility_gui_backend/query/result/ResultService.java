@@ -25,7 +25,7 @@ import org.aktin.broker.client2.BrokerAdmin2;
 public class ResultService {
 
   private final Cache<Long, QueryResult> queryResultCache;
-  private final BrokerAdmin2 delegate;
+  private final BrokerAdmin2 aktinBrokerClient;
 
   @NonNull
   private final QueryDispatchRepository queryDispatchRepository;
@@ -35,9 +35,9 @@ public class ResultService {
    *
    * @param resultExpiry the duration after which a result shouldn't be available anymore
    */
-  public ResultService(Duration resultExpiry, BrokerAdmin2 delegate, QueryDispatchRepository queryDispatchRepository) {
+  public ResultService(Duration resultExpiry, BrokerAdmin2 aktinBrokerClient, QueryDispatchRepository queryDispatchRepository) {
     this.queryDispatchRepository = queryDispatchRepository;
-    this.delegate = Objects.requireNonNull(delegate);
+    this.aktinBrokerClient = aktinBrokerClient;
     this.queryResultCache = Caffeine.newBuilder()
         .expireAfterWrite(resultExpiry)
         .removalListener((key, value, cause) -> onRemoval(key) )
@@ -50,6 +50,11 @@ public class ResultService {
    * @param key the query id as saved in the cache
    */
   private void onRemoval(Object key){
+
+    if (this.aktinBrokerClient == null){
+      return;
+    }
+
     Long queryId = (Long) key;
     var queryDispatch = queryDispatchRepository.findByQueryIdAndBrokerType(String.valueOf(queryId), BrokerClientType.AKTIN);
 
@@ -57,7 +62,7 @@ public class ResultService {
       String externalQueryId  = queryDispatchResult.getId().getExternalId();
       log.debug("Deleting query with internal ID {} and AKTIN ID {} from AKTIN broker", queryId, externalQueryId);
       try {
-        delegate.deleteRequest(Integer.valueOf(externalQueryId));
+        aktinBrokerClient.deleteRequest(Integer.valueOf(externalQueryId));
       } catch (Exception e) {
         e.printStackTrace();
       }

@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class ResultServiceSpringConfig {
 
+  @Value("${app.broker.aktin.enabled}")
+  private boolean aktinEnabled;
+
   @Value("${app.broker.aktin.broker.baseUrl}")
   private String brokerBaseUrl;
 
@@ -25,8 +28,14 @@ public class ResultServiceSpringConfig {
   @Bean
   public ResultService createResultService(
       @Value("${app.queryResultExpiryMinutes}") int resultExpiry, QueryDispatchRepository queryDispatchRepository) {
-    BrokerAdmin2 client = new BrokerAdmin2(URI.create(brokerBaseUrl));
-    client.setAuthFilter(new ApiKeyAuthFilter(brokerApiKey));
+
+    BrokerAdmin2 client = null;
+
+    if (aktinEnabled){
+      client = new BrokerAdmin2(URI.create(brokerBaseUrl));
+      client.setAuthFilter(new ApiKeyAuthFilter(brokerApiKey));
+    }
+
     log.info("Create ResultService with result TTL of {} minutes", resultExpiry);
     return new ResultService(Duration.ofMinutes(resultExpiry), client, queryDispatchRepository);
   }
