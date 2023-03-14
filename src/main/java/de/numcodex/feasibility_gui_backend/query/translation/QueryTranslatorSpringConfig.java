@@ -97,13 +97,13 @@ public class QueryTranslatorSpringConfig {
                         entry("urn:oid:1.2.276.0.76.5.409", "urn409"),
                         entry(
                                 "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/ecrf-parameter-codes",
-                                "num-ecrf"),
+                                "numecrf"),
                         entry("urn:iso:std:iso:3166", "iso3166"),
                         entry("https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/frailty-score",
-                                "fraility-score"),
-                        entry("http://terminology.hl7.org/CodeSystem/consentcategorycodes", "consent"),
-                        entry("urn:oid:2.16.840.1.113883.3.1937.777.24.5.1", "mide-1"),
-                        entry("http://hl7.org/fhir/consent-provision-type", "provision-type"))));
+                                "frailtyscore"),
+                        entry("http://terminology.hl7.org/CodeSystem/consentcategorycodes", "consentcategory"),
+                        entry("urn:oid:2.16.840.1.113883.3.1937.777.24.5.3", "consent"),
+                        entry("http://hl7.org/fhir/consent-provision-type", "provisiontype"))));
     }
 
     @Qualifier("cql")
