@@ -4,11 +4,15 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.E
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
+import java.net.URI;
 import java.time.Duration;
+import org.aktin.broker.client2.BrokerAdmin2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @Tag("query")
@@ -27,9 +31,12 @@ class ResultServiceTest {
 
   private ResultService resultService;
 
+  @Mock
+  private QueryDispatchRepository queryDispatchRepository;
+
   @BeforeEach
   void setUp() {
-    resultService = new ResultService(expiryTime);
+    resultService = new ResultService(expiryTime, new BrokerAdmin2(URI.create("test")), queryDispatchRepository);
   }
 
   @Test

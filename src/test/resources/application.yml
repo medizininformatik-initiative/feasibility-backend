@@ -9,6 +9,9 @@ app:
   queryResultExpiryMinutes: 1
   keycloakAllowedRole: "FEASIBILITY_TEST_USER"
   keycloakAdminRole: "FEASIBILITY_TEST_ADMIN"
+  broker:
+    aktin:
+      enabled: false
   privacy:
     quota:
       create:
