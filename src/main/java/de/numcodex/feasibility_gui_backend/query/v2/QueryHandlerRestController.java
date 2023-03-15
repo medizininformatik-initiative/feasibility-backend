@@ -42,6 +42,7 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
 public class QueryHandlerRestController {
 
+  public static final String HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY = "X-Detailed-Obfuscated-Result-Was-Empty";
   private final QueryHandlerService queryHandlerService;
   private final TermCodeValidation termCodeValidation;
   private final String apiBaseUrl;
@@ -167,13 +168,21 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)
-  public QueryResult getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId) {
+  public ResponseEntity<Object> getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId) {
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.DETAILED_OBFUSCATED);
+
+    if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    HttpHeaders headers = new HttpHeaders();
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
       queryResult.setResultLines(List.of());
     }
-    return queryResult;
+    if (queryResult.getResultLines().isEmpty()) {
+      headers.add(HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY, "true");
+    }
+    return new ResponseEntity<>(queryResult, headers, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)

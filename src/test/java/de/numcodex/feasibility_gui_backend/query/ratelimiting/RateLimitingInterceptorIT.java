@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -45,7 +46,9 @@ import org.springframework.test.web.servlet.MockMvc;
     controllers = QueryHandlerRestController.class,
     properties = {
         "app.enableQueryValidation=true",
-        "app.privacy.quota.read.any.pollingIntervalSeconds=1"
+        "app.privacy.quota.read.any.pollingIntervalSeconds=1",
+        "app.privacy.quota.read.detailedObfuscated.amount=1",
+        "app.privacy.quota.read.detailedObfuscated.intervalSeconds=3"
     }
 )
 @SuppressWarnings("NewClassNamingConvention")
@@ -257,6 +260,42 @@ public class RateLimitingInterceptorIT {
     mockMvc
         .perform(
             get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
+                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+        )
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void testGetDetailedObfuscatedResult_FailsOnLimitExceedingCall() throws Exception {
+    var authorName = UUID.randomUUID().toString();
+    var requestUri = "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+
+    doReturn(false).when(authenticationHelper)
+        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+    doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
+
+    mockMvc
+        .perform(
+            get(requestUri).with(csrf())
+                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+        )
+        .andExpect(status().isOk());
+
+    // Wait longer than 1 second to avoid running into the general rate limit
+    Thread.sleep(1001L);
+
+    mockMvc
+        .perform(
+            get(URI.create(requestUri)).with(csrf())
+                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+        )
+        .andExpect(status().isTooManyRequests());
+
+    Thread.sleep(2001L);
+
+    mockMvc
+        .perform(
+            get(requestUri).with(csrf())
                 .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
         )
         .andExpect(status().isOk());

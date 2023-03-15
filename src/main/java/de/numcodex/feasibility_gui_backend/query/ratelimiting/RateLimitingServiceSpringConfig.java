@@ -12,8 +12,14 @@ public class RateLimitingServiceSpringConfig {
 
   @Bean
   public RateLimitingService createRateLimitingService(
-      @Value("${app.privacy.quota.read.any.pollingIntervalSeconds}") int pollingIntervalSeconds) {
-    log.info("Create RateLimitingService with interval of {} seconds", pollingIntervalSeconds);
-    return new RateLimitingService(Duration.ofSeconds(pollingIntervalSeconds));
+      @Value("${app.privacy.quota.read.any.pollingIntervalSeconds}") int pollingIntervalSeconds,
+      @Value("${app.privacy.quota.read.detailedObfuscated.amount}") int detailedObfuscatedAmount,
+      @Value("${app.privacy.quota.read.detailedObfuscated.intervalSeconds}") int detailedObfuscatedIntervalSeconds) {
+
+    log.info(
+        "Create RateLimitingService with interval of {} seconds for any result endpoint and {} allowed requests to detailed obfuscated result per {} seconds",
+        pollingIntervalSeconds, detailedObfuscatedAmount, detailedObfuscatedIntervalSeconds);
+    return new RateLimitingService(Duration.ofSeconds(pollingIntervalSeconds),
+        detailedObfuscatedAmount, Duration.ofSeconds(detailedObfuscatedIntervalSeconds));
   }
 }
