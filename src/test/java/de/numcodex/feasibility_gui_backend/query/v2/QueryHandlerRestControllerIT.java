@@ -146,4 +146,40 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
+        var termCode = new TermCode();
+        termCode.setCode("LL2191-6");
+        termCode.setSystem("http://loinc.org");
+        termCode.setDisplay("Geschlecht");
+
+        var inclusionCriterion = new Criterion();
+        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
+
+        var testQuery = new StructuredQuery();
+        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
+        testQuery.setExclusionCriteria(List.of());
+        testQuery.setDisplay("foo");
+        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
+
+        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+
+        mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
+                .contentType(APPLICATION_JSON)
+                .content(jsonUtil.writeValueAsString(testQuery)))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
+        var testQuery = new StructuredQuery();
+
+        mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
+                .contentType(APPLICATION_JSON)
+                .content(jsonUtil.writeValueAsString(testQuery)))
+            .andExpect(status().isBadRequest());
+    }
 }
