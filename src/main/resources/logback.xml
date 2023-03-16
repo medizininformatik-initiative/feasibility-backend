@@ -1,5 +1,5 @@
 <configuration>
-  <property name="QUERYRESULT_LOG_FILE" value="queryResults" />
+  <property name="QUERYRESULT_LOG_FILE" value="logging/query-results" />
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -11,7 +11,7 @@
     <file>${QUERYRESULT_LOG_FILE}.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <!-- monthly rollover -->
-      <fileNamePattern>${QUERYRESULT_LOG_FILE}.%d{yyyy-MM-}.gz</fileNamePattern>
+      <fileNamePattern>${QUERYRESULT_LOG_FILE}.%d{yyyy-MM}.gz</fileNamePattern>
       <maxHistory>24</maxHistory>
     </rollingPolicy>
     <append>true</append>
@@ -24,7 +24,7 @@
     <appender-ref ref="STDOUT"/>
   </root>
 
-  <logger name="de.numcodex.feasibility_gui_backend.query.result.ResultService" level="INFO" additivity="false">
+  <logger name="resultLogger" level="INFO" additivity="false">
     <appender-ref ref="FILE" />
   </logger>
 </configuration>
