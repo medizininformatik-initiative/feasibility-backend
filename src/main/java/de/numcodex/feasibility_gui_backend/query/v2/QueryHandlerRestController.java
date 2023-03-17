@@ -210,6 +210,11 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(queryContent, HttpStatus.OK);
   }
 
+  @PostMapping("/validate")
+  public ResponseEntity<Object> validateStructuredQuery(@Valid @RequestBody StructuredQuery query) {
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
   private boolean hasAccess(Long queryId, Authentication authentication) {
     Set<String> roles = authentication.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
