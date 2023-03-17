@@ -43,6 +43,8 @@ public class WebSecurityConfig {
   public static final String PATH_DETAILED_RESULT = "/detailed-result";
   public static final String PATH_TERMINOLOGY = "/terminology";
   public static final String PATH_TEMPLATE = "/template";
+  public static final String PATH_SWAGGER_UI = "/swagger-ui/**";
+  public static final String PATH_SWAGGER_CONFIG = "/v3/api-docs/**";
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
 
@@ -112,6 +114,8 @@ public class WebSecurityConfig {
         .requestMatchers(PATH_API_V2 + "/**").hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
         .requestMatchers(PATH_API_V1 + "/**").hasAuthority(keycloakAllowedRole)
         .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
+        .requestMatchers(PATH_SWAGGER_UI).anonymous()
+        .requestMatchers(PATH_SWAGGER_CONFIG).anonymous()
         .anyRequest().authenticated()
         .and()
         .csrf().disable();

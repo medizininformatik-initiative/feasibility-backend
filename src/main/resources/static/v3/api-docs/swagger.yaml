@@ -294,7 +294,45 @@ paths:
         - feasibility_auth:
             - admin
             - user
-  /v2/query/{queryId}/result/detailed:
+  /v2/query/{queryId}/summary-result:
+    get:
+      tags:
+        - query
+      summary: Read query result summary by query ID
+      description: Returns the aggregated results to a query. There is no breakdown by site.
+      operationId: getQueryResults
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultSummary'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+        429:
+          description: Too many requests
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+            - user
+  /v2/query/{queryId}/detailed-result:
     get:
       tags:
         - query
@@ -328,13 +366,12 @@ paths:
       security:
         - feasibility_auth:
             - admin
-  /v2/query/{queryId}/result:
+  /v2/query/{queryId}/detailed-obfuscated-result:
     get:
       tags:
         - query
       summary: Read obfuscated query result by ID
-      description: Returns all results to query with the site names obfuscated
-        The query results might also be an aggregated one. This is not decided yet.
+      description: Returns all results to query with the site names obfuscated.
       operationId: getQueryResults
       parameters:
         - name: queryId
@@ -359,6 +396,9 @@ paths:
           content: {}
         404:
           description: Query not found
+          content: {}
+        429:
+          description: Too many requests
           content: {}
       security:
         - feasibility_auth:
@@ -565,6 +605,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TermCode"
+    QueryResultSummary:
+      type: object
+      properties:
+        totalNumberOfPatients:
+          type: integer
+          format: int64
+        queryId:
+          type: string
+        resultLines:
+          type: array
     QueryResultObfuscated:
       type: object
       properties:
