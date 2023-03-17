@@ -12,6 +12,8 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.aktin.broker.client2.BrokerAdmin2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stores results of queries volatile.
@@ -22,6 +24,8 @@ import org.aktin.broker.client2.BrokerAdmin2;
  */
 @Slf4j
 public class ResultService {
+
+  private static final Logger resultLogger = LoggerFactory.getLogger("resultLogger");
 
   private final Cache<Long, QueryResult> queryResultCache;
   private final BrokerAdmin2 aktinBrokerClient;
@@ -108,6 +112,7 @@ public class ResultService {
   public void addResultLine(Long queryId, ResultLine result) {
     queryResultCache.asMap()
         .merge(queryId, QueryResult.ofResultLine(result), QueryResult::merge);
+    resultLogger.info("{};{};{}", queryId, result.siteName(), result.result());
   }
 
   /**
