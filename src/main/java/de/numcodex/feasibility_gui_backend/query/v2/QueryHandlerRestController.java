@@ -56,10 +56,10 @@ public class QueryHandlerRestController {
   @Value("${app.privacy.quota.create.intervalminutes}")
   private int quotaCreateIntervalMinutes;
 
-  @Value("${PRIVACY_THRESHOLD_SITES:3}")
+  @Value("${app.privacy.threshold.sites}")
   private int privacyThresholdSites;
 
-  @Value("${PRIVACY_THRESHOLD_RESULTS:20}")
+  @Value("${app.privacy.threshold.results}")
   private int privacyThresholdResults;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
@@ -192,6 +192,7 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY);
+
     if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

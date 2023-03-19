@@ -85,6 +85,9 @@ app:
   cql:
     baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
   privacy:
+    threshold:
+      sites: ${PRIVACY_THRESHOLD_SITES:3}
+      results: ${PRIVACY_THRESHOLD_RESULTS:20}
     quota:
       create:
         amount: ${PRIVACY_QUOTA_CREATE_AMOUNT:3}
