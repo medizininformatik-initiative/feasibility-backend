@@ -35,8 +35,17 @@ jobs:
             [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
              {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: java
+          queries: security-and-quality
+
       - name: Run Tests
         run: mvn -B verify
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
   security-scan:
     runs-on: ubuntu-latest
