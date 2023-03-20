@@ -30,8 +30,9 @@ public class QueryTranslationComponent {
     public Map<QueryMediaType, String> translate(StructuredQuery query) throws QueryTranslationException {
         var translationResults = new HashMap<QueryMediaType, String>();
         for (Entry<QueryMediaType, QueryTranslator> translatorMapping : translators.entrySet()) {
-            translationResults.put(translatorMapping.getKey(), translatorMapping.getValue().translate(query));
-            log.debug(translatorMapping.getValue().translate(query));
+            var translation = translatorMapping.getValue().translate(query);
+            log.debug(translation);
+            translationResults.put(translatorMapping.getKey(), translation);
         }
 
         return translationResults;

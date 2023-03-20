@@ -101,6 +101,7 @@ app:
 
 logging:
   level:
+    org.hibernate: ${LOG_LEVEL_SQL:warn}
     de.numcodex: ${LOG_LEVEL:warn}
     org.springframework.web: ${LOG_LEVEL:warn}
 
