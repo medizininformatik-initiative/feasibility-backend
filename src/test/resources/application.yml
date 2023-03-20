@@ -13,6 +13,9 @@ app:
     aktin:
       enabled: false
   privacy:
+    threshold:
+      sites: 3
+      results: 20
     quota:
       create:
         amount: 3
