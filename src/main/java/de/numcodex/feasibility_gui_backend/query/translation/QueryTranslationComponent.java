@@ -8,10 +8,12 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Provides functions for translating {@link StructuredQuery} into different formats.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class QueryTranslationComponent {
 
@@ -28,8 +30,11 @@ public class QueryTranslationComponent {
     public Map<QueryMediaType, String> translate(StructuredQuery query) throws QueryTranslationException {
         var translationResults = new HashMap<QueryMediaType, String>();
         for (Entry<QueryMediaType, QueryTranslator> translatorMapping : translators.entrySet()) {
-            translationResults.put(translatorMapping.getKey(), translatorMapping.getValue().translate(query));
+            var translation = translatorMapping.getValue().translate(query);
+            log.debug(translation);
+            translationResults.put(translatorMapping.getKey(), translation);
         }
+
         return translationResults;
     }
 }
