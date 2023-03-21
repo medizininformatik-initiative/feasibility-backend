@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RateLimitingService {
 
-  private final Map<String, Bucket> anyResultRetrievalCache = new ConcurrentHashMap<>();
-  private final Map<String, Bucket> detailedObfuscatedResultRetrievalCache = new ConcurrentHashMap<>();
+  private final Map<String, Bucket> summaryResultRetrievalCache = new ConcurrentHashMap<>();
+  private final Map<String, Bucket> detailedResultRetrievalCache = new ConcurrentHashMap<>();
+  private final Map<String, Bucket> detailedViewObfuscatedResultRetrievalCache = new ConcurrentHashMap<>();
 
-  private final Duration intervalAny;
-
+  private final Duration intervalPollingSummary;
+  private final Duration intervalPollingDetailed;
   private final Duration intervalDetailedObfuscated;
-
   private final int amountDetailedObfuscated;
 
   /**
@@ -29,35 +29,47 @@ public class RateLimitingService {
    * This will limit the polling rate for default users on any result endpoint. It will also limit
    * the amount of times a user can request detailed obfuscated results in a given timespan.
    *
-   * @param intervalAny the duration after which the user can poll again
+   * @param intervalPollingSummary the duration after which the user can poll summary results again
+   * @param intervalPollingDetailed the duration after which the user can poll detailed results again
    * @param amountDetailedObfuscated the amount of times a user can request detailed obfuscated results
    * @param intervalDetailedObfuscated the timespan after which a users access is "forgotten"
    */
-  public RateLimitingService(Duration intervalAny, int amountDetailedObfuscated, Duration intervalDetailedObfuscated) {
-    this.intervalAny = intervalAny;
+  public RateLimitingService(Duration intervalPollingSummary, Duration intervalPollingDetailed, int amountDetailedObfuscated, Duration intervalDetailedObfuscated) {
+    this.intervalPollingSummary = intervalPollingSummary;
+    this.intervalPollingDetailed = intervalPollingDetailed;
     this.amountDetailedObfuscated = amountDetailedObfuscated;
     this.intervalDetailedObfuscated = intervalDetailedObfuscated;
   }
 
-  public Bucket resolveAnyResultBucket(String userId) {
-    return anyResultRetrievalCache.computeIfAbsent(userId, this::newAnyResultBucket);
+  public Bucket resolveSummaryResultBucket(String userId) {
+    return summaryResultRetrievalCache.computeIfAbsent(userId, this::newSummaryResultBucket);
   }
 
   public Bucket resolveDetailedObfuscatedResultBucket(String userId) {
-    return detailedObfuscatedResultRetrievalCache.computeIfAbsent(userId, this::newDetailedObfuscatedResultBucket);
+    return detailedResultRetrievalCache.computeIfAbsent(userId, this::newSummaryResultBucket);
+  }
+
+  public Bucket resolveViewDetailedObfuscatedBucket(String userId) {
+    return detailedViewObfuscatedResultRetrievalCache.computeIfAbsent(userId, this::newViewDetailedObfuscatedResultBucket);
   }
 
   public void addTokensToDetailedObfuscatedResultBucket(String userId, int amount) {
-    resolveDetailedObfuscatedResultBucket(userId).addTokens(amount);
+    resolveViewDetailedObfuscatedBucket(userId).addTokens(amount);
   }
 
-  private Bucket newAnyResultBucket(String userId) {
+  private Bucket newSummaryResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalAny)))
+        .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalPollingSummary)))
         .build();
   }
 
-  private Bucket newDetailedObfuscatedResultBucket(String userId) {
+  private Bucket newDetailedResultBucket(String userId) {
+    return Bucket.builder()
+        .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalPollingDetailed)))
+        .build();
+  }
+
+  private Bucket newViewDetailedObfuscatedResultBucket(String userId) {
     return Bucket.builder()
         .addLimit(Bandwidth.classic(amountDetailedObfuscated, Refill.intervally(1, intervalDetailedObfuscated)))
         .build();
