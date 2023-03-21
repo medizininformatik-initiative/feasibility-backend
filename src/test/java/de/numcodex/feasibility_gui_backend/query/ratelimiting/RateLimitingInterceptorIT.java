@@ -46,7 +46,8 @@ import org.springframework.test.web.servlet.MockMvc;
     controllers = QueryHandlerRestController.class,
     properties = {
         "app.enableQueryValidation=true",
-        "app.privacy.quota.read.any.pollingIntervalSeconds=1",
+        "app.privacy.quota.read.resultSummary.pollingIntervalSeconds=1",
+        "app.privacy.quota.read.detailedObfuscated.pollingIntervalSeconds=2",
         "app.privacy.quota.read.detailedObfuscated.amount=1",
         "app.privacy.quota.read.detailedObfuscated.intervalSeconds=3"
     }
@@ -143,7 +144,7 @@ public class RateLimitingInterceptorIT {
 
     mockMvc
         .perform(
-            get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
+            get(URI.create(requestUri)).with(csrf())
                 .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
         )
         .andExpect(status().isTooManyRequests());
