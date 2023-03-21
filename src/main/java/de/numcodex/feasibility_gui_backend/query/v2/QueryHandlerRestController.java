@@ -8,8 +8,10 @@ import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetai
 import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
+import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingService;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +41,13 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 @RequestMapping("api/v2/query")
 @RestController("QueryHandlerRestController-v2")
 @Slf4j
-@CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
+@CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = {"Location"})
 public class QueryHandlerRestController {
 
   public static final String HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY = "X-Detailed-Obfuscated-Result-Was-Empty";
   private final QueryHandlerService queryHandlerService;
   private final TermCodeValidation termCodeValidation;
+  private final RateLimitingService rateLimitingService;
   private final String apiBaseUrl;
 
   @Value("${app.keycloakAdminRole}")
@@ -62,9 +65,10 @@ public class QueryHandlerRestController {
   @Value("${app.privacy.threshold.results}")
   private int privacyThresholdResults;
 
-  public QueryHandlerRestController(QueryHandlerService queryHandlerService,
+  public QueryHandlerRestController(QueryHandlerService queryHandlerService, RateLimitingService rateLimitingService,
       TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
+    this.rateLimitingService = rateLimitingService;
     this.termCodeValidation = termCodeValidation;
     this.apiBaseUrl = apiBaseUrl;
   }
@@ -183,6 +187,19 @@ public class QueryHandlerRestController {
       headers.add(HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY, "true");
     }
     return new ResponseEntity<>(queryResult, headers, HttpStatus.OK);
+  }
+
+  @GetMapping("/detailed-obfuscated-result-rate-limit" )
+  public ResponseEntity<Object> getDetailedObfuscatedResultRateLimit(Principal principal) {
+    var userId = principal.getName();
+    var bucket = this.rateLimitingService.resolveViewDetailedObfuscatedBucket(userId);
+
+    QueryResultRateLimit resultRateLimit = QueryResultRateLimit.builder()
+        .limit(this.rateLimitingService.getAmountDetailedObfuscated())
+        .remaining(bucket.getAvailableTokens())
+        .build();
+
+    return new ResponseEntity<>(resultRateLimit, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)

@@ -90,16 +90,20 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
       var detailedPollingResultProbe = detailedPollingResultTokenBucket.tryConsumeAndReturnRemaining(
           1);
       if (detailedPollingResultProbe.isConsumed()) {
+
         response.addHeader(HEADER_LIMIT_REMAINING,
             Long.toString(detailedPollingResultProbe.getRemainingTokens()));
+
         var detailedObfuscatedResultTokenBucket = rateLimitingService.resolveViewDetailedObfuscatedBucket(
             authentication.getName());
         var detailedObfuscatedResultProbe = detailedObfuscatedResultTokenBucket.tryConsumeAndReturnRemaining(
             1);
+
         if (detailedObfuscatedResultProbe.isConsumed()) {
           response.addHeader(HEADER_LIMIT_REMAINING_DETAILED_OBFUSCATED_RESULTS,
               Long.toString(
                   detailedObfuscatedResultProbe.getRemainingTokens()));
+          return true;
         } else {
           long waitForRefill =
               detailedObfuscatedResultProbe.getNanosToWaitForRefill()
@@ -123,33 +127,6 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
 
     return false;
 
-    /*var anyResultTokenBucket = rateLimitingService.resolveSummaryResultBucket(authentication.getName());
-    var anyResultProbe = anyResultTokenBucket.tryConsumeAndReturnRemaining(1);
-    if (anyResultProbe.isConsumed()) {
-      if (request.getRequestURI().endsWith(WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)) {
-        var detailedObfuscatedResultTokenBucket = rateLimitingService.resolveViewDetailedObfuscatedBucket(
-            authentication.getName());
-        var detailedObfuscatedResultProbe = detailedObfuscatedResultTokenBucket.tryConsumeAndReturnRemaining(
-            1);
-        if (detailedObfuscatedResultProbe.isConsumed()) {
-          response.addHeader(HEADER_LIMIT_REMAINING_DETAILED_OBFUSCATED_RESULTS, Long.toString(detailedObfuscatedResultProbe.getRemainingTokens()));
-        } else {
-          long waitForRefill = detailedObfuscatedResultProbe.getNanosToWaitForRefill() / 1_000_000_000;
-          response.addHeader(HEADER_RETRY_AFTER_DETAILED_OBFUSCATED_RESULTS, Long.toString(waitForRefill));
-          response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-              "You have exhausted your Request Quota for detailed obfuscated results");
-          return false;
-        }
-      }
-      response.addHeader(HEADER_LIMIT_REMAINING, Long.toString(anyResultProbe.getRemainingTokens()));
-      return true;
-    } else {
-      long waitForRefill = anyResultProbe.getNanosToWaitForRefill() / 1_000_000_000;
-      response.addHeader(HEADER_RETRY_AFTER, Long.toString(waitForRefill));
-      response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-          "You have exhausted your API Request Quota");
-      return false;
-    }*/
   }
 
   @Override
@@ -159,9 +136,8 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
     HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
 
     if (request.getRequestURI()
-        .endsWith(WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT) && (
-        response.getStatus() != 200 || response.containsHeader(
-            QueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY))) {
+        .endsWith(WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT) && response.containsHeader(
+            QueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY)) {
       var authentication = SecurityContextHolder.getContext()
           .getAuthentication();
       var detailedObfuscatedResultTokenBucket = rateLimitingService.resolveViewDetailedObfuscatedBucket(

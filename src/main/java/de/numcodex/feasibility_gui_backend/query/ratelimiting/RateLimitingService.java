@@ -46,7 +46,7 @@ public class RateLimitingService {
   }
 
   public Bucket resolveDetailedObfuscatedResultBucket(String userId) {
-    return detailedResultRetrievalCache.computeIfAbsent(userId, this::newSummaryResultBucket);
+    return detailedResultRetrievalCache.computeIfAbsent(userId, this::newDetailedResultBucket);
   }
 
   public Bucket resolveViewDetailedObfuscatedBucket(String userId) {
@@ -67,6 +67,10 @@ public class RateLimitingService {
     return Bucket.builder()
         .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalPollingDetailed)))
         .build();
+  }
+
+  public int getAmountDetailedObfuscated(){
+    return this.amountDetailedObfuscated;
   }
 
   private Bucket newViewDetailedObfuscatedResultBucket(String userId) {
