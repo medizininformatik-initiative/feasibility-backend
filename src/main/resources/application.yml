@@ -93,9 +93,10 @@ app:
         amount: ${PRIVACY_QUOTA_CREATE_AMOUNT:3}
         intervalMinutes: ${PRIVACY_QUOTA_CREATE_INTERVALMINUTES:1}
       read:
-        any:
-          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_ANY_POLLINGINTERVALSECONDS:10}
-        detailedObfuscated:
+        resultSummary:
+          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVALSECONDS:10}
+        resultDetailedObfuscated:
+          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_POLLINGINTERVALSECONDS:10}
           amount: ${PRIVACY_QUOTA_READ_DETAILEDOBFUSCATED_AMOUNT:3}
           intervalSeconds: ${PRIVACY_QUOTA_READ_DETAILEDOBFUSCATED_INTERVALSECONDS:7200}
 

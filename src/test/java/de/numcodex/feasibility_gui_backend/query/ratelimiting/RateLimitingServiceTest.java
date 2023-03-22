@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class RateLimitingServiceTest {
 
-  private final Duration interval = Duration.ofSeconds(1);
+  private final Duration intervalPollingSummary = Duration.ofSeconds(1);
+  private final Duration intervalPollingDetailed = Duration.ofSeconds(1);
   private final int amountDetailedObfuscated = 2;
   private final Duration intervalDetailedObfuscated = Duration.ofSeconds(2);
 
@@ -23,26 +24,39 @@ public class RateLimitingServiceTest {
 
   @BeforeEach
   void setUp() {
-    this.rateLimitingService = new RateLimitingService(interval, amountDetailedObfuscated,
+    this.rateLimitingService = new RateLimitingService(intervalPollingSummary, intervalPollingDetailed, amountDetailedObfuscated,
         intervalDetailedObfuscated);
   }
 
   @Test
   void testResolveBucket() {
-    Bucket bucketSomeone = rateLimitingService.resolveAnyResultBucket("someone");
-    assertNotNull(bucketSomeone);
-    Bucket bucketSomeoneElse = rateLimitingService.resolveAnyResultBucket("someone-else");
-    assertNotNull(bucketSomeoneElse);
-    assertNotEquals(bucketSomeone, bucketSomeoneElse);
-    assertEquals(bucketSomeone, rateLimitingService.resolveAnyResultBucket("someone"));
+    Bucket summaryBucketSomeone = rateLimitingService.resolveSummaryResultBucket("someone");
+    assertNotNull(summaryBucketSomeone);
+    Bucket summaryBucketSomeoneElse = rateLimitingService.resolveSummaryResultBucket("someone-else");
+    assertNotNull(summaryBucketSomeoneElse);
+    assertNotEquals(summaryBucketSomeone, summaryBucketSomeoneElse);
+    assertEquals(summaryBucketSomeone, rateLimitingService.resolveSummaryResultBucket("someone"));
+
+    Bucket detailedBucketSomeone = rateLimitingService.resolveSummaryResultBucket("someone");
+    assertNotNull(detailedBucketSomeone);
+    Bucket detailedBucketSomeoneElse = rateLimitingService.resolveSummaryResultBucket("someone-else");
+    assertNotNull(detailedBucketSomeoneElse);
+    assertNotEquals(detailedBucketSomeone, detailedBucketSomeoneElse);
+    assertEquals(detailedBucketSomeone, rateLimitingService.resolveSummaryResultBucket("someone"));
   }
 
   @Test
   void testResolveBucketRefill() throws InterruptedException {
-    Bucket bucketSomeone = rateLimitingService.resolveAnyResultBucket("someone");
-    assertTrue(bucketSomeone.tryConsume(1));
-    assertFalse(bucketSomeone.tryConsume(1));
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(interval));
-    assertTrue(bucketSomeone.tryConsume(1));
+    Bucket bucketSomeoneSummary = rateLimitingService.resolveSummaryResultBucket("someone");
+    assertTrue(bucketSomeoneSummary.tryConsume(1));
+    assertFalse(bucketSomeoneSummary.tryConsume(1));
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(intervalPollingSummary));
+    assertTrue(bucketSomeoneSummary.tryConsume(1));
+
+    Bucket bucketSomeoneDetailed = rateLimitingService.resolveDetailedObfuscatedResultBucket("someone");
+    assertTrue(bucketSomeoneDetailed.tryConsume(1));
+    assertFalse(bucketSomeoneDetailed.tryConsume(1));
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(intervalPollingSummary));
+    assertTrue(bucketSomeoneDetailed.tryConsume(1));
   }
 }
