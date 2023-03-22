@@ -95,9 +95,7 @@ public class WebSecurityConfig {
 
     http
         .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .csrf().disable();
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     if (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) {
       http.requiresChannel().anyRequest().requiresSecure();
@@ -116,9 +114,7 @@ public class WebSecurityConfig {
         .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
         .requestMatchers(PATH_SWAGGER_UI).anonymous()
         .requestMatchers(PATH_SWAGGER_CONFIG).anonymous()
-        .anyRequest().authenticated()
-        .and()
-        .csrf().disable();
+        .anyRequest().authenticated();
 
     http.cors();
     return http.build();
