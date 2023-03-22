@@ -8,6 +8,7 @@ security:
 app:
   queryResultExpiryMinutes: 1
   keycloakAllowedRole: "FEASIBILITY_TEST_USER"
+  keycloakPowerRole: "FEASIBILITY_TEST_POWER"
   keycloakAdminRole: "FEASIBILITY_TEST_ADMIN"
   broker:
     aktin:
@@ -17,9 +18,14 @@ app:
       sites: 3
       results: 20
     quota:
-      create:
-        amount: 3
-        intervalMinutes: 1
+      soft:
+        create:
+          amount: 3
+          intervalMinutes: 1
+      hard:
+        create:
+          amount: 5
+          intervalMinutes: 2
       read:
         resultSummary:
           pollingIntervalSeconds: 1
