@@ -11,8 +11,13 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
+import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
+import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
+import de.numcodex.feasibility_gui_backend.query.ratelimiting.InvalidAuthenticationException;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingService;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,16 +53,26 @@ public class QueryHandlerRestController {
   private final QueryHandlerService queryHandlerService;
   private final TermCodeValidation termCodeValidation;
   private final RateLimitingService rateLimitingService;
+  private final UserBlacklistRepository userBlacklistRepository;
+  private final AuthenticationHelper authenticationHelper;
   private final String apiBaseUrl;
 
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
+  @Value("${app.keycloakPowerRole}")
+  private String keycloakPowerRole;
 
-  @Value("${app.privacy.quota.create.amount}")
-  private int quotaCreateAmount;
+  @Value("${app.privacy.quota.soft.create.amount}")
+  private int quotaSoftCreateAmount;
 
-  @Value("${app.privacy.quota.create.intervalminutes}")
-  private int quotaCreateIntervalMinutes;
+  @Value("${app.privacy.quota.soft.create.intervalminutes}")
+  private int quotaSoftCreateIntervalMinutes;
+
+  @Value("${app.privacy.quota.hard.create.amount}")
+  private int quotaHardCreateAmount;
+
+  @Value("${app.privacy.quota.hard.create.intervalminutes}")
+  private int quotaHardCreateIntervalMinutes;
 
   @Value("${app.privacy.threshold.sites}")
   private int privacyThresholdSites;
@@ -66,23 +81,43 @@ public class QueryHandlerRestController {
   private int privacyThresholdResults;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService, RateLimitingService rateLimitingService,
-      TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
+      TermCodeValidation termCodeValidation, UserBlacklistRepository userBlacklistRepository,
+      AuthenticationHelper authenticationHelper, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
     this.rateLimitingService = rateLimitingService;
     this.termCodeValidation = termCodeValidation;
+    this.userBlacklistRepository = userBlacklistRepository;
+    this.authenticationHelper = authenticationHelper;
     this.apiBaseUrl = apiBaseUrl;
   }
 
   @PostMapping
   public Mono<ResponseEntity<Object>> runQuery(@Valid @RequestBody StructuredQuery query,
                                                @Context HttpServletRequest request,
-                                               Principal principal) {
+                                               Authentication authentication)
+      throws InvalidAuthenticationException {
+    String userId = authentication.getName();
+    Optional<UserBlacklist> userBlacklistEntry = userBlacklistRepository.findByUserId(userId);
+    boolean isPowerUser = authenticationHelper.hasAuthority(authentication, keycloakPowerRole);
 
-    Long amountOfQueriesByUserAndInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
-        principal.getName(), quotaCreateIntervalMinutes);
-    if (quotaCreateAmount <= amountOfQueriesByUserAndInterval) {
-      Long retryAfter = queryHandlerService.getRetryAfterTime(principal.getName(),
-          quotaCreateAmount - 1, quotaCreateIntervalMinutes);
+    if (!isPowerUser && userBlacklistEntry.isPresent()) {
+      return Mono.just(new ResponseEntity<>(HttpStatus.FORBIDDEN));
+    }
+
+    Long amountOfQueriesByUserAndHardInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
+        userId, quotaHardCreateIntervalMinutes);
+    if (!isPowerUser && (quotaHardCreateAmount <= amountOfQueriesByUserAndHardInterval)) {
+      log.info("User {} exceeded hard limit and is not a power user. Blacklisting...", userId);
+      UserBlacklist userBlacklist = new UserBlacklist();
+      userBlacklist.setUserId(userId);
+      userBlacklistRepository.save(userBlacklist);
+      return Mono.just(new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS));
+    }
+    Long amountOfQueriesByUserAndSoftInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
+        userId, quotaSoftCreateIntervalMinutes);
+    if (quotaSoftCreateAmount <= amountOfQueriesByUserAndSoftInterval) {
+      Long retryAfter = queryHandlerService.getRetryAfterTime(userId,
+          quotaSoftCreateAmount - 1, quotaSoftCreateIntervalMinutes);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
       return Mono.just(new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS));
@@ -91,11 +126,11 @@ public class QueryHandlerRestController {
     // Note: this is using a ResponseEntity instead of a ServerResponse since this is a
     //       @Controller annotated class. This can be adjusted as soon as we switch to the new
     //       functional web framework (if ever).
-    return queryHandlerService.runQuery(query, principal.getName())
+    return queryHandlerService.runQuery(query, userId)
             .map(queryId -> buildResultLocationUri(request, queryId))
             .map(resultLocation -> ResponseEntity.created(resultLocation).build())
             .onErrorResume(e -> {
-              log.error("running a query for '%s' failed".formatted(principal.getName()), e);
+              log.error("running a query for '%s' failed".formatted(userId), e);
               return Mono.just(ResponseEntity.internalServerError()
                       .body(e.getMessage()));
             });

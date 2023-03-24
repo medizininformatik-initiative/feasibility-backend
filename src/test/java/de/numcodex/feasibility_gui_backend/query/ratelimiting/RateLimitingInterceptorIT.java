@@ -15,6 +15,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
+import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
@@ -66,6 +67,9 @@ public class RateLimitingInterceptorIT {
 
   @MockBean
   AuthenticationHelper authenticationHelper;
+
+  @MockBean
+  private UserBlacklistRepository userBlacklistRepository;
 
   @BeforeEach
   void setupMockBehaviour() throws InvalidAuthenticationException {

@@ -46,6 +46,7 @@ app:
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
   keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FEASIBILITY_USER}
+  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FEASIBILITY_POWER_USER}
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FEASIBILITY_ADMIN}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   broker:
@@ -89,9 +90,14 @@ app:
       sites: ${PRIVACY_THRESHOLD_SITES:3}
       results: ${PRIVACY_THRESHOLD_RESULTS:20}
     quota:
-      create:
-        amount: ${PRIVACY_QUOTA_CREATE_AMOUNT:3}
-        intervalMinutes: ${PRIVACY_QUOTA_CREATE_INTERVALMINUTES:1}
+      soft:
+        create:
+          amount: ${PRIVACY_QUOTA_SOFT_CREATE_AMOUNT:3}
+          intervalMinutes: ${PRIVACY_QUOTA_SOFT_CREATE_INTERVALMINUTES:1}
+      hard:
+        create:
+          amount: ${PRIVACY_QUOTA_HARD_CREATE_AMOUNT:50}
+          intervalMinutes: ${PRIVACY_QUOTA_HARD_CREATE_INTERVALMINUTES:10080}
       read:
         resultSummary:
           pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVALSECONDS:10}
