@@ -22,8 +22,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_BASE_URL:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
-          jwk-set-uri: ${KEYCLOAK_BASE_URL:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
