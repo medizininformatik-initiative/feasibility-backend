@@ -44,12 +44,12 @@ public class QueryTemplateValidatorTest {
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
     InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(
-        "/query/query-template-schema.json");
+        "/de/numcodex/feasibility_gui_backend/query/api/validation/query-template-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
         .schemaClient(SchemaClient.classPathAwareClient())
         .schemaJson(jsonSchema)
-        .resolutionScope("classpath://query/")
+        .resolutionScope("classpath://de/numcodex/feasibility_gui_backend/query/api/validation/")
         .draftV7Support()
         .build();
     var schema = loader.load().build();
