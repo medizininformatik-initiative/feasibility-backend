@@ -11,7 +11,7 @@
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>2.1.0</version>
+  <version>3.0.0</version>
 
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
