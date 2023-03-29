@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationComponent;
@@ -136,8 +137,9 @@ public class QueryDispatcherTest {
     }
 
     @Test
-    public void testDispatchEnqueuedQuery_FailsOnBrokerPublishError() throws IOException, QueryTranslationException,
-            QueryNotFoundException {
+    public void testDispatchEnqueuedQuery_FailsOnBrokerPublishError()
+        throws IOException, QueryTranslationException,
+        QueryNotFoundException, QueryDefinitionNotFoundException {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
@@ -164,7 +166,8 @@ public class QueryDispatcherTest {
     }
 
     @Test
-    public void testDispatchEnqueuedQuery_DoesNotFailOnSingleBrokerError() throws IOException, QueryNotFoundException {
+    public void testDispatchEnqueuedQuery_DoesNotFailOnSingleBrokerError()
+        throws IOException, QueryNotFoundException, QueryDefinitionNotFoundException {
         var failingBrokerClient = mock(BrokerClient.class);
         var succeedingBrokerClient = mock(BrokerClient.class);
         var queryDispatcher = createQueryDispatcher(List.of(failingBrokerClient, succeedingBrokerClient));
@@ -189,8 +192,9 @@ public class QueryDispatcherTest {
     }
 
     @Test
-    public void testDispatchEnqueuedQuery_BrokerAfterFirstSuccessfulOneAreCalled() throws IOException,
-            QueryNotFoundException {
+    public void testDispatchEnqueuedQuery_BrokerAfterFirstSuccessfulOneAreCalled()
+        throws IOException,
+        QueryNotFoundException, QueryDefinitionNotFoundException {
         var failingBrokerClient = mock(BrokerClient.class);
         var succeedingBrokerClient = mock(BrokerClient.class);
         var queryDispatcher = createQueryDispatcher(List.of(succeedingBrokerClient, failingBrokerClient));
@@ -215,7 +219,8 @@ public class QueryDispatcherTest {
     }
 
     @Test
-    public void testDispatchEnqueuedQuery_DoesFailIfAllBrokersFail() throws IOException, QueryNotFoundException {
+    public void testDispatchEnqueuedQuery_DoesFailIfAllBrokersFail()
+        throws IOException, QueryNotFoundException, QueryDefinitionNotFoundException {
         var failingBrokerClient = mock(BrokerClient.class);
         var anotherFailingBrokerClient = mock(BrokerClient.class);
         var queryDispatcher = createQueryDispatcher(List.of(failingBrokerClient,

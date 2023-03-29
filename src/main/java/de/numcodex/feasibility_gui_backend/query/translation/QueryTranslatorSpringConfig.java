@@ -83,27 +83,27 @@ public class QueryTranslatorSpringConfig {
                 Stream.of(mappings)
                         .collect(Collectors.toMap(Mapping::key, Function.identity(), (a, b) -> a)),
                 conceptTree,
-                Map.ofEntries(entry("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "icd10"),
-                        entry("mii.abide", "abide"),
-                        entry("http://fhir.de/CodeSystem/bfarm/ops", "ops"),
-                        entry("http://dicom.nema.org/resources/ontology/DCM", "dcm"),
-                        entry("https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus", "vitalstatus"),
-                        entry("http://loinc.org", "loinc"),
-                        entry("https://fhir.bbmri.de/CodeSystem/SampleMaterialType", "sample"),
-                        entry("http://fhir.de/CodeSystem/bfarm/atc", "atc"),
-                        entry("http://snomed.info/sct", "snomed"),
-                        entry("http://terminology.hl7.org/CodeSystem/condition-ver-status", "cvs"),
-                        entry("http://hl7.org/fhir/administrative-gender", "gender"),
-                        entry("urn:oid:1.2.276.0.76.5.409", "urn409"),
-                        entry(
-                                "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/ecrf-parameter-codes",
-                                "numecrf"),
-                        entry("urn:iso:std:iso:3166", "iso3166"),
-                        entry("https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/frailty-score",
-                                "frailtyscore"),
-                        entry("http://terminology.hl7.org/CodeSystem/consentcategorycodes", "consentcategory"),
-                        entry("urn:oid:2.16.840.1.113883.3.1937.777.24.5.3", "consent"),
-                        entry("http://hl7.org/fhir/consent-provision-type", "provisiontype"))));
+            Map.ofEntries(entry("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "icd10"),
+                entry("mii.abide", "abide"),
+                entry("http://fhir.de/CodeSystem/bfarm/ops", "ops"),
+                entry("http://dicom.nema.org/resources/ontology/DCM", "dcm"),
+                entry("https://www.medizininformatik-initiative.de/fhir/core/modul-person/CodeSystem/Vitalstatus", "vitalstatus"),
+                entry("http://loinc.org", "loinc"),
+                entry("https://fhir.bbmri.de/CodeSystem/SampleMaterialType", "sample"),
+                entry("http://fhir.de/CodeSystem/bfarm/atc", "atc"),
+                entry("http://snomed.info/sct", "snomed"),
+                entry("http://terminology.hl7.org/CodeSystem/condition-ver-status", "cvs"),
+                entry("http://hl7.org/fhir/administrative-gender", "gender"),
+                entry("urn:oid:1.2.276.0.76.5.409", "urn409"),
+                entry(
+                    "https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/ecrf-parameter-codes",
+                    "numecrf"),
+                entry("urn:iso:std:iso:3166", "iso3166"),
+                entry("https://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/frailty-score",
+                    "frailtyscore"),
+                entry("http://terminology.hl7.org/CodeSystem/consentcategorycodes", "consentcategory"),
+                entry("urn:oid:2.16.840.1.113883.3.1937.777.24.5.3", "consent"),
+                entry("http://hl7.org/fhir/consent-provision-type", "provisiontype"))));
     }
 
     @Qualifier("cql")

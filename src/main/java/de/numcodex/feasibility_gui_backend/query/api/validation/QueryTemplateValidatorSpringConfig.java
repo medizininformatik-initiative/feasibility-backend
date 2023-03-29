@@ -3,7 +3,7 @@ package de.numcodex.feasibility_gui_backend.query.api.validation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import java.io.InputStream;
-import javax.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;

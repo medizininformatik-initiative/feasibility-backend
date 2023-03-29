@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class QueryResultLine {
     private String siteName;
-    private int numberOfPatients;
+    private long numberOfPatients;
 }

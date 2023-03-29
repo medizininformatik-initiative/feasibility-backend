@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
 
@@ -42,13 +43,13 @@ public interface BrokerClient {
      * The query definition is added to a query identified by the given query ID.
      *
      * @param brokerQueryId Identifies the broker specific query that the query definition shall be added to.
-     * @param mediaType     MIME type for the query content.
+     * @param queryMediaType     {@link QueryMediaType} for the query content.
      * @param content       The actual query in plain text.
      * @throws QueryNotFoundException        If the given query ID does not identify a known query.
      * @throws UnsupportedMediaTypeException If the given media type is not supported.
      * @throws IOException                   IO/communication error
      */
-    void addQueryDefinition(String brokerQueryId, String mediaType, String content) throws QueryNotFoundException,
+    void addQueryDefinition(String brokerQueryId, QueryMediaType queryMediaType, String content) throws QueryNotFoundException,
             UnsupportedMediaTypeException, IOException;
 
     /**
@@ -56,9 +57,10 @@ public interface BrokerClient {
      *
      * @param brokerQueryId Identifies the broker specific query that shall be published.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
+     * @throws QueryDefinitionNotFoundException If the query does not contain a definition of the desired type.
      * @throws IOException            If the query was not published due IO/communication error
      */
-    void publishQuery(String brokerQueryId) throws QueryNotFoundException, IOException;
+    void publishQuery(String brokerQueryId) throws QueryNotFoundException, QueryDefinitionNotFoundException, IOException;
 
     /**
      * Marks an already published broker specific query as closed.

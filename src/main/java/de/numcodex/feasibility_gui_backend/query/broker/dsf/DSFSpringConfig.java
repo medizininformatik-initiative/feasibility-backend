@@ -82,11 +82,6 @@ public class DSFSpringConfig {
         return new DSFQueryResultHandler(webClientProvider);
     }
 
-    @Bean
-    FhirContext fhirContext() {
-        return FhirContext.forR4();
-    }
-
 
     @Bean
     FhirSecurityContextProvider fhirSecurityContextProvider() {

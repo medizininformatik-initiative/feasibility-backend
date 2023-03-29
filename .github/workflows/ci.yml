@@ -12,10 +12,10 @@ on:
 
 jobs:
 
-  unit-tests:
+  tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -24,74 +24,57 @@ jobs:
           java-version: 17
 
       - name: Cache Local Maven Repo
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: maven-repo
+          key: tests-maven-${{ hashFiles('pom.xml') }}
 
-      - uses: s4u/maven-settings-action@v2.4.0
+      - uses: s4u/maven-settings-action@v2
         with:
           servers: |
             [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
              {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
-      - name: Run Unit Tests
-        run: mvn -B test
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
         with:
-          distribution: 'temurin'
-          java-version: 17
+          languages: java
+          queries: security-and-quality
 
-      - name: Cache Local Maven Repo
-        uses: actions/cache@v2.1.2
-        with:
-          path: ~/.m2/repository
-          key: maven-repo
+      - name: Run Tests
+        run: mvn -B verify
 
-      - uses: s4u/maven-settings-action@v2.4.0
-        with:
-          servers: |
-            [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-             {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
-
-      - name: Run Integration Tests
-        run: mvn -B -DskipUnitTests verify
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
   security-scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: 17
 
     - name: Cache Local Maven Repo
-      uses: actions/cache@v2.1.2
+      uses: actions/cache@v3
       with:
         path: ~/.m2/repository
-        key: maven-repo
+        key: security-scan-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2.4.0
+    - uses: s4u/maven-settings-action@v2
       with:
         servers: |
           [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
            {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Maven Package
-      run: mvn -B -DskipUnitTests -DskipIntegrationTests package
+      run: mvn -B -DskipTests package
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
         context: .
         tags: security-scan-build:latest
@@ -100,19 +83,23 @@ jobs:
     - name: Run Trivy Vulnerability Scanner
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: 'security-scan-build:latest'
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: 'os,library'
+        image-ref: security-scan-build:latest
+        format: sarif
+        output: trivy-results.sarif
         severity: 'CRITICAL,HIGH'
+        timeout: '15m0s'
+
+    - name: Upload Trivy Scan Results to GitHub Security Tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: trivy-results.sarif
 
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: [ unit-tests, security-scan, integration-tests ]
+    needs: [ tests, security-scan ]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -121,12 +108,12 @@ jobs:
         java-version: 17
 
     - name: Cache Local Maven Repo
-      uses: actions/cache@v2.1.2
+      uses: actions/cache@v3
       with:
         path: ~/.m2/repository
-        key: maven-repo
+        key: release-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2.4.0
+    - uses: s4u/maven-settings-action@v2
       with:
         servers: |
           [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
@@ -139,7 +126,7 @@ jobs:
         echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
 
     - name: Maven Package
-      run: mvn -B -DskipUnitTests -DskipIntegrationTests package
+      run: mvn -B -DskipTests package
 
     - name: Login to GitHub Docker Registry
       uses: docker/login-action@v1
@@ -155,7 +142,7 @@ jobs:
       uses: docker/setup-buildx-action@v1
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
         context: .
         platforms: linux/amd64,linux/arm64
@@ -163,6 +150,3 @@ jobs:
           ghcr.io/${{ steps.prep.outputs.repository }}:latest
           ghcr.io/${{ steps.prep.outputs.repository }}:${{ steps.prep.outputs.version }}
         push: true
-
-
-

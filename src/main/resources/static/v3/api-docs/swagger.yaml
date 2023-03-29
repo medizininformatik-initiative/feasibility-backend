@@ -1,0 +1,863 @@
+openapi: 3.0.3
+info:
+  title: MII Feasibility Backend REST API
+  description: todo
+  contact:
+    email: noreply@todo.de
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.2
+externalDocs:
+  description: Check out the github repository
+  url: https://github.com/medizininformatik-initiative/feasibility-backend
+servers:
+  - url: https://to.be.defined
+    variables:
+      basePath:
+        default: /api
+tags:
+  - name: query
+    description: operations for queries
+    externalDocs:
+      description: More information
+      url: http://link.to.confluence
+  - name: templates
+    description: operations to work with query templates
+  - name: deprecated
+    description: operations from earlier api versions
+  - name: intrinsics
+    description: Offers intrinsic information about this application.
+paths:
+  /v1/query-handler/run-query:
+    post:
+      tags:
+        - deprecated
+      summary: Create a query in the broker
+      description: The query will be spawned in the broker and directly be dispatched. This endpoint is deprecated. Please use POST /v2/query instead
+      operationId: runQueryV1
+      requestBody:
+        description: Structured query to create and dispatch
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredQuery'
+        required: true
+      responses:
+        201:
+          description: Query successfully dispatched
+          headers:
+            Location:
+              description: Path to the result of your newly created query
+              schema:
+                type: string
+                example: "https://to.be.defined/api/v1/query-handler/result/42"
+          content: { }
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: { }
+        422:
+          description: Invalid input
+          content: { }
+        429:
+          description: Too many requests in a given amount of time (configurable)
+          content: {}
+        500:
+          description: Dispatch error
+          content: { }
+      security:
+        - feasibility_auth:
+            - user
+      x-codegen-request-body-name: body
+  /v1/query-handler/result/{queryId}:
+    get:
+      tags:
+        - deprecated
+      summary: Read obfuscated query result by ID
+      description: Returns all results to query with the site names obfuscated
+        The query results might also be an aggregated one. This is not decided yet.
+        This endpoint is deprecated. Please use GET /v2/query/{queryId}/result instead
+      operationId: getQueryResultsByQueryId
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultObfuscated'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+            - user
+  /v2/query:
+    post:
+      tags:
+        - query
+      summary: Create a query in the broker
+      description: The query will be spawned in the broker and directly be dispatched
+      operationId: runQuery
+      requestBody:
+        description: Structured query to create and dispatch
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredQuery'
+        required: true
+      responses:
+        201:
+          description: Query successfully dispatched
+          headers:
+            Location:
+              description: Path to the result of your newly created query
+              schema:
+                type: string
+                example: "https://to.be.defined/api/v2/query/42"
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        422:
+          description: Invalid input
+          content: {}
+        429:
+          description: Too many requests in a given amount of time (configurable)
+          content: {}
+        500:
+          description: Dispatch error
+          content: {}
+      security:
+        - feasibility_auth:
+            - user
+      x-codegen-request-body-name: body
+    get:
+      tags:
+        - query
+      summary: Get the list of the calling users queries
+      description: This returns a list with basic information about the queries. Id, label (if present) and creation date.
+      operationId: getQueryList
+      parameters:
+        - name: filter
+          in: query
+          description: filters query
+          required: false
+          schema:
+            type: string
+            enum:
+              - saved
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QueryListEntry'
+        401:
+          description: Unauthorized - please login first
+          content: {}
+      security:
+        - feasibility_auth:
+            - user
+  /v2/query/by-user/{userId}:
+    get:
+      tags:
+        - query
+      summary: Finds query summary (id, label, lastModified) of all queries of one user
+      operationId: findQueriesByUser
+      parameters:
+        - name: userId
+          in: path
+          description: User to filter by (keycloak id)
+          required: true
+          schema:
+            type: string
+        - name: filter
+          in: query
+          description: filters query
+          required: false
+          schema:
+            type: string
+            enum:
+              - saved
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QueryListEntry'
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+  /v2/query/{queryId}:
+    get:
+      tags:
+        - query
+      summary: Read query by ID
+      description: Returns a single query. Contains everything known about the query, including results and structured query
+      operationId: getQueryById
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - user
+            - admin
+  /v2/query/{queryId}/content:
+    get:
+      tags:
+        - query
+      summary: Read the content (=structured query) of a query by the query id
+      description: Returns the structured query of a single query.
+      operationId: getQueryContentByQueryId
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the contents shall be returned
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StructuredQuery'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+            - user
+  /v2/query/{queryId}/summary-result:
+    get:
+      tags:
+        - query
+      summary: Read query result summary by query ID
+      description: Returns the aggregated results to a query. There is no breakdown by site.
+      operationId: getQueryResults
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultSummary'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+        429:
+          description: Too many requests
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+            - user
+  /v2/query/{queryId}/detailed-result:
+    get:
+      tags:
+        - query
+      summary: Read query result by ID
+      description: Returns results to query with the real site names - admin rights required
+      operationId: getQueryResultDetailed
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResult'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+  /v2/query/{queryId}/detailed-obfuscated-result:
+    get:
+      tags:
+        - query
+      summary: Read obfuscated query result by ID
+      description: Returns all results to query with the site names obfuscated.
+      operationId: getQueryResults
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query for which the results are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultObfuscated'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: Query not found
+          content: {}
+        429:
+          description: Too many requests
+          content: {}
+      security:
+        - feasibility_auth:
+            - admin
+            - user
+  /v2/query/{queryId}/saved:
+    post:
+      tags:
+        - query
+      summary: Store additional information to an executed query
+      operationId: saveQuery
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of query to which the additional information shall be saved
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The additionally needed information to save a query
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedQuery'
+        required: true
+      responses:
+        204:
+          description: Saved Query successfully stored
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: The query for which the additional information should be stored could not be found
+          content: {}
+        409:
+          description: Query has already been saved
+          content: {}
+      security:
+        - feasibility_auth:
+            - user
+  /v2/query/template:
+    post:
+      tags:
+        - templates
+      summary: Store a structured query with additional label and comment
+      operationId: storeTemplate
+      requestBody:
+        description: Query template to persist
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryTemplate'
+        required: true
+      responses:
+        201:
+          description: Query template successfully stored
+          headers:
+            Location:
+              description: Path to the newly stored query template
+              schema:
+                type: string
+                example: "https://to.be.defined/api/v2/query/template/42"
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        409:
+          description: Query with the same label exists for this user
+          content: {}
+      security:
+        - feasibility_auth:
+            - user
+    get:
+      tags:
+        - templates
+      summary: Read list of query templates
+      description: Returns the list of all query templates of the current user
+      operationId: getQueryTemplateList
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/QueryTemplateListItem'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+      security:
+        - feasibility_auth:
+            - user
+  /v2/query/template/{queryId}:
+    get:
+      tags:
+        - templates
+      summary: Read a query template
+      description: Returns the query template with the given id
+      operationId: getQueryTemplate
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of the requested query template
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/QueryTemplate'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        404:
+          description: Query not found (or user has no access)
+          content: { }
+      security:
+        - feasibility_auth:
+            - user
+  /v2/query/template/validate:
+    get:
+      tags:
+        - templates
+      summary: Check all own query templates for invalid or outdated termcodes
+      description: Returns a list of query templates with the additional info if a query is valid
+      operationId: validateQueryTemplateList
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/QueryTemplate'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+      security:
+        - feasibility_auth:
+            - read:query
+  /actuator/health:
+    get:
+      summary: Offers health information about this application.
+      description: ''
+      operationId: ''
+      responses:
+        200:
+          description: Successful health information.
+          content:
+            application/vnd.spring-boot.actuator.v3+json:
+              examples:
+                Healthy Application:
+                  value: |-
+                    {
+                        "status": "UP"
+                    }
+      tags:
+        - intrinsics
+components:
+  schemas:
+    QueryListEntry:
+      type: object
+      required:
+        - id
+        - label
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+        created_at:
+          type: string
+          format: 'date-time'
+    Query:
+      type: object
+      required:
+        - id
+        - content
+      properties:
+        id:
+          type: integer
+          format: int64
+        content:
+          $ref: "#/components/schemas/StructuredQuery"
+        label:
+          type: string
+        results:
+          $ref: "#/components/schemas/QueryResult"
+        invalidTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+    QueryResultSummary:
+      type: object
+      properties:
+        totalNumberOfPatients:
+          type: integer
+          format: int64
+        queryId:
+          type: string
+        resultLines:
+          type: array
+    QueryResultObfuscated:
+      type: object
+      properties:
+        totalNumberOfPatients:
+          type: integer
+          format: int64
+        queryId:
+          type: string
+        resultLines:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryResultLineObfuscated"
+    QueryResult:
+      type: object
+      properties:
+        totalNumberOfPatients:
+          type: integer
+          format: int64
+        queryId:
+          type: string
+        resultLines:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryResultLine"
+    QueryResultLine:
+      type: object
+      required:
+        - siteName
+        - numberOfPatients
+      properties:
+        siteName:
+          type: string
+        numberOfPatients:
+          type: integer
+          format: int64
+    QueryResultLineObfuscated:
+      type: object
+      required:
+        - siteName
+        - numberOfPatients
+      properties:
+        siteName:
+          type: string
+          description: obfuscated site name
+        numberOfPatients:
+          type: integer
+          format: int64
+    QueryTemplateListItem:
+      type: object
+      required:
+        - label
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+          description: The 'name' of the query. Is assigned by the user via GUI.
+          example: my-query-1
+        comment:
+          type: string
+          description: A more detailed information about the query. Is also assigned by the user via GUI.
+          example: I wanted to see how many patients I could find for my study XYZ
+        lastModified:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          description: Keycloak id of the user who created the query
+    QueryTemplate:
+      type: object
+      required:
+        - label
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+          description: The 'name' of the query. Is assigned by the user via GUI.
+          example: my-query-1
+        comment:
+          type: string
+          description: A more detailed information about the query. Is also assigned by the user via GUI.
+          example: I wanted to see how many patients I could find for my study XYZ
+        content:
+          $ref: "#/components/schemas/StructuredQuery"
+        lastModified:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          description: Keycloak id of the user who created the query
+        invalidTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+    StructuredQuery:
+      type: object
+      required:
+        - version
+        - inclusionCriteria
+      properties:
+        version:
+          type: string
+          format: uri
+          description: The json schema version
+          example: http://to_be_decided.com/draft-1/schema#
+        display:
+          type: string
+          example: foobar
+        inclusionCriteria:
+          type: array
+          items:
+            $ref: "#/components/schemas/CriterionList"
+        exclusionCriteria:
+          type: array
+          items:
+            $ref: "#/components/schemas/CriterionList"
+    SavedQuery:
+      type: object
+      required:
+        - label
+      properties:
+        label:
+          type: string
+          description: The 'name' of the query. Is assigned by the user via GUI.
+          example: my-query-1
+        comment:
+          type: string
+          description: A more detailed information about the query. Is also assigned by the user via GUI.
+          example: I wanted to see how many patients I could find for my study XYZ
+    TermCode:
+      description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
+      type: object
+      required:
+        - code
+        - system
+        - display
+      properties:
+        code:
+          type: string
+          example: 119373006
+        system:
+          type: string
+          example: http://snomed.info/sct
+        version:
+          type: string
+          example: http://snomed.info/sct/900000000000207008/version/20210731
+        display:
+          type: string
+          example: Amniotic fluid specimen (specimen)
+    beforeDate:
+      type: string
+      format: date-time
+    afterDate:
+      type: string
+      format: date-time
+    TimeRestriction:
+      anyOf:
+        - $ref: "#/components/schemas/beforeDate"
+        - $ref: "#/components/schemas/afterDate"
+    Unit:
+      type: object
+      required:
+        - code
+        - display
+      properties:
+        code:
+          type: string
+        display:
+          type: string
+    AttributeFilter:
+      type: object
+      description: An AttributeFilter requires different properties, depending on the type. Please refer to the JSON Schema for this.
+      required:
+        - type
+      properties:
+        attributeCode:
+          $ref: "#/components/schemas/TermCode"
+    ValueFilter:
+      type: object
+      description: A ValueFilter requires different properties, depending on the type. Please refer to the JSON Schema for this.
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - concept
+            - quantity-comparator
+            - quantity-range
+        selectedConcepts:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+        comparator:
+          type: string
+          enum:
+            - eq
+            - ue
+            - le
+            - lt
+            - ge
+            - gt
+        unit:
+          $ref: "#/components/schemas/Unit"
+        value:
+          type: number
+          format: double
+        minValue:
+          type: number
+          format: double
+        maxValue:
+          type: number
+          format: double
+    Criterion:
+      type: object
+      required:
+        - termCodes
+      properties:
+        termCodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+        attributeFilters:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeFilter"
+        valueFilter:
+          $ref: "#/components/schemas/ValueFilter"
+        timeRestriction:
+          $ref: "#/components/schemas/TimeRestriction"
+    CriterionList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Criterion"
+  securitySchemes:
+    feasibility_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://to.be.defined/auth
+          scopes:
+            user: Feasibility user role
+            admin: Feasibility admin role

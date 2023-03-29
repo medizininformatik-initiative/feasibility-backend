@@ -2,7 +2,9 @@ package de.numcodex.feasibility_gui_backend.query.obfuscation;
 
 
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
-import org.junit.jupiter.api.Assertions;
+import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @Tag("query")
 @Tag("obfuscation")
 @Import({
-        QueryObfuscationSpringConfig.class
+        QueryObfuscationSpringConfig.class,
+        ResultServiceSpringConfig.class
 })
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-@SuppressWarnings("NewClassNamingConvention")
 public class QueryResultObfuscationIT {
 
     @Autowired
@@ -36,10 +38,7 @@ public class QueryResultObfuscationIT {
     private QueryRepository queryRepository;
 
     @Autowired
-    private SiteRepository siteRepository;
-
-    @Autowired
-    private ResultRepository resultRepository;
+    private ResultService resultService;
 
     @Autowired
     private QueryResultObfuscator queryResultObfuscator;
@@ -62,30 +61,18 @@ public class QueryResultObfuscationIT {
         testQueryB.setCreatedBy("someone");
         queryRepository.save(testQueryB);
 
-        var testSite = new Site();
-        testSite.setSiteName("A");
-        siteRepository.save(testSite);
+        var testSite = "A";
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
 
-        var testSiteAResult1 = new Result();
-        testSiteAResult1.setSite(testSite);
-        testSiteAResult1.setQuery(testQueryA);
-        testSiteAResult1.setResult(10);
-        testSiteAResult1.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult1.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult1);
+        var testSiteAResult1 = new ResultLine(testSite, SUCCESS, 10L);
+        resultService.addResultLine(testQueryA.getId(), testSiteAResult1);
 
-        var testSiteAResult2 = new Result();
-        testSiteAResult2.setSite(testSite);
-        testSiteAResult2.setQuery(testQueryB);
-        testSiteAResult2.setResult(20);
-        testSiteAResult2.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult2.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult2);
+        var testSiteAResult2 = new ResultLine(testSite, SUCCESS, 20L);
+        resultService.addResultLine(testQueryB.getId(), testSiteAResult2);
 
-        var tokenTestSiteAResult1 = queryResultObfuscator.tokenizeSiteName(testSiteAResult1);
-        var tokenTestSiteAResult2 = queryResultObfuscator.tokenizeSiteName(testSiteAResult2);
+        var tokenTestSiteAResult1 = queryResultObfuscator.tokenizeSiteName(testQueryA.getId(), testSite);
+        var tokenTestSiteAResult2 = queryResultObfuscator.tokenizeSiteName(testQueryB.getId(), testSite);
 
         assertNotEquals(tokenTestSiteAResult1, tokenTestSiteAResult2);
     }
@@ -103,22 +90,15 @@ public class QueryResultObfuscationIT {
         testQueryA.setCreatedBy("someone");
         queryRepository.save(testQueryA);
 
-        var testSite = new Site();
-        testSite.setSiteName("A");
-        siteRepository.save(testSite);
+        var testSite = "A";
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
 
-        var testSiteAResult = new Result();
-        testSiteAResult.setSite(testSite);
-        testSiteAResult.setQuery(testQueryA);
-        testSiteAResult.setResult(10);
-        testSiteAResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult);
+        var testSiteAResult = new ResultLine(testSite, SUCCESS, 10L);
+        resultService.addResultLine(testQueryA.getId(), testSiteAResult);
 
-        var tokenTestSiteAResult1 = queryResultObfuscator.tokenizeSiteName(testSiteAResult);
-        var tokenTestSiteAResult2 = queryResultObfuscator.tokenizeSiteName(testSiteAResult);
+        var tokenTestSiteAResult1 = queryResultObfuscator.tokenizeSiteName(testQueryA.getId(), testSite);
+        var tokenTestSiteAResult2 = queryResultObfuscator.tokenizeSiteName(testQueryA.getId(), testSite);
 
         assertEquals(tokenTestSiteAResult1, tokenTestSiteAResult2);
     }

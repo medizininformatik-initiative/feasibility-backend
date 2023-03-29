@@ -19,7 +19,9 @@ public enum QueryMediaType {
     /**
      * Represents the media type of a FHIR search query.
      */
-    FHIR("text/fhir-codex");
+    FHIR("text/fhir-codex"),
+
+    JSON("application/json");
 
     @Getter
     private final String representation;

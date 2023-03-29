@@ -1,29 +1,35 @@
 package de.numcodex.feasibility_gui_backend.query;
 
-
+import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
+import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryObfuscationSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-
+import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED;
+import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED;
+import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.SUMMARY;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("query")
 @Tag("handler")
@@ -34,7 +40,8 @@ import static org.junit.jupiter.api.Assertions.*;
         QueryCollectSpringConfig.class,
         QueryHandlerService.class,
         QueryObfuscationSpringConfig.class,
-        QueryTemplateHandler.class
+        QueryTemplateHandler.class,
+        ResultServiceSpringConfig.class
 })
 @DataJpaTest(
         properties = {
@@ -48,14 +55,15 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-@SuppressWarnings("NewClassNamingConvention")
 public class QueryHandlerServiceIT {
+
+    public static final String SITE_NAME_1 = "site-name-114606";
+    public static final String SITE_NAME_2 = "site-name-114610";
+    public static final String CREATOR = "creator-114634";
+    public static final long UNKNOWN_QUERY_ID = 9999999L;
 
     @Autowired
     private QueryHandlerService queryHandlerService;
-
-    @Autowired
-    private QueryContentRepository queryContentRepository;
 
     @Autowired
     private QueryRepository queryRepository;
@@ -64,21 +72,16 @@ public class QueryHandlerServiceIT {
     private QueryDispatchRepository queryDispatchRepository;
 
     @Autowired
-    private SiteRepository siteRepository;
-
-    @Autowired
-    private ResultRepository resultRepository;
-
-    @Autowired
-    private QueryResultObfuscator queryResultObfuscator;
+    private ResultService resultService;
 
     @Test
     public void testRunQuery() {
         var testStructuredQuery = new StructuredQuery();
 
         queryHandlerService.runQuery(testStructuredQuery, "test").block();
-        assertEquals(1, queryRepository.count());
-        assertEquals(1, queryDispatchRepository.count());
+
+        assertThat(queryRepository.count()).isOne();
+        assertThat(queryDispatchRepository.count()).isOne();
     }
 
     // This behavior seems to be necessary since the UI is polling constantly.
@@ -86,109 +89,78 @@ public class QueryHandlerServiceIT {
     // TODO: We should discuss this with the UI team. Maybe a better solution can be identified.
     @Test
     public void testGetQueryResult_UnknownQueryIdLeadsToResultWithZeroMatchesInPopulation() {
-        var unknownQueryId = 9999999L;
+        var queryResult = queryHandlerService.getQueryResult(UNKNOWN_QUERY_ID, DETAILED_OBFUSCATED);
 
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(unknownQueryId));
-        assertNotNull(queryResult);
-        assertEquals(unknownQueryId, queryResult.getQueryId());
-        assertEquals(0, queryResult.getTotalNumberOfPatients());
-        assertTrue(queryResult.getResultLines().isEmpty());
+        assertThat(queryResult.getQueryId()).isEqualTo(UNKNOWN_QUERY_ID);
+        assertThat(queryResult.getTotalNumberOfPatients()).isZero();
+        assertThat(queryResult.getResultLines()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @EnumSource
+    public void testGetQueryResult_ErrorResultsAreIgnored(ResultDetail resultDetail) {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, ERROR, 0L));
+
+        var queryResult = queryHandlerService.getQueryResult(queryId, resultDetail);
+
+        assertThat(queryResult.getResultLines()).isEmpty();
     }
 
     @Test
-    public void testGetQueryResult_MatchesInPopulationGetAccumulated() {
-        var testQueryContent = new QueryContent("irrelevant-for-this-test");
-        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
-        queryContentRepository.save(testQueryContent);
+    public void testGetQueryResult_SummaryContainsOnlyTheTotal() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
 
-        var testQuery = new Query();
-        testQuery.setQueryContent(testQueryContent);
-        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
-        testQuery.setCreatedBy("someone");
-        var testQueryId = queryRepository.save(testQuery).getId();
+        var queryResult = queryHandlerService.getQueryResult(queryId, SUMMARY);
 
-        var testSiteA = new Site();
-        testSiteA.setSiteName("A");
-        siteRepository.save(testSiteA);
-
-        var testSiteB = new Site();
-        testSiteB.setSiteName("B");
-        siteRepository.save(testSiteB);
-
-        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
-
-        var testSiteAResult = new Result();
-        testSiteAResult.setSite(testSiteA);
-        testSiteAResult.setQuery(testQuery);
-        testSiteAResult.setResult(10);
-        testSiteAResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult);
-
-        var testSiteBResult = new Result();
-        testSiteBResult.setSite(testSiteB);
-        testSiteBResult.setQuery(testQuery);
-        testSiteBResult.setResult(20);
-        testSiteBResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteBResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteBResult);
-
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
-
-        var testSiteAResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testSiteAResult);
-        var siteAResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
-                .equals(testSiteAResultTokenizedSiteName)).findFirst().orElseThrow();
-
-        var testSiteBResultTokenizedSiteName = queryResultObfuscator.tokenizeSiteName(testSiteBResult);
-        var siteBResultLine = queryResult.getResultLines().stream().filter(l -> l.getSiteName()
-                .equals(testSiteBResultTokenizedSiteName)).findFirst().orElseThrow();
-
-        assertEquals(30, queryResult.getTotalNumberOfPatients());
-        assertEquals(10, siteAResultLine.getNumberOfPatients());
-        assertEquals(20, siteBResultLine.getNumberOfPatients());
+        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.getResultLines()).isEmpty();
     }
 
     @Test
-    public void testGetQueryResult_FailedResultsDoNotAffectResult() {
-        var testQueryContent = new QueryContent("irrelevant-for-this-test");
-        testQueryContent.setHash("ab34ffcd"); // irrelevant for this test, too
-        queryContentRepository.save(testQueryContent);
+    public void testGetQueryResult_DetailedObfuscatedDoesNotContainTheSiteNames() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
 
-        var testQuery = new Query();
-        testQuery.setQueryContent(testQueryContent);
-        testQuery.setCreatedAt(Timestamp.from(Instant.now()));
-        testQuery.setCreatedBy("someone");
-        var testQueryId = queryRepository.save(testQuery).getId();
+        var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED_OBFUSCATED);
 
-        var testSiteA = new Site();
-        testSiteA.setSiteName("A");
-        siteRepository.save(testSiteA);
+        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.getResultLines()).hasSize(2);
+        assertThat(queryResult.getResultLines().stream().map(QueryResultLine::getSiteName))
+            .doesNotContain(SITE_NAME_1, SITE_NAME_2);
+        assertThat(queryResult.getResultLines().stream().map(QueryResultLine::getNumberOfPatients))
+            .contains(10L, 20L);
+    }
 
-        var testSiteB = new Site();
-        testSiteB.setSiteName("B");
-        siteRepository.save(testSiteB);
+    @Test
+    public void testGetQueryResult_DetailedContainsTheSiteNames() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
+        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
 
-        // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
+        var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED);
 
-        var testSiteAResult = new Result();
-        testSiteAResult.setSite(testSiteA);
-        testSiteAResult.setQuery(testQuery);
-        testSiteAResult.setResult(10);
-        testSiteAResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteAResult.setResultType(SUCCESS);
-        resultRepository.save(testSiteAResult);
+        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.getResultLines())
+            .hasSize(2)
+            .contains(QueryResultLine.builder().siteName(SITE_NAME_1).numberOfPatients(10L).build(),
+                QueryResultLine.builder().siteName(SITE_NAME_2).numberOfPatients(20L).build());
+    }
 
-        var testSiteBResult = new Result();
-        testSiteBResult.setSite(testSiteB);
-        testSiteBResult.setQuery(testQuery);
-        testSiteBResult.setResult(20);
-        testSiteBResult.setReceivedAt(Timestamp.from(Instant.now()));
-        testSiteBResult.setResultType(ERROR);
-        resultRepository.save(testSiteBResult);
-
-        var queryResult = assertDoesNotThrow(() -> queryHandlerService.getQueryResult(testQueryId));
-
-        assertEquals(10, queryResult.getTotalNumberOfPatients());
-        assertEquals(1, queryResult.getResultLines().size());
+    @Test
+    public void testGetAuthorId_UnknownQueryIdThrows() {
+        assertThrows(QueryNotFoundException.class,
+            () -> queryHandlerService.getAuthorId(UNKNOWN_QUERY_ID));
     }
 }

@@ -4,15 +4,14 @@ import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Optional;
 
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
@@ -32,10 +31,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
     private final QueryRepository queryRepository;
 
     @NonNull
-    private final SiteRepository siteRepository;
-
-    @NonNull
-    private final ResultRepository resultRepository;
+    private final ResultService resultService;
 
     @Override
     public void onClientUpdate(Long backendQueryId, QueryStatusUpdate statusUpdate) {
@@ -50,10 +46,7 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
             if (statusUpdate.status() == COMPLETED || statusUpdate.status() == FAILED) {
                 var internalQuery = lookupAssociatedBackendQuery(backendQueryId);
                 var siteName = resolveSiteName(statusUpdate.brokerSiteId(), statusUpdate.source());
-                var site = lookupSite(siteName)
-                        .orElseGet(() -> createSite(siteName));
-
-                persistResult(internalQuery, site, matchesInPopulation.orElse(null));
+                persistResult(internalQuery, siteName, matchesInPopulation.orElse(null));
             }
         } catch (QueryResultCollectException e) {
             log.error("cannot persist result of query '%s' for site '%s' with status '%s'".formatted(
@@ -95,31 +88,11 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
         }
     }
 
-    private Optional<Site> lookupSite(String siteName) {
-        return siteRepository.findBySiteName(siteName);
-    }
-
-    private Site createSite(String siteName) {
-        var site = new Site();
-        site.setSiteName(siteName);
-        return siteRepository.save(site);
-    }
-
-    private void persistResult(Query internalQuery, Site site, Integer matchesInPopulation)
+    private void persistResult(Query internalQuery, String siteName, Integer matchesInPopulation)
             throws QueryResultCollectException {
-        var result = new Result();
-        result.setQuery(internalQuery);
-        result.setSite(site);
-        result.setResultType((matchesInPopulation != null) ? SUCCESS : ERROR);
-        result.setResult(matchesInPopulation);
-        result.setReceivedAt(Timestamp.from(Instant.now()));
+        var resultLine = new ResultLine(siteName, (matchesInPopulation == null) ? ERROR : SUCCESS,
+            (matchesInPopulation == null) ? 0 : matchesInPopulation);
 
-        try {
-            resultRepository.save(result);
-        } catch (DataIntegrityViolationException e) {
-            // TODO: this should be possible (although as an update) if the former result has had a failed state!
-            throw new QueryResultCollectException("result for query '%s' to site '%s' already exists - dropping this one"
-                    .formatted(internalQuery.getId(), site.getSiteName()));
-        }
+        resultService.addResultLine(internalQuery.getId(), resultLine);
     }
 }

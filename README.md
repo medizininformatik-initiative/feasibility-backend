@@ -3,37 +3,63 @@
 
 ## Configuration Base
 
-| EnvVar                        | Description                                                                                                                                                              | Example          | Default                      |
-|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|------------------------------|
-| LOG_LEVEL                     | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                        |                  | `warn`                       |
-| BROKER_CLIENT_MOCK_ENABLED    | Enables the mock client. Possible values are `true` and `false`.                                                                                                         |                  | `true`                       |
-| BROKER_CLIENT_DIRECT_ENABLED  | Enables the direct client. Possible values are `true` and `false`.                                                                                                       |                  | `false`                      |
-| BROKER_CLIENT_AKTIN_ENABLED   | Enables the aktin client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                      |
-| BROKER_CLIENT_DSF_ENABLED     | Enables the dsf client. Possible values are `true` and `false`.                                                                                                          |                  | `false`                      |
-| KEYCLOAK_ENABLED              | Enables Keycloak if set to true. Possible values are `true` and `false`.                                                                                                 |                  | `true`                       |
-| KEYCLOAK_BASE_URL             | Base URL to reach a keycloak instance.                                                                                                                                   |                  | `http://localhost:8080`      |
-| KEYCLOAK_REALM                | Realm to be used for checking bearer tokens.                                                                                                                             |                  | `codex-develop`              |
-| KEYCLOAK_CLIENT_ID            | Client ID to be used for checking bearer tokens.                                                                                                                         |                  | `middleware-broker`          |
-| KEYCLOAK_ALLOWED_ROLE         | Role that has to be part of the bearer token in order for the requester to be rendered authorized.                                                                       |                  | `CODEX_USER`                 |
-| FEASIBILITY_DATABASE_HOST     | Host under which the Postgres feasibility database can be reached.                                                                                                       | localhost        | `localhost`                  |
-| FEASIBILITY_DATABASE_USER     | Username to connect to the Postgres feasibility database.                                                                                                                | codex-postgres   | `codex-postgres`             |
-| FEASIBILITY_DATABASE_PASSWORD | Password to connect to the Postgres feasibility database.                                                                                                                | codex-password   | `codex-password`             |
-| ONTOLOGY_FILES_FOLDER_UI      |                                                                                                                                                                          |                  | ontology/ui_profiles         |
-| ONTOLOGY_DB_MIGRATION_FOLDER      |                                                                                                                                                                          |                  | ontology/migration         |
-| MAPPINGS_FILE                 |                                                                                                                                                                          |                  | ontology/termCodeMapping.json |
-| CONCEPT_TREE_FILE             |                                                                                                                                                                          |                  | ontology/conceptTree.json    |
-| CQL_TRANSLATE_ENABLED         |                                                                                                                                                                          |                  | true                         |
-| FHIR_TRANSLATE_ENABLED        |                                                                                                                                                                          |                  | false                        |
-| FLARE_WEBSERVICE_BASE_URL     | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path                                                                   |                  | http://localhost:5000        |
-| API_BASE_URL                  | sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url             | https://host/api ||
-| QUERY_VALIDATION_ENABLED      | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json`   | true / false     | true                          |
+| EnvVar                       | Description                                                                                                                                                            | Example          | Default                                                             |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------------------------------------|
+| LOG_LEVEL                    | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                      |                  | `warn`                                                              |
+| BROKER_CLIENT_MOCK_ENABLED   | Enables the mock client. Possible values are `true` and `false`.                                                                                                       |                  | `true`                                                              |
+| BROKER_CLIENT_DIRECT_ENABLED | Enables the direct client. Possible values are `true` and `false`.                                                                                                     |                  | `false`                                                             |
+| BROKER_CLIENT_AKTIN_ENABLED  | Enables the aktin client. Possible values are `true` and `false`.                                                                                                      |                  | `false`                                                             |
+| BROKER_CLIENT_DSF_ENABLED    | Enables the dsf client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                                                             |
+| KEYCLOAK_ENABLED             | Enables Keycloak if set to true. Possible values are `true` and `false`.                                                                                               |                  | `true`                                                              |
+| KEYCLOAK_BASE_URL            | Base URL to reach a keycloak instance.                                                                                                                                 |                  | `http://localhost:8080`                                             |
+| KEYCLOAK_BASE_URL_ISSUER     | Base URL the keycloak instance uses in the issuer claim                                                                                                                |                  | `http://localhost:8080`                                             |
+| KEYCLOAK_BASE_URL_JWK        | Base URL for the JWK Set URI of the keycloak instance                                                                                                                  |                  | `http://localhost:8080`                                             |
+| KEYCLOAK_REALM               | Realm to be used for checking bearer tokens.                                                                                                                           |                  | `feasibility`                                                       |
+| KEYCLOAK_CLIENT_ID           | Client ID to be used for checking bearer tokens.                                                                                                                       |                  | `feasibility-webapp`                                                |
+| KEYCLOAK_ALLOWED_ROLE        | Role that has to be part of the bearer token in order for the requester to be rendered authorized.                                                                     |                  | `FeasibilityUser`                                                   |
+| KEYCLOAK_POWER_ROLE          | Optional role that can be assigned to a user to absolve them from being punished by any hard limits (see _PRIVACY_QUOTA_HARD.*_ EnvVars).                              |                  | `FeasibilityPowerUser`                                              |
+| KEYCLOAK_ADMIN_ROLE          | Role that gives admin rights to a user. Admins do not fall under any limits and can also see unobfuscated site names.                                                  |                  | `FeasibilityAdmin`                                                  |
+| SPRING_DATASOURCE_URL        | The JDBC URL of the Postgres feasibility database.                                                                                                                     |                  | `jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex` |
+| SPRING_DATASOURCE_USERNAME   | Username to connect to the Postgres feasibility database.                                                                                                              |                  | `codex-postgres`                                                    |
+| SPRING_DATASOURCE_PASSWORD   | Password to connect to the Postgres feasibility database.                                                                                                              |                  | `codex-password`                                                    |
+| ONTOLOGY_FILES_FOLDER_UI     |                                                                                                                                                                        |                  | ontology/ui_profiles                                                |
+| ONTOLOGY_DB_MIGRATION_FOLDER |                                                                                                                                                                        |                  | ontology/migration                                                  |
+| MAPPINGS_FILE                |                                                                                                                                                                        |                  | ontology/termCodeMapping.json                                       |
+| CONCEPT_TREE_FILE            |                                                                                                                                                                        |                  | ontology/conceptTree.json                                           |
+| CQL_TRANSLATE_ENABLED        |                                                                                                                                                                        |                  | true                                                                |
+| FHIR_TRANSLATE_ENABLED       |                                                                                                                                                                        |                  | false                                                               |
+| FLARE_WEBSERVICE_BASE_URL    | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path                                                                 |                  | http://localhost:5000                                               |
+| CQL_SERVER_BASE_URL          | Url of the local FHIR server that handles CQL requests                                                                                                                 |                  | http://cql                                                          |
+| API_BASE_URL                 | sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url           | https://host/api |                                                                     |
+| QUERY_VALIDATION_ENABLED     | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                                                |
+| QUERYRESULT_EXPIRY_MINUTES   | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                                   |
+| ALLOWED_ORIGINS              | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                                    |
 
 
-### Running the DIRECT path with local flare
+### Running the DIRECT path
 
-In order to run the backend using the DIRECT broker path,
-the FLARE_WEBSERVICE_BASE_URL environment variable needs to be set to a running instance of a FLARE
+The DIRECT path can be run **either** with flare **or** with a CQL compatible server, not with both.
+Result counts from the direct path can be obfuscated for privacy reasons. The current implementation
+handles obfuscation by adding or subtracting a random number <=5.
+
+| EnvVar                                | Description                                                                    | Example                       | Default |
+|---------------------------------------|--------------------------------------------------------------------------------|-------------------------------|---------|
+| BROKER_CLIENT_DIRECT_USE_CQL          | Whether to use a CQL server or not.                                            | | false   |
+| BROKER_CLIENT_OBFUSCATE_RESULT_COUNT  | Whether the result counts retrieved from the direct broker shall be obfuscated | | false   |
+
+This is irrelevant if _BROKER_CLIENT_DIRECT_ENABLED_ is set to false.
+
+#### Running the DIRECT path with local flare
+
+In order to run the backend using the DIRECT broker path with flare,
+the _FLARE_WEBSERVICE_BASE_URL_ environment variable needs to be set to a running instance of a FLARE
 instance the backend is allowed to connect to.
+
+#### Running the DIRECT path with local CQL server
+
+In order to run the backend using the DIRECT broker path with CQL,
+the _CQL_SERVER_BASE_URL_ environment variable needs to be set to a running instance of a CQL compatible
+FHIR server.
 
 
 ### Running the AKTIN broker path
@@ -66,6 +92,30 @@ In order to run the backend using the DSF path, the following environment variab
 | DSF_WEBSOCKET_URL              | URL pointing to the local ZARS FHIR server websocket endpoint.                                                        | `wss://zars/fhir/ws` ||
 | DSF_ORGANIZATION_ID            | Identifier for the local organization this backend is part of.                                                        | `MY ZARS`            ||
 
+
+### Privacy and obfuscation
+
+In order to prevent potentially malicious attempts to obtain critical data about patients, several
+countermeasures have been implemented. Users are restricted to creating a certain amount of queries per timeframe.
+Permanently pushing this limit will get a user blacklisted and needs manual intervention if the user shall be de-listed again.
+Moreover, retrieving detailed results for queries (including a breakdown by (obfuscated) site names) is also limited.
+
+If the number of responding sites is below the configured threshold, only the total number of results will be provided.
+If the number of total results is below threshold, no result will be provided.
+
+
+| EnvVar                                                        | Description                                                                                                                                                   | Example | Default |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|---------|
+| PRIVACY_QUOTA_SOFT_CREATE_AMOUNT                              | Amount of queries a user can create in the interval defined in _PRIVACY_QUOTA_SOFT_CREATE_INTERVALMINUTES_.                                                   |         | 3       |
+| PRIVACY_QUOTA_SOFT_CREATE_INTERVALMINUTES                     | (see description above)                                                                                                                                       |         | 1       |
+| PRIVACY_QUOTA_HARD_CREATE_AMOUNT                              | Amount of queries a user can create in the interval defined in _PRIVACY_QUOTA_HARD_CREATE_INTERVALMINUTES_ before being blacklisted.                          |         | 50      |
+| PRIVACY_QUOTA_HARD_CREATE_INTERVALMINUTES                     | (see description above)                                                                                                                                       |         | 10080   |
+| PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVALSECONDS             | Interval in which a user can read the summary query result endpoint.                                                                                          |         | 10      |
+| PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_POLLINGINTERVALSECONDS | Interval in which a user can read the detailed obfuscated query result endpoint.                                                                              |         | 10      |
+| PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_AMOUNT                 | Amount of times a user can create a distinct detailed obfuscated result in the interval defined in _PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS _. |         | 10      |
+| PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS        | (see description above)                                                                                                                                       |         | 3       |
+| PRIVACY_THRESHOLD_RESULTS                                     | If the total number of results is below this number, return an empty result instead.                                                                          |         | 3       |
+| PRIVACY_THRESHOLD_SITES                                       | If the number of responding sites is below this number, only respond with a total amount of patients                                                          |         | 20      |
 
 ## Setting up Development
 

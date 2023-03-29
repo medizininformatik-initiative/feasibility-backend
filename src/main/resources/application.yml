@@ -15,16 +15,20 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        dialect=com:
-          jackis:
-            jsonintegration:
-              hibernate: CustomPostgreSQL95Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     locations: filesystem:${ONTOLOGY_DB_MIGRATION_FOLDER:ontology/migration},classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
-    url: /swagger.yaml
+    url: /v3/api-docs/swagger.yaml
+    tryItOutEnabled: false
 management:
   endpoints:
     enabled-by-default: false
@@ -42,12 +46,16 @@ app:
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
   keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FEASIBILITY_USER}
+  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FEASIBILITY_POWER_USER}
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FEASIBILITY_ADMIN}
+  queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
     direct:
       enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
+      useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
+      obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
     aktin:
       enabled: ${BROKER_CLIENT_AKTIN_ENABLED:false}
       broker:
@@ -75,22 +83,32 @@ app:
     baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
     readTimeout: 20000
     connectTimeout: 2000
-  security:
-    nqueries:
-      amount: ${SECURITY_NQUERIES_AMOUNT:3}
-      perminutes: ${SECURITY_NQUERIES_PERMINUTES:1}
-
-keycloak:
-  cors: true
-  cors-exposed-headers: Location
-  bearer-only: true
-  auth-server-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}/auth
-  realm: ${KEYCLOAK_REALM:codex-develop}
-  ssl-required: external
-  resource: ${KEYCLOAK_CLIENT_ID:feasibility-gui}
+  cql:
+    baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
+  privacy:
+    threshold:
+      sites: ${PRIVACY_THRESHOLD_SITES:3}
+      results: ${PRIVACY_THRESHOLD_RESULTS:20}
+    quota:
+      soft:
+        create:
+          amount: ${PRIVACY_QUOTA_SOFT_CREATE_AMOUNT:3}
+          intervalMinutes: ${PRIVACY_QUOTA_SOFT_CREATE_INTERVALMINUTES:1}
+      hard:
+        create:
+          amount: ${PRIVACY_QUOTA_HARD_CREATE_AMOUNT:50}
+          intervalMinutes: ${PRIVACY_QUOTA_HARD_CREATE_INTERVALMINUTES:10080}
+      read:
+        resultSummary:
+          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVALSECONDS:10}
+        resultDetailedObfuscated:
+          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_POLLINGINTERVALSECONDS:10}
+          amount: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_AMOUNT:3}
+          intervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS:7200}
 
 logging:
   level:
+    org.hibernate: ${LOG_LEVEL_SQL:warn}
     de.numcodex: ${LOG_LEVEL:warn}
     org.springframework.web: ${LOG_LEVEL:warn}
 

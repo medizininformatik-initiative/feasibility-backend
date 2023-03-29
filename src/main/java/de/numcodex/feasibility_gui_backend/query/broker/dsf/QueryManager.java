@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
+import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
+import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
 
@@ -23,21 +25,22 @@ interface QueryManager {
      * The query definition is added to a query identified by the given query ID.
      *
      * @param queryId   Identifies the query that the query definition shall be added to.
-     * @param mediaType ?
+     * @param queryMediaType the {@link QueryMediaType} of the query definition
      * @param content   The actual query in plain text.
      * @throws QueryNotFoundException        If the given query ID does not identify a known query.
      * @throws UnsupportedMediaTypeException If the given media type is not supported.
      */
-    void addQueryDefinition(String queryId, String mediaType, String content) throws QueryNotFoundException, UnsupportedMediaTypeException;
+    void addQueryDefinition(String queryId, QueryMediaType queryMediaType, String content) throws QueryNotFoundException, UnsupportedMediaTypeException;
 
     /**
      * Publishes a handled query for distributed execution.
      *
      * @param queryId Identifies the query that shall be published.
      * @throws QueryNotFoundException If the given query ID does not identify a known query.
+     * @throws QueryDefinitionNotFoundException If the query does not contain a definition of the desired type.
      * @throws IOException If the query identified by the given query ID can not be published.
      */
-    void publishQuery(String queryId) throws QueryNotFoundException, IOException;
+    void publishQuery(String queryId) throws QueryNotFoundException, QueryDefinitionNotFoundException, IOException;
 
     /**
      * Removes a query from being handled if there is any.

@@ -10,6 +10,8 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import lombok.NonNull;
@@ -21,13 +23,16 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 
 @Service
 @RequiredArgsConstructor
 public class QueryHandlerService {
+
+    public enum ResultDetail {
+        SUMMARY,
+        DETAILED_OBFUSCATED,
+        DETAILED
+    }
 
     @NonNull
     private final QueryDispatcher queryDispatcher;
@@ -42,7 +47,7 @@ public class QueryHandlerService {
     private final QueryContentRepository queryContentRepository;
 
     @NonNull
-    private final ResultRepository resultRepository;
+    private final ResultService resultService;
 
     @NonNull
     private final QueryTemplateRepository queryTemplateRepository;
@@ -67,30 +72,27 @@ public class QueryHandlerService {
     }
 
     @Transactional
-    public QueryResult getQueryResult(Long queryId) {
-        return getQueryResult(queryId, true);
-    }
+    public QueryResult getQueryResult(Long queryId, ResultDetail resultDetail) {
+        var singleSiteResults = resultService.findSuccessfulByQuery(queryId);
+        List<QueryResultLine> resultLines = new ArrayList<>();
 
-    @Transactional
-    public QueryResult getQueryResult(Long queryId, boolean obfuscateSites) {
-        var singleSiteResults = resultRepository.findByQueryAndStatus(queryId, SUCCESS);
-
-        var resultLines = singleSiteResults.stream()
+        if (resultDetail != ResultDetail.SUMMARY) {
+            resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                        .siteName(obfuscateSites ? queryResultObfuscator.tokenizeSiteName(ssr) : ssr.getSite().getSiteName())
-                        .numberOfPatients(ssr.getResult())
-                        .build())
-                .collect(Collectors.toList());
+                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
+                    .numberOfPatients(ssr.result())
+                    .build())
+                .toList();
+        }
 
         var totalMatchesInPopulation = singleSiteResults.stream()
-                .map(Result::getResult)
-                .reduce(0, Integer::sum);
+            .mapToLong(ResultLine::result).sum();
 
         return QueryResult.builder()
-                .queryId(queryId)
-                .resultLines(resultLines)
-                .totalNumberOfPatients(totalMatchesInPopulation)
-                .build();
+            .queryId(queryId)
+            .resultLines(resultLines)
+            .totalNumberOfPatients(totalMatchesInPopulation)
+            .build();
     }
 
     public Query getQuery(Long queryId) throws JsonProcessingException {
@@ -154,7 +156,6 @@ public class QueryHandlerService {
             out.setLabel(savedQuery.get().getLabel());
             out.setComment(savedQuery.get().getComment());
         }
-        out.setResults(getQueryResult(in.getId()));
         return out;
     }
 
@@ -180,8 +181,8 @@ public class QueryHandlerService {
         return queries.orElseGet(ArrayList::new);
     }
 
-    public String getAuthorId(Long queryId) {
-        return queryRepository.getAuthor(queryId).orElse(null);
+    public String getAuthorId(Long queryId) throws QueryNotFoundException {
+        return queryRepository.getAuthor(queryId).orElseThrow(QueryNotFoundException::new);
     }
 
     public List<QueryListEntry> convertQueriesToQueryListEntries(List<de.numcodex.feasibility_gui_backend.query.persistence.Query> queryList) {

@@ -1,10 +1,9 @@
 package de.numcodex.feasibility_gui_backend.query.obfuscation;
 
-import de.numcodex.feasibility_gui_backend.query.persistence.Result;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -43,42 +42,36 @@ public class QueryResultObfuscator {
     private MessageDigest hashFn;
 
     /**
-     * Tokenizes the site name of the given {@link Result}. That is, replaces it with a
+     * Tokenizes the site name of the given queryid and site name. That is, replaces it with a
      * placeholder in order to obfuscate it.
      * <p>
-     * Tokenization is based on a hash function seeded by information identifying the {@link Result}.
+     * Tokenization is based on a hash function seeded by information identifying the query id and site name.
      *
-     * @param result The result whose corresponding site name shall be tokenized.
+     * @param queryId The query id for which the site name shall be tokenized.
+     * @param siteName The site name that shall be tokenized
      * @return The tokenized site name.
      */
-    public String tokenizeSiteName(@NotNull Result result) {
-        if (result == null) {
-            throw new IllegalArgumentException("result must not be null");
+    public String tokenizeSiteName(Long queryId, @NotNull String siteName) {
+        if (siteName == null) {
+            throw new IllegalArgumentException("siteName must not be null");
         }
 
-        var seed = generateSeed(result);
+        var seed = generateSeed(queryId, siteName);
         hashFn.reset();
         hashFn.update(seed.getBytes(StandardCharsets.UTF_8));
-        var siteNameToken = hashFn.digest(result.getSite().getSiteName().getBytes(StandardCharsets.UTF_8));
+        var siteNameToken = hashFn.digest(siteName.getBytes(StandardCharsets.UTF_8));
         var siteNameTokenHex = byteToHex(siteNameToken);
         return truncateHashValue(siteNameTokenHex);
     }
 
-    private String generateSeed(Result result) {
-        var resultId = result.getId();
-        var correspondingSiteId = result.getSiteId();
-        var correspondingQueryId = result.getQueryId();
+    private String generateSeed(Long queryId, String siteName) {
 
-        var resultIdHash = hashFn.digest(String.valueOf(resultId)
+        var queryIdHash = hashFn.digest(String.valueOf(queryId)
                 .getBytes(StandardCharsets.UTF_8));
-        var correspondingSiteIdHash = hashFn.digest(String.valueOf(correspondingSiteId)
-                .getBytes(StandardCharsets.UTF_8));
-        var correspondingQueryIdHash = hashFn.digest(String.valueOf(correspondingQueryId)
-                .getBytes(StandardCharsets.UTF_8));
+        var siteNameHash = hashFn.digest(siteName.getBytes(StandardCharsets.UTF_8));
 
-        return Arrays.toString(resultIdHash) +
-                Arrays.toString(correspondingSiteIdHash) +
-                Arrays.toString(correspondingQueryIdHash);
+        return  Arrays.toString(queryIdHash) +
+                Arrays.toString(siteNameHash);
     }
 
     private String byteToHex(byte[] hash) {
