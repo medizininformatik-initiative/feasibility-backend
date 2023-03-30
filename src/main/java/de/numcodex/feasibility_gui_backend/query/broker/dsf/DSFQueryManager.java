@@ -5,8 +5,18 @@ import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundE
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
 import org.highmed.fhir.client.FhirWebserviceClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +40,7 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
  */
 class DSFQueryManager implements QueryManager {
 
-    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.5.0";
+    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.6.2";
     private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request";
     private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure";
     private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library";
