@@ -2,7 +2,11 @@ package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
 import lombok.extern.slf4j.Slf4j;
 import org.highmed.fhir.client.FhirWebserviceClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 
 import java.util.Optional;
 
@@ -13,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 class DSFQueryResultHandler {
 
-    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.5.0";
+    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2";
     private static final String CODE_SYSTEM_FEASIBILITY = "http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REPORT_REF = "measure-report-reference";
     private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";

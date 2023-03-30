@@ -23,7 +23,10 @@ import java.util.UUID;
 
 import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
 import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.STRUCTURED_QUERY;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -141,7 +144,8 @@ public class DSFQueryManagerTest {
 
         assertEquals(businessKey, queryId);
         assertNotNull(library.getName());
-        assertEquals("http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.5.0", task.getInstantiatesUri());
+        assertEquals("http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.6.2",
+                task.getInstantiatesUri());
         assertEquals(1, task.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
                         .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request"))
                 .count());
