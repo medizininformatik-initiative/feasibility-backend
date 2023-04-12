@@ -3,7 +3,11 @@ package de.numcodex.feasibility_gui_backend.query.v2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
+import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
+import de.numcodex.feasibility_gui_backend.query.api.ResultAbsentReason;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
@@ -30,6 +34,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -43,6 +48,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -92,6 +98,12 @@ public class QueryHandlerRestControllerIT {
 
     @Value("${app.privacy.quota.hard.create.intervalminutes}")
     private int quotaHardCreateIntervalMinutes;
+
+    @Value("${app.privacy.threshold.results}")
+    private long privacyThresholdResults;
+
+    @Value("${app.privacy.threshold.sites}")
+    private int privacyThresholdSites;
 
     @BeforeEach
     void initTest() throws Exception {
@@ -238,6 +250,84 @@ public class QueryHandlerRestControllerIT {
             .andExpect(header().string("location", "/api/v2/query/1"));
     }
 
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetSummaryResultEndpoint_SucceedsOnTooFewResultsWith200ButAbsentTotalResult() throws Exception {
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(createQueryResultWithTooFewTotalResults()).when(queryHandlerService).getQueryResult(any(Long.class), eq(QueryHandlerService.ResultDetail.SUMMARY));
+
+        mockMvc.perform(get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalNumberOfPatients").doesNotExist())
+                .andExpect(jsonPath("$.absentReasonTotal").value(ResultAbsentReason.RESULT_TOO_SMALL.name()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetDetailedObfuscatedResultEndpoint_SucceedsOnTooFewResultsWith200ButAbsentTotalResult() throws Exception {
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(createQueryResultWithTooFewTotalResults()).when(queryHandlerService).getQueryResult(any(Long.class), eq(QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED));
+
+        mockMvc.perform(get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalNumberOfPatients").doesNotExist())
+                .andExpect(jsonPath("$.absentReasonTotal").value(ResultAbsentReason.RESULT_TOO_SMALL.name()))
+                .andExpect(jsonPath("$.resultLines").exists())
+                .andExpect(jsonPath("$.absentReasonResultLines").doesNotExist())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetDetailedObfuscatedResultEndpoint_SucceedsOnTooFewSitesWith200ButAbsentResultLines() throws Exception {
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(createQueryResultWithTooFewRespondingSites()).when(queryHandlerService).getQueryResult(any(Long.class), eq(QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED));
+
+        mockMvc.perform(get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultLines").doesNotExist())
+                .andExpect(jsonPath("$.absentReasonResultLines").value(ResultAbsentReason.NOT_ENOUGH_SITES.name()))
+                .andExpect(jsonPath("$.totalNumberOfPatients").exists())
+                .andExpect(jsonPath("$.absentReasonTotal").doesNotExist())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetDetailedObfuscatedResultEndpoint_SucceedsOnTooFewSitesAndTooFewResultsWith200ButAbsentResultLinesAndAbsentTotalResult() throws Exception {
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(createQueryResultWithTooFewTotalResultsAndTooFewRespondingSites()).when(queryHandlerService).getQueryResult(any(Long.class), eq(QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED));
+
+        mockMvc.perform(get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultLines").doesNotExist())
+                .andExpect(jsonPath("$.absentReasonResultLines").value(ResultAbsentReason.NOT_ENOUGH_SITES.name()))
+                .andExpect(jsonPath("$.totalNumberOfPatients").doesNotExist())
+                .andExpect(jsonPath("$.absentReasonTotal").value(ResultAbsentReason.RESULT_TOO_SMALL.name()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetDetailedObfuscatedResultEndpoint_SucceedsWith200AndContainsNoAbsentMarkers() throws Exception {
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(createQueryResultWithEnoughResultsAndSites()).when(queryHandlerService).getQueryResult(any(Long.class), eq(QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED));
+
+        mockMvc.perform(get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultLines").exists())
+                .andExpect(jsonPath("$.absentReasonResultLines").doesNotExist())
+                .andExpect(jsonPath("$.totalNumberOfPatients").exists())
+                .andExpect(jsonPath("$.absentReasonTotal").doesNotExist())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
         var termCode = new TermCode();
@@ -254,5 +344,49 @@ public class QueryHandlerRestControllerIT {
         testQuery.setDisplay("foo");
         testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
         return testQuery;
+    }
+
+    private QueryResult createQueryResultWithEnoughResultsAndSites() {
+        var resultLine1 = QueryResultLine.builder().siteName("foo").numberOfPatients(privacyThresholdResults + 1).build();
+        var resultLine2 = QueryResultLine.builder().siteName("bar").numberOfPatients(privacyThresholdResults + 1).build();
+        var resultLine3 = QueryResultLine.builder().siteName("baz").numberOfPatients(privacyThresholdResults + 1).build();
+
+        return QueryResult.builder()
+                .queryId(1L)
+                .totalNumberOfPatients(3 * privacyThresholdResults + 3)
+                .resultLines(List.of(resultLine1, resultLine2, resultLine3))
+                .build();
+    }
+
+    private QueryResult createQueryResultWithTooFewTotalResults() {
+        var resultLine1 = QueryResultLine.builder().siteName("foo").numberOfPatients(0L).build();
+        var resultLine2 = QueryResultLine.builder().siteName("bar").numberOfPatients(privacyThresholdResults - 1).build();
+        var resultLine3 = QueryResultLine.builder().siteName("baz").numberOfPatients(0L).build();
+
+        return QueryResult.builder()
+                .queryId(1L)
+                .totalNumberOfPatients(privacyThresholdResults - 1)
+                .resultLines(List.of(resultLine1, resultLine2, resultLine3))
+                .build();
+    }
+
+    private QueryResult createQueryResultWithTooFewRespondingSites() {
+        var resultLine = QueryResultLine.builder().siteName("bar").numberOfPatients(privacyThresholdResults + 1).build();
+
+        return QueryResult.builder()
+                .queryId(1L)
+                .totalNumberOfPatients(privacyThresholdResults + 1)
+                .resultLines(List.of(resultLine))
+                .build();
+    }
+
+    private QueryResult createQueryResultWithTooFewTotalResultsAndTooFewRespondingSites() {
+        var resultLine = QueryResultLine.builder().siteName("bar").numberOfPatients(privacyThresholdResults - 1).build();
+
+        return QueryResult.builder()
+                .queryId(1L)
+                .totalNumberOfPatients(privacyThresholdResults - 1)
+                .resultLines(List.of(resultLine))
+                .build();
     }
 }

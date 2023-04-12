@@ -9,6 +9,7 @@ import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
+import de.numcodex.feasibility_gui_backend.query.api.ResultAbsentReason;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
@@ -212,13 +213,15 @@ public class QueryHandlerRestController {
         ResultDetail.DETAILED_OBFUSCATED);
 
     if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      queryResult.setAbsentReasonTotal(ResultAbsentReason.RESULT_TOO_SMALL);
+      queryResult.setTotalNumberOfPatients(null);
     }
     HttpHeaders headers = new HttpHeaders();
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
-      queryResult.setResultLines(List.of());
+      queryResult.setAbsentReasonResultLines(ResultAbsentReason.NOT_ENOUGH_SITES);
+      queryResult.setResultLines(null);
     }
-    if (queryResult.getResultLines().isEmpty()) {
+    if (queryResult.getResultLines() == null || queryResult.getResultLines().isEmpty()) {
       headers.add(HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY, "true");
     }
     return new ResponseEntity<>(queryResult, headers, HttpStatus.OK);
@@ -246,7 +249,8 @@ public class QueryHandlerRestController {
     var queryResult = queryHandlerService.getQueryResult(queryId, ResultDetail.SUMMARY);
 
     if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      queryResult.setAbsentReasonTotal(ResultAbsentReason.RESULT_TOO_SMALL);
+      queryResult.setTotalNumberOfPatients(null);
     }
     return new ResponseEntity<>(queryResult, HttpStatus.OK);
   }
