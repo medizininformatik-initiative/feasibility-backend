@@ -11,6 +11,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
@@ -101,7 +102,7 @@ public class QueryHandlerRestController {
     boolean isPowerUser = authenticationHelper.hasAuthority(authentication, keycloakPowerRole);
 
     if (!isPowerUser && userBlacklistEntry.isPresent()) {
-      return Mono.just(new ResponseEntity<>(HttpStatus.FORBIDDEN));
+      return Mono.just(new ResponseEntity<>(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER, HttpStatus.FORBIDDEN));
     }
 
     Long amountOfQueriesByUserAndHardInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
@@ -111,7 +112,7 @@ public class QueryHandlerRestController {
       UserBlacklist userBlacklist = new UserBlacklist();
       userBlacklist.setUserId(userId);
       userBlacklistRepository.save(userBlacklist);
-      return Mono.just(new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS));
+      return Mono.just(new ResponseEntity<>(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER, HttpStatus.FORBIDDEN));
     }
     Long amountOfQueriesByUserAndSoftInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
         userId, quotaSoftCreateIntervalMinutes);
@@ -120,8 +121,7 @@ public class QueryHandlerRestController {
           quotaSoftCreateAmount - 1, quotaSoftCreateIntervalMinutes);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
-      return Mono.just(new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS));
-      //return new ResponseEntity<>(httpHeaders, HttpStatus.TOO_MANY_REQUESTS);
+      return Mono.just(new ResponseEntity<>(FeasibilityIssue.QUOTA_EXCEEDED, httpHeaders, HttpStatus.TOO_MANY_REQUESTS));
     }
     // Note: this is using a ResponseEntity instead of a ServerResponse since this is a
     //       @Controller annotated class. This can be adjusted as soon as we switch to the new

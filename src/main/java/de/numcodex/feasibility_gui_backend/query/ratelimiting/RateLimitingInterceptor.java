@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
+import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
 import de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -76,7 +77,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
             summaryResultProbe.getNanosToWaitForRefill() / 1_000_000_000;
         response.addHeader(HEADER_RETRY_AFTER, Long.toString(waitForRefill));
         response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-            "You have exhausted your API Request Quota");
+                FeasibilityIssue.POLLING_LIMIT_EXCEEDED.name());
         return false;
       }
 
@@ -110,8 +111,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
                   / 1_000_000_000;
           response.addHeader(HEADER_RETRY_AFTER_DETAILED_OBFUSCATED_RESULTS,
               Long.toString(waitForRefill));
-          response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-              "You have exhausted your Request Quota for detailed obfuscated results");
+          response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), FeasibilityIssue.QUOTA_EXCEEDED.name());
           return false;
         }
       } else {
@@ -119,8 +119,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
             detailedPollingResultProbe.getNanosToWaitForRefill()
                 / 1_000_000_000;
         response.addHeader(HEADER_RETRY_AFTER, Long.toString(waitForRefill));
-        response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-            "You have exhausted your API Request Quota");
+        response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), FeasibilityIssue.POLLING_LIMIT_EXCEEDED.name());
         return false;
       }
     }
