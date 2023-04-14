@@ -77,7 +77,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
             summaryResultProbe.getNanosToWaitForRefill() / 1_000_000_000;
         response.addHeader(HEADER_RETRY_AFTER, Long.toString(waitForRefill));
         response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                FeasibilityIssue.POLLING_LIMIT_EXCEEDED.name());
+                Integer.toString(FeasibilityIssue.POLLING_LIMIT_EXCEEDED.code()));
         return false;
       }
 
@@ -111,7 +111,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
                   / 1_000_000_000;
           response.addHeader(HEADER_RETRY_AFTER_DETAILED_OBFUSCATED_RESULTS,
               Long.toString(waitForRefill));
-          response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), FeasibilityIssue.QUOTA_EXCEEDED.name());
+          response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), Integer.toString(FeasibilityIssue.QUOTA_EXCEEDED.code()));
           return false;
         }
       } else {
@@ -119,7 +119,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
             detailedPollingResultProbe.getNanosToWaitForRefill()
                 / 1_000_000_000;
         response.addHeader(HEADER_RETRY_AFTER, Long.toString(waitForRefill));
-        response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), FeasibilityIssue.POLLING_LIMIT_EXCEEDED.name());
+        response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), Integer.toString(FeasibilityIssue.POLLING_LIMIT_EXCEEDED.code()));
         return false;
       }
     }

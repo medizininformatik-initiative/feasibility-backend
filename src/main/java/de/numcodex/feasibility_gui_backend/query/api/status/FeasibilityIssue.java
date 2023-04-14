@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.api.status;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -62,6 +63,24 @@ public enum FeasibilityIssue {
 
     public Boolean retry() {
         return this.retry;
+    }
+
+    public static FeasibilityIssue valueOf(int feasibilityIssueCode) {
+        FeasibilityIssue feasibilityIssue = resolve(feasibilityIssueCode);
+        if (feasibilityIssue == null) {
+            throw new IllegalArgumentException("No matching Feasibility issue for code " + feasibilityIssueCode);
+        }
+        return feasibilityIssue;
+    }
+
+    @Nullable
+    public static FeasibilityIssue resolve(int feasibilityIssueCode) {
+        for (FeasibilityIssue feasibilityIssue : VALUES) {
+            if (feasibilityIssue.code == feasibilityIssueCode) {
+                return feasibilityIssue;
+            }
+        }
+        return null;
     }
 
     public enum IssueType {

@@ -16,11 +16,10 @@ public class RateLimitingErrorAttributes extends DefaultErrorAttributes {
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
         String originalErrorMessage = super.getMessage(webRequest, null);
 
-        if (FeasibilityIssue.QUOTA_EXCEEDED.name().equals(originalErrorMessage)) {
-            return Map.of("issue", List.of(FeasibilityIssue.QUOTA_EXCEEDED));
-        } else if (FeasibilityIssue.POLLING_LIMIT_EXCEEDED.name().equals(originalErrorMessage))
-            return Map.of("issue", List.of(FeasibilityIssue.POLLING_LIMIT_EXCEEDED));
-
-        return super.getErrorAttributes(webRequest, options);
+        try {
+            return Map.of("issue", List.of(FeasibilityIssue.valueOf(Integer.parseInt(originalErrorMessage))));
+        } catch (IllegalArgumentException e) {
+            return super.getErrorAttributes(webRequest, options);
+        }
     }
 }
