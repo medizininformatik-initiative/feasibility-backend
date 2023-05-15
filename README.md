@@ -3,37 +3,38 @@
 
 ## Configuration Base
 
-| EnvVar                       | Description                                                                                                                                                            | Example          | Default                                                             |
-|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------------------------------------|
-| LOG_LEVEL                    | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                      |                  | `warn`                                                              |
-| BROKER_CLIENT_MOCK_ENABLED   | Enables the mock client. Possible values are `true` and `false`.                                                                                                       |                  | `true`                                                              |
-| BROKER_CLIENT_DIRECT_ENABLED | Enables the direct client. Possible values are `true` and `false`.                                                                                                     |                  | `false`                                                             |
-| BROKER_CLIENT_AKTIN_ENABLED  | Enables the aktin client. Possible values are `true` and `false`.                                                                                                      |                  | `false`                                                             |
-| BROKER_CLIENT_DSF_ENABLED    | Enables the dsf client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                                                             |
-| KEYCLOAK_ENABLED             | Enables Keycloak if set to true. Possible values are `true` and `false`.                                                                                               |                  | `true`                                                              |
-| KEYCLOAK_BASE_URL            | Base URL to reach a keycloak instance.                                                                                                                                 |                  | `http://localhost:8080`                                             |
-| KEYCLOAK_BASE_URL_ISSUER     | Base URL the keycloak instance uses in the issuer claim                                                                                                                |                  | `http://localhost:8080`                                             |
-| KEYCLOAK_BASE_URL_JWK        | Base URL for the JWK Set URI of the keycloak instance                                                                                                                  |                  | `http://localhost:8080`                                             |
-| KEYCLOAK_REALM               | Realm to be used for checking bearer tokens.                                                                                                                           |                  | `feasibility`                                                       |
-| KEYCLOAK_CLIENT_ID           | Client ID to be used for checking bearer tokens.                                                                                                                       |                  | `feasibility-webapp`                                                |
-| KEYCLOAK_ALLOWED_ROLE        | Role that has to be part of the bearer token in order for the requester to be rendered authorized.                                                                     |                  | `FeasibilityUser`                                                   |
-| KEYCLOAK_POWER_ROLE          | Optional role that can be assigned to a user to absolve them from being punished by any hard limits (see _PRIVACY_QUOTA_HARD.*_ EnvVars).                              |                  | `FeasibilityPowerUser`                                              |
-| KEYCLOAK_ADMIN_ROLE          | Role that gives admin rights to a user. Admins do not fall under any limits and can also see unobfuscated site names.                                                  |                  | `FeasibilityAdmin`                                                  |
+| EnvVar                       | Description                                                                                                                                                            | Example          | Default                                                              |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|----------------------------------------------------------------------|
+| LOG_LEVEL                    | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                      |                  | `warn`                                                               |
+| BROKER_CLIENT_MOCK_ENABLED   | Enables the mock client. Possible values are `true` and `false`.                                                                                                       |                  | `true`                                                               |
+| BROKER_CLIENT_DIRECT_ENABLED | Enables the direct client. Possible values are `true` and `false`.                                                                                                     |                  | `false`                                                              |
+| BROKER_CLIENT_AKTIN_ENABLED  | Enables the aktin client. Possible values are `true` and `false`.                                                                                                      |                  | `false`                                                              |
+| BROKER_CLIENT_DSF_ENABLED    | Enables the dsf client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                                                              |
+| KEYCLOAK_ENABLED             | Enables Keycloak if set to true. Possible values are `true` and `false`.                                                                                               |                  | `true`                                                               |
+| KEYCLOAK_BASE_URL            | Base URL to reach a keycloak instance.                                                                                                                                 |                  | `http://localhost:8080`                                              |
+| KEYCLOAK_BASE_URL_ISSUER     | Base URL the keycloak instance uses in the issuer claim                                                                                                                |                  | `http://localhost:8080`                                              |
+| KEYCLOAK_BASE_URL_JWK        | Base URL for the JWK Set URI of the keycloak instance                                                                                                                  |                  | `http://localhost:8080`                                              |
+| KEYCLOAK_REALM               | Realm to be used for checking bearer tokens.                                                                                                                           |                  | `feasibility`                                                        |
+| KEYCLOAK_CLIENT_ID           | Client ID to be used for checking bearer tokens.                                                                                                                       |                  | `feasibility-webapp`                                                 |
+| KEYCLOAK_ALLOWED_ROLE        | Role that has to be part of the bearer token in order for the requester to be rendered authorized.                                                                     |                  | `FeasibilityUser`                                                    |
+| KEYCLOAK_POWER_ROLE          | Optional role that can be assigned to a user to absolve them from being punished by any hard limits (see _PRIVACY_QUOTA_HARD.*_ EnvVars).                              |                  | `FeasibilityPowerUser`                                               |
+| KEYCLOAK_ADMIN_ROLE          | Role that gives admin rights to a user. Admins do not fall under any limits and can also see unobfuscated site names.                                                  |                  | `FeasibilityAdmin`                                                   |
 | SPRING_DATASOURCE_URL        | The JDBC URL of the Postgres feasibility database.                                                                                                                     |                  | `jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex` |
-| SPRING_DATASOURCE_USERNAME   | Username to connect to the Postgres feasibility database.                                                                                                              |                  | `codex-postgres`                                                    |
-| SPRING_DATASOURCE_PASSWORD   | Password to connect to the Postgres feasibility database.                                                                                                              |                  | `codex-password`                                                    |
-| ONTOLOGY_FILES_FOLDER_UI     |                                                                                                                                                                        |                  | ontology/ui_profiles                                                |
-| ONTOLOGY_DB_MIGRATION_FOLDER |                                                                                                                                                                        |                  | ontology/migration                                                  |
-| MAPPINGS_FILE                |                                                                                                                                                                        |                  | ontology/termCodeMapping.json                                       |
-| CONCEPT_TREE_FILE            |                                                                                                                                                                        |                  | ontology/conceptTree.json                                           |
-| CQL_TRANSLATE_ENABLED        |                                                                                                                                                                        |                  | true                                                                |
-| FHIR_TRANSLATE_ENABLED       |                                                                                                                                                                        |                  | false                                                               |
-| FLARE_WEBSERVICE_BASE_URL    | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path                                                                 |                  | http://localhost:5000                                               |
-| CQL_SERVER_BASE_URL          | Url of the local FHIR server that handles CQL requests                                                                                                                 |                  | http://cql                                                          |
-| API_BASE_URL                 | sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url           | https://host/api |                                                                     |
-| QUERY_VALIDATION_ENABLED     | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                                                |
-| QUERYRESULT_EXPIRY_MINUTES   | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                                   |
-| ALLOWED_ORIGINS              | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                                    |
+| SPRING_DATASOURCE_USERNAME   | Username to connect to the Postgres feasibility database.                                                                                                              |                  | `codex-postgres`                                                     |
+| SPRING_DATASOURCE_PASSWORD   | Password to connect to the Postgres feasibility database.                                                                                                              |                  | `codex-password`                                                     |
+| ONTOLOGY_FILES_FOLDER_UI     |                                                                                                                                                                        |                  | ontology/ui_profiles                                                 |
+| ONTOLOGY_DB_MIGRATION_FOLDER |                                                                                                                                                                        |                  | ontology/migration                                                   |
+| MAPPINGS_FILE                |                                                                                                                                                                        |                  | ontology/termCodeMapping.json                                        |
+| CONCEPT_TREE_FILE            |                                                                                                                                                                        |                  | ontology/conceptTree.json                                            |
+| CQL_TRANSLATE_ENABLED        |                                                                                                                                                                        |                  | true                                                                 |
+| FHIR_TRANSLATE_ENABLED       |                                                                                                                                                                        |                  | false                                                                |
+| FLARE_WEBSERVICE_BASE_URL    | Url of the local FLARE webservice - needed for fhir query translation and when running the DIRECT path                                                                 |                  | http://localhost:5000                                                |
+| CQL_SERVER_BASE_URL          | Url of the local FHIR server that handles CQL requests                                                                                                                 |                  | http://cql                                                           |
+| API_BASE_URL                 | sets the base url of the webservice, this is necessary if the webservice is running behind a proxy server, if not filled the api base url is the request url           | https://host/api |                                                                      |
+| QUERY_VALIDATION_ENABLED     | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                                                 |
+| QUERYRESULT_EXPIRY_MINUTES   | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                                    |
+| QUERYRESULT_PUBLIC_KEY       | The public key in Base64-encoded DER format without banners and line breaks.                                                                                           |                  |                                                                      |
+| ALLOWED_ORIGINS              | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                                     |
 
 
 ### Running the DIRECT path
@@ -42,10 +43,10 @@ The DIRECT path can be run **either** with flare **or** with a CQL compatible se
 Result counts from the direct path can be obfuscated for privacy reasons. The current implementation
 handles obfuscation by adding or subtracting a random number <=5.
 
-| EnvVar                                | Description                                                                    | Example                       | Default |
-|---------------------------------------|--------------------------------------------------------------------------------|-------------------------------|---------|
-| BROKER_CLIENT_DIRECT_USE_CQL          | Whether to use a CQL server or not.                                            | | false   |
-| BROKER_CLIENT_OBFUSCATE_RESULT_COUNT  | Whether the result counts retrieved from the direct broker shall be obfuscated | | false   |
+| EnvVar                               | Description                                                                    | Example | Default |
+|--------------------------------------|--------------------------------------------------------------------------------|---------|---------|
+| BROKER_CLIENT_DIRECT_USE_CQL         | Whether to use a CQL server or not.                                            |         | false   |
+| BROKER_CLIENT_OBFUSCATE_RESULT_COUNT | Whether the result counts retrieved from the direct broker shall be obfuscated |         | false   |
 
 This is irrelevant if _BROKER_CLIENT_DIRECT_ENABLED_ is set to false.
 
@@ -68,8 +69,8 @@ In order to run the backend using the AKTIN broker path, the following environme
 
 | EnvVar                | Description                                              | Example                       | Default |
 |-----------------------|----------------------------------------------------------|-------------------------------|---------|
-| AKTIN_BROKER_BASE_URL | Base URL for the AKTIN RESTful API                       | http://localhost:8080/broker/ ||
-| AKTIN_BROKER_API_KEY  | API key for the broker RESTful API with admin privileges | xxxAdmin1234                  ||
+| AKTIN_BROKER_BASE_URL | Base URL for the AKTIN RESTful API                       | http://localhost:8080/broker/ |         |
+| AKTIN_BROKER_API_KEY  | API key for the broker RESTful API with admin privileges | xxxAdmin1234                  |         |
 
 When using API-key authentication, please make sure that the broker server has a
 corresponding API-key entry with `OU=admin` contained in the DN-string.
@@ -82,15 +83,15 @@ In order to run the backend using the DSF path, the following environment variab
 
 | EnvVar                         | Description                                                                                                           | Example              | Default |
 |--------------------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------|---------|
-| DSF_SECURITY_CACERT            | Certificate required for secured communication with the DSF middleware.                                               |||
-| DSF_SECURITY_KEYSTORE_P12FILE  | Security archive (`PKCS #12`) carrying authentication information required for communication with the DSF middleware. |||
-| DSF_SECURITY_KEYSTORE_PASSWORD | Password required to decrypt the security archive for subsequent use.                                                 |||
-| DSF_PROXY_HOST                 | Proxy host to be used.                                                                                                |||
-| DSF_PROXY_USERNAME             | Proxy username to be used.                                                                                            |||
-| DSF_PROXY_PASSWORD             | Proxy password to be used.                                                                                            |||
-| DSF_WEBSERVICE_BASE_URL        | Base URL pointing to the local ZARS FHIR server.                                                                      | `https://zars/fhir`  ||
-| DSF_WEBSOCKET_URL              | URL pointing to the local ZARS FHIR server websocket endpoint.                                                        | `wss://zars/fhir/ws` ||
-| DSF_ORGANIZATION_ID            | Identifier for the local organization this backend is part of.                                                        | `MY ZARS`            ||
+| DSF_SECURITY_CACERT            | Certificate required for secured communication with the DSF middleware.                                               |                      |         |
+| DSF_SECURITY_KEYSTORE_P12FILE  | Security archive (`PKCS #12`) carrying authentication information required for communication with the DSF middleware. |                      |         |
+| DSF_SECURITY_KEYSTORE_PASSWORD | Password required to decrypt the security archive for subsequent use.                                                 |                      |         |
+| DSF_PROXY_HOST                 | Proxy host to be used.                                                                                                |                      |         |
+| DSF_PROXY_USERNAME             | Proxy username to be used.                                                                                            |                      |         |
+| DSF_PROXY_PASSWORD             | Proxy password to be used.                                                                                            |                      |         |
+| DSF_WEBSERVICE_BASE_URL        | Base URL pointing to the local ZARS FHIR server.                                                                      | `https://zars/fhir`  |         |
+| DSF_WEBSOCKET_URL              | URL pointing to the local ZARS FHIR server websocket endpoint.                                                        | `wss://zars/fhir/ws` |         |
+| DSF_ORGANIZATION_ID            | Identifier for the local organization this backend is part of.                                                        | `MY ZARS`            |         |
 
 
 ### Privacy and obfuscation
@@ -261,3 +262,36 @@ GET http://localhost:8090/api/v1/terminology/root-entries
 ```
 
 Should reply with status 200 and a JSON object
+
+## Query Result Log Encryption
+
+### Generating a Public/Private Key Pair
+
+According to [BSI TR-02102-1][1] we have to use at least 3000 bit long RSA keys. So we will use 3072 because that is the next possible value.
+
+Generate the private key:
+
+```sh
+openssl genrsa -out key.pem 3072
+```
+
+Extract the public key from the private key as Base64-encoded DER format to put into `QUERYRESULT_PUBLIC_KEY`:
+
+```sh
+openssl rsa -in key.pem -outform DER -pubout | base64
+```
+
+If you like to use the `Decryptor` class, you have to convert the private key into the PKCS#8 format:
+
+```sh
+openssl pkcs8 -topk8 -inform PEM -outform DER -in key.pem -nocrypt | base64
+```
+
+You can use the following Java code to create a `PrivateKey` class for use with `Decryptor`:
+
+```java
+var keyFactory = KeyFactory.getInstance("RSA");
+var privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode("...")));
+```
+
+[1]: <https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Technische-Richtlinien/TR-nach-Thema-sortiert/tr02102/tr02102_node.html>
