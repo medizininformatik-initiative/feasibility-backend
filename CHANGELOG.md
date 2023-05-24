@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 The full changelog can be found [here](https://todo).
 
+## [3.1.1] - 2023-05-24
+
+### Fixed
+- Database configuration changed
+
 ## [3.1.0] - 2023-05-24
 
 ### Changed
