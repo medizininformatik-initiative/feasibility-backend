@@ -26,8 +26,8 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <spring-security.version>6.0.2</spring-security.version>
-    <spring-security-test.version>6.0.2</spring-security-test.version>
+    <spring-security.version>6.1.0</spring-security.version>
+    <spring-security-test.version>6.1.0</spring-security-test.version>
   </properties>
 
   <dependencies>
