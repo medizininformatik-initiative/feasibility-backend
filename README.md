@@ -33,11 +33,11 @@
 | API_BASE_URL                 | Sets the base URL of the webservice. This is necessary if the webservice is running behind a proxy server. If not filled, the API base URL is the request URL          | https://host/api |                                                                      |
 | QUERY_VALIDATION_ENABLED     | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                                                 |
 | QUERYRESULT_EXPIRY_MINUTES   | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                                    |
-| QUERYRESULT_PUBLIC_KEY       | The public key in Base64-encoded DER format without banners and line breaks.            |                                                                           
+| QUERYRESULT_PUBLIC_KEY       | The public key in Base64-encoded DER format without banners and line breaks.                                                                                           |                                                                           
 | ALLOWED_ORIGINS              | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                                     |
 
 
-### Running the DIRECT path
+### Running the DIRECT Path
 
 The DIRECT path can be run **either** with FLARE **or** with a CQL compatible server, not with both.
 Result counts from the direct path can be obfuscated for privacy reasons. The current implementation
@@ -50,20 +50,20 @@ handles obfuscation by adding or subtracting a random number <=5.
 
 This is irrelevant if _BROKER_CLIENT_DIRECT_ENABLED_ is set to false.
 
-#### Running the DIRECT path with local FLARE
+#### Running the DIRECT Path with Local FLARE
 
 In order to run the backend using the DIRECT broker path with FLARE,
 the _FLARE_WEBSERVICE_BASE_URL_ environment variable needs to be set to a running instance of a FLARE
 instance the backend is allowed to connect to.
 
-#### Running the DIRECT path with local CQL server
+#### Running the DIRECT Path with Local CQL Server
 
 In order to run the backend using the DIRECT broker path with CQL,
 the _CQL_SERVER_BASE_URL_ environment variable needs to be set to a running instance of a CQL compatible
 FHIR server.
 
 
-### Running the AKTIN broker path
+### Running the AKTIN Broker Path
 
 In order to run the backend using the AKTIN broker path, the following environment variables need to be set:
 
@@ -94,7 +94,7 @@ In order to run the backend using the DSF path, the following environment variab
 | DSF_ORGANIZATION_ID            | Identifier for the local organization this backend is part of.                                                        | `MY ZARS`            |         |
 
 
-### Privacy and obfuscation
+### Privacy and Obfuscation
 
 In order to prevent potentially malicious attempts to obtain critical patient data, several
 countermeasures have been implemented. Users are restricted to creating a certain amount of queries per timeframe.
@@ -127,7 +127,7 @@ In order to run this project the following steps need to be followed:
 3. Setup database
 
 
-### Add GitHub package repositories
+### Adding GitHub Package Repositories
 
 This project uses dependencies ([HiGHmed DSF](https://github.com/highmed/highmed-dsf) and [sq2cql](https://github.com/medizininformatik-initiative/sq2cql)) which are not hosted on maven central but on GitHub.
 
@@ -159,12 +159,12 @@ After that, add the following `<server>` configurations to the `<servers>` secti
 </settings>
 ```
 
-### Build the project
+### Building the Project
 
 Navigate to the root of this repository and execute `mvn install`.
 Be aware that Step 1 "Add GitHub package repositories" needs to be executed before.
 
-### Setup database
+### Setting up the Database
 
 The project requires a PSQL database. The easiest way to set this up is to use the docker-compose file provided:
 
@@ -174,9 +174,9 @@ Note that this starts an empty psql database as well as a containerized version 
 The containerized version of the backend will then connect to the backend database.
 One can then connect to the same database when starting the backend in an IDE.
 
-## Working with the backend
+## Working with the Backend
 
-This backend provides a rest webservice which connects the [mii feasibility gui](https://github.com/medizininformatik-initiative/feasibility-gui)
+This backend provides a rest webservice which connects the [MII feasibility gui](https://github.com/medizininformatik-initiative/feasibility-gui)
 and the corresponding middlewares.
 
 To send a query to the backend, use the following example query:
@@ -242,13 +242,13 @@ or at http://localhost:8090/swagger-ui/index.html when running)
 
 ## Starting with Docker
 
-### Create Docker image
+### Creating the Docker Image
 ```
 mvn install
 docker build -t feasibility-gui-backend .
 ```
 
-### Start backend and database
+### Starting the Backend and the Database
 ```
 docker-compose up -d
 ```
@@ -258,7 +258,7 @@ docker-compose up -d
 FEASIBILITY_DATABASE_PORT=<your-desired-port> docker-compose up -d
 ```
 
-### Test if container is running properly
+### Testing if the Container is Running Properly
 ```
 GET http://localhost:8090/api/v2/terminology/root-entries
 ```
@@ -269,7 +269,7 @@ Should reply with status 200 and a JSON object
 
 ### Generating a Public/Private Key Pair
 
-According to [BSI TR-02102-1][1] we have to use at least 3000 bit long RSA keys. So we will use 3072 because that is the next possible value.
+According to [BSI TR-02102-1][1], we have to use RSA keys with a minimum size of 3000 bit. We will use 3072 because that is the next possible value.
 
 Generate the private key:
 
@@ -277,13 +277,13 @@ Generate the private key:
 openssl genrsa -out key.pem 3072
 ```
 
-Extract the public key from the private key as Base64-encoded DER format to put into `QUERYRESULT_PUBLIC_KEY`:
+Extract the public key from the private key in Base64-encoded DER format to put into `QUERYRESULT_PUBLIC_KEY`:
 
 ```sh
 openssl rsa -in key.pem -outform DER -pubout | base64
 ```
 
-If you like to use the `Decryptor` class, you have to convert the private key into the PKCS#8 format:
+If you like to use the `Decryptor` class, you have to convert the private key into the [PKCS#8](https://www.rfc-editor.org/rfc/rfc5208) format:
 
 ```sh
 openssl pkcs8 -topk8 -inform PEM -outform DER -in key.pem -nocrypt | base64
