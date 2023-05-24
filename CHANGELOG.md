@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [3.1.0] - 2023-05-24
+
+### Changed
+- Result Log files are encrypted ([#124](https://github.com/medizininformatik-initiative/feasibility-backend/pull/124))
+### Security
+- Update Spring Boot to 3.1.0 ([#130](https://github.com/medizininformatik-initiative/feasibility-backend/pull/130))
+- Update Spring Security to 6.1.0 ([#129](https://github.com/medizininformatik-initiative/feasibility-backend/pull/129))
+- Update JSON lib to 20230227 ([#131](https://github.com/medizininformatik-initiative/feasibility-backend/pull/131))
+
 ## [3.0.0] - 2023-03-29
 
 ### Added

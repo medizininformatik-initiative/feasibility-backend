@@ -5,7 +5,14 @@ import ca.uhn.fhir.parser.IParser;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +38,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NewClassNamingConvention")
 public class DSFQueryResultCollectorIT {
 
-    private static final String SINGLE_DIC_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.5.0";
+    private static final String SINGLE_DIC_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2";
 
     @Mock
     private DSFBrokerClient brokerClient;
@@ -60,7 +67,7 @@ public class DSFQueryResultCollectorIT {
                 .setStatus(COMPLETED)
                 .setIntent(ORDER)
                 .setAuthoredOn(new Date())
-                .setInstantiatesUri("http://highmed.org/bpe/Process/feasibilityRequest/0.5.0");
+                .setInstantiatesUri("http://highmed.org/bpe/Process/feasibilityRequest/0.6.2");
 
         task.getRequester()
                 .setType("Organization")

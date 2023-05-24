@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.5</version>
+    <version>3.1.0</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>3.0.0</version>
+  <version>3.1.0</version>
 
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
@@ -26,8 +26,8 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <spring-security.version>6.0.2</spring-security.version>
-    <spring-security-test.version>6.0.2</spring-security-test.version>
+    <spring-security.version>6.1.0</spring-security.version>
+    <spring-security-test.version>6.1.0</spring-security-test.version>
   </properties>
 
   <dependencies>
@@ -110,6 +110,18 @@
       <groupId>com.github.erosb</groupId>
       <artifactId>everit-json-schema</artifactId>
       <version>1.14.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.json</groupId>
+          <artifactId>json</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20230227</version>
     </dependency>
 
     <dependency>
