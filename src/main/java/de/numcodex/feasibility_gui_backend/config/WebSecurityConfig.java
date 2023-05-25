@@ -23,6 +23,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+
 
 @Configuration
 @EnableWebSecurity
@@ -58,6 +60,11 @@ public class WebSecurityConfig {
   @Autowired
   @Qualifier("delegatedAuthenticationEntryPoint")
   AuthenticationEntryPoint authEntryPoint;
+
+
+  @Autowired
+  @Qualifier("delegatedAccessDeniedExceptionHandler")
+  AccessDeniedHandler accessDeniedHandler;
 
   public interface Jwt2AuthoritiesConverter extends
       Converter<Jwt, Collection<? extends GrantedAuthority>> {
@@ -125,9 +132,13 @@ public class WebSecurityConfig {
         .anyRequest().authenticated()
         .and()
         .exceptionHandling()
-        .authenticationEntryPoint(authEntryPoint);
+        .authenticationEntryPoint(authEntryPoint)
+        .accessDeniedHandler(accessDeniedHandler);
 
     http.cors();
     return http.build();
   }
+
+
+
 }

@@ -7,10 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @JsonSerialize(using = FeasibilityIssueSerializer.class)
 public enum FeasibilityIssue {
+
     USER_NOT_LOGGED_IN(10001, "Unauthorized", IssueType.FORBIDDEN, Severity.ERROR, false),
-    USER_BLACKLISTED_NOT_POWER_USER(10002, "Too many requests - user is blacklisted", IssueType.FORBIDDEN, Severity.ERROR),
-    QUOTA_EXCEEDED(10003, "Too many requests - quota reached", IssueType.BUSY, Severity.ERROR),
-    POLLING_LIMIT_EXCEEDED(10004, "Too many Requests - polling limit exceeded", IssueType.BUSY, Severity.ERROR);
+    USER_INCORRECT_ACCESS_RIGHTS(10002, "Missing access right for api call", IssueType.FORBIDDEN, Severity.ERROR),
+    USER_BLACKLISTED_NOT_POWER_USER(10003, "Too many requests - user is blacklisted", IssueType.FORBIDDEN, Severity.ERROR),
+    QUOTA_EXCEEDED(10004, "Too many requests - quota reached", IssueType.BUSY, Severity.ERROR),
+    POLLING_LIMIT_EXCEEDED(10005, "Too many Requests - polling limit exceeded", IssueType.BUSY, Severity.ERROR),
+    PRIVACY_RESTRICTION_RESULT_SIZE(10006, "Response insufficiently large", IssueType.BUSY, Severity.ERROR),
+    PRIVACY_RESTRICTION_RESULT_SITES(10007, "Number of responded sites too small", IssueType.BUSY, Severity.ERROR);
 
     private static final FeasibilityIssue[] VALUES;
 
