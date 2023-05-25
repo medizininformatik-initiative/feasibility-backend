@@ -23,10 +23,6 @@ public class DelegatedAccessDeniedHandler implements AccessDeniedHandler {
   @Override
   public void handle(HttpServletRequest request, HttpServletResponse response,
       AccessDeniedException accessDeniedException) {
-    List<String> errors = new ArrayList<>();
-    errors.add(
-        "Access denied. You do not have permission to access this resource.");
-
     resolver.resolveException(request, response, null, accessDeniedException);
   }
 }
