@@ -1,7 +1,14 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
 import org.highmed.fhir.client.FhirWebserviceClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +20,9 @@ import java.util.Optional;
 
 import static org.hl7.fhir.r4.model.Task.TaskIntent.ORDER;
 import static org.hl7.fhir.r4.model.Task.TaskStatus.COMPLETED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +64,8 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.5.0");
+        task.getMeta().addProfile(
+                "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2");
 
         task.addInput()
                 .setType(new CodeableConcept()
@@ -88,7 +98,8 @@ public class DSFQueryResultHandlerTest {
                 .setIntent(ORDER)
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
-        task.getMeta().addProfile("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.5.0");
+        task.getMeta().addProfile(
+                "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2");
 
         task.addInput()
                 .setType(new CodeableConcept()

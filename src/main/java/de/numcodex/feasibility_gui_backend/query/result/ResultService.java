@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.result;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
@@ -45,7 +46,7 @@ public class ResultService {
     this.aktinBrokerClient = aktinBrokerClient;
     this.queryResultCache = Caffeine.newBuilder()
         .expireAfterWrite(resultExpiry)
-        .removalListener((key, value, cause) -> onRemoval(key))
+        .removalListener((key, value, cause) -> onRemoval(key, cause))
         .build();
   }
 
@@ -55,9 +56,9 @@ public class ResultService {
    *
    * @param key the query id as saved in the cache
    */
-  private void onRemoval(Object key) {
+  private void onRemoval(Object key, Object cause) {
 
-    if (this.aktinBrokerClient == null) {
+    if (this.aktinBrokerClient == null || ! cause.equals(RemovalCause.EXPIRED)) {
       return;
     }
 

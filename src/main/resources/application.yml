@@ -9,7 +9,7 @@ spring:
     password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
     driverClassName: org.postgresql.Driver
   jpa:
-    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     hibernate:
       ddl-auto: none
@@ -22,8 +22,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_BASE_URL:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
-          jwk-set-uri: ${KEYCLOAK_BASE_URL:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
@@ -103,8 +103,8 @@ app:
           pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVALSECONDS:10}
         resultDetailedObfuscated:
           pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_POLLINGINTERVALSECONDS:10}
-          amount: ${PRIVACY_QUOTA_READ_DETAILEDOBFUSCATED_AMOUNT:3}
-          intervalSeconds: ${PRIVACY_QUOTA_READ_DETAILEDOBFUSCATED_INTERVALSECONDS:7200}
+          amount: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_AMOUNT:3}
+          intervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS:7200}
 
 logging:
   level:
