@@ -9,7 +9,7 @@ spring:
     password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
     driverClassName: org.postgresql.Driver
   jpa:
-    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     hibernate:
       ddl-auto: none
