@@ -19,5 +19,4 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<List<FeasibilityIssue>> handleAuthenticationException(Exception ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(List.of(FeasibilityIssue.USER_NOT_LOGGED_IN));
     }
-
 }

@@ -18,7 +18,12 @@ public class AccessDeniedExceptionHandler extends
   @ResponseBody
   public ResponseEntity<List<FeasibilityIssue>> handleAccessDeniedException(
       Exception ex) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(List.of(FeasibilityIssue.USER_INCORRECT_ACCESS_RIGHTS));
+    if (ex.getClass() == AccessDeniedException.class) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+              .body(List.of(FeasibilityIssue.USER_INCORRECT_ACCESS_RIGHTS));
+    } else {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+              .body(List.of(FeasibilityIssue.USER_NOT_LOGGED_IN));
+    }
   }
 }
