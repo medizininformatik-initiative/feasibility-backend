@@ -43,7 +43,7 @@ public class StructuredQueryValidatorTest {
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
     InputStream inputStream = StructuredQueryValidator.class.getResourceAsStream(
-        "/query/query-schema.json");
+        "/de/numcodex/feasibility_gui_backend/query/api/validation/query-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
         .schemaJson(jsonSchema)

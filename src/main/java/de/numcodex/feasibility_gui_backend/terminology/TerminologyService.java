@@ -69,8 +69,7 @@ public class TerminologyService {
   }
 
   private Set<String> getFilePathsUiProfiles() {
-    System.out.println("####################");
-    System.out.println(uiProfilePath);
+    log.info("Ui Profile Path -> {}", uiProfilePath);
 
     return Stream.of(
             Objects.requireNonNull(new File(uiProfilePath).listFiles()))

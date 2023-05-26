@@ -1,10 +1,10 @@
 package de.numcodex.feasibility_gui_backend.query.dispatch;
 
+import com.google.common.hash.Hashing;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import static java.util.regex.Pattern.matches;
@@ -18,8 +18,7 @@ public class QueryHashCalculatorTest {
 
     @BeforeAll
     public static void setUp() throws NoSuchAlgorithmException {
-        var hashFn = MessageDigest.getInstance("SHA3-256");
-        queryHashCalculator = new QueryHashCalculator(hashFn);
+        queryHashCalculator = new QueryHashCalculator(Hashing.sha256());
     }
 
     @Test

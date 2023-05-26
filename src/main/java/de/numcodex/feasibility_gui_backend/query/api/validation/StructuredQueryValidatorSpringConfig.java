@@ -19,7 +19,7 @@ import java.io.InputStream;
 @Slf4j
 public class StructuredQueryValidatorSpringConfig {
 
-  private static final String JSON_SCHEMA = "/query/query-schema.json";
+  private static final String JSON_SCHEMA = "/de/numcodex/feasibility_gui_backend/query/api/validation/query-schema.json";
 
   @Value("${app.enableQueryValidation}")
   private boolean enabled;

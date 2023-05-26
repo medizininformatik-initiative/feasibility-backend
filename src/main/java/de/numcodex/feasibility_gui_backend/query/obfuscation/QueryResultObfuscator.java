@@ -1,12 +1,11 @@
 package de.numcodex.feasibility_gui_backend.query.obfuscation;
 
+import com.google.common.hash.HashFunction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import jakarta.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Arrays;
 
 /**
  * Provides functionality for obfuscating a site using a tokenization technique.
@@ -39,13 +38,11 @@ public class QueryResultObfuscator {
     private static final int TRUNCATION_OUTPUT_LENGTH = 10;
 
     @NonNull
-    private MessageDigest hashFn;
+    private HashFunction hashFn;
 
     /**
-     * Tokenizes the site name of the given queryid and site name. That is, replaces it with a
+     * Tokenizes the site name of the given query id and site name. That is, replaces it with a
      * placeholder in order to obfuscate it.
-     * <p>
-     * Tokenization is based on a hash function seeded by information identifying the query id and site name.
      *
      * @param queryId The query id for which the site name shall be tokenized.
      * @param siteName The site name that shall be tokenized
@@ -56,30 +53,13 @@ public class QueryResultObfuscator {
             throw new IllegalArgumentException("siteName must not be null");
         }
 
-        var seed = generateSeed(queryId, siteName);
-        hashFn.reset();
-        hashFn.update(seed.getBytes(StandardCharsets.UTF_8));
-        var siteNameToken = hashFn.digest(siteName.getBytes(StandardCharsets.UTF_8));
-        var siteNameTokenHex = byteToHex(siteNameToken);
-        return truncateHashValue(siteNameTokenHex);
-    }
+        var siteNameHash = hashFn.newHasher()
+            .putLong(queryId)
+            .putString(siteName, StandardCharsets.UTF_8)
+            .hash()
+            .toString();
 
-    private String generateSeed(Long queryId, String siteName) {
-
-        var queryIdHash = hashFn.digest(String.valueOf(queryId)
-                .getBytes(StandardCharsets.UTF_8));
-        var siteNameHash = hashFn.digest(siteName.getBytes(StandardCharsets.UTF_8));
-
-        return  Arrays.toString(queryIdHash) +
-                Arrays.toString(siteNameHash);
-    }
-
-    private String byteToHex(byte[] hash) {
-        var hex = new StringBuilder();
-        for (byte b : hash) {
-            hex.append(String.format("%02x", b));
-        }
-        return hex.toString();
+        return truncateHashValue(siteNameHash);
     }
 
     private String truncateHashValue(String hashValue) {
