@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 
 
 @Configuration
@@ -56,15 +52,6 @@ public class WebSecurityConfig {
 
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
-
-  @Autowired
-  @Qualifier("delegatedAuthenticationEntryPoint")
-  AuthenticationEntryPoint authEntryPoint;
-
-
-  @Autowired
-  @Qualifier("delegatedAccessDeniedExceptionHandler")
-  AccessDeniedHandler accessDeniedHandler;
 
   public interface Jwt2AuthoritiesConverter extends
       Converter<Jwt, Collection<? extends GrantedAuthority>> {
@@ -129,11 +116,7 @@ public class WebSecurityConfig {
         .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
         .requestMatchers(PATH_SWAGGER_UI).anonymous()
         .requestMatchers(PATH_SWAGGER_CONFIG).anonymous()
-        .anyRequest().authenticated()
-        .and()
-        .exceptionHandling()
-        .authenticationEntryPoint(authEntryPoint)
-        .accessDeniedHandler(accessDeniedHandler);
+        .anyRequest().authenticated();
 
     http.cors();
     return http.build();

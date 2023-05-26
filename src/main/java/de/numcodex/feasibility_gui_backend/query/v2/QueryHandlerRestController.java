@@ -279,9 +279,7 @@ public class QueryHandlerRestController {
       @PathVariable("id") Long queryId,
       Authentication authentication) {
     if (!hasAccess(queryId, authentication)) {
-      return new ResponseEntity<>(
-          List.of(FeasibilityIssue.USER_INCORRECT_ACCESS_RIGHTS),
-          HttpStatus.FORBIDDEN);
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.SUMMARY);

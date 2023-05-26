@@ -24,9 +24,6 @@ public class FeasibilityIssueSerializer extends StdSerializer<FeasibilityIssue> 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("message", feasibilityIssue.message());
         jsonGenerator.writeStringField("type", feasibilityIssue.type().value());
-        if (feasibilityIssue.retry() != null) {
-            jsonGenerator.writeStringField("retry", feasibilityIssue.retry() ? "yes" : "no");
-        }
         jsonGenerator.writeStringField("code", "FEAS-" + feasibilityIssue.code());
         jsonGenerator.writeStringField("severity", feasibilityIssue.severity().value());
         jsonGenerator.writeEndObject();
