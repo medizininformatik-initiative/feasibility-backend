@@ -212,7 +212,7 @@ public class QueryHandlerRestControllerIT {
             .andReturn();
 
         mockMvc.perform(asyncDispatch(mvcResult))
-            .andExpect(status().isTooManyRequests());
+            .andExpect(status().isForbidden());
     }
 
     @Test
