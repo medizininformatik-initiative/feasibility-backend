@@ -1,0 +1,99 @@
+{
+    "children": [
+        {
+            "children": [],
+            "display": "ExtensionWirkstoffrelation",
+            "id": "b45b1a19-e89c-498c-b7e0-f833634ab5b6",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ExtensionWirkstoffrelation",
+                "display": "ExtensionWirkstoffrelation",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ExtensionWirkstofftyp",
+            "id": "f008a306-aa16-4950-afd0-a034e77b3d4f",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ExtensionWirkstofftyp",
+                "display": "ExtensionWirkstofftyp",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileMedicationMedikation",
+            "id": "d879692c-3252-4999-b02f-8a52015a517d",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileMedicationMedikation",
+                "display": "ProfileMedicationMedikation",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileMedicationAdministrationMedikation",
+            "id": "033e41fe-b928-4dcb-8e07-61f0b947e7cd",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileMedicationAdministrationMedikation",
+                "display": "ProfileMedicationAdministrationMedikation",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileMedicationStatementMedikation",
+            "id": "afc93ce2-dd0c-4478-adf0-ef5c89b5558c",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileMedicationStatementMedikation",
+                "display": "ProfileMedicationStatementMedikation",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "LogicalModelMedikation",
+            "id": "fed9419a-aeb8-4275-8e78-6653d702a9d8",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "LogicalModelMedikation",
+                "display": "LogicalModelMedikation",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        }
+    ],
+    "display": "Medikation",
+    "id": "55d7682b-6b6b-4bcf-b187-92e3e39fb858",
+    "leaf": false,
+    "selectable": false,
+    "termCode": {
+        "code": "Medikation",
+        "display": "Medikation",
+        "system": "num.abide"
+    },
+    "timeRestrictionAllowed": false,
+    "valueDefinitions": []
+}

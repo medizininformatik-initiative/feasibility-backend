@@ -29,7 +29,7 @@ jobs:
           path: ~/.m2/repository
           key: tests-maven-${{ hashFiles('pom.xml') }}
 
-      - uses: s4u/maven-settings-action@v2
+      - uses: s4u/maven-settings-action@v2.8.0
         with:
           servers: |
             [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
@@ -46,6 +46,28 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+
+      - name: Upload Feasibility Backend Jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-jar
+          path: target/feasibilityBackend.jar
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and Export to Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          tags: backend:latest
+          outputs: type=docker,dest=/tmp/feasibilityBackend.tar
+
+      - name: Upload Feasibility Backend Image
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-image
+          path: /tmp/feasibilityBackend.tar
 
   security-scan:
     runs-on: ubuntu-latest
@@ -64,7 +86,7 @@ jobs:
         path: ~/.m2/repository
         key: security-scan-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2
+    - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: |
           [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
@@ -94,9 +116,35 @@ jobs:
       with:
         sarif_file: trivy-results.sarif
 
+  integration-test-default-config:
+    needs: tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Download Feasibility Backend Image
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-image
+          path: /tmp
+
+      - name: Load Feasibility Backend Image
+        run: docker load --input /tmp/feasibilityBackend.tar
+
+      - name: Run Feasibility Backend with Database
+        run: docker-compose -f .github/integration-test/docker-compose.yml up -d
+
+      - name: Wait for Feasibility Backend
+        run: .github/scripts/wait-for-url.sh  http://localhost:8091/actuator/health
+
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: [ tests, security-scan ]
+    needs:
+      - tests
+      - integration-test-default-config
+      - security-scan
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -113,7 +161,7 @@ jobs:
         path: ~/.m2/repository
         key: release-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2
+    - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: |
           [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},

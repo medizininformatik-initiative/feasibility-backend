@@ -315,6 +315,8 @@
 
 
   <build>
+    <finalName>feasibilityBackend</finalName>
+
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
