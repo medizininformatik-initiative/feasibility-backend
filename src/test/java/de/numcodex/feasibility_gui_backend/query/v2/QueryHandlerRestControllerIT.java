@@ -264,30 +264,6 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
-    public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
-        StructuredQuery testQuery = createValidStructuredQuery();
-
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
-
-        mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
-                        .contentType(APPLICATION_JSON)
-                        .content(jsonUtil.writeValueAsString(testQuery)))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
-        var testQuery = new StructuredQuery();
-
-        mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
-                        .contentType(APPLICATION_JSON)
-                        .content(jsonUtil.writeValueAsString(testQuery)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     public void testGetQueryList_Succeeds() throws Exception {
         long queryId = 1;
@@ -354,9 +330,7 @@ public class QueryHandlerRestControllerIT {
     void testSaveQuery_Succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
 
-        var savedQuery = new SavedQuery();
-        savedQuery.setLabel("foo");
-        savedQuery.setComment("bar");
+        var savedQuery = new SavedQuery("foo", "bar");
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -369,9 +343,7 @@ public class QueryHandlerRestControllerIT {
     void testSaveQuery_failsWith404OnAuthorForQueryNotFound() throws Exception {
         doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
 
-        var savedQuery = new SavedQuery();
-        savedQuery.setLabel("foo");
-        savedQuery.setComment("bar");
+        var savedQuery = new SavedQuery("foo", "bar");
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -384,9 +356,7 @@ public class QueryHandlerRestControllerIT {
     void testSaveQuery_failsWith403OnAuthorMismatch() throws Exception {
         doReturn("SomeOtherUser").when(queryHandlerService).getAuthorId(any(Long.class));
 
-        var savedQuery = new SavedQuery();
-        savedQuery.setLabel("foo");
-        savedQuery.setComment("bar");
+        var savedQuery = new SavedQuery("foo", "bar");
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -400,9 +370,7 @@ public class QueryHandlerRestControllerIT {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doThrow(DataIntegrityViolationException.class).when(queryHandlerService).saveQuery(any(Long.class), any(SavedQuery.class));
 
-        var savedQuery = new SavedQuery();
-        savedQuery.setLabel("foo");
-        savedQuery.setComment("bar");
+        var savedQuery = new SavedQuery("foo", "bar");
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -494,20 +462,10 @@ public class QueryHandlerRestControllerIT {
 
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
-        var termCode = new TermCode();
-        termCode.setCode("LL2191-6");
-        termCode.setSystem("http://loinc.org");
-        termCode.setDisplay("Geschlecht");
-
-        var inclusionCriterion = new Criterion();
-        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
-
-        var testQuery = new StructuredQuery();
-        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
-        testQuery.setExclusionCriteria(List.of());
-        testQuery.setDisplay("foo");
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-        return testQuery;
+        var termCode = new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
+        var inclusionCriterion = new Criterion(List.of(termCode), List.of(), null, null);
+        return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+                List.of(List.of(inclusionCriterion)), List.of(), "foo");
     }
 
     @NotNull
@@ -531,22 +489,12 @@ public class QueryHandlerRestControllerIT {
 
     @NotNull
     private static QueryListEntry createValidQueryListEntry(long id) {
-        var queryListEntry = new QueryListEntry();
-        queryListEntry.setId(id);
-        queryListEntry.setLabel("abc");
-        queryListEntry.setCreatedAt(new Timestamp(new java.util.Date().getTime()));
-        return queryListEntry;
+        return new QueryListEntry(id, "abc", new Timestamp(new java.util.Date().getTime()));
     }
 
     @NotNull
     private static Query createValidApiQuery(long id) {
-        var query = new Query();
-        query.setId(id);
-        query.setContent(createValidStructuredQuery());
-        query.setLabel("test");
-        query.setComment("test");
-        query.setInvalidTerms(List.of());
-        return query;
+        return new Query(id, createValidStructuredQuery(), "test", "test", List.of());
     }
 
     @NotNull
