@@ -12,6 +12,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
+import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssues;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
@@ -114,8 +115,9 @@ public class QueryHandlerRestController {
         keycloakPowerRole);
 
     if (!isPowerUser && userBlacklistEntry.isPresent()) {
+      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER));
       return Mono.just(
-          new ResponseEntity<>(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER,
+          new ResponseEntity<>(issues,
               HttpStatus.FORBIDDEN));
     }
 
@@ -129,8 +131,10 @@ public class QueryHandlerRestController {
       UserBlacklist userBlacklist = new UserBlacklist();
       userBlacklist.setUserId(userId);
       userBlacklistRepository.save(userBlacklist);
+
+      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER));
       return Mono.just(
-          new ResponseEntity<>(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER,
+          new ResponseEntity<>(issues,
               HttpStatus.FORBIDDEN));
     }
     Long amountOfQueriesByUserAndSoftInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
@@ -140,8 +144,9 @@ public class QueryHandlerRestController {
           quotaSoftCreateAmount - 1, quotaSoftCreateIntervalMinutes);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
+      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.QUOTA_EXCEEDED));
       return Mono.just(
-          new ResponseEntity<>(FeasibilityIssue.QUOTA_EXCEEDED, httpHeaders,
+          new ResponseEntity<>(issues, httpHeaders,
               HttpStatus.TOO_MANY_REQUESTS));
     }
     // Note: this is using a ResponseEntity instead of a ServerResponse since this is a
@@ -243,14 +248,15 @@ public class QueryHandlerRestController {
         ResultDetail.DETAILED_OBFUSCATED);
 
     if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
-      return new ResponseEntity<>(
-          List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE),
+      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE));
+      return new ResponseEntity<>(issues,
           HttpStatus.OK);
     }
     HttpHeaders headers = new HttpHeaders();
     if (queryResult.getResultLines().size() < privacyThresholdSites) {
+      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES));
       return new ResponseEntity<>(
-          List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES),
+          issues,
           HttpStatus.OK);
     }
     if (queryResult.getResultLines().isEmpty()) {
@@ -285,8 +291,9 @@ public class QueryHandlerRestController {
         ResultDetail.SUMMARY);
 
     if (queryResult.getTotalNumberOfPatients() < privacyThresholdResults) {
+      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE));
       return new ResponseEntity<>(
-          List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE),
+          issues,
           HttpStatus.OK);
     }
     return new ResponseEntity<>(queryResult, HttpStatus.OK);
