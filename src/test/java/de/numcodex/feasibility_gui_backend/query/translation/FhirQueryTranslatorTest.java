@@ -36,7 +36,7 @@ public class FhirQueryTranslatorTest {
 
     @Test
     public void testTranslate_EncodingStructuredQueryForRequestFails() throws JsonProcessingException {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         doThrow(JsonProcessingException.class).when(jsonUtil).writeValueAsString(testQuery);
 
         assertThrows(QueryTranslationException.class, () -> fhirQueryTranslator.translate(testQuery));
@@ -46,7 +46,7 @@ public class FhirQueryTranslatorTest {
 
     @Test
     public void testTranslate_RequestToExternalTranslationServiceFails() throws JsonProcessingException {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         doReturn("foo").when(jsonUtil).writeValueAsString(testQuery);
         doThrow(RestClientException.class).when(client)
                 .postForObject(anyString(), any(), eq(String.class));
@@ -58,7 +58,7 @@ public class FhirQueryTranslatorTest {
 
     @Test
     public void testTranslate_EverythingSucceeds() throws JsonProcessingException, QueryTranslationException {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         doReturn("foo").when(jsonUtil).writeValueAsString(testQuery);
         when(client.postForObject(eq("/query/translate"), requestCaptor.capture(), eq(String.class)))
                 .thenReturn("bar");

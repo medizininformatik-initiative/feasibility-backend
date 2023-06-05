@@ -78,7 +78,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         mockMvc.perform(post(URI.create("/api/v2/query/template")).with(csrf())
                         .contentType(APPLICATION_JSON)
-                        .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore())))
+                        .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore(queryId))))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
                 .andExpect(header().string("location", "/api/v2/query/template/" + queryId));
@@ -100,7 +100,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         mockMvc.perform(post(URI.create("/api/v2/query/template")).with(csrf())
                         .contentType(APPLICATION_JSON)
-                        .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore())))
+                        .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore(1L))))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -111,7 +111,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         mockMvc.perform(post(URI.create("/api/v2/query/template")).with(csrf())
                         .contentType(APPLICATION_JSON)
-                        .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore())))
+                        .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore(1L))))
                 .andExpect(status().isConflict());
     }
 
@@ -221,12 +221,15 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @NotNull
-    private static QueryTemplate createValidQueryTemplateToStore() {
-        var queryTemplate = new QueryTemplate();
-        queryTemplate.setContent(createValidStructuredQuery());
-        queryTemplate.setLabel("TestLabel");
-        queryTemplate.setComment("TestComment");
-        return queryTemplate;
+    private static QueryTemplate createValidQueryTemplateToStore(long id) {
+        return new QueryTemplate(id,
+                createValidStructuredQuery(),
+                "TestLabel",
+                "TestComment",
+                null,
+                null,
+                List.of(),
+                true);
     }
 
     @NotNull
@@ -251,42 +254,26 @@ public class QueryTemplateHandlerRestControllerIT {
 
     @NotNull
     private static QueryTemplate createValidApiQueryTemplateToGet(long id) {
-        var queryTemplate = new QueryTemplate();
-        queryTemplate.setId(id);
-        queryTemplate.setContent(createValidStructuredQuery());
-        queryTemplate.setLabel("TestLabel");
-        queryTemplate.setComment("TestComment");
-        queryTemplate.setLastModified(new Timestamp(new java.util.Date().getTime()).toString());
-        queryTemplate.setCreatedBy("someone");
-        queryTemplate.setInvalidTerms(List.of());
-        queryTemplate.setIsValid(true);
-        return queryTemplate;
+        return new QueryTemplate(id,
+                createValidStructuredQuery(),
+                "TestLabel",
+                "TestComment",
+                new Timestamp(new java.util.Date().getTime()).toString(),
+                "someone",
+                List.of(),
+                true);
     }
 
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
-        var termCode = new TermCode();
-        termCode.setCode("LL2191-6");
-        termCode.setSystem("http://loinc.org");
-        termCode.setDisplay("Geschlecht");
-
-        var inclusionCriterion = new Criterion();
-        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
-
-        var testQuery = new StructuredQuery();
-        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
-        testQuery.setExclusionCriteria(List.of());
-        testQuery.setDisplay("foo");
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-        return testQuery;
+        var termCode = new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
+        var inclusionCriterion = new Criterion(List.of(termCode), List.of(), null, null);
+        return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+                List.of(List.of(inclusionCriterion)), List.of(), "foo");
     }
 
     @NotNull
     private static TermCode createTermCode() {
-        var termCode = new TermCode();
-        termCode.setCode("LL2191-6");
-        termCode.setSystem("http://loinc.org");
-        termCode.setDisplay("Geschlecht");
-        return termCode;
+        return new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
     }
 }

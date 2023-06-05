@@ -289,7 +289,7 @@ public class TerminologyService {
     return terminologyEntry.getDisplay().toLowerCase().startsWith(query.toLowerCase()) ||
         Arrays.stream(terminologyEntry.getDisplay().toLowerCase().split(" "))
             .anyMatch(var -> var.startsWith(query.toLowerCase())) ||
-        (terminologyEntry.getTermCodes().stream().anyMatch(termCode -> termCode.getCode()
+        (terminologyEntry.getTermCodes().stream().anyMatch(termCode -> termCode.code()
             .startsWith(query)));
   }
 }
