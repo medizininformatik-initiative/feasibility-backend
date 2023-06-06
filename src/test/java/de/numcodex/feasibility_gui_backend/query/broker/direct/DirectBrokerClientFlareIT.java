@@ -66,7 +66,12 @@ class DirectBrokerClientFlareIT {
         assertEquals("POST", recordedRequest.getMethod());
         assertEquals("foo", recordedRequest.getBody().readUtf8());
 
-        var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", COMPLETED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(client)
+                .brokerQueryId(brokerQueryId)
+                .brokerSiteId("1")
+                .status(COMPLETED)
+                .build();
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID, statusUpdate);
 
         assertEquals(1, client.getResultSiteIds(brokerQueryId).size());
@@ -86,7 +91,12 @@ class DirectBrokerClientFlareIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", FAILED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(client)
+                .brokerQueryId(brokerQueryId)
+                .brokerSiteId("1")
+                .status(FAILED)
+                .build();
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(TEST_BACKEND_QUERY_ID,
             statusUpdate);
     }
@@ -103,7 +113,12 @@ class DirectBrokerClientFlareIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", FAILED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(client)
+                .brokerQueryId(brokerQueryId)
+                .brokerSiteId("1")
+                .status(FAILED)
+                .build();
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).only()).onClientUpdate(TEST_BACKEND_QUERY_ID,
             statusUpdate);
     }

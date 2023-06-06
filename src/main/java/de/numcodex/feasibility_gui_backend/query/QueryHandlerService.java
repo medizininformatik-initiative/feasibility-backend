@@ -150,9 +150,17 @@ public class QueryHandlerService {
             throws JsonProcessingException {
 
         if (savedQuery.isPresent()) {
-            return new Query(in.getId(), jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class), savedQuery.get().getLabel(), savedQuery.get().getComment(), null);
+            return Query.builder()
+                    .id(in.getId())
+                    .content(jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class))
+                    .label(savedQuery.get().getLabel())
+                    .comment(savedQuery.get().getComment())
+                    .build();
         } else {
-            return new Query(in.getId(), jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class),null, null, null);
+            return Query.builder()
+                    .id(in.getId())
+                    .content(jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class))
+                    .build();
         }
     }
 
@@ -188,10 +196,17 @@ public class QueryHandlerService {
         queryList.forEach(q -> {
             if (q.getSavedQuery() != null) {
                 ret.add(
-                        new QueryListEntry(q.getId(), q.getSavedQuery().getLabel(), q.getCreatedAt()));
+                        QueryListEntry.builder()
+                                .id(q.getId())
+                                .label(q.getSavedQuery().getLabel())
+                                .createdAt(q.getCreatedAt())
+                                .build());
             } else {
                 ret.add(
-                        new QueryListEntry(q.getId(), null, q.getCreatedAt()));
+                        QueryListEntry.builder()
+                                .id(q.getId())
+                                .createdAt(q.getCreatedAt())
+                                .build());
             }
         });
 

@@ -41,7 +41,11 @@ class ResultServiceTest {
 
   @Test
   void findSuccessfulByQuery_withSuccessResultLine() {
-    var resultLine = new ResultLine(SITE_NAME, SUCCESS, 0L);
+    var resultLine = ResultLine.builder()
+            .siteName(SITE_NAME)
+            .type(SUCCESS)
+            .result(0L)
+            .build();
     resultService.addResultLine(QUERY_ID, resultLine);
 
     var resultLines = resultService.findSuccessfulByQuery(QUERY_ID);
@@ -51,7 +55,13 @@ class ResultServiceTest {
 
   @Test
   void findSuccessfulByQuery_withErrorResultLine() {
-    resultService.addResultLine(QUERY_ID, new ResultLine(SITE_NAME, ERROR, 0L));
+    resultService.addResultLine(QUERY_ID,
+            ResultLine.builder()
+                    .siteName(SITE_NAME)
+                    .type(ERROR)
+                    .result(0L)
+                    .build()
+    );
 
     var resultLines = resultService.findSuccessfulByQuery(QUERY_ID);
 
@@ -60,7 +70,13 @@ class ResultServiceTest {
 
   @Test
   void testResultExpiry() throws Exception {
-    resultService.addResultLine(QUERY_ID, new ResultLine(SITE_NAME, SUCCESS, 0L));
+    resultService.addResultLine(QUERY_ID,
+            ResultLine.builder()
+                    .siteName(SITE_NAME)
+                    .type(SUCCESS)
+                    .result(0L)
+                    .build()
+    );
     Thread.sleep(expiryTime.plusMillis(250).toMillis());
 
     var resultLines = resultService.findSuccessfulByQuery(QUERY_ID);
@@ -70,9 +86,21 @@ class ResultServiceTest {
 
   @Test
   void testKeepsFirstResultPerSite() {
-    ResultLine resultLine = new ResultLine(SITE_NAME, SUCCESS, 0L);
-    resultService.addResultLine(QUERY_ID, resultLine);
-    resultService.addResultLine(QUERY_ID, new ResultLine(SITE_NAME, ERROR, 0L));
+    ResultLine resultLine = ResultLine.builder()
+            .siteName(SITE_NAME)
+            .type(SUCCESS)
+            .result(0L)
+            .build();
+    resultService.addResultLine(
+            QUERY_ID,
+            resultLine);
+    resultService.addResultLine(
+            QUERY_ID,
+            ResultLine.builder()
+                    .siteName(SITE_NAME)
+                    .type(ERROR)
+                    .result(0L)
+                    .build());
 
     var resultLines = resultService.findSuccessfulByQuery(QUERY_ID);
 
@@ -81,9 +109,17 @@ class ResultServiceTest {
 
   @Test
   void testStoresResultsFromMultipleSitesPerQuery() {
-    ResultLine resultLine1 = new ResultLine(SITE_NAME_1, SUCCESS, 0L);
+    ResultLine resultLine1 = ResultLine.builder()
+            .siteName(SITE_NAME_1)
+            .type(SUCCESS)
+            .result(0L)
+            .build();
     resultService.addResultLine(QUERY_ID, resultLine1);
-    ResultLine resultLine2 = new ResultLine(SITE_NAME_2, SUCCESS, 0L);
+    ResultLine resultLine2 = ResultLine.builder()
+            .siteName(SITE_NAME_2)
+            .type(SUCCESS)
+            .result(0L)
+            .build();
     resultService.addResultLine(QUERY_ID, resultLine2);
 
     var resultLines = resultService.findSuccessfulByQuery(QUERY_ID);
@@ -93,7 +129,11 @@ class ResultServiceTest {
 
   @Test
   void testStoresResultsFromMultipleQueries() {
-    ResultLine resultLine = new ResultLine(SITE_NAME, SUCCESS, 0L);
+    ResultLine resultLine = ResultLine.builder()
+            .siteName(SITE_NAME)
+            .type(SUCCESS)
+            .result(0L)
+            .build();
     resultService.addResultLine(QUERY_ID_1, resultLine);
     resultService.addResultLine(QUERY_ID_2, resultLine);
 

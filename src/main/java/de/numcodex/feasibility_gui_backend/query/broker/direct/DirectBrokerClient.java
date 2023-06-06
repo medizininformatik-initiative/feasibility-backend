@@ -121,7 +121,12 @@ public abstract class DirectBrokerClient implements BrokerClient {
    * @param queryStatus the {@link QueryStatus} to publish to the listeners
    */
   protected void updateQueryStatus(DirectQuery query, QueryStatus queryStatus) {
-    var statusUpdate = new QueryStatusUpdate(this, query.getQueryId(), SITE_ID_LOCAL, queryStatus);
+    var statusUpdate = QueryStatusUpdate.builder()
+            .source(this)
+            .brokerQueryId(query.getQueryId())
+            .brokerSiteId(SITE_ID_LOCAL)
+            .status(queryStatus)
+            .build();
     listeners.forEach(
         l -> l.onClientUpdate(query.getBackendQueryId(), statusUpdate)
     );

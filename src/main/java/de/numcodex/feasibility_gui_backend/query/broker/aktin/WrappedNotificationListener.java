@@ -49,7 +49,7 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 		}catch( IllegalArgumentException e ) {
 			return; // unsupported/unrecognized status
 		}
-		
+
 		queryStatus = switch (rs) {
 			case completed -> QueryStatus.COMPLETED;
 			case processing -> QueryStatus.EXECUTING;
@@ -58,8 +58,13 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 			default -> QueryStatus.FAILED;
 		};
 		log.log(Level.INFO,"Request status updated {0} {1} {2}", new Object[] {requestId,nodeId,status});
-		var statusUpdate = new QueryStatusUpdate(client, client.wrapQueryId(requestId), client.wrapSiteId(nodeId),
-				queryStatus);
+		var statusUpdate = QueryStatusUpdate.builder()
+				.source(client)
+				.brokerQueryId(client.wrapQueryId(requestId))
+				.brokerSiteId(client.wrapSiteId(nodeId))
+				.status(queryStatus)
+				.build();
+
 		var associatedBackendQueryId = client.getBackendQueryId(client.wrapQueryId(requestId));
 		statusListener.onClientUpdate(associatedBackendQueryId, statusUpdate);
 	}

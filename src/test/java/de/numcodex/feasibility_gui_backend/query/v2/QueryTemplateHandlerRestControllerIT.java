@@ -222,14 +222,14 @@ public class QueryTemplateHandlerRestControllerIT {
 
     @NotNull
     private static QueryTemplate createValidQueryTemplateToStore(long id) {
-        return new QueryTemplate(id,
-                createValidStructuredQuery(),
-                "TestLabel",
-                "TestComment",
-                null,
-                null,
-                List.of(),
-                true);
+        return QueryTemplate.builder()
+                .id(id)
+                .content(createValidStructuredQuery())
+                .label("TestLabel")
+                .comment("TestComment")
+                .invalidTerms(List.of())
+                .isValid(true)
+                .build();
     }
 
     @NotNull
@@ -254,26 +254,38 @@ public class QueryTemplateHandlerRestControllerIT {
 
     @NotNull
     private static QueryTemplate createValidApiQueryTemplateToGet(long id) {
-        return new QueryTemplate(id,
-                createValidStructuredQuery(),
-                "TestLabel",
-                "TestComment",
-                new Timestamp(new java.util.Date().getTime()).toString(),
-                "someone",
-                List.of(),
-                true);
+        return QueryTemplate.builder()
+                .id(id)
+                .content(createValidStructuredQuery())
+                .label("TestLabel")
+                .comment("TestComment")
+                .lastModified(new Timestamp(new java.util.Date().getTime()).toString())
+                .createdBy("someone")
+                .invalidTerms(List.of())
+                .isValid(true)
+                .build();
     }
 
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
-        var termCode = new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
-        var inclusionCriterion = new Criterion(List.of(termCode), List.of(), null, null);
-        return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
-                List.of(List.of(inclusionCriterion)), List.of(), "foo");
+        var inclusionCriterion = Criterion.builder()
+                .termCodes(List.of(createTermCode()))
+                .attributeFilters(List.of())
+                .build();
+        return StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+                .exclusionCriteria(List.of())
+                .display("foo")
+                .build();
     }
 
     @NotNull
     private static TermCode createTermCode() {
-        return new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
+        return TermCode.builder()
+                .code("LL2191-6")
+                .system("http://loinc.org")
+                .display("Geschlecht")
+                .build();
     }
 }

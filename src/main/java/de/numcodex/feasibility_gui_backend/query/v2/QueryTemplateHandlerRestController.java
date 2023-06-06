@@ -84,16 +84,16 @@ public class QueryTemplateHandlerRestController {
       var queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
       List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
           queryTemplate.content());
-      var queryTemplateWithInvalidTermCodes = new QueryTemplate(
-          queryTemplate.id(),
-          queryTemplate.content(),
-          queryTemplate.label(),
-          queryTemplate.comment(),
-          queryTemplate.lastModified(),
-          queryTemplate.createdBy(),
-          invalidTermCodes,
-          queryTemplate.isValid()
-      );
+      var queryTemplateWithInvalidTermCodes = QueryTemplate.builder()
+              .id(queryTemplate.id())
+              .content(queryTemplate.content())
+              .label(queryTemplate.label())
+              .comment(queryTemplate.comment())
+              .lastModified(queryTemplate.lastModified())
+              .createdBy(queryTemplate.createdBy())
+              .invalidTerms(invalidTermCodes)
+              .isValid(queryTemplate.isValid())
+              .build();
       return new ResponseEntity<>(queryTemplateWithInvalidTermCodes, HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -110,16 +110,15 @@ public class QueryTemplateHandlerRestController {
     queries.forEach(q -> {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
-        QueryTemplate convertedQueryWithoutContent = new QueryTemplate(
-            convertedQuery.id(),
-            null,
-            convertedQuery.label(),
-            convertedQuery.comment(),
-            convertedQuery.lastModified(),
-            convertedQuery.createdBy(),
-            convertedQuery.invalidTerms(),
-            convertedQuery.isValid()
-        );
+        var convertedQueryWithoutContent = QueryTemplate.builder()
+                .id(convertedQuery.id())
+                .label(convertedQuery.label())
+                .comment(convertedQuery.comment())
+                .lastModified(convertedQuery.lastModified())
+                .createdBy(convertedQuery.createdBy())
+                .invalidTerms(convertedQuery.invalidTerms())
+                .isValid(convertedQuery.isValid())
+                .build();
         ret.add(convertedQueryWithoutContent);
       } catch (JsonProcessingException e) {
         log.error("Error converting query");
@@ -138,16 +137,15 @@ public class QueryTemplateHandlerRestController {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
         List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
             convertedQuery.content());
-        QueryTemplate convertedQueryWithoutContent = new QueryTemplate(
-            convertedQuery.id(),
-            null,
-            convertedQuery.label(),
-            convertedQuery.comment(),
-            convertedQuery.lastModified(),
-            convertedQuery.createdBy(),
-            convertedQuery.invalidTerms(),
-            invalidTermCodes.isEmpty()
-        );
+        var convertedQueryWithoutContent = QueryTemplate.builder()
+                .id(convertedQuery.id())
+                .label(convertedQuery.label())
+                .comment(convertedQuery.comment())
+                .lastModified(convertedQuery.lastModified())
+                .createdBy(convertedQuery.createdBy())
+                .invalidTerms(convertedQuery.invalidTerms())
+                .isValid(convertedQuery.isValid())
+                .build();
         ret.add(convertedQueryWithoutContent);
       } catch (JsonProcessingException e) {
         log.error("Error converting query");

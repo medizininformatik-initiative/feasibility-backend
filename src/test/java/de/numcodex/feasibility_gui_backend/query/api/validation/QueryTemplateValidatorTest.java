@@ -74,56 +74,90 @@ public class QueryTemplateValidatorTest {
   }
 
   private QueryTemplate buildValidQuery() {
-    var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1",
-        "Body weight (observable entity)");
-    var kgUnit = new Unit("kg", "kilogram");
-    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
-        50.0, null, null);
-    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
-    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
-        bodyWeightValueFilter, timeRestriction);
-    var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
-        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
-    return new QueryTemplate(0, testQuery, "testquery", "this is just a test query", null,
-        "foo-bar-1234", null, null);
+    var bodyWeightTermCode = TermCode.builder()
+            .code("27113001")
+            .system("http://snomed.info/sct")
+            .version("v1")
+            .display("Body weight (observable entity)")
+            .build();
+    var kgUnit = Unit.builder()
+            .code("kg")
+            .display("kilogram")
+            .build();
+    var bodyWeightValueFilter = ValueFilter.builder()
+            .type(QUANTITY_COMPARATOR)
+            .comparator(GREATER_EQUAL)
+            .quantityUnit(kgUnit)
+            .value(50.0)
+            .build();
+    var timeRestriction = TimeRestriction.builder()
+            .afterDate("2021-01-01")
+            .beforeDate("2021-12-31")
+            .build();
+
+    var hasBmiGreaterThanFifty = Criterion.builder()
+            .termCodes(List.of(bodyWeightTermCode))
+            .valueFilter(bodyWeightValueFilter)
+            .timeRestriction(timeRestriction)
+            .build();
+    var testQuery = StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+            .display(null)
+            .build();
+    return QueryTemplate.builder()
+            .id(0)
+            .content(testQuery)
+            .label("testquery")
+            .comment("this is just a test query")
+            .createdBy("foo-bar-1234")
+            .build();
   }
 
   private QueryTemplate buildInvalidValidQueryWithoutLabel() {
     var validQuery = buildValidQuery();
-    return new QueryTemplate(validQuery.id(),
-        validQuery.content(),
-        null,
-        validQuery.comment(),
-        validQuery.lastModified(),
-        validQuery.createdBy(),
-        validQuery.invalidTerms(),
-        validQuery.isValid());
+    return QueryTemplate.builder()
+            .id(validQuery.id())
+            .content(validQuery.content())
+            .comment(validQuery.comment())
+            .lastModified(validQuery.lastModified())
+            .createdBy(validQuery.createdBy())
+            .invalidTerms(validQuery.invalidTerms())
+            .isValid(validQuery.isValid())
+            .build();
   }
 
   private QueryTemplate buildInvalidValidQueryWithoutContent() {
     var validQuery = buildValidQuery();
-    return new QueryTemplate(validQuery.id(),
-        null,
-        validQuery.label(),
-        validQuery.comment(),
-        validQuery.lastModified(),
-        validQuery.createdBy(),
-        validQuery.invalidTerms(),
-        validQuery.isValid());
+    return QueryTemplate.builder()
+            .id(validQuery.id())
+            .label(validQuery.label())
+            .comment(validQuery.comment())
+            .lastModified(validQuery.lastModified())
+            .createdBy(validQuery.createdBy())
+            .invalidTerms(validQuery.invalidTerms())
+            .isValid(validQuery.isValid())
+            .build();
   }
 
   private QueryTemplate buildInvalidQueryWithMalformedStructuredQuery() {
     var validQuery = buildValidQuery();
-    var invalidTestQuery = new StructuredQuery(validQuery.content().version(), null, validQuery.content()
-        .exclusionCriteria(), validQuery.content().display());
-    return new QueryTemplate(validQuery.id(),
-        invalidTestQuery,
-        validQuery.label(),
-        validQuery.comment(),
-        validQuery.lastModified(),
-        validQuery.createdBy(),
-        validQuery.invalidTerms(),
-        validQuery.isValid());
+    var invalidTestQuery = StructuredQuery.builder()
+            .version(validQuery.content().version())
+            .exclusionCriteria(validQuery.content().exclusionCriteria())
+            .display(validQuery.content().display())
+            .build();
+    return QueryTemplate.builder()
+            .id(validQuery.id())
+            .content(invalidTestQuery)
+            .label(validQuery.label())
+            .comment(validQuery.comment())
+            .lastModified(validQuery.lastModified())
+            .createdBy(validQuery.createdBy())
+            .invalidTerms(validQuery.invalidTerms())
+            .isValid(validQuery.isValid())
+            .build();
   }
 
 }

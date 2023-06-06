@@ -80,7 +80,15 @@ class DirectBrokerClientCqlTest {
 
         client.publishQuery(queryId);
 
-        verify(listener).onClientUpdate(TEST_BACKEND_QUERY_ID, new QueryStatusUpdate(client, queryId, SITE_ID_LOCAL, COMPLETED));
+        verify(listener).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(queryId)
+                        .brokerSiteId(SITE_ID_LOCAL)
+                        .status(COMPLETED)
+                        .build()
+                );
     }
 
 

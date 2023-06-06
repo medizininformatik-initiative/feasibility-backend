@@ -47,13 +47,30 @@ public class CqlQueryTranslatorIT {
 
     @Test
     public void testTranslate() {
-        var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1", "Body weight (observable entity)");
-        var kgUnit = new Unit("kg", "kilogram");
-        var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
-            50.0, null, null);
-        var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
-            bodyWeightValueFilter, null);
-        var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"), List.of(List.of(hasBmiGreaterThanFifty)), null, null);
+        var bodyWeightTermCode = TermCode.builder()
+                .code("27113001")
+                .system("http://snomed.info/sct")
+                .version("v1")
+                .display("Body weight (observable entity)")
+                .build();
+        var kgUnit = Unit.builder()
+                .code("kg")
+                .display("kilogram")
+                .build();
+        var bodyWeightValueFilter = ValueFilter.builder()
+                .type(QUANTITY_COMPARATOR)
+                .comparator(GREATER_EQUAL)
+                .quantityUnit(kgUnit)
+                .value(50.0)
+                .build();
+        var hasBmiGreaterThanFifty = Criterion.builder()
+                .termCodes(List.of(bodyWeightTermCode))
+                .valueFilter(bodyWeightValueFilter)
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+                .build();
 
         @SuppressWarnings("unused")
         var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
@@ -62,12 +79,28 @@ public class CqlQueryTranslatorIT {
 
     @Test
     public void testTranslate_SupportsTimeRestrictions() {
-        var dementiaTermCode = new TermCode("F00", "http://fhir.de/CodeSystem/dimdi/icd-10-gm", null, "F00");
-        var hasDementia = new Criterion(List.of(dementiaTermCode), null, null, null);
-        var psychologicalDysfunctionTermCode = new TermCode("F09", "http://fhir.de/CodeSystem/dimdi/icd-10-gm", null, "F09");
+        var dementiaTermCode = TermCode.builder()
+                .code("F00")
+                .system("http://fhir.de/CodeSystem/dimdi/icd-10-gm")
+                .display("F00")
+                .build();
+        var hasDementia = Criterion.builder()
+                .termCodes(List.of(dementiaTermCode))
+                .build();
+        var psychologicalDysfunctionTermCode = TermCode.builder()
+                .code("F09")
+                .system("http://fhir.de/CodeSystem/dimdi/icd-10-gm")
+                .display("F09")
+                .build();
         var timeRestriction = new TimeRestriction("2021-10-09", "2021-09-09");
-        var hasPsychologicalDysfunction = new Criterion(List.of(psychologicalDysfunctionTermCode), null, null, timeRestriction);
-        var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"), List.of(List.of(hasDementia, hasPsychologicalDysfunction)), null, null);
+        var hasPsychologicalDysfunction = Criterion.builder()
+                .termCodes(List.of(psychologicalDysfunctionTermCode))
+                .timeRestriction(timeRestriction)
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(hasDementia, hasPsychologicalDysfunction)))
+                .build();
 
         @SuppressWarnings("unused")
         var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
@@ -76,16 +109,55 @@ public class CqlQueryTranslatorIT {
 
     @Test
     public void testTranslate_SupportsAttributeFilters() {
-        var ageTermCode = new TermCode("30525-0", "http://loinc.org", null, "Alter");
-        var yearUnit = new Unit("a", "Jahr");
-        var ageValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_THAN, yearUnit, 18.0, null, null);
-        var olderThanEighteen = new Criterion(List.of(ageTermCode), null, ageValueFilter, null);
-        var bodyTemperatureTermCode = new TermCode("8310-5", "http://loinc.org", null, "Körpertemperatur");
-        var axillaryMeasureMethod = new TermCode("LA9370-3", "http://loinc.org", null, "Axillary");
-        var method = new TermCode("method", "abide", null, "method");
-        var axillaryMeasured = new AttributeFilter(CONCEPT, List.of(axillaryMeasureMethod), null, null, null, null, null, method);
-        var bodyTemperatureAxillaryMeasured = new Criterion(List.of(bodyTemperatureTermCode), List.of(axillaryMeasured), null, null);
-        var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"), List.of(List.of(olderThanEighteen)), List.of(List.of(bodyTemperatureAxillaryMeasured)), null);
+        var ageTermCode = TermCode.builder()
+                .code("30525-0")
+                .system("http://loinc.org")
+                .display("Alter")
+                .build();
+        var yearUnit = Unit.builder()
+                .code("a")
+                .display("Jahr")
+                .build();
+        var ageValueFilter = ValueFilter.builder()
+                .type(QUANTITY_COMPARATOR)
+                .comparator(GREATER_THAN)
+                .quantityUnit(yearUnit)
+                .value(18.0)
+                .build();
+        var olderThanEighteen = Criterion.builder()
+                .termCodes(List.of(ageTermCode))
+                .valueFilter(ageValueFilter)
+                .build();
+        var bodyTemperatureTermCode = TermCode.builder()
+                .code("8310-5")
+                .system("http://loinc.org")
+                .display("Körpertemperatur")
+                .build();
+        var axillaryMeasureMethod = TermCode.builder()
+                .code("LA9370-3")
+                .system("http://loinc.org")
+                .display("Axillary")
+                .build();
+        var method = TermCode.builder()
+                .code("method")
+                .system("abide")
+                .display("method")
+                .build();
+        var axillaryMeasured = AttributeFilter.builder()
+                .type(CONCEPT)
+                .selectedConcepts(List.of(axillaryMeasureMethod))
+                .attributeCode(method)
+                .build();
+        var bodyTemperatureAxillaryMeasured = Criterion.builder()
+                .termCodes(List.of(bodyTemperatureTermCode))
+                .attributeFilters(List.of(axillaryMeasured))
+                .build();
+
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(olderThanEighteen)))
+                .exclusionCriteria(List.of(List.of(bodyTemperatureAxillaryMeasured)))
+                .build();
 
         @SuppressWarnings("unused")
         var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
