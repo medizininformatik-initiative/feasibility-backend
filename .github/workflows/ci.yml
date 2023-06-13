@@ -116,7 +116,7 @@ jobs:
       with:
         sarif_file: trivy-results.sarif
 
-  integration-test-default-config:
+  integration-test:
     needs: tests
     runs-on: ubuntu-22.04
 
@@ -124,16 +124,25 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
+      - name: Install Blazectl
+        run: .github/scripts/install-blazectl.sh
+
       - name: Download Feasibility Backend Image
         uses: actions/download-artifact@v3
         with:
           name: backend-image
           path: /tmp
 
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v1.0.1
+
+      - name: Download mapping files
+        run: .github/scripts/download-and-extract-mapping-files.sh
+
       - name: Load Feasibility Backend Image
         run: docker load --input /tmp/feasibilityBackend.tar
 
-      - name: Run Feasibility Backend with Database
+      - name: Run Feasibility Backend with Database, Keycloak and Blaze
         run: docker-compose -f .github/integration-test/docker-compose.yml up -d
 
       - name: Wait for Feasibility Backend
@@ -141,6 +150,21 @@ jobs:
 
       - name: Check if Feasibility Backend is correctly running with the feasibility user
         run: .github/scripts/check-if-running-as-feasibility-user.sh
+
+      - name: Wait for Blaze
+        run: .github/scripts/wait-for-url.sh  http://localhost:8082/health
+
+      - name: Load Data
+        run: blazectl --no-progress --server http://localhost:8082/fhir upload .github/test-data/synthea
+
+      - name: Wait for Keycloak
+        run: .github/scripts/wait-for-url.sh  http://localhost:8083/auth/
+
+      - name: Create Test User in Keycloak
+        run: .github/scripts/create-keycloak-user.sh
+
+      - name: Post Test Query
+        run: .github/scripts/post-test-query.sh
 
       - name: Dump docker logs on failure
         if: failure()
@@ -150,7 +174,7 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     needs:
       - tests
-      - integration-test-default-config
+      - integration-test
       - security-scan
     runs-on: ubuntu-latest
     steps:
