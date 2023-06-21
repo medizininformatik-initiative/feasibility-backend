@@ -139,6 +139,13 @@ jobs:
       - name: Wait for Feasibility Backend
         run: .github/scripts/wait-for-url.sh  http://localhost:8091/actuator/health
 
+      - name: Check if Feasibility Backend is correctly running with the feasibility user
+        run: .github/scripts/check-if-running-as-feasibility-user.sh
+
+      - name: Dump docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
+
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     needs:
