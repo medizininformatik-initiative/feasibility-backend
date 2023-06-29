@@ -136,9 +136,6 @@ jobs:
       - name: Install jq
         uses: dcarbone/install-jq-action@v1.0.1
 
-      - name: Download mapping files
-        run: .github/scripts/download-and-extract-mapping-files.sh
-
       - name: Load Feasibility Backend Image
         run: docker load --input /tmp/feasibilityBackend.tar
 
