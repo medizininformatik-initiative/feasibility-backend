@@ -124,9 +124,6 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Install Blazectl
-        run: .github/scripts/install-blazectl.sh
-
       - name: Download Feasibility Backend Image
         uses: actions/download-artifact@v3
         with:
@@ -152,7 +149,7 @@ jobs:
         run: .github/scripts/wait-for-url.sh  http://localhost:8082/health
 
       - name: Load Data
-        run: blazectl --no-progress --server http://localhost:8082/fhir upload .github/test-data/synthea
+        run: .github/scripts/load-test-data.sh
 
       - name: Wait for Keycloak
         run: .github/scripts/wait-for-url.sh  http://localhost:8083/auth/
