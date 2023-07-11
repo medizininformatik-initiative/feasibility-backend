@@ -13,6 +13,7 @@ import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -76,7 +77,7 @@ public class QueryHandlerServiceIT {
 
     @Test
     public void testRunQuery() {
-        var testStructuredQuery = new StructuredQuery();
+        var testStructuredQuery = new StructuredQuery(null, List.of(List.of()), List.of(List.of()), null);
 
         queryHandlerService.runQuery(testStructuredQuery, "test").block();
 
@@ -91,9 +92,9 @@ public class QueryHandlerServiceIT {
     public void testGetQueryResult_UnknownQueryIdLeadsToResultWithZeroMatchesInPopulation() {
         var queryResult = queryHandlerService.getQueryResult(UNKNOWN_QUERY_ID, DETAILED_OBFUSCATED);
 
-        assertThat(queryResult.getQueryId()).isEqualTo(UNKNOWN_QUERY_ID);
-        assertThat(queryResult.getTotalNumberOfPatients()).isZero();
-        assertThat(queryResult.getResultLines()).isEmpty();
+        assertThat(queryResult.queryId()).isEqualTo(UNKNOWN_QUERY_ID);
+        assertThat(queryResult.totalNumberOfPatients()).isZero();
+        assertThat(queryResult.resultLines()).isEmpty();
     }
 
     @ParameterizedTest
@@ -106,7 +107,7 @@ public class QueryHandlerServiceIT {
 
         var queryResult = queryHandlerService.getQueryResult(queryId, resultDetail);
 
-        assertThat(queryResult.getResultLines()).isEmpty();
+        assertThat(queryResult.resultLines()).isEmpty();
     }
 
     @Test
@@ -119,8 +120,8 @@ public class QueryHandlerServiceIT {
 
         var queryResult = queryHandlerService.getQueryResult(queryId, SUMMARY);
 
-        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
-        assertThat(queryResult.getResultLines()).isEmpty();
+        assertThat(queryResult.totalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.resultLines()).isEmpty();
     }
 
     @Test
@@ -133,11 +134,11 @@ public class QueryHandlerServiceIT {
 
         var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED_OBFUSCATED);
 
-        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
-        assertThat(queryResult.getResultLines()).hasSize(2);
-        assertThat(queryResult.getResultLines().stream().map(QueryResultLine::getSiteName))
+        assertThat(queryResult.totalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.resultLines()).hasSize(2);
+        assertThat(queryResult.resultLines().stream().map(QueryResultLine::siteName))
             .doesNotContain(SITE_NAME_1, SITE_NAME_2);
-        assertThat(queryResult.getResultLines().stream().map(QueryResultLine::getNumberOfPatients))
+        assertThat(queryResult.resultLines().stream().map(QueryResultLine::numberOfPatients))
             .contains(10L, 20L);
     }
 
@@ -151,8 +152,8 @@ public class QueryHandlerServiceIT {
 
         var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED);
 
-        assertThat(queryResult.getTotalNumberOfPatients()).isEqualTo(30L);
-        assertThat(queryResult.getResultLines())
+        assertThat(queryResult.totalNumberOfPatients()).isEqualTo(30L);
+        assertThat(queryResult.resultLines())
             .hasSize(2)
             .contains(QueryResultLine.builder().siteName(SITE_NAME_1).numberOfPatients(10L).build(),
                 QueryResultLine.builder().siteName(SITE_NAME_2).numberOfPatients(20L).build());

@@ -1,0 +1,71 @@
+{
+    "children": [
+        {
+            "children": [],
+            "display": "ProfilePatientPatientIn",
+            "id": "335b239e-2ec5-444e-85d3-5d73461b768c",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfilePatientPatientIn",
+                "display": "ProfilePatientPatientIn",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "LogicalModelPerson",
+            "id": "1b021053-8890-4b53-a751-c83472ff2844",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "LogicalModelPerson",
+                "display": "LogicalModelPerson",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileResearchSubjectProbandIn",
+            "id": "2367ec18-3df5-4744-a5fd-acf6019de9bb",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileResearchSubjectProbandIn",
+                "display": "ProfileResearchSubjectProbandIn",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileObservationVitalstatus",
+            "id": "0e102811-e95f-48c7-a61a-37625fd01a96",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileObservationVitalstatus",
+                "display": "ProfileObservationVitalstatus",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        }
+    ],
+    "display": "Person",
+    "id": "f038a6da-aac2-4f6e-a902-ee6dc282d93a",
+    "leaf": false,
+    "selectable": false,
+    "termCode": {
+        "code": "Person",
+        "display": "Person",
+        "system": "num.abide"
+    },
+    "timeRestrictionAllowed": false,
+    "valueDefinitions": []
+}

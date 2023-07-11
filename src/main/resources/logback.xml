@@ -7,19 +7,38 @@
     </encoder>
   </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${QUERYRESULT_LOG_FILE}.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- monthly rollover -->
-      <fileNamePattern>${QUERYRESULT_LOG_FILE}.%d{yyyy-MM}.gz</fileNamePattern>
-      <maxHistory>24</maxHistory>
-    </rollingPolicy>
-    <append>true</append>
-    <encoder class="de.numcodex.feasibility_gui_backend.query.result.EncryptingEncoder">
-      <publicKey>${QUERYRESULT_PUBLIC_KEY}</publicKey>
-      <pattern>%d{"yyyy-MM-dd'T'HH:mm:ss.SSS"};%msg</pattern>
-    </encoder>
-  </appender>
+  <if condition='property("QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION").equalsIgnoreCase("true")'>
+    <then>
+      <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${QUERYRESULT_LOG_FILE}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+          <!-- monthly rollover -->
+          <fileNamePattern>${QUERYRESULT_LOG_FILE}.%d{yyyy-MM}.gz</fileNamePattern>
+          <maxHistory>24</maxHistory>
+        </rollingPolicy>
+        <append>true</append>
+        <encoder>
+          <pattern>%d{"yyyy-MM-dd'T'HH:mm:ss.SSS"};%msg%n</pattern>
+        </encoder>
+      </appender>
+    </then>
+    <else>
+      <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${QUERYRESULT_LOG_FILE}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+          <!-- monthly rollover -->
+          <fileNamePattern>${QUERYRESULT_LOG_FILE}.%d{yyyy-MM}.gz</fileNamePattern>
+          <maxHistory>24</maxHistory>
+        </rollingPolicy>
+        <append>true</append>
+        <encoder class="de.numcodex.feasibility_gui_backend.query.result.EncryptingEncoder">
+          <publicKey>${QUERYRESULT_PUBLIC_KEY}</publicKey>
+          <pattern>%d{"yyyy-MM-dd'T'HH:mm:ss.SSS"};%msg</pattern>
+        </encoder>
+      </appender>
+    </else>
+  </if>
+
 
   <root level="info">
     <appender-ref ref="STDOUT"/>

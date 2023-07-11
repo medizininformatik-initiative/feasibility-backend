@@ -1,0 +1,85 @@
+{
+    "children": [
+        {
+            "children": [],
+            "display": "QuelleKlinischesBezugsdatum",
+            "id": "172c73ae-c63b-4794-a584-1a0ea0937f78",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "QuelleKlinischesBezugsdatum",
+                "display": "QuelleKlinischesBezugsdatum",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "Laborbefund",
+            "id": "95986b4b-441c-4214-a59e-d08d68448fcf",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "Laborbefund",
+                "display": "Laborbefund",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileDiagnosticReportLaborbefund",
+            "id": "08b436ce-bf07-46a1-8383-c2f040749aef",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileDiagnosticReportLaborbefund",
+                "display": "ProfileDiagnosticReportLaborbefund",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileObservationLaboruntersuchung",
+            "id": "bc4291df-14e8-448d-b4c2-af31e1235ee1",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileObservationLaboruntersuchung",
+                "display": "ProfileObservationLaboruntersuchung",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        },
+        {
+            "children": [],
+            "display": "ProfileServiceRequestLaboranforderung",
+            "id": "bc5a4bdc-3c6e-47c8-bed3-65b2827867a8",
+            "leaf": false,
+            "selectable": false,
+            "termCode": {
+                "code": "ProfileServiceRequestLaboranforderung",
+                "display": "ProfileServiceRequestLaboranforderung",
+                "system": "num.abide"
+            },
+            "timeRestrictionAllowed": false,
+            "valueDefinitions": []
+        }
+    ],
+    "display": "Laborbefund",
+    "id": "edc3f488-7568-4d6a-af8c-c8310e768ad5",
+    "leaf": false,
+    "selectable": false,
+    "termCode": {
+        "code": "Laborbefund",
+        "display": "Laborbefund",
+        "system": "num.abide"
+    },
+    "timeRestrictionAllowed": false,
+    "valueDefinitions": []
+}
