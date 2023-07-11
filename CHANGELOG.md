@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [3.1.2] - 2023-07-11
+
+### Security
+- Fix potential input resource leak ([#155](https://github.com/medizininformatik-initiative/feasibility-backend/issues/155))
+
 ## [3.1.1] - 2023-05-24
 
 ### Fixed
