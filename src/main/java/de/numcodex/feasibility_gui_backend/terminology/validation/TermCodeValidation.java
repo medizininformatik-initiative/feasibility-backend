@@ -37,28 +37,28 @@ public class TermCodeValidation {
 
     List<List<Criterion>> combinedCriteria;
 
-    if (structuredQuery.getExclusionCriteria() != null && !structuredQuery.getExclusionCriteria().isEmpty()) {
+    if (structuredQuery.exclusionCriteria() != null && !structuredQuery.exclusionCriteria().isEmpty()) {
       combinedCriteria = Stream.of(
-          structuredQuery.getInclusionCriteria(),
-          structuredQuery.getExclusionCriteria()).flatMap(
+          structuredQuery.inclusionCriteria(),
+          structuredQuery.exclusionCriteria()).flatMap(
           Collection::stream).toList();
     } else {
-      combinedCriteria = structuredQuery.getInclusionCriteria();
+      combinedCriteria = structuredQuery.inclusionCriteria();
     }
 
     for (List<Criterion> criterionList : combinedCriteria) {
       for (Criterion criterion : criterionList) {
-        for (TermCode termCode : criterion.getTermCodes()) {
+        for (TermCode termCode : criterion.termCodes()) {
           try {
-            terminologyService.getUiProfile(termCode.getSystem(),
-                termCode.getCode(),
-                termCode.getVersion());
-            log.trace("termcode ok: {} - {} - {}", termCode.getSystem(), termCode.getCode(),
-                termCode.getVersion());
+            terminologyService.getUiProfile(termCode.system(),
+                termCode.code(),
+                termCode.version());
+            log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code(),
+                termCode.version());
           } catch (NullPointerException e) {
             // currently, terminology service throws a NPE when the code is not found
-            log.debug("termcode invalid: {} - {} - {}", termCode.getSystem(), termCode.getCode(),
-                termCode.getVersion());
+            log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
+                termCode.version());
             invalidTermCodes.add(termCode);
           }
         }

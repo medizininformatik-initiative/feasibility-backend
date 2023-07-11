@@ -1,10 +1,10 @@
 package de.numcodex.feasibility_gui_backend.query.obfuscation;
 
+import com.google.common.hash.Hashing;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,8 +17,7 @@ public class QueryResultObfuscationTest {
 
     @BeforeAll
     public static void setUp() throws NoSuchAlgorithmException {
-        var hashFn = MessageDigest.getInstance("SHA3-256");
-        queryResultObfuscator = new QueryResultObfuscator(hashFn);
+        queryResultObfuscator = new QueryResultObfuscator(Hashing.sha256());
     }
 
     @Test
