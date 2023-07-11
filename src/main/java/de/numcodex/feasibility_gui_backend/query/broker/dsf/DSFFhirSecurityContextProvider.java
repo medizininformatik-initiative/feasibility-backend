@@ -40,11 +40,12 @@ public class DSFFhirSecurityContextProvider implements FhirSecurityContextProvid
             if (!Files.isReadable(Paths.get(certificateFile))) {
                 throw new IOException("Certificate file '" + certificateFile + "' not readable");
             }
-            FileInputStream inStream = new FileInputStream(certificateFile);
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate cert = cf.generateCertificate(inStream);
+            try (FileInputStream inStream = new FileInputStream(certificateFile)) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                Certificate cert = cf.generateCertificate(inStream);
 
-            localTrustStore.setCertificateEntry("zars", cert);
+                localTrustStore.setCertificateEntry("zars", cert);
+            }
 
             return new FhirSecurityContext(localKeyStore, localTrustStore, keyStorePassword);
         } catch (Exception e) {
