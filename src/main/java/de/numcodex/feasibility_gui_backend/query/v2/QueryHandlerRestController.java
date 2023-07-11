@@ -55,7 +55,7 @@ Rest Interface for the UI to send queries from the ui to the ui backend.
 @RequestMapping("api/v2/query")
 @RestController("QueryHandlerRestController-v2")
 @Slf4j
-@CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = {"Location"})
+@CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = {HttpHeaders.LOCATION, HttpHeaders.RETRY_AFTER})
 public class QueryHandlerRestController {
 
   public static final String HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY = "X-Detailed-Obfuscated-Result-Was-Empty";
