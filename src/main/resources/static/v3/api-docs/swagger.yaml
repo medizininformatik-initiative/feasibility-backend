@@ -300,7 +300,7 @@ paths:
         - query
       summary: Read query result summary by query ID
       description: Returns the aggregated results to a query. There is no breakdown by site.
-      operationId: getQueryResults
+      operationId: getQueryResultSummary
       parameters:
         - name: queryId
           in: path
@@ -372,7 +372,7 @@ paths:
         - query
       summary: Read obfuscated query result by ID
       description: Returns all results to query with the site names obfuscated.
-      operationId: getQueryResults
+      operationId: getQueryResultDetailedObfuscated
       parameters:
         - name: queryId
           in: path
