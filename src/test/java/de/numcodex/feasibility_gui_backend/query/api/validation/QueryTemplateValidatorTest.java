@@ -16,7 +16,6 @@ import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import jakarta.validation.ConstraintValidatorContext;
 import org.everit.json.schema.loader.SchemaClient;
@@ -44,12 +43,12 @@ public class QueryTemplateValidatorTest {
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
     InputStream inputStream = QueryTemplateValidator.class.getResourceAsStream(
-        "/query/query-template-schema.json");
+        "/de/numcodex/feasibility_gui_backend/query/api/validation/query-template-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
         .schemaClient(SchemaClient.classPathAwareClient())
         .schemaJson(jsonSchema)
-        .resolutionScope("classpath://query/")
+        .resolutionScope("classpath://de/numcodex/feasibility_gui_backend/query/api/validation/")
         .draftV7Support()
         .build();
     var schema = loader.load().build();
@@ -64,60 +63,67 @@ public class QueryTemplateValidatorTest {
 
   @Test
   public void testValidate_invalidQueriesFail() {
-    var queryWithoutLabel = buildValidQuery();
-    queryWithoutLabel.setLabel(null);
+    var queryWithoutLabel = buildInvalidValidQueryWithoutLabel();
     assertFalse(validator.isValid(queryWithoutLabel, constraintValidatorContext));
 
-    var queryWithoutStructuredQuery = buildValidQuery();
-    queryWithoutStructuredQuery.setContent(null);
+    var queryWithoutStructuredQuery = buildInvalidValidQueryWithoutContent();
     assertFalse(validator.isValid(queryWithoutStructuredQuery, constraintValidatorContext));
 
-    var queryWithMalformedStructuredQuery = buildValidQuery();
-    var malformedStructuredQuery = queryWithMalformedStructuredQuery.getContent();
-    malformedStructuredQuery.setInclusionCriteria(null);
-    queryWithMalformedStructuredQuery.setContent(malformedStructuredQuery);
+    var queryWithMalformedStructuredQuery = buildInvalidQueryWithMalformedStructuredQuery();
     assertFalse(validator.isValid(queryWithMalformedStructuredQuery, constraintValidatorContext));
   }
 
   private QueryTemplate buildValidQuery() {
-    var bodyWeightTermCode = new TermCode();
-    bodyWeightTermCode.setSystem("http://snomed.info/sct");
-    bodyWeightTermCode.setDisplay("Body weight (observable entity)");
-    bodyWeightTermCode.setCode("27113001");
-    bodyWeightTermCode.setVersion("v1");
+    var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1",
+        "Body weight (observable entity)");
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+    return new QueryTemplate(0, testQuery, "testquery", "this is just a test query", null,
+        "foo-bar-1234", null, null);
+  }
 
-    var kgUnit = new Unit();
-    kgUnit.setCode("kg");
-    kgUnit.setDisplay("kilogram");
+  private QueryTemplate buildInvalidValidQueryWithoutLabel() {
+    var validQuery = buildValidQuery();
+    return new QueryTemplate(validQuery.id(),
+        validQuery.content(),
+        null,
+        validQuery.comment(),
+        validQuery.lastModified(),
+        validQuery.createdBy(),
+        validQuery.invalidTerms(),
+        validQuery.isValid());
+  }
 
-    var bodyWeightValueFilter = new ValueFilter();
-    bodyWeightValueFilter.setType(QUANTITY_COMPARATOR);
-    bodyWeightValueFilter.setQuantityUnit(kgUnit);
-    bodyWeightValueFilter.setComparator(GREATER_EQUAL);
-    bodyWeightValueFilter.setValue(50.0);
+  private QueryTemplate buildInvalidValidQueryWithoutContent() {
+    var validQuery = buildValidQuery();
+    return new QueryTemplate(validQuery.id(),
+        null,
+        validQuery.label(),
+        validQuery.comment(),
+        validQuery.lastModified(),
+        validQuery.createdBy(),
+        validQuery.invalidTerms(),
+        validQuery.isValid());
+  }
 
-    var hasBmiGreaterThanFifty = new Criterion();
-    hasBmiGreaterThanFifty.setTermCodes(new ArrayList<>(List.of(bodyWeightTermCode)));
-    hasBmiGreaterThanFifty.setValueFilter(bodyWeightValueFilter);
-
-    var timeRestriction = new TimeRestriction();
-    timeRestriction.setAfterDate("2021-01-01");
-    timeRestriction.setBeforeDate("2021-12-31");
-
-    hasBmiGreaterThanFifty.setTimeRestriction(timeRestriction);
-
-    var testQuery = new StructuredQuery();
-    testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-    testQuery.setInclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
-    testQuery.setExclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
-
-    var testQueryTemplate = new QueryTemplate();
-    testQueryTemplate.setContent(testQuery);
-    testQueryTemplate.setLabel("testquery");
-    testQueryTemplate.setComment("this is just a test query");
-    testQueryTemplate.setCreatedBy("foo-bar-1234");
-
-    return testQueryTemplate;
+  private QueryTemplate buildInvalidQueryWithMalformedStructuredQuery() {
+    var validQuery = buildValidQuery();
+    var invalidTestQuery = new StructuredQuery(validQuery.content().version(), null, validQuery.content()
+        .exclusionCriteria(), validQuery.content().display());
+    return new QueryTemplate(validQuery.id(),
+        invalidTestQuery,
+        validQuery.label(),
+        validQuery.comment(),
+        validQuery.lastModified(),
+        validQuery.createdBy(),
+        validQuery.invalidTerms(),
+        validQuery.isValid());
   }
 
 }

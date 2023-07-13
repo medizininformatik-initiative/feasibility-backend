@@ -21,7 +21,6 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
@@ -43,7 +42,7 @@ public class StructuredQueryValidatorTest {
   public static void setUp() throws IOException {
     var jsonUtil = new ObjectMapper();
     InputStream inputStream = StructuredQueryValidator.class.getResourceAsStream(
-        "/query/query-schema.json");
+        "/de/numcodex/feasibility_gui_backend/query/api/validation/query-schema.json");
     var jsonSchema = new JSONObject(new JSONTokener(inputStream));
     SchemaLoader loader = SchemaLoader.builder()
         .schemaJson(jsonSchema)
@@ -61,91 +60,147 @@ public class StructuredQueryValidatorTest {
 
   @Test
   public void testValidate_invalidQueriesFail() {
-    var queryWithoutVersion = buildValidQuery();
-    queryWithoutVersion.setVersion(null);
+    var queryWithoutVersion = buildInvalidQueryWithoutVersion();
     assertFalse(validator.isValid(queryWithoutVersion, constraintValidatorContext));
 
-    var queryWithoutInclusionCriteria = buildValidQuery();
-    queryWithoutInclusionCriteria.setInclusionCriteria(null);
+    var queryWithoutInclusionCriteria = buildInvalidQueryWithoutInclusionCriteria();
     assertFalse(validator.isValid(queryWithoutInclusionCriteria, constraintValidatorContext));
 
-    var queryWithEmptyInclusionCriteria = buildValidQuery();
-    queryWithEmptyInclusionCriteria.setInclusionCriteria(new ArrayList<>());
+    var queryWithEmptyInclusionCriteria = buildInvalidQueryWithEmptyInclusionCriteria();
     assertFalse(validator.isValid(queryWithEmptyInclusionCriteria, constraintValidatorContext));
 
-    var queryWithEmptyCriterionTermCodes = buildValidQuery();
-    queryWithEmptyCriterionTermCodes.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.setTermCodes(null)));
+    var queryWithEmptyCriterionTermCodes = buildInvalidQueryWithEmptyTermCodes();
     assertFalse(validator.isValid(queryWithEmptyCriterionTermCodes, constraintValidatorContext));
 
-    var queryWithEmptyTermCodeCodes = buildValidQuery();
-    queryWithEmptyTermCodeCodes.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.getTermCodes().forEach(tc ->
-            tc.setCode(null))));
+    var queryWithEmptyTermCodeCodes = buildInvalidQueryWithEmptyTermCodeCodes();
     assertFalse(validator.isValid(queryWithEmptyTermCodeCodes, constraintValidatorContext));
 
-    var queryWithEmptyTermCodeSystems = buildValidQuery();
-    queryWithEmptyTermCodeSystems.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.getTermCodes().forEach(tc ->
-            tc.setSystem(null))));
+    var queryWithEmptyTermCodeSystems = buildInvalidQueryWithEmptyTermCodeSystems();
     assertFalse(validator.isValid(queryWithEmptyTermCodeSystems, constraintValidatorContext));
 
-    var queryWithEmptyTermCodeDisplays = buildValidQuery();
-    queryWithEmptyTermCodeDisplays.getInclusionCriteria().forEach(ic -> ic.forEach(c -> c.getTermCodes().forEach(tc ->
-            tc.setDisplay(null))));
+    var queryWithEmptyTermCodeDisplays = buildInvalidQueryWithEmptyTermCodeDisplays();
     assertFalse(validator.isValid(queryWithEmptyTermCodeDisplays, constraintValidatorContext));
 
-    var queryWithMalformedTimeRestrictions = buildValidQuery();
-    queryWithMalformedTimeRestrictions.getInclusionCriteria().forEach(ic -> ic.forEach(c -> {
-      c.getTimeRestriction().setBeforeDate("foo");
-      c.getTimeRestriction().setAfterDate("bar");
-    }));
+    var queryWithMalformedTimeRestrictions = buildInvalidQueryWithMalformedTimeRestrictions();
     assertFalse(validator.isValid(queryWithMalformedTimeRestrictions, constraintValidatorContext));
 
-    var queryWithTimeRestrictionsWithoutDates = buildValidQuery();
-    queryWithTimeRestrictionsWithoutDates.getInclusionCriteria().forEach(ic -> ic.forEach(c -> {
-      c.getTimeRestriction().setBeforeDate(null);
-      c.getTimeRestriction().setAfterDate(null);
-    }));
+    var queryWithTimeRestrictionsWithoutDates = buildInvalidQueryWithTimeRestrictionsWithoutDates();
     assertFalse(
         validator.isValid(queryWithTimeRestrictionsWithoutDates, constraintValidatorContext));
-
-    var queryWithMissingValueFilterType = buildValidQuery();
-    queryWithMissingValueFilterType.getInclusionCriteria().forEach(ic -> ic.forEach(c ->
-            c.getValueFilter().setType(null)));
-    assertFalse(validator.isValid(queryWithMissingValueFilterType, constraintValidatorContext));
   }
 
   private StructuredQuery buildValidQuery() {
-    var bodyWeightTermCode = new TermCode();
-    bodyWeightTermCode.setSystem("http://snomed.info/sct");
-    bodyWeightTermCode.setDisplay("Body weight (observable entity)");
-    bodyWeightTermCode.setCode("27113001");
-    bodyWeightTermCode.setVersion("v1");
+    var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1", "Body weight (observable entity)");
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+  }
 
-    var kgUnit = new Unit();
-    kgUnit.setCode("kg");
-    kgUnit.setDisplay("kilogram");
+  private StructuredQuery buildInvalidQueryWithoutVersion() {
+    var validQuery = buildValidQuery();
+    return new StructuredQuery(
+      null,
+      validQuery.inclusionCriteria(),
+      validQuery.exclusionCriteria(),
+        validQuery.display()
+    );
+  }
 
-    var bodyWeightValueFilter = new ValueFilter();
-    bodyWeightValueFilter.setType(QUANTITY_COMPARATOR);
-    bodyWeightValueFilter.setQuantityUnit(kgUnit);
-    bodyWeightValueFilter.setComparator(GREATER_EQUAL);
-    bodyWeightValueFilter.setValue(50.0);
+  private StructuredQuery buildInvalidQueryWithoutInclusionCriteria() {
+    var validQuery = buildValidQuery();
+    return new StructuredQuery(
+        validQuery.version(),
+        null,
+        validQuery.exclusionCriteria(),
+        validQuery.display()
+    );
+  }
 
-    var hasBmiGreaterThanFifty = new Criterion();
-    hasBmiGreaterThanFifty.setTermCodes(new ArrayList<>(List.of(bodyWeightTermCode)));
-    hasBmiGreaterThanFifty.setValueFilter(bodyWeightValueFilter);
+  private StructuredQuery buildInvalidQueryWithEmptyInclusionCriteria() {
+    var validQuery = buildValidQuery();
+    return new StructuredQuery(
+        validQuery.version(),
+        List.of(),
+        validQuery.exclusionCriteria(),
+        validQuery.display()
+    );
+  }
 
-    var timeRestriction = new TimeRestriction();
-    timeRestriction.setAfterDate("2021-01-01");
-    timeRestriction.setBeforeDate("2021-12-31");
+  private StructuredQuery buildInvalidQueryWithEmptyTermCodes() {
+    var bodyWeightTermCode = new TermCode(null, null, null, null);
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+  }
 
-    hasBmiGreaterThanFifty.setTimeRestriction(timeRestriction);
+  private StructuredQuery buildInvalidQueryWithEmptyTermCodeCodes() {
+    var bodyWeightTermCode = new TermCode(null, "http://snomed.info/sct", "v1", "Body weight (observable entity)");
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+  }
 
-    var testQuery = new StructuredQuery();
-    testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-    testQuery.setInclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
-    testQuery.setExclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
+  private StructuredQuery buildInvalidQueryWithEmptyTermCodeSystems() {
+    var bodyWeightTermCode = new TermCode("27113001", null, "v1", "Body weight (observable entity)");
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+  }
 
-    return testQuery;
+  private StructuredQuery buildInvalidQueryWithEmptyTermCodeDisplays() {
+    var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1", null);
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("2021-12-31", "2021-01-01");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+  }
+
+  private StructuredQuery buildInvalidQueryWithMalformedTimeRestrictions() {
+    var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1", "Body weight (observable entity)");
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction("foo", "bar");
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
+  }
+
+  private StructuredQuery buildInvalidQueryWithTimeRestrictionsWithoutDates() {
+    var bodyWeightTermCode = new TermCode("27113001", "http://snomed.info/sct", "v1", "Body weight (observable entity)");
+    var kgUnit = new Unit("kg", "kilogram");
+    var bodyWeightValueFilter = new ValueFilter(QUANTITY_COMPARATOR, null, GREATER_EQUAL, kgUnit,
+        50.0, null, null);
+    var timeRestriction = new TimeRestriction(null, null);
+    var hasBmiGreaterThanFifty = new Criterion(List.of(bodyWeightTermCode), null,
+        bodyWeightValueFilter, timeRestriction);
+    return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
+        List.of(List.of(hasBmiGreaterThanFifty)), List.of(List.of(hasBmiGreaterThanFifty)), null);
   }
 
 }

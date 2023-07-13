@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "classpath://de/numcodex/feasibility_gui_backend/query/api/validation/query-template-schema.json",
+  "title": "Query Template",
+  "description": "A structured query, along with few more metadata to be persisted in the database",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": "string",
+      "description": "The 'name' of the query. Is assigned by the user via GUI."
+    },
+    "comment": {
+      "type": "string",
+      "description": "A more detailed information about the query. Is also assigned by the user via GUI."
+    },
+    "content": {
+      "$ref": "query-schema.json#queryDefinition",
+      "description": "The structured query itself."
+    },
+    "lastModified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The timestamp of the last modification of the query. If it has not been modified, this is the time of creation."
+    },
+    "createdBy": {
+      "type": "string",
+      "description": "The user id in the authentication service of the user that created the query."
+    },
+    "invalidTerms": {
+      "type": "array",
+      "description": "An array of Terms that did not pass validation. This is only filled when reading from the backend.",
+      "items": {
+        "$ref": "query-schema.json#/definitions/termCode"
+      }
+    }
+  },
+  "required": [
+    "label",
+    "content"
+  ]
+}

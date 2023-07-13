@@ -1,7 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.result;
 
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
-import java.time.Instant;
 import java.util.Objects;
 
 /**

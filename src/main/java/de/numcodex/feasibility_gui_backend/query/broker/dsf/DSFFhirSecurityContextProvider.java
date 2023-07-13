@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 /**
  * An entity that can provide a security context for communicating with a FHIR server.
@@ -42,14 +43,23 @@ public class DSFFhirSecurityContextProvider implements FhirSecurityContextProvid
             }
             try (FileInputStream inStream = new FileInputStream(certificateFile)) {
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                Certificate cert = cf.generateCertificate(inStream);
 
-                localTrustStore.setCertificateEntry("zars", cert);
+                for (Certificate cert : cf.generateCertificates(inStream)) {
+                    localTrustStore.setCertificateEntry(getCertificateName(cert), cert);
+                }
             }
 
             return new FhirSecurityContext(localKeyStore, localTrustStore, keyStorePassword);
         } catch (Exception e) {
             throw new FhirSecurityContextProvisionException(e);
+        }
+    }
+
+    private String getCertificateName(Certificate cert) {
+        if (cert instanceof X509Certificate) {
+            return ((X509Certificate) cert).getSubjectX500Principal().getName();
+        } else {
+            return "cert" + cert.hashCode();
         }
     }
 }

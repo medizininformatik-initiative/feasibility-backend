@@ -81,8 +81,7 @@ public class QueryDispatcherIT {
 
     @Test
     public void testEnqueueNewQuery_QueryContentGetsCreatedIfNotAlreadyPresent() throws JsonProcessingException {
-        var otherQuery = new StructuredQuery();
-        otherQuery.setVersion(URI.create("https://to_be_decided.com/draft-2/schema#"));
+        var otherQuery = new StructuredQuery(URI.create("https://to_be_decided.com/draft-2/schema#"), null, null, null);
         var serializedOtherQuery = jsonUtil.writeValueAsString(otherQuery);
         var serializedOtherQueryHash = queryHashCalculator.calculateSerializedQueryBodyHash(serializedOtherQuery);
 
@@ -91,7 +90,7 @@ public class QueryDispatcherIT {
         queryContentRepository.save(otherQueryContent);
 
 
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         var serializedTestQuery = jsonUtil.writeValueAsString(testQuery);
         var serializedTestQueryHash = queryHashCalculator.calculateSerializedQueryBodyHash(serializedTestQuery);
 
@@ -105,7 +104,7 @@ public class QueryDispatcherIT {
 
     @Test
     public void testEnqueueNewQuery_QueryContentGetsReusedIfAlreadyPresent() throws JsonProcessingException {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         var serializedTestQuery = jsonUtil.writeValueAsString(testQuery);
         var serializedTestQueryHash = queryHashCalculator.calculateSerializedQueryBodyHash(serializedTestQuery);
 
@@ -119,7 +118,7 @@ public class QueryDispatcherIT {
 
     @Test
     public void testEnqueueNewQuery() throws JsonProcessingException {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
         var serializedTestQuery = jsonUtil.writeValueAsString(testQuery);
         var serializedTestQueryHash = queryHashCalculator.calculateSerializedQueryBodyHash(serializedTestQuery);
 
@@ -144,7 +143,7 @@ public class QueryDispatcherIT {
 
     @Test
     public void testDispatchEnqueuedQuery() {
-        var testQuery = new StructuredQuery();
+        var testQuery = new StructuredQuery(null, null, null, null);
 
         var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
 

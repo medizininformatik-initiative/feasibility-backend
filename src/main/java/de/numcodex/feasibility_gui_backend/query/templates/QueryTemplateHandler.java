@@ -42,7 +42,7 @@ public class QueryTemplateHandler {
   public Long storeTemplate(QueryTemplate queryTemplateApi, String userId)
       throws QueryTemplateException {
 
-    Long queryId = storeNewQuery(queryTemplateApi.getContent(), userId);
+    Long queryId = storeNewQuery(queryTemplateApi.content(), userId);
     de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate
         = convertApiToPersistence(queryTemplateApi, queryId);
     queryTemplate = queryTemplateRepository.save(queryTemplate);
@@ -98,10 +98,10 @@ public class QueryTemplateHandler {
     de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate out = new de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate();
 
     out.setQuery(queryRepository.getReferenceById(queryId));
-    out.setComment(in.getComment());
-    out.setLabel(in.getLabel());
-    if (in.getLastModified() != null) {
-      out.setLastModified(Timestamp.valueOf(in.getLastModified()));
+    out.setComment(in.comment());
+    out.setLabel(in.label());
+    if (in.lastModified() != null) {
+      out.setLastModified(Timestamp.valueOf(in.lastModified()));
     }
     return out;
   }
@@ -109,15 +109,16 @@ public class QueryTemplateHandler {
   public QueryTemplate convertPersistenceToApi(
       de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate in)
       throws JsonProcessingException {
-    QueryTemplate out = new QueryTemplate();
 
     ObjectMapper jsonUtil = new ObjectMapper();
-    out.setComment(in.getComment());
-    out.setLabel(in.getLabel());
-    out.setContent(jsonUtil.readValue(in.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class));
-    out.setLastModified(in.getLastModified().toString());
-    out.setCreatedBy(in.getQuery().getCreatedBy());
-    out.setId(in.getId());
+    QueryTemplate out = new QueryTemplate(in.getId(),
+        jsonUtil.readValue(in.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class),
+        in.getLabel(),
+        in.getComment(),
+        in.getLastModified().toString(),
+        in.getQuery().getCreatedBy(),
+        null,
+        null);
     return out;
   }
 }

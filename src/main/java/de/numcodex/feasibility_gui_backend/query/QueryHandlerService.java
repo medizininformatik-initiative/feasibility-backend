@@ -146,23 +146,20 @@ public class QueryHandlerService {
     private Query convertQueryToApi(de.numcodex.feasibility_gui_backend.query.persistence.Query in,
                                     Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQuery)
             throws JsonProcessingException {
-        Query out = new Query();
-        out.setId(in.getId());
-        out.setContent(
-                jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class));
+
         if (savedQuery.isPresent()) {
-            out.setLabel(savedQuery.get().getLabel());
-            out.setComment(savedQuery.get().getComment());
+            return new Query(in.getId(), jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class), savedQuery.get().getLabel(), savedQuery.get().getComment(), null);
+        } else {
+            return new Query(in.getId(), jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class),null, null, null);
         }
-        return out;
     }
 
     private de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery convertSavedQueryApiToPersistence(
             SavedQuery in, Long queryId) {
         var out = new de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery();
         out.setQuery(queryRepository.getReferenceById(queryId));
-        out.setComment(in.getComment());
-        out.setLabel(in.getLabel());
+        out.setComment(in.comment());
+        out.setLabel(in.label());
         return out;
     }
 

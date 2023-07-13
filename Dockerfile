@@ -6,6 +6,12 @@ WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology
 
+RUN addgroup --system feasibility && adduser --system feasibility --ingroup feasibility
+RUN mkdir logging
+RUN chown -R feasibility:feasibility /opt/codex-feasibility-backend
+
+USER feasibility:feasibility
+
 ARG VERSION=2.1.0
 ENV APP_VERSION=${VERSION}
 ENV FEASIBILITY_DATABASE_HOST="feasibility-network"
