@@ -147,8 +147,6 @@ public class QueryDispatcherIT {
 
         var queryId = assertDoesNotThrow(() -> queryDispatcher.enqueueNewQuery(testQuery, "test"));
 
-        var queries = queryRepository.findAll();
-
         StepVerifier.create(queryDispatcher.dispatchEnqueuedQuery(queryId))
                 .verifyComplete();
 
