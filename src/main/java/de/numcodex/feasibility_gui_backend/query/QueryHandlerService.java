@@ -16,6 +16,7 @@ import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateExceptio
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -117,7 +118,10 @@ public class QueryHandlerService {
         return queryTemplateHandler.storeTemplate(queryTemplate, userId);
     }
 
-    public Long saveQuery(Long queryId, SavedQuery savedQueryApi) {
+    public Long saveQuery(Long queryId, String userId, SavedQuery savedQueryApi) {
+        if (savedQueryRepository.existsSavedQueryByLabelAndUserId(savedQueryApi.label(), userId)) {
+            throw new DataIntegrityViolationException(String.format("User %s already has a saved query named %s", userId, savedQueryApi.label()));
+        }
         de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery savedQuery = convertSavedQueryApiToPersistence(savedQueryApi, queryId);
         return savedQueryRepository.save(savedQuery).getId();
     }
