@@ -31,9 +31,20 @@ public class StructuredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_validQueryPasses() {
-        var termCode = new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
-        var inclusionCriterion = new Criterion(List.of(termCode), null, null, null);
-        var testQuery = new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"), List.of(List.of(inclusionCriterion)), List.of(), "foo");
+        var termCode = TermCode.builder()
+                .code("LL2191-6")
+                .system("http://loinc.org")
+                .display("Geschlecht")
+                .build();
+        var inclusionCriterion = Criterion.builder()
+                .termCodes(List.of(termCode))
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+                .exclusionCriteria(List.of())
+                .display("foo")
+                .build();
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testQuery, ctx));
         assertTrue(validationResult);
@@ -41,7 +52,7 @@ public class StructuredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_invalidQueryPasses() {
-        var testQuery = new StructuredQuery(null, null, null, null);
+        var testQuery = StructuredQuery.builder().build();
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testQuery, ctx));
         assertTrue(validationResult);
     }

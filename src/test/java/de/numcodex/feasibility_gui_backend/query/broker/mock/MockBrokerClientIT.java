@@ -34,14 +34,42 @@ public class MockBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "2", COMPLETED));
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "3", COMPLETED));
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "4", COMPLETED));
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "5", COMPLETED));
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("2")
+                        .status(COMPLETED)
+                        .build()
+        );
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("3")
+                        .status(COMPLETED)
+                        .build()
+        );
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("4")
+                        .status(COMPLETED)
+                        .build()
+        );
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("5")
+                        .status(COMPLETED)
+                        .build()
+        );
 
         assertEquals(4, client.getResultSiteIds(brokerQueryId).size());
         assertTrue(client.getResultFeasibility(brokerQueryId, "2") >= 10);
@@ -59,13 +87,41 @@ public class MockBrokerClientIT {
         client.publishQuery(brokerQueryId);
         client.closeQuery(brokerQueryId);
 
-        verify(statusListener, never()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "1", COMPLETED));
-        verify(statusListener, never()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "2", COMPLETED));
-        verify(statusListener, never()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "3", COMPLETED));
-        verify(statusListener, never()).onClientUpdate(TEST_BACKEND_QUERY_ID,
-                new QueryStatusUpdate(client, brokerQueryId, "4", COMPLETED));
+        verify(statusListener, never()).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("1")
+                        .status(COMPLETED)
+                        .build()
+        );
+        verify(statusListener, never()).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("2")
+                        .status(COMPLETED)
+                        .build()
+        );
+        verify(statusListener, never()).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("3")
+                        .status(COMPLETED)
+                        .build()
+        );
+        verify(statusListener, never()).onClientUpdate(
+                TEST_BACKEND_QUERY_ID,
+                QueryStatusUpdate.builder()
+                        .source(client)
+                        .brokerQueryId(brokerQueryId)
+                        .brokerSiteId("4")
+                        .status(COMPLETED)
+                        .build()
+        );
     }
 }

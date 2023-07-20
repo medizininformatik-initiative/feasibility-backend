@@ -111,14 +111,13 @@ public class QueryTemplateHandler {
       throws JsonProcessingException {
 
     ObjectMapper jsonUtil = new ObjectMapper();
-    QueryTemplate out = new QueryTemplate(in.getId(),
-        jsonUtil.readValue(in.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class),
-        in.getLabel(),
-        in.getComment(),
-        in.getLastModified().toString(),
-        in.getQuery().getCreatedBy(),
-        null,
-        null);
-    return out;
+    return QueryTemplate.builder()
+            .id(in.getId())
+            .content(jsonUtil.readValue(in.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class))
+            .label(in.getLabel())
+            .comment(in.getComment())
+            .lastModified(in.getLastModified().toString())
+            .createdBy(in.getQuery().getCreatedBy())
+            .build();
   }
 }

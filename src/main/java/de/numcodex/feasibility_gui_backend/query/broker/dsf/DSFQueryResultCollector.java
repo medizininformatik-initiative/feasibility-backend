@@ -77,8 +77,12 @@ class DSFQueryResultCollector implements QueryResultCollector {
         for (Entry<DSFBrokerClient, QueryStatusListener> listener : listeners.entrySet()) {
             var broker = listener.getKey();
             var statusListener = listener.getValue();
-            var statusUpdate = new QueryStatusUpdate(broker, result.getQueryId(), result.getSiteId(),
-                    QueryStatus.COMPLETED);
+            var statusUpdate = QueryStatusUpdate.builder()
+                    .source(broker)
+                    .brokerQueryId(result.getQueryId())
+                    .brokerSiteId(result.getSiteId())
+                    .status(QueryStatus.COMPLETED)
+                    .build();
             var associatedBackendQueryId = broker.getBackendQueryId(result.getQueryId());
 
             statusListener.onClientUpdate(associatedBackendQueryId, statusUpdate);

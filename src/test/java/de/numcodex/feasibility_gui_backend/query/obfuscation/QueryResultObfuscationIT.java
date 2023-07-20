@@ -64,12 +64,23 @@ public class QueryResultObfuscationIT {
         var testSite = "A";
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
+        resultService.addResultLine(
+                testQueryA.getId(),
+                ResultLine.builder()
+                        .siteName(testSite)
+                        .type(SUCCESS)
+                        .result(10L)
+                        .build()
+        );
 
-        var testSiteAResult1 = new ResultLine(testSite, SUCCESS, 10L);
-        resultService.addResultLine(testQueryA.getId(), testSiteAResult1);
-
-        var testSiteAResult2 = new ResultLine(testSite, SUCCESS, 20L);
-        resultService.addResultLine(testQueryB.getId(), testSiteAResult2);
+        resultService.addResultLine(
+                testQueryB.getId(),
+                ResultLine.builder()
+                        .siteName(testSite)
+                        .type(SUCCESS)
+                        .result(20L)
+                        .build()
+        );
 
         var tokenTestSiteAResult1 = queryResultObfuscator.tokenizeSiteName(testQueryA.getId(), testSite);
         var tokenTestSiteAResult2 = queryResultObfuscator.tokenizeSiteName(testQueryB.getId(), testSite);
@@ -93,9 +104,13 @@ public class QueryResultObfuscationIT {
         var testSite = "A";
 
         // Dispatch entries are left out for brevity. Also, they do not matter for this test scenario.
-
-        var testSiteAResult = new ResultLine(testSite, SUCCESS, 10L);
-        resultService.addResultLine(testQueryA.getId(), testSiteAResult);
+        resultService.addResultLine(
+                testQueryA.getId(),
+                ResultLine.builder()
+                        .siteName(testSite)
+                        .type(SUCCESS)
+                        .result(10L)
+                        .build());
 
         var tokenTestSiteAResult1 = queryResultObfuscator.tokenizeSiteName(testQueryA.getId(), testSite);
         var tokenTestSiteAResult2 = queryResultObfuscator.tokenizeSiteName(testQueryA.getId(), testSite);

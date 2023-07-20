@@ -79,7 +79,7 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(new StructuredQuery(null, null, null, null)));
+        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(StructuredQuery.builder().build()));
         testQuery.setQueryContent(testQueryContent);
 
         doReturn(Optional.of(testQuery)).when(queryRepository).findById(testQueryId);
@@ -98,7 +98,7 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var structuredQuery = new StructuredQuery(null, null, null, null);
+        var structuredQuery = StructuredQuery.builder().build();
         var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(structuredQuery));
         testQuery.setQueryContent(testQueryContent);
 
@@ -119,7 +119,7 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var structuredQuery = new StructuredQuery(null, null, null, null);
+        var structuredQuery = StructuredQuery.builder().build();
         var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(structuredQuery));
         testQuery.setQueryContent(testQueryContent);
 
@@ -143,7 +143,10 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var structuredQuery = new StructuredQuery(URI.create("https://to.be.decided/schema"), null , null, "Test");
+        var structuredQuery = StructuredQuery.builder()
+                .version(URI.create("https://to.be.decided/schema"))
+                .display("Test")
+                .build();
 
         var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(structuredQuery));
         testQuery.setQueryContent(testQueryContent);
@@ -173,7 +176,7 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(new StructuredQuery(null, null, null, null)));
+        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(StructuredQuery.builder().build()));
         testQuery.setQueryContent(testQueryContent);
 
         doReturn(Optional.of(testQuery)).when(queryRepository).findById(testQueryId);
@@ -200,7 +203,7 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(new StructuredQuery(null, null, null, null)));
+        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(StructuredQuery.builder().build()));
         testQuery.setQueryContent(testQueryContent);
 
         doReturn(Optional.of(testQuery)).when(queryRepository).findById(testQueryId);
@@ -227,7 +230,7 @@ public class QueryDispatcherTest {
         var testQueryId = 99999L;
         var testQuery = new Query();
         testQuery.setId(testQueryId);
-        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(new StructuredQuery(null, null, null, null)));
+        var testQueryContent = new QueryContent(jsonUtil.writeValueAsString(StructuredQuery.builder().build()));
         testQuery.setQueryContent(testQueryContent);
 
         doReturn(Optional.of(testQuery)).when(queryRepository).findById(testQueryId);

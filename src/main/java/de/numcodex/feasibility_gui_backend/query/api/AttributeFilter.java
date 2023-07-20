@@ -6,11 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Unit;
+import lombok.Builder;
+
 import java.util.List;
 import java.util.Objects;
 
 
 @JsonInclude(Include.NON_NULL)
+@Builder
 public record AttributeFilter(
     @JsonProperty(value = "type", required = true) ValueFilterType type,
     @JsonProperty("selectedConcepts") List<TermCode> selectedConcepts,

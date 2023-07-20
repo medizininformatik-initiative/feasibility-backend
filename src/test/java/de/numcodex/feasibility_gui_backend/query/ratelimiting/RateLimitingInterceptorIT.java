@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -314,9 +315,21 @@ public class RateLimitingInterceptorIT {
       queryResultLines = List.of();
     } else {
       var resultLines = List.of(
-          new ResultLine("A", ResultType.SUCCESS, 123L),
-          new ResultLine("B", ResultType.SUCCESS, 456L),
-          new ResultLine("C", ResultType.SUCCESS, 789L)
+              ResultLine.builder()
+                      .siteName("A")
+                      .type(SUCCESS)
+                      .result(123L)
+                      .build(),
+              ResultLine.builder()
+                      .siteName("B")
+                      .type(SUCCESS)
+                      .result(456L)
+                      .build(),
+              ResultLine.builder()
+                      .siteName("C")
+                      .type(SUCCESS)
+                      .result(789L)
+                      .build()
       );
       queryResultLines = resultLines.stream()
           .map(ssr -> QueryResultLine.builder()

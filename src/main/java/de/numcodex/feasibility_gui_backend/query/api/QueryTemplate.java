@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.validation.QueryTemplateValidation;
+import lombok.Builder;
+
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 @QueryTemplateValidation
+@Builder
 public record QueryTemplate(
     @JsonProperty long id,
     @JsonProperty StructuredQuery content,

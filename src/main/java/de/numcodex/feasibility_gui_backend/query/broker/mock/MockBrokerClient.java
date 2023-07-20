@@ -82,12 +82,22 @@ public class MockBrokerClient implements BrokerClient {
                     try {
                         Thread.sleep(Math.round(2000 + 6000 * Math.random()));
                         query.registerSiteResults(siteId, (int) Math.round(10 + 500 * Math.random()));
-                        var statusUpdate = new QueryStatusUpdate(this, brokerQueryId, siteId, COMPLETED);
+                        var statusUpdate = QueryStatusUpdate.builder()
+                                .source(this)
+                                .brokerQueryId(brokerQueryId)
+                                .brokerSiteId(siteId)
+                                .status(COMPLETED)
+                                .build();
                         var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(brokerQueryId);
                         listeners.forEach(l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate));
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
-                        var statusUpdate = new QueryStatusUpdate(this, brokerQueryId, siteId, FAILED);
+                        var statusUpdate = QueryStatusUpdate.builder()
+                                .source(this)
+                                .brokerQueryId(brokerQueryId)
+                                .brokerSiteId(siteId)
+                                .status(FAILED)
+                                .build();
                         var associatedBackendQueryId = brokerToBackendQueryIdMapping.get(brokerQueryId);
                         listeners.forEach(l -> l.onClientUpdate(associatedBackendQueryId, statusUpdate));
                     }
