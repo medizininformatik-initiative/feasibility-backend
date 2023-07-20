@@ -1,0 +1,79 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Organization",
+        "id": "a4a8d190-7957-4b2c-bed5-fbcd48c9ae99",
+        "name": "Foobar",
+        "address": [
+          {
+            "city": "Foo City",
+            "postalCode": "12345",
+            "country": "Germany"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/a4a8d190-7957-4b2c-bed5-fbcd48c9ae99"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "50d830df-9fc1-4d6c-a499-875bcf52bf94",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://fhir.de/CodeSystem/identifier-type-de-basis",
+                  "code": "GKV"
+                }
+              ]
+            },
+            "system": "http://fhir.de/IdSystem/gkv/kvid-10",
+            "value": "6368525657",
+            "assigner": {
+              "reference": "Organization/a4a8d190-7957-4b2c-bed5-fbcd48c9ae99",
+              "display": "Foobar"
+            }
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Mustermann",
+            "given": [
+              "Maximilian"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1970-01-01",
+        "address": [
+          {
+            "type": "physical",
+            "line": [
+              "Musterstr. 1a"
+            ],
+            "city": "Musterstadt",
+            "postalCode": "12345",
+            "country": "DE"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/50d830df-9fc1-4d6c-a499-875bcf52bf94"
+      }
+    }
+  ]
+}

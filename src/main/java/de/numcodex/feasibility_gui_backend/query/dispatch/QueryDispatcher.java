@@ -66,6 +66,7 @@ public class QueryDispatcher {
      * @throws QueryDispatchException If an error occurs while enqueueing the query.
      */
     public Long enqueueNewQuery(StructuredQuery query, String userId) throws QueryDispatchException {
+        log.info("try to enqueue new query");
         var querySerialized = serializedStructuredQuery(query);
 
         var queryHash = queryHashCalculator.calculateSerializedQueryBodyHash(querySerialized);
