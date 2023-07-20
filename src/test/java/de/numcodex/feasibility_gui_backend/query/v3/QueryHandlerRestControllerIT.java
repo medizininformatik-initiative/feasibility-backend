@@ -436,6 +436,16 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetDetailedObfuscatedResult_failsOnWrongAuthorWith403() throws Exception {
+        doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
+
+        mockMvc.perform(get(URI.create("/api/v3/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     public void testGetQueryContent_succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidStructuredQuery()).when(queryHandlerService).getQueryContent(any(Long.class));
