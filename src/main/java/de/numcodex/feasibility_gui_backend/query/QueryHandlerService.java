@@ -8,8 +8,8 @@ import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
-import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryResultObfuscator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import de.numcodex.feasibility_gui_backend.query.result.RandomSiteNameGenerator;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -56,9 +57,6 @@ public class QueryHandlerService {
     private final SavedQueryRepository savedQueryRepository;
 
     @NonNull
-    private final QueryResultObfuscator queryResultObfuscator;
-
-    @NonNull
     private ObjectMapper jsonUtil;
 
     public Mono<Long> runQuery(StructuredQuery structuredQuery, String userId) {
@@ -79,7 +77,7 @@ public class QueryHandlerService {
         if (resultDetail != ResultDetail.SUMMARY) {
             resultLines = singleSiteResults.stream()
                 .map(ssr -> QueryResultLine.builder()
-                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED ? queryResultObfuscator.tokenizeSiteName(queryId, ssr.siteName()) : ssr.siteName())
+                    .siteName(resultDetail == ResultDetail.DETAILED_OBFUSCATED ? RandomSiteNameGenerator.generateRandomSiteName() : ssr.siteName())
                     .numberOfPatients(ssr.result())
                     .build())
                 .toList();

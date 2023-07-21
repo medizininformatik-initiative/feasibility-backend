@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 The full changelog can be found [here](https://todo).
 
+## [3.1.3] - 2023-07-13
+
+### Changed
+- Obfuscated site ids are no longer consistent over multiple requests of the same result
+### Security
+- Update Spring Boot to 3.1.1
+
 ## [3.1.2] - 2023-07-11
 
 ### Security

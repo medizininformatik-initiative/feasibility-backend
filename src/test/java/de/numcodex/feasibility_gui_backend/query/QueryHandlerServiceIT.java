@@ -6,7 +6,6 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.obfuscation.QueryObfuscationSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
@@ -40,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         QueryDispatchSpringConfig.class,
         QueryCollectSpringConfig.class,
         QueryHandlerService.class,
-        QueryObfuscationSpringConfig.class,
         QueryTemplateHandler.class,
         ResultServiceSpringConfig.class
 })
