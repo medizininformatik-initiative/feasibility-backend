@@ -10,6 +10,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.aktin.broker.client2.BrokerAdmin2;
@@ -119,16 +121,21 @@ public class ResultService {
   /**
    * Holds all submitted {@link ResultLine results} from sites to a query.
    */
+  @Builder
   private record QueryResult(Map<String, ResultLine> resultsBySite) {
 
-    private static final QueryResult EMPTY = new QueryResult(Map.of());
+    private static final QueryResult EMPTY = QueryResult.builder()
+            .resultsBySite(Map.of())
+            .build();
 
     private QueryResult {
       resultsBySite = Map.copyOf(resultsBySite);
     }
 
     private static QueryResult ofResultLine(ResultLine resultLine) {
-      return new QueryResult(Map.of(resultLine.siteName(), resultLine));
+      return QueryResult.builder()
+              .resultsBySite(Map.of(resultLine.siteName(), resultLine))
+              .build();
     }
 
     /**
@@ -148,7 +155,9 @@ public class ResultService {
       Map<String, ResultLine> mergedResultsBySite = new HashMap<>(
           resultsBySite);
       other.resultsBySite.forEach(mergedResultsBySite::putIfAbsent);
-      return new QueryResult(mergedResultsBySite);
+      return QueryResult.builder()
+              .resultsBySite(mergedResultsBySite)
+              .build();
     }
   }
 }

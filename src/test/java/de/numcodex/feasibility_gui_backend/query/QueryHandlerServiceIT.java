@@ -75,7 +75,10 @@ public class QueryHandlerServiceIT {
 
     @Test
     public void testRunQuery() {
-        var testStructuredQuery = new StructuredQuery(null, List.of(List.of()), List.of(List.of()), null);
+        var testStructuredQuery = StructuredQuery.builder()
+                .inclusionCriteria(List.of(List.of()))
+                .exclusionCriteria(List.of(List.of()))
+                .build();
 
         queryHandlerService.runQuery(testStructuredQuery, "test").block();
 
@@ -101,7 +104,13 @@ public class QueryHandlerServiceIT {
         var query = new Query();
         query.setCreatedBy(CREATOR);
         var queryId = queryRepository.save(query).getId();
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, ERROR, 0L));
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_1)
+                        .type(ERROR)
+                        .result(0L)
+                        .build()
+        );
 
         var queryResult = queryHandlerService.getQueryResult(queryId, resultDetail);
 
@@ -113,8 +122,19 @@ public class QueryHandlerServiceIT {
         var query = new Query();
         query.setCreatedBy(CREATOR);
         var queryId = queryRepository.save(query).getId();
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_1)
+                        .type(SUCCESS)
+                        .result(10L)
+                        .build());
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_2)
+                        .type(SUCCESS)
+                        .result(20L)
+                        .build()
+        );
 
         var queryResult = queryHandlerService.getQueryResult(queryId, SUMMARY);
 
@@ -127,8 +147,20 @@ public class QueryHandlerServiceIT {
         var query = new Query();
         query.setCreatedBy(CREATOR);
         var queryId = queryRepository.save(query).getId();
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_1)
+                        .type(SUCCESS)
+                        .result(10L)
+                        .build()
+        );
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_2)
+                        .type(SUCCESS)
+                        .result(20L)
+                        .build()
+        );
 
         var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED_OBFUSCATED);
 
@@ -145,8 +177,20 @@ public class QueryHandlerServiceIT {
         var query = new Query();
         query.setCreatedBy(CREATOR);
         var queryId = queryRepository.save(query).getId();
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_1, SUCCESS, 10L));
-        resultService.addResultLine(query.getId(), new ResultLine(SITE_NAME_2, SUCCESS, 20L));
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_1)
+                        .type(SUCCESS)
+                        .result(10L)
+                        .build()
+        );
+        resultService.addResultLine(query.getId(),
+                ResultLine.builder()
+                        .siteName(SITE_NAME_2)
+                        .type(SUCCESS)
+                        .result(20L)
+                        .build()
+        );
 
         var queryResult = queryHandlerService.getQueryResult(queryId, DETAILED);
 

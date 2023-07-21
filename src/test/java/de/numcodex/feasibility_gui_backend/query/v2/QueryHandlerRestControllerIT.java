@@ -43,6 +43,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.List;
 
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -108,7 +109,7 @@ public class QueryHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
-        var testQuery = new StructuredQuery(null, null, null, null);
+        var testQuery = StructuredQuery.builder().build();
 
         mockMvc.perform(post(URI.create("/api/v2/query")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -190,7 +191,7 @@ public class QueryHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
-        var testQuery = new StructuredQuery(null, null, null, null);
+        var testQuery = StructuredQuery.builder().build();
 
         mockMvc.perform(post(URI.create("/api/v2/query/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -329,8 +330,10 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     void testSaveQuery_Succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
-
-        var savedQuery = new SavedQuery("foo", "bar");
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .build();
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -343,7 +346,10 @@ public class QueryHandlerRestControllerIT {
     void testSaveQuery_failsWith404OnAuthorForQueryNotFound() throws Exception {
         doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
 
-        var savedQuery = new SavedQuery("foo", "bar");
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .build();
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -356,7 +362,10 @@ public class QueryHandlerRestControllerIT {
     void testSaveQuery_failsWith403OnAuthorMismatch() throws Exception {
         doReturn("SomeOtherUser").when(queryHandlerService).getAuthorId(any(Long.class));
 
-        var savedQuery = new SavedQuery("foo", "bar");
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .build();
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -370,7 +379,10 @@ public class QueryHandlerRestControllerIT {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doThrow(DataIntegrityViolationException.class).when(queryHandlerService).saveQuery(any(Long.class), any(SavedQuery.class));
 
-        var savedQuery = new SavedQuery("foo", "bar");
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .build();
 
         mockMvc.perform(post(URI.create("/api/v2/query/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -462,10 +474,21 @@ public class QueryHandlerRestControllerIT {
 
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
-        var termCode = new TermCode("LL2191-6", "http://loinc.org", null, "Geschlecht");
-        var inclusionCriterion = new Criterion(List.of(termCode), List.of(), null, null);
-        return new StructuredQuery(URI.create("http://to_be_decided.com/draft-2/schema#"),
-                List.of(List.of(inclusionCriterion)), List.of(), "foo");
+        var termCode = TermCode.builder()
+                .code("LL2191-6")
+                .system("http://loinc.org")
+                .display("Geschlecht")
+                .build();
+        var inclusionCriterion = Criterion.builder()
+                .termCodes(List.of(termCode))
+                .attributeFilters(List.of())
+                .build();
+        return StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+                .exclusionCriteria(List.of())
+                .display("foo")
+                .build();
     }
 
     @NotNull
@@ -489,12 +512,22 @@ public class QueryHandlerRestControllerIT {
 
     @NotNull
     private static QueryListEntry createValidQueryListEntry(long id) {
-        return new QueryListEntry(id, "abc", new Timestamp(new java.util.Date().getTime()));
+        return QueryListEntry.builder()
+                .id(id)
+                .label("abc")
+                .createdAt(new Timestamp(new java.util.Date().getTime()))
+                .build();
     }
 
     @NotNull
     private static Query createValidApiQuery(long id) {
-        return new Query(id, createValidStructuredQuery(), "test", "test", List.of());
+        return Query.builder()
+                .id(id)
+                .content(createValidStructuredQuery())
+                .label("test")
+                .comment("test")
+                .invalidTerms(List.of())
+                .build();
     }
 
     @NotNull
@@ -505,9 +538,21 @@ public class QueryHandlerRestControllerIT {
             queryResultLines = List.of();
         } else {
             var resultLines = List.of(
-                    new ResultLine("A", ResultType.SUCCESS, 123L),
-                    new ResultLine("B", ResultType.SUCCESS, 456L),
-                    new ResultLine("C", ResultType.SUCCESS, 789L)
+                    ResultLine.builder()
+                            .siteName("A")
+                            .type(SUCCESS)
+                            .result(123L)
+                            .build(),
+                    ResultLine.builder()
+                            .siteName("B")
+                            .type(SUCCESS)
+                            .result(456L)
+                            .build(),
+                    ResultLine.builder()
+                            .siteName("C")
+                            .type(SUCCESS)
+                            .result(789L)
+                            .build()
             );
             queryResultLines = resultLines.stream()
                     .map(ssr -> QueryResultLine.builder()

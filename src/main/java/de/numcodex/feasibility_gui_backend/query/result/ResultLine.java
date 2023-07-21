@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query.result;
 
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
+import lombok.Builder;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,7 @@ import java.util.Objects;
  * implementations. It holds information about the site name (as submitted by the
  * {@code BrokerClient}, the {@link ResultType} (success or error)and the number of patients.
  */
+@Builder
 public record ResultLine(String siteName, ResultType type, long result) {
 
   public ResultLine {

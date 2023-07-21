@@ -116,7 +116,9 @@ public class QueryHandlerRestController {
         keycloakPowerRole);
 
     if (!isPowerUser && userBlacklistEntry.isPresent()) {
-      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER));
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER))
+              .build();
       return Mono.just(
           new ResponseEntity<>(issues,
               HttpStatus.FORBIDDEN));
@@ -133,7 +135,9 @@ public class QueryHandlerRestController {
       userBlacklist.setUserId(userId);
       userBlacklistRepository.save(userBlacklist);
 
-      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER));
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.USER_BLACKLISTED_NOT_POWER_USER))
+              .build();
       return Mono.just(
           new ResponseEntity<>(issues,
               HttpStatus.FORBIDDEN));
@@ -145,7 +149,9 @@ public class QueryHandlerRestController {
           quotaSoftCreateAmount - 1, quotaSoftCreateIntervalMinutes);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
-      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.QUOTA_EXCEEDED));
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.QUOTA_EXCEEDED))
+              .build();
       return Mono.just(
           new ResponseEntity<>(issues, httpHeaders,
               HttpStatus.TOO_MANY_REQUESTS));
@@ -225,10 +231,14 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var query = queryHandlerService.getQuery(queryId);
-    List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
-        query.content());
-    var queryWithInvalidTerms = new Query(query.id(), query.content(), query.label(),
-        query.comment(), invalidTermCodes);
+    List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(query.content());
+    var queryWithInvalidTerms = Query.builder()
+            .id(query.id())
+            .content(query.content())
+            .label(query.label())
+            .comment(query.comment())
+            .invalidTerms(invalidTermCodes)
+            .build();
     return new ResponseEntity<>(queryWithInvalidTerms, HttpStatus.OK);
   }
 
@@ -244,13 +254,17 @@ public class QueryHandlerRestController {
         ResultDetail.DETAILED_OBFUSCATED);
 
     if (queryResult.totalNumberOfPatients() < privacyThresholdResults) {
-      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE));
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE))
+              .build();
       return new ResponseEntity<>(issues,
           HttpStatus.OK);
     }
     HttpHeaders headers = new HttpHeaders();
     if (queryResult.resultLines().size() < privacyThresholdSites) {
-      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES));
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES))
+              .build();
       return new ResponseEntity<>(
           issues,
           HttpStatus.OK);
@@ -287,7 +301,9 @@ public class QueryHandlerRestController {
         ResultDetail.SUMMARY);
 
     if (queryResult.totalNumberOfPatients() < privacyThresholdResults) {
-      FeasibilityIssues issues = new FeasibilityIssues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE));
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SIZE))
+              .build();
       return new ResponseEntity<>(
           issues,
           HttpStatus.OK);

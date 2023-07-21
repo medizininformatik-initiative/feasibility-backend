@@ -1,6 +1,7 @@
 FROM eclipse-temurin:17-jre
 
-RUN apt update -yqq && apt upgrade -yqq
+RUN apt update -yqq && apt upgrade -yqq && \
+    apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/
 
 WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar

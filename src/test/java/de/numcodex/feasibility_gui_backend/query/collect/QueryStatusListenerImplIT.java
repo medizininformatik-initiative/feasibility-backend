@@ -78,8 +78,12 @@ class QueryStatusListenerImplIT {
             mode = EnumSource.Mode.EXCLUDE)
     public void testPersistResult_NonTerminatingStatusChangesDoesNotLeadToPersistedResult(QueryStatus status) {
         var fakeBrokerClient = new FakeBrokerClient();
-
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, status);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(fakeBrokerClient)
+                .brokerQueryId(BROKER_QUERY_ID)
+                .brokerSiteId(TEST_SITE_NAME)
+                .status(status)
+                .build();
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
         assertEquals(0, resultService.findSuccessfulByQuery(testBackendQueryId).size());
     }
@@ -89,7 +93,12 @@ class QueryStatusListenerImplIT {
         var fakeBrokerClient = new FakeBrokerClient();
         var unknownBrokerQueryId = "some_unknown_id";
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, unknownBrokerQueryId, TEST_SITE_NAME, COMPLETED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(fakeBrokerClient)
+                .brokerQueryId(unknownBrokerQueryId)
+                .brokerSiteId(TEST_SITE_NAME)
+                .status(COMPLETED)
+                .build();
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
         assertEquals(0, resultService.findSuccessfulByQuery(testBackendQueryId).size());
     }
@@ -98,7 +107,12 @@ class QueryStatusListenerImplIT {
     public void testPersistResult_CompleteStatusLeadsToPersistedResultWithMatchesInPopulation() {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, COMPLETED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(fakeBrokerClient)
+                .brokerQueryId(BROKER_QUERY_ID)
+                .brokerSiteId(TEST_SITE_NAME)
+                .status(COMPLETED)
+                .build();
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
         var registeredResults = resultService.findSuccessfulByQuery(testBackendQueryId);
@@ -112,7 +126,12 @@ class QueryStatusListenerImplIT {
     public void testPersistResult_FailedStatusLeadsToNoSuccessfulQueryResult() {
         var fakeBrokerClient = new FakeBrokerClient();
 
-        var statusUpdate = new QueryStatusUpdate(fakeBrokerClient, BROKER_QUERY_ID, TEST_SITE_NAME, FAILED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(fakeBrokerClient)
+                .brokerQueryId(BROKER_QUERY_ID)
+                .brokerSiteId(TEST_SITE_NAME)
+                .status(FAILED)
+                .build();
         assertDoesNotThrow(() -> queryStatusListener.onClientUpdate(testBackendQueryId, statusUpdate));
 
         var registeredResults = resultService.findSuccessfulByQuery(testBackendQueryId);

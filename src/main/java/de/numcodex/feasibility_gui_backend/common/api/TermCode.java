@@ -3,9 +3,12 @@ package de.numcodex.feasibility_gui_backend.common.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+
 import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
+@Builder
 public record TermCode(
     @JsonProperty("code") String code,
     @JsonProperty("system") String system,
