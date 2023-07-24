@@ -89,6 +89,9 @@ public class QueryHandlerRestController {
   @Value("${app.privacy.threshold.results}")
   private int privacyThresholdResults;
 
+  @Value("${app.privacy.threshold.sitesResult}")
+  private int privacyThresholdSitesResult;
+
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       RateLimitingService rateLimitingService,
       TermCodeValidation termCodeValidation,
@@ -264,13 +267,13 @@ public class QueryHandlerRestController {
           HttpStatus.OK);
     }
     HttpHeaders headers = new HttpHeaders();
-    if (queryResult.resultLines().size() < privacyThresholdSites) {
+    if (queryResult.resultLines().stream().filter(result -> result.numberOfPatients() > privacyThresholdSitesResult).count() < privacyThresholdSites) {
       var issues = FeasibilityIssues.builder()
               .issues(List.of(FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES))
               .build();
       return new ResponseEntity<>(
-          issues,
-          HttpStatus.OK);
+              issues,
+              HttpStatus.OK);
     }
     if (queryResult.resultLines().isEmpty()) {
       headers.add(HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY, "true");

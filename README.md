@@ -116,7 +116,8 @@ If the number of total results is below threshold, no result will be provided.
 | PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_AMOUNT                 | Amount of times a user can create a distinct detailed obfuscated result in the interval defined in _PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS _. |         | 10      |
 | PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS        | (see description above)                                                                                                                                       |         | 3       |
 | PRIVACY_THRESHOLD_RESULTS                                     | If the total number of results is below this number, return an empty result instead.                                                                          |         | 3       |
-| PRIVACY_THRESHOLD_SITES                                       | If the number of responding sites is below this number, only respond with a total amount of patients                                                          |         | 20      |
+| PRIVACY_THRESHOLD_SITES                                       | If the number of responding sites (above PRIVACY_THRESHOLD_SITES_RESULT) is below this number, only respond with a total amount of patients                   |         | 20      |
+| PRIVACY_THRESHOLD_SITES_RESULT                                | Any site that reports a number below this threshold is considered as non-responding (or zero) in regard to PRIVACY_THRESHOLD_SITES                            |         | 20      |
 
 ## Setting up Development
 

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -76,18 +77,18 @@ public class QueryTemplateHandlerRestControllerIT {
         long queryId = 1;
         doReturn(queryId).when(queryHandlerService).storeQueryTemplate(any(QueryTemplate.class), any(String.class));
 
-        mockMvc.perform(post(URI.create("/api/v3/query/template")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore(queryId))))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
-                .andExpect(header().string("location", "/api/v3/query/template/" + queryId));
+                .andExpect(header().string("location", PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryId));
     }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testStoreQueryTemplate_failsOnInvalidQueryTemplate() throws Exception {
-        mockMvc.perform(post(URI.create("/api/v3/query/template")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -98,7 +99,7 @@ public class QueryTemplateHandlerRestControllerIT {
     public void testStoreQueryTemplate_failsOnTemplateExceptionWith500() throws Exception {
         doThrow(QueryTemplateException.class).when(queryHandlerService).storeQueryTemplate(any(QueryTemplate.class), any(String.class));
 
-        mockMvc.perform(post(URI.create("/api/v3/query/template")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore(1L))))
                 .andExpect(status().isInternalServerError());
@@ -109,7 +110,7 @@ public class QueryTemplateHandlerRestControllerIT {
     public void testStoreQueryTemplate_failsOnDuplicateWith409() throws Exception {
         doThrow(DataIntegrityViolationException.class).when(queryHandlerService).storeQueryTemplate(any(QueryTemplate.class), any(String.class));
 
-        mockMvc.perform(post(URI.create("/api/v3/query/template")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(createValidQueryTemplateToStore(1L))))
                 .andExpect(status().isConflict());
@@ -124,7 +125,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template/" + queryTemplateId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(queryTemplateId));
     }
@@ -138,7 +139,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template/" + queryTemplateId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -151,7 +152,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template/" + queryTemplateId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -162,7 +163,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(listSize))
                 .andExpect(jsonPath("$.[0].id").exists());
@@ -174,7 +175,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidPersistenceQueryTemplateListToGet(5)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
@@ -187,7 +188,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template/validate")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/validate")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(listSize))
                 .andExpect(jsonPath("$.[*].id").exists())
@@ -202,7 +203,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
         doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template/validate")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/validate")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(listSize));
     }
@@ -215,7 +216,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
         doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/template/validate")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/validate")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
