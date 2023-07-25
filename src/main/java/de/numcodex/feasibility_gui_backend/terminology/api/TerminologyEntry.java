@@ -16,30 +16,25 @@ import java.util.stream.Collectors;
 @JsonInclude(Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TerminologyEntry {
-
-    @JsonProperty("children")
-    private List<TerminologyEntry> children = new ArrayList<>();
-    @JsonProperty("termCode")
-    private TermCode termCode;
+    @JsonProperty("id")
+    private UUID id;
+    @JsonProperty("context")
+    private TermCode context;
     @JsonProperty("termCodes")
     @EqualsAndHashCode.Include
     private List<TermCode> termCodes = new ArrayList<>();
-    @JsonProperty("id")
-    private UUID id;
+    @JsonProperty("termCode")
+    private TermCode termCode;
+    @JsonProperty("children")
+    private List<TerminologyEntry> children = new ArrayList<>();
     @JsonProperty("leaf")
     private boolean leaf;
     @JsonProperty("selectable")
     private boolean selectable;
-    @JsonProperty("timeRestrictionAllowed")
-    private boolean timeRestrictionAllowed;
-    @JsonProperty("valueDefinition")
-    private ValueDefinition valueDefinition;
-    @JsonProperty("valueDefinitions")
-    private List<ValueDefinition> valueDefinitions = new ArrayList<>();
-    @JsonProperty("attributeDefinitions")
-    private List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
     @JsonProperty("display")
     private String display;
+    @JsonProperty("root")
+    private boolean root;
 
     public static TerminologyEntry copyWithDirectChildren(TerminologyEntry other) {
         var terminology_entry = copyWithoutChildren(other);
@@ -56,11 +51,9 @@ public class TerminologyEntry {
         terminologyEntry.id = other.id;
         terminologyEntry.leaf = other.leaf;
         terminologyEntry.selectable = other.selectable;
-        terminologyEntry.timeRestrictionAllowed = other.timeRestrictionAllowed;
-        terminologyEntry.valueDefinition = other.valueDefinition;
-        terminologyEntry.valueDefinitions = other.valueDefinitions;
-        terminologyEntry.attributeDefinitions = other.attributeDefinitions;
         terminologyEntry.display = other.display;
+        terminologyEntry.context = other.context;
+        terminologyEntry.root = other.root;
         return terminologyEntry;
     }
 }

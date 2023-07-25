@@ -1,0 +1,350 @@
+{
+    "children": [
+        {
+            "context": {
+                "code": "Category1",
+                "display": "Category1",
+                "system": "fdpg.mii.cds",
+                "version": "1.0.0"
+            },
+            "display": "Termcode 1_1",
+            "id": "0ea8b1d4-43c5-d664-bc37-18b58a0f623c",
+            "leaf": true,
+            "selectable": true,
+            "termCodes": [
+                {
+                    "code": "tc1_1",
+                    "display": "Termcode 1_1",
+                    "system": "http://some.system/",
+                    "version": "http://some.system/123/version/456"
+                }
+            ]
+        },
+        {
+            "context": {
+                "code": "Category1",
+                "display": "Category1",
+                "system": "fdpg.mii.cds",
+                "version": "1.0.0"
+            },
+            "display": "Termcode 1_2",
+            "id": "72ceaea9-c1ff-2e94-5fc0-7ba34feca654",
+            "leaf": true,
+            "selectable": true,
+            "termCodes": [
+                {
+                    "code": "tc1_2",
+                    "display": "Termcode 1_2",
+                    "system": "http://some.system/",
+                    "version": "http://some.system/123/version/456"
+                }
+            ]
+        },
+        {
+            "children": [
+                {
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_4",
+                    "id": "43f9c541-1c2d-ee82-949d-f86c3b4def28",
+                    "leaf": true,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_4",
+                            "display": "Termcode 1_4",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                },
+                {
+                    "children": [
+                        {
+                            "children": [
+                                {
+                                    "context": {
+                                        "code": "Category1",
+                                        "display": "Category1",
+                                        "system": "fdpg.mii.cds",
+                                        "version": "1.0.0"
+                                    },
+                                    "display": "Termcode 1_5",
+                                    "id": "48d1e121-51ff-88e1-de5a-3d790b39467b",
+                                    "leaf": true,
+                                    "selectable": true,
+                                    "termCodes": [
+                                        {
+                                            "code": "tc1_5",
+                                            "display": "Termcode 1_5",
+                                            "system": "http://some.system/",
+                                            "version": "http://some.system/123/version/456"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "context": {
+                                "code": "Category1",
+                                "display": "Category1",
+                                "system": "fdpg.mii.cds",
+                                "version": "1.0.0"
+                            },
+                            "display": "Termcode 1_6",
+                            "id": "cab226e5-7ede-27cb-244b-ac3be506dc42",
+                            "leaf": false,
+                            "selectable": true,
+                            "termCodes": [
+                                {
+                                    "code": "tc1_6",
+                                    "display": "Termcode 1_6",
+                                    "system": "http://some.system/",
+                                    "version": "http://some.system/123/version/456"
+                                }
+                            ]
+                        }
+                    ],
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_7",
+                    "id": "5aa094b5-2ca9-9540-fce1-7af90ec59d3d",
+                    "leaf": false,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_7",
+                            "display": "Termcode 1_7",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                },
+                {
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_8",
+                    "id": "e1351592-5c58-ad45-e555-deef4f3ed831",
+                    "leaf": true,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_8",
+                            "display": "Termcode 1_8",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                },
+                {
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_9",
+                    "id": "23563999-1f91-7440-5652-b85ed5cb45ac",
+                    "leaf": true,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_9",
+                            "display": "Termcode 1_9",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                },
+                {
+                    "children": [
+                        {
+                            "context": {
+                                "code": "Category1",
+                                "display": "Category1",
+                                "system": "fdpg.mii.cds",
+                                "version": "1.0.0"
+                            },
+                            "display": "Termcode 1_10",
+                            "id": "d4ecb8e1-ddfe-d18f-d78f-25ffea1964cc",
+                            "leaf": true,
+                            "selectable": true,
+                            "termCodes": [
+                                {
+                                    "code": "tc1_10",
+                                    "display": "Termcode 1_10",
+                                    "system": "http://some.system/",
+                                    "version": "http://some.system/123/version/456"
+                                }
+                            ]
+                        },
+                        {
+                            "context": {
+                                "code": "Category1",
+                                "display": "Category1",
+                                "system": "fdpg.mii.cds",
+                                "version": "1.0.0"
+                            },
+                            "display": "Termcode 1_11",
+                            "id": "767c6deb-5cd5-b122-e1d8-e35bfe8a8fcd",
+                            "leaf": true,
+                            "selectable": true,
+                            "termCodes": [
+                                {
+                                    "code": "tc1_11",
+                                    "display": "Termcode 1_11",
+                                    "system": "http://some.system/",
+                                    "version": "http://some.system/123/version/456"
+                                }
+                            ]
+                        },
+                        {
+                            "context": {
+                                "code": "Category1",
+                                "display": "Category1",
+                                "system": "fdpg.mii.cds",
+                                "version": "1.0.0"
+                            },
+                            "display": "Termcode 1_12",
+                            "id": "cb8f96b1-0431-7a2d-354f-31e4de671f3d",
+                            "leaf": true,
+                            "selectable": true,
+                            "termCodes": [
+                                {
+                                    "code": "tc1_12",
+                                    "display": "Termcode 1_12",
+                                    "system": "http://some.system/",
+                                    "version": "http://some.system/123/version/456"
+                                }
+                            ]
+                        }
+                    ],
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_13",
+                    "id": "ed262069-1c6f-85da-8364-649cbd169ba8",
+                    "leaf": false,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_13",
+                            "display": "Termcode 1_13",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                },
+                {
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_14",
+                    "id": "0226899f-51de-3253-aa58-73254a64c84c",
+                    "leaf": true,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_14",
+                            "display": "Termcode 1_14",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                },
+                {
+                    "children": [
+                        {
+                            "context": {
+                                "code": "Category1",
+                                "display": "Category1",
+                                "system": "fdpg.mii.cds",
+                                "version": "1.0.0"
+                            },
+                            "display": "Termcode 1_15",
+                            "id": "48d1e121-51ff-88e1-de5a-3d790b39467b",
+                            "leaf": true,
+                            "selectable": true,
+                            "termCodes": [
+                                {
+                                    "code": "tc1_15",
+                                    "display": "Termcode 1_15",
+                                    "system": "http://some.system/",
+                                    "version": "http://some.system/123/version/456"
+                                }
+                            ]
+                        }
+                    ],
+                    "context": {
+                        "code": "Category1",
+                        "display": "Category1",
+                        "system": "fdpg.mii.cds",
+                        "version": "1.0.0"
+                    },
+                    "display": "Termcode 1_16",
+                    "id": "d7fd3ba5-f9ba-4655-bf0c-8db8f0a68101",
+                    "leaf": false,
+                    "selectable": true,
+                    "termCodes": [
+                        {
+                            "code": "tc1_16",
+                            "display": "Termcode 1_16",
+                            "system": "http://some.system/",
+                            "version": "http://some.system/123/version/456"
+                        }
+                    ]
+                }
+            ],
+            "context": {
+                "code": "Category1",
+                "display": "Category1",
+                "system": "fdpg.mii.cds",
+                "version": "1.0.0"
+            },
+            "display": "Termcode 1_3",
+            "id": "5018e5bd-c3ce-3443-c79b-017d98f7fd4d",
+            "leaf": false,
+            "selectable": true,
+            "termCodes": [
+                {
+                    "code": "tc1_3",
+                    "display": "Termcode 1_3",
+                    "system": "http://some.system/",
+                    "version": "http://some.system/123/version/456"
+                }
+            ]
+        }
+    ],
+    "context": {
+        "code": "Category1",
+        "display": "Category1",
+        "system": "fdpg.mii.cds"
+    },
+    "display": "Category1",
+    "id": "2ec77ac6-2547-2aff-031b-337d9ff80cff",
+    "leaf": false,
+    "selectable": false,
+    "termCodes": [
+        {
+            "code": "Category1",
+            "display": "Category1",
+            "system": "fdpg.mii.cds"
+        }
+    ]
+}

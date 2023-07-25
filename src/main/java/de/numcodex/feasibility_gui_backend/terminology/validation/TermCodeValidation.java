@@ -49,16 +49,11 @@ public class TermCodeValidation {
     for (List<Criterion> criterionList : combinedCriteria) {
       for (Criterion criterion : criterionList) {
         for (TermCode termCode : criterion.termCodes()) {
-          try {
-            terminologyService.getUiProfile(termCode.system(),
-                termCode.code(),
-                termCode.version());
-            log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code(),
-                termCode.version());
-          } catch (NullPointerException e) {
-            // currently, terminology service throws a NPE when the code is not found
+          if (terminologyService.isExistingTermCode(termCode.system(), termCode.code(), termCode.version())) {
+            log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code(), termCode.version());
+          } else {
             log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
-                termCode.version());
+                    termCode.version());
             invalidTermCodes.add(termCode);
           }
         }

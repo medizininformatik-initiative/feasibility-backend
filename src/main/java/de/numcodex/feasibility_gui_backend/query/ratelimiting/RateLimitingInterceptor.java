@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
-import de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController;
+import de.numcodex.feasibility_gui_backend.query.v3.QueryHandlerRestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
