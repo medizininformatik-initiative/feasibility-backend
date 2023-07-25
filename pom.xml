@@ -109,11 +109,15 @@
     <dependency>
       <groupId>com.github.erosb</groupId>
       <artifactId>everit-json-schema</artifactId>
-      <version>1.14.1</version>
+      <version>1.14.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.json</groupId>
           <artifactId>json</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-collections</groupId>
+          <artifactId>commons-collections</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -277,16 +281,6 @@
       <version>3.5.2</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>jakarta.xml.bind.</groupId>
-      <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>2.3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
-      <version>2.3.3</version>
-    </dependency>
 
     <!-- Explicitly add older jakarta lib to support AKTIN
     note the "." at the end of the groupId for jakarta.xml.bind
@@ -343,6 +337,7 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>3.0.0-M7</version>
         <configuration>
