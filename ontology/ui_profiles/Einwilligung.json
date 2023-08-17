@@ -10,7 +10,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT Analysedaten zusammenfuehren Dritte",
-                    "id": "264b5b41-48da-db75-8b35-f25baf8481d9",
+                    "id": "5706277b-fa93-2c78-9ffd-9ca6acc434a4",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -30,7 +30,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT Eigentum \u00fcbertragen",
-                    "id": "abb8970a-cf67-48d3-d988-84737b8194bc",
+                    "id": "86abf5d7-4f55-316d-02a4-ab0c41ae7cda",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -50,7 +50,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT erheben",
-                    "id": "6f7d3661-7d35-855f-75f9-95575f510534",
+                    "id": "96c8f455-77ba-1f18-f7b9-ade6f2fd23b8",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -70,7 +70,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT lagern verarbeiten",
-                    "id": "664ae5b4-13de-86ee-32eb-8c7ae0a3e016",
+                    "id": "0e53baac-0c31-9606-c7a6-fab7c81eb265",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -90,7 +90,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT wissenschaftlich nutzen EU DSGVO NIVEAU",
-                    "id": "1e075a4d-e38a-ce8b-24af-97a65a9ff3f9",
+                    "id": "688692a6-3b74-7a4f-74e3-95eaf86f41dc",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -110,9 +110,9 @@
                 "version": "1.0.0"
             },
             "display": "Biomaterial erheben, lagern, nutzen",
-            "id": "702ce444-cdf8-3cf7-df98-f7454f8c0681",
+            "id": "8699f7c8-53dd-9fdf-e838-08ebb06f5906",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.18",
@@ -132,7 +132,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT retrospektiv Analysedaten zusammenfuehren Dritte",
-                    "id": "c6dd6d82-ac83-dc3f-5995-b025c4963089",
+                    "id": "138fcd20-4322-a505-8b04-cf63acfda35c",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -152,7 +152,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT retrospektiv lagern verarbeiten",
-                    "id": "ff44c877-2ca0-4a70-522e-20cf47f02768",
+                    "id": "6ec7038c-2d9c-0195-468a-4a76c93f3996",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -172,7 +172,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT retrospektiv wissenschaftlich nutzen EU DSGVO NIVEAU",
-                    "id": "e042835f-b04f-6c2d-b92d-223a921b6543",
+                    "id": "8faeb128-8c7a-4e67-5e4e-ed99bb9da6cb",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -192,9 +192,9 @@
                 "version": "1.0.0"
             },
             "display": "Biomaterial retrospektiv speichern, nutzen",
-            "id": "08e8a9d7-7abf-73a2-34dd-a49605423b3a",
+            "id": "aff9f4d8-5eea-f003-255d-c159e11df449",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.50",
@@ -214,7 +214,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT bereitstellen ohne EU DSGVO NIVEAU",
-                    "id": "eea968df-a30f-8cdb-f847-ebf5616d56bc",
+                    "id": "c4f14cc6-41f0-6fa9-2b3c-78cba349dd86",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -234,9 +234,9 @@
                 "version": "1.0.0"
             },
             "display": "Biomaterial Weitergabe non EU DSGVO NIVEAU",
-            "id": "a98aa28b-9968-f618-1d82-d50431f58481",
+            "id": "62b510a5-9404-1d9a-97d7-118cbc4acda4",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.54",
@@ -256,7 +256,7 @@
                         "version": "1.0.0"
                     },
                     "display": "BIOMAT Zusatzmengen entnehmen",
-                    "id": "98a935f1-faf5-8638-7217-fd03d0d1521f",
+                    "id": "d820c20e-bf8b-73bb-39fb-2093c8e75127",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -276,9 +276,9 @@
                 "version": "1.0.0"
             },
             "display": "Biomaterial Zusatzentnahme",
-            "id": "1926aedd-0b3d-a553-81a2-2b60bbd4b485",
+            "id": "1a28cda7-362b-5284-1f65-452bb9ff4570",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.24",
@@ -298,7 +298,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J prospektiv speichern verarbeiten",
-                    "id": "68aee612-121e-4a24-0576-d290cea24c35",
+                    "id": "1cdcb89b-9029-2529-3aaf-7ecce6b4126a",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -318,7 +318,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J prospektiv uebertragen",
-                    "id": "20c22d93-732d-1fba-476d-5f7af5cfb9f8",
+                    "id": "e393b910-6b3c-a9c9-35d5-7aae3eee326c",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -338,7 +338,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J prospektiv uebertragen KVNR",
-                    "id": "0be20518-69c9-ebf4-46a4-2634e1f19f08",
+                    "id": "3ac764c3-d42f-178b-6310-cfd85c6fb124",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -358,7 +358,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J prospektiv wissenschaftlich nutzen",
-                    "id": "c68a9e9e-5aa1-6323-28f3-f01fa85efb04",
+                    "id": "669ab342-e40a-ee99-8f3f-9d8d5d185a22",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -378,9 +378,9 @@
                 "version": "1.0.0"
             },
             "display": "KKDAT prospektiv uebertragen speichern nutzen",
-            "id": "663465ec-a4f1-d530-9e74-19b7713b51b0",
+            "id": "d691f654-3265-c296-4876-23cfae853a58",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.14",
@@ -400,7 +400,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J retrospektiv speichern verarbeiten",
-                    "id": "87a1344b-7479-4a0c-87a5-d66cab78200a",
+                    "id": "54d4d779-e66f-944e-7f9e-85afa593887f",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -420,7 +420,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J retrospektiv uebertragen",
-                    "id": "03b18fb4-d47a-52fc-617e-847e86b81301",
+                    "id": "ffa161ed-29b5-9bca-6515-a53d4ff170f9",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -440,7 +440,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J retrospektiv uebertragen KVNR",
-                    "id": "3b178cbb-be43-aea1-78f5-9fa89658d23c",
+                    "id": "23e9b9f2-0dc4-d6fe-5b70-41f59dbdca84",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -460,7 +460,7 @@
                         "version": "1.0.0"
                     },
                     "display": "KKDAT 5J retrospektiv wissenschaftlich nutzen",
-                    "id": "4b59240d-bc2a-8edb-985b-a2254b10dc21",
+                    "id": "7953c66f-a55c-0e66-7051-69523f53af0f",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -480,9 +480,9 @@
                 "version": "1.0.0"
             },
             "display": "Krankenkassendaten retrospektiv uebertragen, speichern, nutzen",
-            "id": "d93db5e7-a665-dc6b-a6dc-a9ce8d58962b",
+            "id": "46db2dc0-0110-9c80-4ade-4873a5e586b7",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.10",
@@ -502,7 +502,7 @@
                         "version": "1.0.0"
                     },
                     "display": "IDAT bereitstellen EU DSGVO NIVEAU",
-                    "id": "940ff98b-ddfd-9bc2-1884-7a0bc59c2300",
+                    "id": "b0c28d6e-2a16-14f2-d0c0-46fe3e0ca53d",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -522,7 +522,7 @@
                         "version": "1.0.0"
                     },
                     "display": "IDAT erheben",
-                    "id": "cc0064ab-04c4-643b-76a4-f578d94d199b",
+                    "id": "78de5771-34d9-7b32-971e-df954f4999cc",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -542,7 +542,7 @@
                         "version": "1.0.0"
                     },
                     "display": "IDAT speichern, verarbeiten",
-                    "id": "16c02305-a2e9-afab-2137-9ad411b34954",
+                    "id": "03c2c032-1484-1496-a412-f62116624965",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -562,7 +562,7 @@
                         "version": "1.0.0"
                     },
                     "display": "IDAT zusammenfuehren Dritte",
-                    "id": "69131b27-dfee-00de-51be-8dcdf9b6998c",
+                    "id": "03bebdfe-113b-ab6b-9dbf-ee9774eb620a",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -582,7 +582,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT erheben",
-                    "id": "73606fa5-309f-8a7a-6cfd-57c753693c9b",
+                    "id": "f72653c5-0c92-5e6a-cb22-e7395fc8c87e",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -602,7 +602,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT speichern, verarbeiten",
-                    "id": "58f09532-2cde-70e8-69e8-8ed7aa4fdc95",
+                    "id": "8bec678e-3637-ce49-310e-a89094619f68",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -622,7 +622,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU",
-                    "id": "81aeee2f-92c2-7e27-28ff-cd8a563fe78b",
+                    "id": "3ce8f4d4-bbd6-89f3-7dbb-71e67c91ab16",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -642,7 +642,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT zusammenfuehren Dritte",
-                    "id": "45a14758-2ebe-4cb9-da63-bd4b5a6c4875",
+                    "id": "dbb331c1-cd66-f05b-fde3-ee6472b88fb7",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -662,7 +662,7 @@
                         "version": "1.0.0"
                     },
                     "display": "Rekontaktierung Ergebnisse erheblicher Bedeutung",
-                    "id": "0c3a4408-5995-4080-f771-f5d339b273fe",
+                    "id": "5fca4f05-3955-4ccc-a1f1-f7bb81816a9e",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -682,9 +682,9 @@
                 "version": "1.0.0"
             },
             "display": "Patientendaten erheben, speichern, nutzen",
-            "id": "8f5bc1a0-9cbe-08f5-a27f-a742197d5a0f",
+            "id": "93a033c3-3dd7-45b2-d9a1-61bd2f71d6ff",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.1",
@@ -704,7 +704,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT retrospektiv speichern verarbeiten",
-                    "id": "e38402e4-bec5-7017-873c-ebc5c5ae68ad",
+                    "id": "e2570313-ab42-bfcb-005a-47cd72ebd860",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -724,7 +724,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT retrospektiv wissenschaftlich nutzen EU DSGVO NIVEAU",
-                    "id": "3497352a-cf62-7051-40be-2c58e9142699",
+                    "id": "75ebacdf-60f7-2e55-6c93-243840d9a552",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -744,7 +744,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT retrospektiv zusammenfuehren Dritte",
-                    "id": "ec7fe6fe-997c-25d0-38b2-53c9116a67cc",
+                    "id": "726dd673-0e55-0e83-6ce0-2ee5022c04c2",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -764,9 +764,9 @@
                 "version": "1.0.0"
             },
             "display": "Patientendaten retrospektiv verarbeiten, nutzen",
-            "id": "01358f9d-dcf7-59da-69a2-e24921f9eb4b",
+            "id": "82acabf0-f084-f549-cda4-5d4d2a5798cd",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.44",
@@ -786,7 +786,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT bereitstellen non EU DSGVO NIVEAU",
-                    "id": "a0da9604-fddb-dabf-423c-eeec05cbd229",
+                    "id": "59d84c4f-32f6-0669-cf58-3803e7ea77ac",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -806,9 +806,9 @@
                 "version": "1.0.0"
             },
             "display": "Patientendaten Weitergabe non DSGVO NIVEAU",
-            "id": "2b784ffc-3d95-9b7b-aab1-2971a59f9885",
+            "id": "37004fae-ae5b-2663-38cb-c4dc5d54fb80",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.48",
@@ -828,7 +828,7 @@
                         "version": "1.0.0"
                     },
                     "display": "Rekontaktierung Verkn\u00fcpfung Datenbanken",
-                    "id": "a603808d-d38f-0d6c-e2e3-081a4000f429",
+                    "id": "9223e9e3-f589-d02b-2a8c-432d7aa1e76a",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -848,7 +848,7 @@
                         "version": "1.0.0"
                     },
                     "display": "Rekontaktierung weitere Erhebung",
-                    "id": "0cb68aeb-5d0e-e05b-8db7-402d7c879ee2",
+                    "id": "8645b3de-eead-283f-c1e7-6ff1d88002b8",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -868,7 +868,7 @@
                         "version": "1.0.0"
                     },
                     "display": "Rekontaktierung weitere Studien",
-                    "id": "4aa2b657-a765-abc2-f2dd-49e07001e1e8",
+                    "id": "37400db7-0cde-bf93-eeee-3b910c4eab9c",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -888,9 +888,9 @@
                 "version": "1.0.0"
             },
             "display": "Rekontaktierung Erg\u00e4nzungen",
-            "id": "4012dacc-5b10-c24c-1d3a-40d00d656998",
+            "id": "f3acf49e-ca23-6ad1-f1e8-1e50d7f55cbe",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.26",
@@ -910,7 +910,7 @@
                         "version": "1.0.0"
                     },
                     "display": "Rekontaktierung Zusatzbefund",
-                    "id": "e40f020d-e291-71e2-7991-7e769972c37d",
+                    "id": "f2484334-0527-4455-f0d6-e208ec28f490",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -930,9 +930,9 @@
                 "version": "1.0.0"
             },
             "display": "Rekontaktierung Zusatzbefund",
-            "id": "a492aada-58fe-fd07-f26d-2f3b721518db",
+            "id": "52232b28-5648-c25e-6fca-20bfe961900f",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.30",
@@ -952,7 +952,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 bereitstellen NUM/CODEX",
-                    "id": "9439360e-d085-804d-dc2e-ab56bd44ada7",
+                    "id": "df7378cf-ea21-2a41-0759-c92458d504e4",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -972,7 +972,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 erheben",
-                    "id": "7f9fa64f-a373-09f1-1232-0a21b6227c14",
+                    "id": "c000736c-bf7b-8159-c993-c94443c89ca8",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -992,7 +992,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 komplettieren einmalig",
-                    "id": "97efcf77-8210-ee01-9f8c-b2012539c844",
+                    "id": "90b2b451-2b34-29a1-55be-562fcfb5f627",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -1012,7 +1012,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 speichern verarbeiten NUM/CODEX",
-                    "id": "7dd563d7-105f-3d41-5647-a888b40c53dd",
+                    "id": "c70b0ac6-c5f5-32fc-61c7-e376419d1ddf",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -1032,7 +1032,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 wissenschaftlich nutzen COVID 19 Forschung EU DSGVO konform",
-                    "id": "d68abc85-6842-ffa2-91b9-2e27a8ac7c01",
+                    "id": "ff0341e3-461c-b7c4-ea25-fcc8d860d448",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -1052,7 +1052,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 wissenschaftlich nutzen NUM/CODEX EU DSGVO NIVEAU",
-                    "id": "d0a4cdb6-1ba5-d255-dd4f-98bc9fe45a4a",
+                    "id": "adf68b29-028f-a79d-2530-d1c5e27a6403",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -1072,7 +1072,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 wissenschaftlich nutzen Pandemie Forschung EU DSGVO konform",
-                    "id": "fcbb6d46-b0f0-17bd-6815-d724341b78a1",
+                    "id": "996d0e61-66e8-1c32-0269-93d485a47630",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -1092,9 +1092,9 @@
                 "version": "1.0.0"
             },
             "display": "Z1 GECCO83 Nutzung NUM/CODEX",
-            "id": "e63092c9-a51a-0e17-2e6b-73a0654206bb",
+            "id": "fd6d68dd-84e5-f4d0-1d3d-75cfe34ce8a5",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.32",
@@ -1114,7 +1114,7 @@
                         "version": "1.0.0"
                     },
                     "display": "MDAT GECCO83 bereitstellen NUM/CODEX ohne EU DSGVO NIVEAU",
-                    "id": "0c33a1c1-a641-4240-9f3c-8a15910ba820",
+                    "id": "650fec96-fbf6-2af9-63a1-28c997718dc2",
                     "leaf": true,
                     "selectable": true,
                     "termCodes": [
@@ -1134,9 +1134,9 @@
                 "version": "1.0.0"
             },
             "display": "Z1 GECCO83 Weitergabe NUM/CODEX non EU DSGVO NIVEAU",
-            "id": "90182cc2-87b7-04e6-9276-6ac89c889227",
+            "id": "abb7cdc2-a41c-1487-6de8-4768fe92444b",
             "leaf": false,
-            "selectable": true,
+            "selectable": false,
             "termCodes": [
                 {
                     "code": "2.16.840.1.113883.3.1937.777.24.5.3.35",
@@ -1153,7 +1153,7 @@
         "system": "fdpg.mii.cds"
     },
     "display": "Einwilligung",
-    "id": "7ee330d6-fa1b-961f-b5d6-f3d54e9484a9",
+    "id": "8af806e7-dcd4-094a-51a5-56d7afc20823",
     "leaf": false,
     "selectable": false,
     "termCodes": [
