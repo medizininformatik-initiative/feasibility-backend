@@ -1,6 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
-import org.highmed.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
@@ -56,8 +56,10 @@ public class DSFQueryResultHandlerTest {
 
     @Test
     public void testOnResultButReferencedMeasureReportCanNotBeFetched() throws FhirWebClientProvisionException {
-        Reference dicOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("DIC"));
-        Reference zarsOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("ZARS"));
+        Reference dicOrganizationRef = new Reference().setIdentifier(
+                new Identifier().setSystem("http://dsf.dev/fhir/NamingSystem/organization-identifier").setValue("DIC"));
+        Reference zarsOrganizationRef = new Reference().setIdentifier(new Identifier()
+                .setSystem("http://dsf.dev/fhir/NamingSystem/organization-identifier").setValue("ZARS"));
 
         Task task = new Task()
                 .setStatus(COMPLETED)
@@ -65,12 +67,12 @@ public class DSFQueryResultHandlerTest {
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
         task.getMeta().addProfile(
-                "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2");
+                "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|1.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+                                .setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
                                 .setCode("business-key")))
                 .setValue(new StringType("1234567890"));
         task.addOutput()
@@ -90,8 +92,10 @@ public class DSFQueryResultHandlerTest {
 
     @Test
     public void testOnResult() throws FhirWebClientProvisionException {
-        Reference dicOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("DIC"));
-        Reference zarsOrganizationRef = new Reference().setIdentifier(new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("ZARS"));
+        Reference dicOrganizationRef = new Reference().setIdentifier(
+                new Identifier().setSystem("http://dsf.dev/fhir/NamingSystem/organization-identifier").setValue("DIC"));
+        Reference zarsOrganizationRef = new Reference().setIdentifier(new Identifier()
+                .setSystem("http://dsf.dev/fhir/NamingSystem/organization-identifier").setValue("ZARS"));
 
         Task task = new Task()
                 .setStatus(COMPLETED)
@@ -99,12 +103,12 @@ public class DSFQueryResultHandlerTest {
                 .setRequester(dicOrganizationRef)
                 .setRestriction(new TaskRestrictionComponent().addRecipient(zarsOrganizationRef));
         task.getMeta().addProfile(
-                "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2");
+                "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|1.0");
 
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+                                .setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
                                 .setCode("business-key")))
                 .setValue(new StringType("1234567890"));
         task.addOutput()

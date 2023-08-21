@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
+import dev.dsf.fhir.client.FhirWebserviceClient;
 import lombok.extern.slf4j.Slf4j;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -17,10 +17,10 @@ import java.util.Optional;
 @Slf4j
 class DSFQueryResultHandler {
 
-    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2";
+    private static final String SINGLE_DIC_QUERY_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|1.0";
     private static final String CODE_SYSTEM_FEASIBILITY = "http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REPORT_REF = "measure-report-reference";
-    private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
+    private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
     private static final String CODE_SYSTEM_BPMN_MESSAGE_VALUE_BUSINESS_KEY = "business-key";
 
     private static final String CODE_SYSTEM_MEASURE_POPULATION = "http://terminology.hl7.org/CodeSystem/measure-population";

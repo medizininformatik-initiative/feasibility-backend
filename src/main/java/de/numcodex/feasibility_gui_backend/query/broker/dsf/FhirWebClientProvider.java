@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.WebsocketClient;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.WebsocketClient;
 
 /**
  * Represents an entity capable of providing different kinds of FHIR web clients. Supported web client types are

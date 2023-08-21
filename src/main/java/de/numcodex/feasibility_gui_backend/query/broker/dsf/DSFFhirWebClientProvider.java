@@ -1,12 +1,12 @@
 package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
-import org.highmed.fhir.client.WebsocketClient;
-import org.highmed.fhir.client.WebsocketClientTyrus;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClientJersey;
+import dev.dsf.fhir.client.WebsocketClient;
+import dev.dsf.fhir.client.WebsocketClientTyrus;
+import dev.dsf.fhir.service.ReferenceCleanerImpl;
+import dev.dsf.fhir.service.ReferenceExtractorImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Subscription;
 
@@ -27,7 +27,7 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
 
     private static final String QUERY_RESULT_SUBSCRIPTION_REASON = "Waiting for query results";
     private static final String QUERY_RESULT_SUBSCRIPTION_CHANNEL_PAYLOAD = "application/fhir+json";
-    private static final String CODE_SYSTEM_READ_ACCESS_TAG = "http://highmed.org/fhir/CodeSystem/read-access-tag";
+    private static final String CODE_SYSTEM_READ_ACCESS_TAG = "http://dsf.dev/fhir/CodeSystem/read-access-tag";
     private static final String CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL = "ALL";
 
     private final FhirContext fhirContext;
