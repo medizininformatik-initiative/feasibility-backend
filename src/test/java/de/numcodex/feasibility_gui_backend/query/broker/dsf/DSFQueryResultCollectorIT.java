@@ -3,8 +3,8 @@ package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.WebsocketClient;
+import dev.dsf.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NewClassNamingConvention")
 public class DSFQueryResultCollectorIT {
 
-    private static final String SINGLE_DIC_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|0.6.2";
+    private static final String SINGLE_DIC_RESULT_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-single-dic-result|1.0";
 
     @Mock
     private DSFBrokerClient brokerClient;
@@ -67,26 +67,26 @@ public class DSFQueryResultCollectorIT {
                 .setStatus(COMPLETED)
                 .setIntent(ORDER)
                 .setAuthoredOn(new Date())
-                .setInstantiatesUri("http://highmed.org/bpe/Process/feasibilityRequest/0.6.2");
+                .setInstantiatesCanonical("http://dsf.dev/bpe/Process/feasibilityRequest|1.0");
 
         task.getRequester()
                 .setType("Organization")
-                .getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(siteId);
+                .getIdentifier().setSystem("http://dsf.dev/fhir/NamingSystem/organization-identifier").setValue(siteId);
 
         task.getRestriction().getRecipientFirstRep()
                 .setType("Organization")
-                .getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("ZARS");
+                .getIdentifier().setSystem("http://dsf.dev/fhir/NamingSystem/organization-identifier").setValue("ZARS");
 
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+                                .setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
                                 .setCode("message-name")))
                 .setValue(new StringType("feasibilityRequestMessage"));
         task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
-                                .setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+                                .setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
                                 .setCode("business-key")))
                 .setValue(new StringType(brokerQueryId));
         task.addInput()

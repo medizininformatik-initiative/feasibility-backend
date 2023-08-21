@@ -179,27 +179,21 @@
     </dependency>
 
     <dependency>
-      <groupId>de.medizininformatik-initiative</groupId>
+      <groupId>dev.dsf</groupId>
       <artifactId>dsf-fhir-webservice-client</artifactId>
-      <version>0.9.0-jakarta</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-text</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
-      <groupId>org.highmed.dsf</groupId>
+      <groupId>dev.dsf</groupId>
       <artifactId>dsf-fhir-websocket-client</artifactId>
-      <version>0.9.0</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
-      <groupId>de.medizininformatik-initiative</groupId>
+      <groupId>dev.dsf</groupId>
       <artifactId>dsf-fhir-rest-adapter</artifactId>
-      <version>0.9.0-jakarta</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
@@ -301,18 +295,6 @@
   </dependencies>
 
   <repositories>
-    <repository>
-      <id>highmed</id>
-      <name>GitHub HiGHmed Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/highmed/*</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-
     <repository>
       <id>mii</id>
       <name>GitHub Medizininformatik-Initiative Apache Maven Packages</name>

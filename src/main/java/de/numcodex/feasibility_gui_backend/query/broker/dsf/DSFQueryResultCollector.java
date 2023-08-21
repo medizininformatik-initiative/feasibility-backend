@@ -2,12 +2,12 @@ package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatus;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
-import org.highmed.fhir.client.WebsocketClient;
+import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
+import dev.dsf.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.DomainResource;
 
 import java.io.IOException;
