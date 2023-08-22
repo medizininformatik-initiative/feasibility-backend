@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Unit;
 import lombok.Builder;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @JsonInclude(Include.NON_NULL)
 @Builder
 public record AttributeFilter(
+    @JsonProperty List<Criterion> criteria,
     @JsonProperty(value = "type", required = true) ValueFilterType type,
     @JsonProperty("selectedConcepts") List<TermCode> selectedConcepts,
     @JsonProperty("comparator") Comparator comparator,
