@@ -182,7 +182,7 @@ and the corresponding middlewares.
 To send a query to the backend, use the following example query:
 
 ```
-curl --location --request POST 'http://localhost:8090/api/v2/query' \
+curl --location --request POST 'http://localhost:8090/api/v3/query' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "version": "http://to_be_decided.com/draft-1/schema#",
@@ -212,7 +212,7 @@ curl --location --request POST 'http://localhost:8090/api/v2/query' \
 ```
 another example
 ```
-curl --location --request POST 'http://localhost:8090/api/v2/query' \
+curl --location --request POST 'http://localhost:8090/api/v3/query' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "version": "http://to_be_decided.com/draft-1/schema#",
@@ -260,7 +260,7 @@ FEASIBILITY_DATABASE_PORT=<your-desired-port> docker-compose up -d
 
 ### Testing if the Container is Running Properly
 ```
-GET http://localhost:8090/api/v2/terminology/root-entries
+GET http://localhost:8090/api/v3/terminology/root-entries
 ```
 
 Should reply with status 200 and a JSON object

@@ -34,8 +34,7 @@ public class WebSecurityConfig {
   public static final String KEY_SPRING_ADDONS_CONFIDENTIAL = "spring-addons-confidential";
   public static final String KEY_SPRING_ADDONS_PUBLIC = "spring-addons-public";
   public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
-  public static final String PATH_API_V1 = "/api/v1";
-  public static final String PATH_API_V2 = "/api/v2";
+  public static final String PATH_API = "/api/v3";
   public static final String PATH_QUERY = "/query";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
@@ -94,15 +93,14 @@ public class WebSecurityConfig {
       Converter<Jwt, ? extends AbstractAuthenticationToken> authenticationConverter) throws Exception {
 
     http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + "/**").hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API_V2 + PATH_QUERY).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_USER_ID_MATCHER).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE + "/*").hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API_V2 + "/**").hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-                    .requestMatchers(PATH_API_V1 + "/**").hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(PATH_API + PATH_TERMINOLOGY + "/**").hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(PATH_API + PATH_QUERY).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(PATH_API + PATH_QUERY + PATH_USER_ID_MATCHER).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(PATH_API + PATH_QUERY + PATH_TEMPLATE).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*").hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(PATH_API + "/**").hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
                     .requestMatchers(PATH_SWAGGER_UI).anonymous()
                     .requestMatchers(PATH_SWAGGER_CONFIG).anonymous()

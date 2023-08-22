@@ -69,7 +69,7 @@ services:
       - ${CODEX_FEASIBILITY_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/codex-feasibility-backend/dsf-security/
       - ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_DB_MIGRATION_FOLDER:-../ontology/migration}:/opt/codex-feasibility-backend/ontology/migration
   feasibility-db:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:15-alpine'
     container_name: feasibility-db
     ports:
     - ${CODEX_FEASIBILITY_BACKEND_DATABASE_PORT:-5432}:5432

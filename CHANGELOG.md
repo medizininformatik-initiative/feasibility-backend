@@ -7,9 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [UNRELEASED] - yyyy-mm-dd
 
 ### Added
+- New DB tables
+- v3 api endpoint
 ### Changed
 ### Deprecated
 ### Removed
+- v1 and v2 api endpoints
 ### Fixed
 ### Security
 
