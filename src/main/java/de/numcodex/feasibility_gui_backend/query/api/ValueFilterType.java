@@ -11,5 +11,7 @@ public enum ValueFilterType {
     @JsonProperty("quantity-comparator")
     QUANTITY_COMPARATOR,
     @JsonProperty("quantity-range")
-    QUANTITY_RANGE
+    QUANTITY_RANGE,
+    @JsonProperty("reference")
+    REFERENCE
 }
