@@ -32,8 +32,7 @@ jobs:
       - uses: s4u/maven-settings-action@v2.8.0
         with:
           servers: |
-            [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-             {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+            [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -94,8 +93,7 @@ jobs:
     - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: |
-          [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+          [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Maven Package
       run: mvn -B -DskipTests package
@@ -194,8 +192,7 @@ jobs:
     - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: |
-          [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+          [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Prepare Version
       id: prep

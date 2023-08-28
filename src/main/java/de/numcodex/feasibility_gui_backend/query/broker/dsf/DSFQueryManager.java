@@ -4,7 +4,7 @@ import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
-import org.highmed.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
@@ -40,7 +40,7 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
  */
 class DSFQueryManager implements QueryManager {
 
-    private static final String INSTANTIATE_URI = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.6.2";
+    private static final String INSTANTIATE_CANONICAL = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest|1.0";
     private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request";
     private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure";
     private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library";
@@ -58,13 +58,13 @@ class DSFQueryManager implements QueryManager {
 
     private static final String CODE_SYSTEM_FEASIBILITY = "http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility";
     private static final String CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REFERENCE = "measure-reference";
-    private static final String CODE_SYSTEM_ORGANIZATION = "http://highmed.org/sid/organization-identifier";
-    private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://highmed.org/fhir/CodeSystem/bpmn-message";
+    private static final String CODE_SYSTEM_ORGANIZATION = "http://dsf.dev/sid/organization-identifier";
+    private static final String CODE_SYSTEM_BPMN_MESSAGE = "http://dsf.dev/fhir/CodeSystem/bpmn-message";
     private static final String CODE_SYSTEM_BPMN_MESSAGE_VALUE_MESSAGE_NAME = "message-name";
     private static final String CODE_SYSTEM_BPMN_MESSAGE_VALUE_BUSINESS_KEY = "business-key";
     private static final String CODE_SYSTEM_LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     private static final String CODE_SYSTEM_LIBRARY_TYPE_VALUE_LOGIC_LIBRARY = "logic-library";
-    private static final String CODE_SYSTEM_READ_ACCESS_TAG = "http://highmed.org/fhir/CodeSystem/read-access-tag";
+    private static final String CODE_SYSTEM_READ_ACCESS_TAG = "http://dsf.dev/fhir/CodeSystem/read-access-tag";
     private static final String CODE_SYSTEM_READ_ACCESS_TAG_VALUE_ALL = "ALL";
     private static final String CODE_SYSTEM_MEASURE_SCORING = "http://terminology.hl7.org/CodeSystem/measure-scoring";
     private static final String CODE_SYSTEM_MEASURE_SCORING_VALUE_COHORT = "cohort";
@@ -178,7 +178,7 @@ class DSFQueryManager implements QueryManager {
                 .setStatus(REQUESTED)
                 .setIntent(ORDER)
                 .setAuthoredOn(new Date())
-                .setInstantiatesUri(INSTANTIATE_URI);
+                .setInstantiatesCanonical(INSTANTIATE_CANONICAL);
 
         task.getRequester()
                 .setType(REQUESTER_TYPE)
