@@ -96,7 +96,7 @@ public class DSFQueryResultCollectorIT {
                                 .setCode("measure-reference")))
                 .setValue(new Reference()
                         .setReference("urn:uuid:" + UUID.randomUUID()));
-        task.addOutput()
+        task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
                                 .setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility")

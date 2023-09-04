@@ -109,7 +109,7 @@ class DSFQueryResultHandler {
      * @return The measure report URL.
      */
     private IdType extractMeasureReportId(Task task) {
-        Reference measureReportReference = (Reference) task.getOutput()
+        Reference measureReportReference = (Reference) task.getInput()
                 .stream()
                 .filter(o -> o.getType().getCodingFirstRep().getSystem().equals(CODE_SYSTEM_FEASIBILITY)
                         && o.getType().getCodingFirstRep().getCode().equals(CODE_SYSTEM_FEASIBILITY_VALUE_MEASURE_REPORT_REF))

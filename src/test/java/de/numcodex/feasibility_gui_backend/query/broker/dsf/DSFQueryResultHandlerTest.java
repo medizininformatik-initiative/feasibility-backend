@@ -75,7 +75,7 @@ public class DSFQueryResultHandlerTest {
                                 .setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
                                 .setCode("business-key")))
                 .setValue(new StringType("1234567890"));
-        task.addOutput()
+        task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
                                 .setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility")
@@ -111,7 +111,7 @@ public class DSFQueryResultHandlerTest {
                                 .setSystem("http://dsf.dev/fhir/CodeSystem/bpmn-message")
                                 .setCode("business-key")))
                 .setValue(new StringType("1234567890"));
-        task.addOutput()
+        task.addInput()
                 .setType(new CodeableConcept()
                         .addCoding(new Coding()
                                 .setSystem("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility")
