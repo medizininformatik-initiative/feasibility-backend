@@ -17,6 +17,7 @@ app:
     threshold:
       sites: 3
       results: 20
+      sitesResult: 20
     quota:
       soft:
         create:

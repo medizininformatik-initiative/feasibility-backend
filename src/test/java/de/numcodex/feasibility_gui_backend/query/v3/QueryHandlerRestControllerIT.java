@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
+import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
@@ -42,6 +43,8 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.List;
 
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_QUERY;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
@@ -100,6 +103,9 @@ public class QueryHandlerRestControllerIT {
     @Value("${app.privacy.quota.hard.create.intervalminutes}")
     private int quotaHardCreateIntervalMinutes;
 
+    @Value("${app.privacy.threshold.sitesResult}")
+    private long thresholdSitesResult;
+
     @BeforeEach
     void initTest() throws Exception {
         when(rateLimitingInterceptor.preHandle(any(), any(), any())).thenReturn(true);
@@ -110,7 +116,7 @@ public class QueryHandlerRestControllerIT {
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
         var testQuery = StructuredQuery.builder().build();
 
-        mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(status().isBadRequest());
@@ -124,7 +130,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(request().asyncStarted())
@@ -133,7 +139,7 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
-                .andExpect(header().string("location", "/api/v3/query/1"));
+                .andExpect(header().string("location", PATH_API + PATH_QUERY + "/1"));
     }
 
     @Test
@@ -146,7 +152,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(request().asyncStarted())
@@ -164,7 +170,7 @@ public class QueryHandlerRestControllerIT {
         doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(Integer.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(testQuery)))
                 .andExpect(request().asyncStarted())
@@ -181,7 +187,7 @@ public class QueryHandlerRestControllerIT {
 
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(post(URI.create("/api/v3/query/validate")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(status().isNoContent());
@@ -192,7 +198,7 @@ public class QueryHandlerRestControllerIT {
     public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
         var testQuery = StructuredQuery.builder().build();
 
-        mockMvc.perform(post(URI.create("/api/v3/query/validate")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(status().isBadRequest());
@@ -211,7 +217,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(request().asyncStarted())
@@ -230,7 +236,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(request().asyncStarted())
@@ -251,7 +257,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        var mvcResult = mockMvc.perform(post(URI.create("/api/v3/query")).with(csrf())
+        var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(request().asyncStarted())
@@ -260,7 +266,7 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isCreated())
             .andExpect(header().exists("location"))
-            .andExpect(header().string("location", "/api/v3/query/1"));
+            .andExpect(header().string("location", PATH_API + PATH_QUERY + "/1"));
     }
 
     @Test
@@ -270,7 +276,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
         doReturn(List.of(createValidQueryListEntry(queryId))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
 
-        mockMvc.perform(get(URI.create("/api/v3/query")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(queryId));
     }
@@ -283,7 +289,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
         doReturn(List.of(createValidQueryListEntry(queryId))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
 
-        mockMvc.perform(get(URI.create("/api/v3/query/by-user/" + userId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/by-user/" + userId)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(queryId));
     }
@@ -295,7 +301,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(List.of()).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
         doReturn(List.of()).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
 
-        mockMvc.perform(get(URI.create("/api/v3/query/by-user/" + userId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/by-user/" + userId)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").doesNotExist());
     }
@@ -308,7 +314,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/" + queryId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(queryId));
     }
@@ -321,7 +327,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/" + queryId)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
@@ -334,7 +340,7 @@ public class QueryHandlerRestControllerIT {
                 .comment("bar")
                 .build();
 
-        mockMvc.perform(post(URI.create("/api/v3/query/1/saved")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(savedQuery)))
                 .andExpect(status().isNoContent());
@@ -350,7 +356,7 @@ public class QueryHandlerRestControllerIT {
                 .comment("bar")
                 .build();
 
-        mockMvc.perform(post(URI.create("/api/v3/query/1/saved")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(savedQuery)))
                 .andExpect(status().isNotFound());
@@ -366,7 +372,7 @@ public class QueryHandlerRestControllerIT {
                 .comment("bar")
                 .build();
 
-        mockMvc.perform(post(URI.create("/api/v3/query/1/saved")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(savedQuery)))
                 .andExpect(status().isForbidden());
@@ -383,7 +389,7 @@ public class QueryHandlerRestControllerIT {
                 .comment("bar")
                 .build();
 
-        mockMvc.perform(post(URI.create("/api/v3/query/1/saved")).with(csrf())
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(savedQuery)))
                 .andExpect(status().isConflict());
@@ -393,7 +399,7 @@ public class QueryHandlerRestControllerIT {
     @EnumSource
     @WithMockUser(roles = {"FEASIBILITY_TEST_ADMIN"}, username = "test")
     public void testGetQueryResult_succeeds(QueryHandlerService.ResultDetail resultDetail) throws Exception {
-        var requestUri = "/api/v3/query/1";
+        var requestUri = PATH_API + PATH_QUERY + "/1";
         doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));
@@ -403,10 +409,10 @@ public class QueryHandlerRestControllerIT {
                 requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
             }
             case DETAILED_OBFUSCATED -> {
-                requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+                requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
             }
             case DETAILED -> {
-                requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_RESULT;
+                requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_RESULT;
             }
         }
 
@@ -436,6 +442,24 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetDetailedObfuscatedQueryResult_returnsIssueWhenBelowThreshold() throws Exception {
+        var requestUri = PATH_API + PATH_QUERY + "/1" +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(createTestDetailedObfuscatedQueryResultWithTooFewResults(thresholdSitesResult))
+                .when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));
+
+
+        mockMvc.perform(get(requestUri).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultLines").doesNotExist())
+                .andExpect(jsonPath("$.issues").exists())
+                .andExpect(jsonPath("$.issues").isArray())
+                .andExpect(jsonPath("$.issues[0].code").value("FEAS-" + FeasibilityIssue.PRIVACY_RESTRICTION_RESULT_SITES.code()));
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     public void testGetDetailedObfuscatedResult_failsOnWrongAuthorWith403() throws Exception {
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -450,7 +474,7 @@ public class QueryHandlerRestControllerIT {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidStructuredQuery()).when(queryHandlerService).getQueryContent(any(Long.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/1" + WebSecurityConfig.PATH_CONTENT)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/1" + WebSecurityConfig.PATH_CONTENT)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.inclusionCriteria").exists())
                 .andExpect(jsonPath("$.inclusionCriteria", not(empty())));
@@ -462,14 +486,14 @@ public class QueryHandlerRestControllerIT {
         doReturn("not-test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidStructuredQuery()).when(queryHandlerService).getQueryContent(any(Long.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/1" + WebSecurityConfig.PATH_CONTENT)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/1" + WebSecurityConfig.PATH_CONTENT)).with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     public void testGetDetailedObfuscatedResultRateLimit_succeeds() throws Exception  {
-        mockMvc.perform(get(URI.create("/api/v3/query/detailed-obfuscated-result-rate-limit")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/detailed-obfuscated-result-rate-limit")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.limit").exists())
                 .andExpect(jsonPath("$.remaining").exists());
@@ -477,7 +501,7 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     public void testGetDetailedObfuscatedResultRateLimit_failsOnNotLoggedIn() throws Exception  {
-        mockMvc.perform(get(URI.create("/api/v3/query/detailed-obfuscated-result-rate-limit")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/detailed-obfuscated-result-rate-limit")).with(csrf()))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -542,9 +566,11 @@ public class QueryHandlerRestControllerIT {
     @NotNull
     private static QueryResult createTestQueryResult(QueryHandlerService.ResultDetail resultDetail) {
         List<QueryResultLine> queryResultLines;
+        long totalNumberOfPatients;
 
         if (resultDetail == QueryHandlerService.ResultDetail.SUMMARY) {
             queryResultLines = List.of();
+            totalNumberOfPatients = 999L;
         } else {
             var resultLines = List.of(
                     ResultLine.builder()
@@ -570,11 +596,49 @@ public class QueryHandlerRestControllerIT {
                             .numberOfPatients(ssr.result())
                             .build())
                     .toList();
+
+            totalNumberOfPatients = queryResultLines.stream().map(QueryResultLine::numberOfPatients).reduce(0L, Long::sum);
         }
 
         return QueryResult.builder()
                 .queryId(1L)
-                .totalNumberOfPatients(123L)
+                .totalNumberOfPatients(totalNumberOfPatients)
+                .resultLines(queryResultLines)
+                .build();
+    }
+
+    @NotNull
+    private static QueryResult createTestDetailedObfuscatedQueryResultWithTooFewResults(long threshold) {
+        List<QueryResultLine> queryResultLines;
+
+
+        var resultLines = List.of(
+                ResultLine.builder()
+                        .siteName("A")
+                        .type(SUCCESS)
+                        .result(threshold - 1)
+                        .build(),
+                ResultLine.builder()
+                        .siteName("B")
+                        .type(SUCCESS)
+                        .result(threshold - 2)
+                        .build(),
+                ResultLine.builder()
+                        .siteName("C")
+                        .type(SUCCESS)
+                        .result(threshold - 1)
+                        .build()
+        );
+        queryResultLines = resultLines.stream()
+                .map(ssr -> QueryResultLine.builder()
+                        .siteName("foobar" + ssr.siteName())
+                        .numberOfPatients(ssr.result())
+                        .build())
+                .toList();
+
+        return QueryResult.builder()
+                .queryId(1L)
+                .totalNumberOfPatients(queryResultLines.stream().map(QueryResultLine::numberOfPatients).reduce(0L, Long::sum))
                 .resultLines(queryResultLines)
                 .build();
     }

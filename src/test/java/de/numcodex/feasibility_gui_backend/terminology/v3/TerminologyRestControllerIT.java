@@ -34,6 +34,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_TERMINOLOGY;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -73,7 +75,7 @@ public class TerminologyRestControllerIT {
         var terminologyEntry = createTerminologyEntry(id);
         doReturn(terminologyEntry).when(terminologyService).getEntry(any(UUID.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/terminology/entries/" + id)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entries/" + id)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.context.code").value(terminologyEntry.getContext().code()))
@@ -89,7 +91,7 @@ public class TerminologyRestControllerIT {
     public void testGetEntry_failsWith404OnNotFound() throws Exception {
         Mockito.doThrow(NodeNotFoundException.class).when(terminologyService).getEntry(any(UUID.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/terminology/entries/" + UUID.randomUUID())).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entries/" + UUID.randomUUID())).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -99,7 +101,7 @@ public class TerminologyRestControllerIT {
         List<CategoryEntry> categoryEntries = createCategoryEntries();
         doReturn(categoryEntries).when(terminologyService).getCategories();
 
-        mockMvc.perform(get(URI.create("/api/v3/terminology/categories")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/categories")).with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(categoryEntries.size()))
@@ -119,13 +121,13 @@ public class TerminologyRestControllerIT {
         doReturn(terminologyEntries).when(terminologyService).getSelectableEntries(any(String.class), isNull());
 
         if (includeCategory) {
-            requestBuilder = get(URI.create("/api/v3/terminology/entries"))
+            requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entries"))
                     .param("query", "GESCH")
                     .param("categoryId", UUID.randomUUID().toString())
                     .with(csrf());
 
         } else {
-            requestBuilder = get(URI.create("/api/v3/terminology/entries"))
+            requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entries"))
                     .param("query", "GESCH")
                     .with(csrf());
 
@@ -147,7 +149,7 @@ public class TerminologyRestControllerIT {
     public void testGetSelectableEntries_succeedsWith200ButEmptyOnNoMatch() throws Exception {
         doReturn(List.of()).when(terminologyService).getSelectableEntries(any(String.class), any(UUID.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/terminology/entries"))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entries"))
                         .param("query", "GESCH")
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -159,7 +161,7 @@ public class TerminologyRestControllerIT {
     public void testGetSelectableEntries_failsWith400OnMissingQueryParameter() throws Exception {
         doReturn(List.of()).when(terminologyService).getSelectableEntries(any(String.class), any(UUID.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/terminology/entries"))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entries"))
                         .with(csrf()))
                 .andExpect(status().isBadRequest());
     }
@@ -170,7 +172,7 @@ public class TerminologyRestControllerIT {
         MockHttpServletRequestBuilder requestBuilder;
         doReturn(createUiProfile()).when(terminologyService).getUiProfile(any(String.class));
 
-        requestBuilder = get(URI.create("/api/v3/terminology/5e6679ac-2b20-48ad-8459-f102c8944a06/ui_profile"))
+        requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/5e6679ac-2b20-48ad-8459-f102c8944a06/ui_profile"))
                 .with(csrf());
 
         mockMvc.perform(requestBuilder)
@@ -184,7 +186,7 @@ public class TerminologyRestControllerIT {
         MockHttpServletRequestBuilder requestBuilder;
         doThrow(UiProfileNotFoundException.class).when(terminologyService).getUiProfile(any(String.class));
 
-        requestBuilder = get(URI.create("/api/v3/terminology/5e6679ac-2b20-48ad-8459-f102c8944a06/ui_profile"))
+        requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/5e6679ac-2b20-48ad-8459-f102c8944a06/ui_profile"))
                 .with(csrf());
 
         mockMvc.perform(requestBuilder)
@@ -197,7 +199,7 @@ public class TerminologyRestControllerIT {
         MockHttpServletRequestBuilder requestBuilder;
         doReturn(createUiProfile()).when(terminologyService).getMapping(any(String.class));
 
-        requestBuilder = get(URI.create("/api/v3/terminology/5e6679ac-2b20-48ad-8459-f102c8944a06/mapping"))
+        requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/5e6679ac-2b20-48ad-8459-f102c8944a06/mapping"))
                 .with(csrf());
 
         mockMvc.perform(requestBuilder)
@@ -211,7 +213,7 @@ public class TerminologyRestControllerIT {
         MockHttpServletRequestBuilder requestBuilder;
         doThrow(MappingNotFoundException.class).when(terminologyService).getMapping(any(String.class));
 
-        requestBuilder = get(URI.create("/api/v3/terminology/5e6679ac-2b20-48ad-8459-f102c8944a06/mapping"))
+        requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/5e6679ac-2b20-48ad-8459-f102c8944a06/mapping"))
                 .with(csrf());
 
         mockMvc.perform(requestBuilder)
@@ -226,7 +228,7 @@ public class TerminologyRestControllerIT {
         var randomUuidListMinusOne = randomUuidList.subList(0, randomUuidList.size() - 2);
         doReturn(randomUuidListMinusOne).when(terminologyService).getIntersection(any(String.class), anyList());
 
-        requestBuilder = post(URI.create("/api/v3/terminology/criteria-set/intersect"))
+        requestBuilder = post(URI.create(PATH_API + PATH_TERMINOLOGY + "/criteria-set/intersect"))
                 .param("criteriaSetUrl", "http://foo.bar")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .content(jsonUtil.writeValueAsString(randomUuidList))
