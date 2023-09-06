@@ -12,12 +12,11 @@ import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplateRepository;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Slf4j
 @Transactional
@@ -42,23 +41,15 @@ public class QueryTemplateHandler {
   public Long storeTemplate(QueryTemplate queryTemplateApi, String userId)
       throws QueryTemplateException {
 
+    if (queryTemplateRepository.existsQueryTemplateByLabelAndUserId(queryTemplateApi.label(), userId)) {
+      throw new DataIntegrityViolationException(String.format("User %s already has a query template named %s", userId, queryTemplateApi.label()));
+    }
+
     Long queryId = storeNewQuery(queryTemplateApi.content(), userId);
     de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate
         = convertApiToPersistence(queryTemplateApi, queryId);
     queryTemplate = queryTemplateRepository.save(queryTemplate);
     return queryTemplate.getId();
-  }
-
-  public QueryTemplate loadTemplate() {
-    return null;
-  }
-
-  public List<QueryTemplate> loadTemplates() {
-    return new ArrayList<>();
-  }
-
-  public List<QueryTemplate> validateTemplates() {
-    return new ArrayList<>();
   }
 
   public Long storeNewQuery(StructuredQuery query, String userId) throws QueryTemplateException {
@@ -86,6 +77,9 @@ public class QueryTemplateHandler {
   }
 
   private String serializedStructuredQuery(StructuredQuery query) throws QueryTemplateException {
+    if (query == null) {
+      throw new QueryTemplateException("Submitted query is null");
+    }
     try {
       return jsonUtil.writeValueAsString(query);
     } catch (JsonProcessingException e) {

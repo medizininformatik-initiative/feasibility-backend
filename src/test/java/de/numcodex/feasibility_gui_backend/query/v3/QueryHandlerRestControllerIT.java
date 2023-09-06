@@ -376,7 +376,7 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     void testSaveQuery_failsWith409OnExistingSavedQuery() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
-        doThrow(DataIntegrityViolationException.class).when(queryHandlerService).saveQuery(any(Long.class), any(SavedQuery.class));
+        doThrow(DataIntegrityViolationException.class).when(queryHandlerService).saveQuery(any(Long.class), any(String.class), any(SavedQuery.class));
 
         var savedQuery = SavedQuery.builder()
                 .label("foo")

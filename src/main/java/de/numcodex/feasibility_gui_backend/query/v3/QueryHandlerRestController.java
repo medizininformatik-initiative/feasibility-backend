@@ -207,7 +207,7 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     } else {
       try {
-        queryHandlerService.saveQuery(queryId, savedQuery);
+        queryHandlerService.saveQuery(queryId, authorId, savedQuery);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
       } catch (DataIntegrityViolationException e) {
         return new ResponseEntity<>(HttpStatus.CONFLICT);
