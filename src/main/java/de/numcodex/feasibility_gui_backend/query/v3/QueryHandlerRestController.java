@@ -248,8 +248,11 @@ public class QueryHandlerRestController {
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT)
-  public ResponseEntity<Object> getDetailedObfuscatedQueryResult(
-      @PathVariable("id") Long queryId) {
+  public ResponseEntity<Object> getDetailedObfuscatedQueryResult(@PathVariable("id") Long queryId,
+   Authentication authentication) {
+    if (!hasAccess(queryId, authentication)) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
     QueryResult queryResult = queryHandlerService.getQueryResult(queryId,
         ResultDetail.DETAILED_OBFUSCATED);
 
