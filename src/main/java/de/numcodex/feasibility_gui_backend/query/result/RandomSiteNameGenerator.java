@@ -8,11 +8,11 @@ import java.util.UUID;
  * UUIDs have the format 8-4-4-4-12. For historical reasons, we currently need 10 characters, so we just use the
  * last 10, meaning the substring begin index is 8+4+4+4+2 + the 4 hyphens = 26
  */
-public class RandomSiteNameGenerator {
+public interface RandomSiteNameGenerator {
 
-    private static final int BEGIN_INDEX = 26;
+    int BEGIN_INDEX = 26;
 
-    public static String generateRandomSiteName() {
+    static String generateRandomSiteName() {
         return UUID.randomUUID().toString().substring(BEGIN_INDEX);
     }
 }
