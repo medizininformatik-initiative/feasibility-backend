@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 
 @Configuration
@@ -52,6 +55,9 @@ public class WebSecurityConfig {
 
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
+
+  @Autowired
+  private HandlerMappingIntrospector introspector;
 
   public interface Jwt2AuthoritiesConverter extends
       Converter<Jwt, Collection<? extends GrantedAuthority>> {
@@ -93,17 +99,17 @@ public class WebSecurityConfig {
       Converter<Jwt, ? extends AbstractAuthenticationToken> authenticationConverter) throws Exception {
 
     http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(PATH_API + PATH_TERMINOLOGY + "/**").hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API + PATH_QUERY).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API + PATH_QUERY + PATH_USER_ID_MATCHER).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(PATH_API + PATH_QUERY + PATH_TEMPLATE).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*").hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(PATH_API + "/**").hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-                    .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
-                    .requestMatchers(PATH_SWAGGER_UI).anonymous()
-                    .requestMatchers(PATH_SWAGGER_CONFIG).anonymous()
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_TERMINOLOGY + "/**")).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT)).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*")).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_HEALTH)).anonymous()
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_UI)).anonymous()
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_CONFIG)).anonymous()
                     .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
