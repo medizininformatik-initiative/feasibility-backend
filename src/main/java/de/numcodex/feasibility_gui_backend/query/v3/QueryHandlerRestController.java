@@ -14,6 +14,7 @@ import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssues;
+import de.numcodex.feasibility_gui_backend.query.api.status.SavedQuerySlots;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
@@ -37,14 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -91,6 +85,9 @@ public class QueryHandlerRestController {
 
   @Value("${app.privacy.threshold.sitesResult}")
   private int privacyThresholdSitesResult;
+
+  @Value("${app.maxSavedQueriesPerUser}")
+  private int maxSavedQueriesPerUser;
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       RateLimitingService rateLimitingService,
@@ -208,14 +205,61 @@ public class QueryHandlerRestController {
 
     if (!authorId.equalsIgnoreCase(principal.getName())) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    } else {
-      try {
-        queryHandlerService.saveQuery(queryId, authorId, savedQuery);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-      } catch (DataIntegrityViolationException e) {
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
-      }
     }
+
+    Long amountOfSavedQueriesByUser = queryHandlerService.getAmountOfSavedQueriesByUser(authorId);
+    if (amountOfSavedQueriesByUser >= maxSavedQueriesPerUser) {
+      return new ResponseEntity<>("Saved query limit reached. Please delete old saved queries before trying to create new ones.", HttpStatus.FORBIDDEN);
+    }
+
+    try {
+      queryHandlerService.saveQuery(queryId, authorId, savedQuery);
+      amountOfSavedQueriesByUser++;
+      var savedQuerySlots = SavedQuerySlots.builder()
+              .used(amountOfSavedQueriesByUser)
+              .free(maxSavedQueriesPerUser - amountOfSavedQueriesByUser)
+              .build();
+      return new ResponseEntity<>(savedQuerySlots, HttpStatus.OK);
+    } catch (DataIntegrityViolationException e) {
+      return new ResponseEntity<>(HttpStatus.CONFLICT);
+    }
+  }
+
+  @GetMapping("/saved-query-slots")
+  public ResponseEntity<Object> getSavedQuerySlots(Principal principal) {
+    return new ResponseEntity<>(getSavedQuerySlotsJson(principal), HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{id}/saved")
+  public ResponseEntity<Object> deleteSavedQuery(@PathVariable("id") Long queryId, Principal principal) {
+
+    String authorId;
+    try {
+      authorId = queryHandlerService.getAuthorId(queryId);
+    } catch (QueryNotFoundException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    if (!authorId.equalsIgnoreCase(principal.getName())) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    try {
+      queryHandlerService.deleteSavedQuery(queryId);
+      return new ResponseEntity<>(getSavedQuerySlotsJson(principal), HttpStatus.OK);
+    } catch (QueryNotFoundException e) {
+      return new ResponseEntity<>(getSavedQuerySlotsJson(principal), HttpStatus.NOT_FOUND);
+    }
+  }
+
+  private SavedQuerySlots getSavedQuerySlotsJson(Principal principal) {
+    Long amountOfSavedQueriesByUser = queryHandlerService.getAmountOfSavedQueriesByUser(principal.getName());
+
+    var savedQuerySlots = SavedQuerySlots.builder()
+            .used(amountOfSavedQueriesByUser)
+            .free(maxSavedQueriesPerUser - amountOfSavedQueriesByUser)
+            .build();
+    return savedQuerySlots;
   }
 
   @GetMapping("/by-user/{id}")

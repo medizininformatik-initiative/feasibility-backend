@@ -1,0 +1,2 @@
+ALTER TABLE saved_query ADD COLUMN IF NOT EXISTS result_size INTEGER;
+ALTER TABLE saved_query DROP COLUMN IF EXISTS deleted;

@@ -346,9 +346,12 @@ paths:
               $ref: '#/components/schemas/SavedQuery'
         required: true
       responses:
-        204:
+        200:
           description: Saved Query successfully stored
-          content: {}
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
         401:
           description: Unauthorized - please login first
           content: { }
@@ -361,6 +364,50 @@ paths:
         409:
           description: Query has already been saved
           content: {}
+      security:
+        - feasibility_auth:
+            - user
+    delete:
+      tags:
+        - query
+      summary: "Remove a saved query from a given query"
+      operationId: "deleteSavedQuery"
+      parameters:
+        - name: "queryId"
+          in: "path"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: The query for which the additional information should be stored could not be found
+          content: {}
+  /query/saved-query-slots:
+    get:
+      tags:
+        - query
+      summary: "Show how many saved query slots a user already used and how many he has left."
+      operationId: "getSavedQuerySlots"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
       security:
         - feasibility_auth:
             - user
@@ -828,6 +875,20 @@ components:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
           example: I wanted to see how many patients I could find for my study XYZ
+    SavedQuerySlots:
+      type: object
+      required:
+        - used
+        - free
+      properties:
+        used:
+          type: integer
+          description: The amount of used saved query slots for a user.
+          example: 2
+        free:
+          type: integer
+          description: The amount of free saved query slots for a user.
+          example: 8
     TermCode:
       description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
       type: object

@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -172,6 +174,7 @@ public class QueryHandlerService {
         out.setQuery(queryRepository.getReferenceById(queryId));
         out.setComment(in.comment());
         out.setLabel(in.label());
+        out.setResultSize(in.totalNumberOfPatients());
         return out;
     }
 
@@ -201,6 +204,7 @@ public class QueryHandlerService {
                         QueryListEntry.builder()
                                 .id(q.getId())
                                 .label(q.getSavedQuery().getLabel())
+                                .totalNumberOfPatients(q.getSavedQuery().getResultSize())
                                 .createdAt(q.getCreatedAt())
                                 .build());
             } else {
@@ -220,6 +224,24 @@ public class QueryHandlerService {
     }
 
     public Long getRetryAfterTime(String userId, int offset, long interval) {
-        return 60 * interval - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+        try {
+            return 60 * interval - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+        } catch (NullPointerException e) {
+            return 0L;
+        }
+    }
+
+    public Long getAmountOfSavedQueriesByUser(String userId) {
+        var queries = queryRepository.findSavedQueriesByAuthor(userId);
+        return queries.map(queryList -> (long) queryList.size()).orElse(0L);
+    }
+
+    public void deleteSavedQuery(Long queryId) throws QueryNotFoundException {
+        var savedQueryOptional = savedQueryRepository.findByQueryId(queryId);
+        if (savedQueryOptional.isPresent()) {
+            savedQueryRepository.deleteById(savedQueryOptional.get().getId());
+        } else {
+            throw new QueryNotFoundException();
+        }
     }
 }

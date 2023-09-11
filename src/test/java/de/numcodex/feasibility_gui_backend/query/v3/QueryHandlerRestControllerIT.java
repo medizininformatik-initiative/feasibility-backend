@@ -106,6 +106,9 @@ public class QueryHandlerRestControllerIT {
     @Value("${app.privacy.threshold.sitesResult}")
     private long thresholdSitesResult;
 
+    @Value("${app.maxSavedQueriesPerUser}")
+    private long maxSavedQueriesPerUser;
+
     @BeforeEach
     void initTest() throws Exception {
         when(rateLimitingInterceptor.preHandle(any(), any(), any())).thenReturn(true);
@@ -338,12 +341,13 @@ public class QueryHandlerRestControllerIT {
         var savedQuery = SavedQuery.builder()
                 .label("foo")
                 .comment("bar")
+                .totalNumberOfPatients(100L)
                 .build();
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(savedQuery)))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -354,6 +358,7 @@ public class QueryHandlerRestControllerIT {
         var savedQuery = SavedQuery.builder()
                 .label("foo")
                 .comment("bar")
+                .totalNumberOfPatients(100L)
                 .build();
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
@@ -370,6 +375,7 @@ public class QueryHandlerRestControllerIT {
         var savedQuery = SavedQuery.builder()
                 .label("foo")
                 .comment("bar")
+                .totalNumberOfPatients(100L)
                 .build();
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
@@ -387,12 +393,68 @@ public class QueryHandlerRestControllerIT {
         var savedQuery = SavedQuery.builder()
                 .label("foo")
                 .comment("bar")
+                .totalNumberOfPatients(100L)
                 .build();
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
                         .contentType(APPLICATION_JSON)
                         .content(jsonUtil.writeValueAsString(savedQuery)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testSaveQuery_failsWith403OnNoFreeSlots() throws Exception {
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doReturn(maxSavedQueriesPerUser).when(queryHandlerService).getAmountOfSavedQueriesByUser(any(String.class));
+
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .totalNumberOfPatients(100L)
+                .build();
+
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonUtil.writeValueAsString(savedQuery)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testDeleteSavedQuery_Succeeds() throws Exception {
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+
+        mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testDeleteSavedQuery_FailsWith403OnWrongAuthor() throws Exception {
+        doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
+
+        mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testDeleteSavedQuery_FailsWith404IfQueryNotFound() throws Exception {
+        doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
+
+        mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testDeleteSavedQuery_FailsWith404IfSavedQueryNotFound() throws Exception {
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        doThrow(QueryNotFoundException.class).when(queryHandlerService).deleteSavedQuery(any(Long.class));
+
+        mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf()))
+                .andExpect(status().isNotFound());
     }
 
     @ParameterizedTest
