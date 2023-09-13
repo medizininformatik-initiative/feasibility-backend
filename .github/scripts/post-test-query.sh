@@ -14,41 +14,42 @@ response=$(curl -s -i \
   --header "Authorization: Bearer $access_token" \
   --header 'Content-Type: application/json' \
   --data '{
-	"version": "http://to_be_decided.com/draft-1/schema#",
-	"inclusionCriteria": [
-		[
-			{
-				"termCodes": [
-					{
-						"code": "gender",
-						"system": "mii.abide",
-						"display": "Geschlecht"
-					}
-				],
-				"attributeFilters": [
-					{
-						"type": "concept",
-						"selectedConcepts": [
-							{
-								"code": "male",
-								"system": "http://hl7.org/fhir/administrative-gender",
-								"display": "Male"
-							}
-						],
-						"attributeCode": {
-							"code": "gender",
-							"system": "mii.abide",
-							"display": "Geschlecht"
-						}
-					}
-				]
-			}
-		]
-	]
-}')
+            "version": "http://to_be_decided.com/draft-1/schema#",
+            "inclusionCriteria": [
+              [
+                {
+                  "attributeFilters": [],
+                  "termCodes": [
+                    {
+                      "code": "263495000",
+                      "display": "Geschlecht",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ],
+                  "context": {
+                    "code": "Patient",
+                    "display": "Patient",
+                    "system": "fdpg.mii.cds",
+                    "version": "1.0.0"
+                  },
+                  "valueFilter": {
+                    "selectedConcepts": [
+                      {
+                        "code": "male",
+                        "display": "Male",
+                        "system": "http://hl7.org/fhir/administrative-gender"
+                      }
+                    ],
+                    "type": "concept"
+                  }
+                }
+              ]
+            ]
+          }
+')
 
 result_location=$(echo "$response" | grep -i location | awk '{print $2}')
-
+sleep 5
 nr_of_pats=$(curl -v \
   --url "${result_location%?}/summary-result" \
   --header "Authorization: Bearer $access_token" | jq '.totalNumberOfPatients')

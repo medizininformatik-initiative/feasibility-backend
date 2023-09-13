@@ -46,6 +46,7 @@ googleCodeStyle.xml
 
 ### ui-profiles ###
 /ontology/ui_profiles/
+/ontology/migration/
 /logging/
 
 result.log
