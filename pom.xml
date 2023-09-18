@@ -26,6 +26,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
+    <ontology-tag>v2.0.1-RC</ontology-tag>
   </properties>
 
   <dependencies>
@@ -197,7 +198,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>0.1.37</version>
+      <version>0.1.45</version>
     </dependency>
 
     <dependency>
@@ -361,8 +362,120 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>download-ontology</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>delete-ontology-directories</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>rm</executable>
+                  <arguments>
+                    <argument>-rf</argument>
+                    <argument>ontology/migration</argument>
+                    <argument>ontology/ui_profiles</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>create-ontology-directory</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mkdir</executable>
+                  <arguments>
+                    <argument>--parents</argument>
+                    <argument>ontology/migration</argument>
+                    <argument>ontology/ui_profiles</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>download-ontology</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>curl</executable>
+                  <arguments>
+                    <argument>-L</argument>
+                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/backend.zip</argument>
+                    <argument>-o</argument>
+                    <argument>ontology/backend.zip</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>unpack-ontology</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>unzip</executable>
+                  <arguments>
+                    <argument>-jod</argument>
+                    <argument>ontology/ui_profiles/</argument>
+                    <argument>ontology/backend.zip</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>move-db-script</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_profiles/R__Load_latest_ui_profile.sql</argument>
+                    <argument>ontology/migration/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>delete-zip-files</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>rm</executable>
+                  <arguments>
+                    <argument>ontology/backend.zip</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

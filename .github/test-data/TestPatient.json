@@ -3,27 +3,10 @@
   "type": "transaction",
   "entry": [
     {
-      "resource": {
-        "resourceType": "Organization",
-        "id": "a4a8d190-7957-4b2c-bed5-fbcd48c9ae99",
-        "name": "Foobar",
-        "address": [
-          {
-            "city": "Foo City",
-            "postalCode": "12345",
-            "country": "Germany"
-          }
-        ]
-      },
-      "request": {
-        "method": "PUT",
-        "url": "Organization/a4a8d190-7957-4b2c-bed5-fbcd48c9ae99"
-      }
-    },
-    {
+      "fullUrl": "Patient/SPEC-DIAB-TEST-P-1",
       "resource": {
         "resourceType": "Patient",
-        "id": "50d830df-9fc1-4d6c-a499-875bcf52bf94",
+        "id": "SPEC-DIAB-TEST-P-1",
         "meta": {
           "profile": [
             "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
@@ -31,48 +14,159 @@
         },
         "identifier": [
           {
+            "use": "usual",
             "type": {
               "coding": [
                 {
-                  "system": "http://fhir.de/CodeSystem/identifier-type-de-basis",
-                  "code": "GKV"
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
                 }
               ]
             },
-            "system": "http://fhir.de/IdSystem/gkv/kvid-10",
-            "value": "6368525657",
-            "assigner": {
-              "reference": "Organization/a4a8d190-7957-4b2c-bed5-fbcd48c9ae99",
-              "display": "Foobar"
-            }
-          }
-        ],
-        "name": [
-          {
-            "use": "official",
-            "family": "Mustermann",
-            "given": [
-              "Maximilian"
-            ]
+            "system": "https://test/pid",
+            "value": "SPEC-DIAB-TEST-P-1"
           }
         ],
         "gender": "male",
-        "birthDate": "1970-01-01",
-        "address": [
-          {
-            "type": "physical",
-            "line": [
-              "Musterstr. 1a"
-            ],
-            "city": "Musterstadt",
-            "postalCode": "12345",
-            "country": "DE"
-          }
-        ]
+        "birthDate": "2003-11-01"
       },
       "request": {
         "method": "PUT",
-        "url": "Patient/50d830df-9fc1-4d6c-a499-875bcf52bf94"
+        "url": "Patient/SPEC-DIAB-TEST-P-1"
+      }
+    },
+    {
+      "fullUrl": "Condition/SPEC-DIAB-TEST-C-1",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "SPEC-DIAB-TEST-C-1",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+          ]
+        },
+        "identifier": [
+          {
+            "value": "SPEC-DIAB-TEST-C-1"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+              "version": "2023",
+              "code": "E13.9"
+            }
+          ],
+          "text": "Idiopathische Hypotonie"
+        },
+        "subject": {
+          "reference": "Patient/SPEC-DIAB-TEST-P-1"
+        },
+        "recordedDate": "2021-01-01T00:00:00+01:00"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/SPEC-DIAB-TEST-C-1"
+      }
+    },
+    {
+      "fullUrl": "Specimen/SPEC-DIAB-TEST-S-1",
+      "resource": {
+        "resourceType": "Specimen",
+        "id": "SPEC-DIAB-TEST-S-1",
+        "extension": [
+          {
+            "url": "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/StructureDefinition/Diagnose",
+            "valueReference": {
+              "reference": "Condition/SPEC-DIAB-TEST-C-1"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "value": "SPEC-DIAB-TEST-S-1"
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "http://snomed.info/sct/900000000000207008/version/20220930",
+              "code": "119364003"
+            }
+          ],
+          "text": "Serum Specimen"
+        },
+        "subject": {
+          "reference": "Patient/SPEC-DIAB-TEST-P-1"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Specimen/SPEC-DIAB-TEST-S-1"
+      }
+    },
+    {
+      "fullUrl": "Patient/SPEC-DIAB-TEST-P-2",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "SPEC-DIAB-TEST-P-2",
+        "meta": {
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+          ]
+        },
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
+                }
+              ]
+            },
+            "system": "https://test/pid",
+            "value": "SPEC-DIAB-TEST-P-2"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "2000-11-01"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/SPEC-DIAB-TEST-P-2"
+      }
+    },
+    {
+      "fullUrl": "Specimen/SPEC-DIAB-TEST-S-2",
+      "resource": {
+        "resourceType": "Specimen",
+        "id": "SPEC-DIAB-TEST-S-2",
+        "identifier": [
+          {
+            "value": "SPEC-DIAB-TEST-S-2"
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "http://snomed.info/sct/900000000000207008/version/20220930",
+              "code": "119364003"
+            }
+          ],
+          "text": "Serum Specimen"
+        },
+        "subject": {
+          "reference": "Patient/SPEC-DIAB-TEST-P-2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Specimen/SPEC-DIAB-TEST-S-2"
       }
     }
   ]

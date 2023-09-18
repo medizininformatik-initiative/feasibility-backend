@@ -41,7 +41,7 @@ jobs:
           queries: security-and-quality
 
       - name: Run Tests
-        run: mvn -B verify
+        run: mvn -Pdownload-ontology -B verify
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -96,7 +96,7 @@ jobs:
           [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Maven Package
-      run: mvn -B -DskipTests package
+      run: mvn -Pdownload-ontology -B -DskipTests package
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
@@ -139,6 +139,9 @@ jobs:
       - name: Load Feasibility Backend Image
         run: docker load --input /tmp/feasibilityBackend.tar
 
+      - name: Download ontology files from github
+        run: .github/scripts/download-and-unpack-ontology.sh
+
       - name: Run Feasibility Backend with Database, Keycloak and Blaze
         run: docker-compose -f .github/integration-test/docker-compose.yml up -d
 
@@ -159,6 +162,9 @@ jobs:
 
       - name: Create Test User in Keycloak
         run: .github/scripts/create-keycloak-user.sh
+
+      - name: Wait for Flare
+        run: .github/scripts/wait-for-url.sh  http://localhost:8092/cache/stats
 
       - name: Post Test Query
         run: .github/scripts/post-test-query.sh
@@ -201,7 +207,7 @@ jobs:
         echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
 
     - name: Maven Package
-      run: mvn -B -DskipTests package
+      run: mvn -Pdownload-ontology -B -DskipTests package
 
     - name: Login to GitHub Docker Registry
       uses: docker/login-action@v1

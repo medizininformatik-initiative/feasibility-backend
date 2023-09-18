@@ -162,7 +162,19 @@ After that, add the following `<server>` configurations to the `<servers>` secti
 
 ### Building the Project
 
-Navigate to the root of this repository and execute `mvn install`.
+Since Release 4.0.0, this project is packaged without ontology files. They have to be downloaded first from the corresponding
+[GitHub repository](https://github.com/medizininformatik-initiative/fhir-ontology-generator). This can be done by enabling
+the maven profile "download-ontology" when building the project. This wipes any existing ontology files in your project.
+So if you are working with your own ontology files, do **not** execute this.
+
+Navigate to the root of this repository and execute `mvn install -Pdownload-ontology` (or omit the -Pdownload-ontology part
+when working with your own).
+
+You can change your run configuration in intellij to execute maven goals before running. So if you want to always just
+grab the latest ontology from GitHub, you can Edit your run configuration, go to `modify options` and select `add before launch task`
+and `run maven goal` with `clean package -Pdownload-ontology`. This is however not necessary, and your mileage may vary
+in other IDEs if they offer such an option.
+
 Be aware that Step 1 "Add GitHub package repositories" needs to be executed before.
 
 ### Setting up the Database
