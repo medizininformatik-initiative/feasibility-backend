@@ -120,6 +120,16 @@ If the number of total results is below threshold, no result will be provided.
 | PRIVACY_THRESHOLD_SITES                                       | If the number of responding sites (above PRIVACY_THRESHOLD_SITES_RESULT) is below this number, only respond with a total amount of patients                   |         | 20      |
 | PRIVACY_THRESHOLD_SITES_RESULT                                | Any site that reports a number below this threshold is considered as non-responding (or zero) in regard to PRIVACY_THRESHOLD_SITES                            |         | 20      |
 
+## Support for self-signed certificates
+
+The feasibility backend supports the use of self-signed certificates from your own CAs.
+On each startup, the feasibility backend will search through the folder /app/certs inside the container, add all found
+CA *.pem files to a java truststore and start the application with this truststore.
+
+Using docker-compose, mount a folder from your host (e.g.: ./certs) to the /app/certs folder,
+add your *.pem files (one for each CA you would like to support) to the folder and ensure that they
+have the .pem extension.
+
 ## Setting up Development
 
 In order to run this project the following steps need to be followed:
