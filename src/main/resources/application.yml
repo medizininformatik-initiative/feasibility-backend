@@ -16,6 +16,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: ${HIBERNATE_SHOW_SQL:false}
   flyway:
     locations: filesystem:${ONTOLOGY_DB_MIGRATION_FOLDER:ontology/migration},classpath:db/migration
   security:
