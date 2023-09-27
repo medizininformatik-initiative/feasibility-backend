@@ -8,7 +8,7 @@ import lombok.Builder;
 @Builder
 public record SavedQuerySlots(
         @JsonProperty("used") long used,
-        @JsonProperty("free") long free
+        @JsonProperty("total") long total
 )
 {
 }

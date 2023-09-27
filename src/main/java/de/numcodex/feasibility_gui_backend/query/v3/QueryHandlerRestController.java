@@ -209,7 +209,10 @@ public class QueryHandlerRestController {
 
     Long amountOfSavedQueriesByUser = queryHandlerService.getAmountOfSavedQueriesByUser(authorId);
     if (amountOfSavedQueriesByUser >= maxSavedQueriesPerUser) {
-      return new ResponseEntity<>("Saved query limit reached. Please delete old saved queries before trying to create new ones.", HttpStatus.FORBIDDEN);
+      var issues = FeasibilityIssues.builder()
+              .issues(List.of(FeasibilityIssue.SAVED_QUERY_STORAGE_FULL))
+              .build();
+      return new ResponseEntity<>(issues, HttpStatus.FORBIDDEN);
     }
 
     try {
@@ -217,7 +220,7 @@ public class QueryHandlerRestController {
       amountOfSavedQueriesByUser++;
       var savedQuerySlots = SavedQuerySlots.builder()
               .used(amountOfSavedQueriesByUser)
-              .free(maxSavedQueriesPerUser - amountOfSavedQueriesByUser)
+              .total(maxSavedQueriesPerUser)
               .build();
       return new ResponseEntity<>(savedQuerySlots, HttpStatus.OK);
     } catch (DataIntegrityViolationException e) {
@@ -257,7 +260,7 @@ public class QueryHandlerRestController {
 
     var savedQuerySlots = SavedQuerySlots.builder()
             .used(amountOfSavedQueriesByUser)
-            .free(maxSavedQueriesPerUser - amountOfSavedQueriesByUser)
+            .total(maxSavedQueriesPerUser)
             .build();
     return savedQuerySlots;
   }

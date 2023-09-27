@@ -354,10 +354,27 @@ paths:
                 $ref: "#/components/schemas/SavedQuerySlots"
         401:
           description: Unauthorized - please login first
-          content: { }
-        403:
-          description: Forbidden - insufficient access rights
           content: {}
+        403:
+          description: Forbidden - insufficient access rights, or no free slots left
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        severity:
+                          type: string
         404:
           description: The query for which the additional information should be stored could not be found
           content: {}
@@ -875,20 +892,25 @@ components:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
           example: I wanted to see how many patients I could find for my study XYZ
+        totalNumberOfPatients:
+          type: integer
+          format: int64
+          description: The number of results that were found for this query.
+          example: 12345
     SavedQuerySlots:
       type: object
       required:
         - used
-        - free
+        - total
       properties:
         used:
           type: integer
           description: The amount of used saved query slots for a user.
           example: 2
-        free:
+        total:
           type: integer
-          description: The amount of free saved query slots for a user.
-          example: 8
+          description: The total amount of saved query slots per user.
+          example: 10
     TermCode:
       description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
       type: object
