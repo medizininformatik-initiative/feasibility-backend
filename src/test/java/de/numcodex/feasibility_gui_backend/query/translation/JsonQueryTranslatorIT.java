@@ -34,8 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
         properties = {
                 "app.cqlTranslationEnabled=true",
                 "app.fhirTranslationEnabled=false",
-                "app.mappingsFile=./ontology/codex-term-code-mapping.json",
-                "app.conceptTreeFile=./ontology/codex-code-tree.json"
+                "app.mappingsFile=./ontology/mapping_cql.json",
+                "app.conceptTreeFile=./ontology/mapping_tree.json"
         }
 )
 @SuppressWarnings("NewClassNamingConvention")
