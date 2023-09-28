@@ -26,7 +26,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v2.0.1-RC</ontology-tag>
+    <ontology-tag>v2.1.9-RC</ontology-tag>
   </properties>
 
   <dependencies>
@@ -198,7 +198,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>0.1.45</version>
+      <version>0.2.0-alpha.1</version>
     </dependency>
 
     <dependency>
@@ -388,8 +388,7 @@
                   <executable>rm</executable>
                   <arguments>
                     <argument>-rf</argument>
-                    <argument>ontology/migration</argument>
-                    <argument>ontology/ui_profiles</argument>
+                    <argument>ontology</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -403,15 +402,28 @@
                 <configuration>
                   <executable>mkdir</executable>
                   <arguments>
-                    <argument>--parents</argument>
-                    <argument>ontology/migration</argument>
-                    <argument>ontology/ui_profiles</argument>
+                    <argument>ontology</argument>
                   </arguments>
                 </configuration>
               </execution>
 
               <execution>
-                <id>download-ontology</id>
+                <id>create-ontology-subdirectories</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mkdir</executable>
+                  <arguments>
+                    <argument>ontology/migration</argument>
+                    <argument>ontology/ui_trees</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>download-ontology-backend</id>
                 <phase>generate-resources</phase>
                 <goals>
                   <goal>exec</goal>
@@ -428,7 +440,7 @@
               </execution>
 
               <execution>
-                <id>unpack-ontology</id>
+                <id>unpack-ontology-backend</id>
                 <phase>generate-resources</phase>
                 <goals>
                   <goal>exec</goal>
@@ -437,7 +449,7 @@
                   <executable>unzip</executable>
                   <arguments>
                     <argument>-jod</argument>
-                    <argument>ontology/ui_profiles/</argument>
+                    <argument>ontology/ui_trees/</argument>
                     <argument>ontology/backend.zip</argument>
                   </arguments>
                 </configuration>
@@ -452,8 +464,41 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_profiles/R__Load_latest_ui_profile.sql</argument>
+                    <argument>ontology/ui_trees/R__Load_latest_ui_profile.sql</argument>
                     <argument>ontology/migration/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>download-ontology-mapping</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>curl</executable>
+                  <arguments>
+                    <argument>-L</argument>
+                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/mapping.zip</argument>
+                    <argument>-o</argument>
+                    <argument>ontology/mapping.zip</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>unpack-ontology-mapping</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>unzip</executable>
+                  <arguments>
+                    <argument>-jod</argument>
+                    <argument>ontology/</argument>
+                    <argument>ontology/mapping.zip</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -468,6 +513,7 @@
                   <executable>rm</executable>
                   <arguments>
                     <argument>ontology/backend.zip</argument>
+                    <argument>ontology/mapping.zip</argument>
                   </arguments>
                 </configuration>
               </execution>
