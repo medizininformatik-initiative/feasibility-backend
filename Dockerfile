@@ -19,10 +19,17 @@ ENV FEASIBILITY_DATABASE_HOST="feasibility-network"
 ENV FEASIBILITY_DATABASE_PORT=5432
 ENV FEASIBILITY_DATABASE_USER=postgres
 ENV FEASIBILITY_DATABASE_PASSWORD=password
+ENV CERTIFICATE_PATH=/opt/codex-feasibility-backend/certs
+ENV TRUSTSTORE_PATH=/opt/codex-feasibility-backend/truststore
+ENV TRUSTSTORE_FILE=self-signed-truststore.jks
+
+RUN mkdir -p $CERTIFICATE_PATH $TRUSTSTORE_PATH
+RUN chown feasibility:feasibility $CERTIFICATE_PATH $TRUSTSTORE_PATH
 
 HEALTHCHECK --interval=5s --start-period=10s CMD curl -s -f http://localhost:8090/actuator/health || exit 1
 
-ENTRYPOINT ["java","-jar","feasibility-gui-backend.jar"]
+COPY ./docker-entrypoint.sh /
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
 
 ARG GIT_REF=""
 ARG BUILD_TIME=""
