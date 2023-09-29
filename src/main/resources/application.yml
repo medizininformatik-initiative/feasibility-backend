@@ -39,9 +39,9 @@ management:
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
-  ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_profiles}
-  mappingsFile: ${MAPPINGS_FILE:ontology/codex-term-code-mapping.json}
-  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/codex-code-tree.json}
+  ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_trees}
+  mappingsFile: ${MAPPINGS_FILE:ontology/mapping_cql.json}
+  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/mapping_tree.json}
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
