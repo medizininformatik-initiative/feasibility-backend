@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
+import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -14,10 +16,9 @@ import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetai
 import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
-import de.numcodex.feasibility_gui_backend.query.v2.QueryHandlerRestController;
+import de.numcodex.feasibility_gui_backend.query.v3.QueryHandlerRestController;
 import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import java.net.URI;
 import java.util.List;
@@ -87,7 +88,7 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_SucceedsOnFirstCall(ResultDetail resultDetail) throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = "/api/v2/query/1";
+    var requestUri = PATH_API + "/query/1";
     boolean isAdmin = false;
 
     switch (resultDetail) {
@@ -120,7 +121,7 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_FailsOnImmediateSecondCall(ResultDetail resultDetail) throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = "/api/v2/query/1";
+    var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
       case SUMMARY -> {
@@ -158,7 +159,7 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_SucceedsOnDelayedSecondCall(ResultDetail resultDetail) throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = "/api/v2/query/1";
+    var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
       case SUMMARY -> {
@@ -188,7 +189,7 @@ public class RateLimitingInterceptorIT {
 
     mockMvc
         .perform(
-            get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
+            get(URI.create(PATH_API + "/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
                 .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
         )
         .andExpect(status().isOk());
@@ -200,7 +201,7 @@ public class RateLimitingInterceptorIT {
       throws Exception {
 
     var authorName = UUID.randomUUID().toString();
-    var requestUri = "/api/v2/query/1";
+    var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
       case SUMMARY -> {
@@ -233,7 +234,7 @@ public class RateLimitingInterceptorIT {
   public void testGetResult_SucceedsOnImmediateSecondCallAsOtherUser(ResultDetail resultDetail)
       throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = "/api/v2/query/1";
+    var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
       case SUMMARY -> {
@@ -264,7 +265,7 @@ public class RateLimitingInterceptorIT {
 
     mockMvc
         .perform(
-            get(URI.create("/api/v2/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
+            get(URI.create(PATH_API + "/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
                 .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
         )
         .andExpect(status().isOk());
@@ -273,7 +274,7 @@ public class RateLimitingInterceptorIT {
   @Test
   public void testGetDetailedObfuscatedResult_FailsOnLimitExceedingCall() throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = "/api/v2/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+    var requestUri = PATH_API + "/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
 
     doReturn(false).when(authenticationHelper)
         .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
@@ -314,9 +315,21 @@ public class RateLimitingInterceptorIT {
       queryResultLines = List.of();
     } else {
       var resultLines = List.of(
-          new ResultLine("A", ResultType.SUCCESS, 123L),
-          new ResultLine("B", ResultType.SUCCESS, 456L),
-          new ResultLine("C", ResultType.SUCCESS, 789L)
+              ResultLine.builder()
+                      .siteName("A")
+                      .type(SUCCESS)
+                      .result(123L)
+                      .build(),
+              ResultLine.builder()
+                      .siteName("B")
+                      .type(SUCCESS)
+                      .result(456L)
+                      .build(),
+              ResultLine.builder()
+                      .siteName("C")
+                      .type(SUCCESS)
+                      .result(789L)
+                      .build()
       );
       queryResultLines = resultLines.stream()
           .map(ssr -> QueryResultLine.builder()

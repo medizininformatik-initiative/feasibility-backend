@@ -63,13 +63,14 @@ services:
       # If the total result for a query is below this number, return an empty result instead.
       PRIVACY_THRESHOLD_RESULTS: ${CODEX_FEASIBILITY_BACKEND_PRIVACY_THRESHOLD_RESULTS}
       PRIVACY_THRESHOLD_SITES: ${CODEX_FEASIBILITY_BACKEND_PRIVACY_THRESHOLD_SITES}
+      PRIVACY_THRESHOLD_SITES_RESULT: ${CODEX_FEASIBILITY_BACKEND_PRIVACY_THRESHOLD_SITES_RESULT}
     volumes:
       - ${CODEX_FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/codex-code-tree.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-code-tree.json
       - ${CODEX_FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/codex-term-code-mapping.json}:${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-term-code-mapping.json
       - ${CODEX_FEASIBILITY_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/codex-feasibility-backend/dsf-security/
       - ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_DB_MIGRATION_FOLDER:-../ontology/migration}:/opt/codex-feasibility-backend/ontology/migration
   feasibility-db:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:15-alpine'
     container_name: feasibility-db
     ports:
     - ${CODEX_FEASIBILITY_BACKEND_DATABASE_PORT:-5432}:5432

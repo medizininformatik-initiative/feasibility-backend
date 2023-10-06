@@ -16,14 +16,15 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: ${HIBERNATE_SHOW_SQL:false}
   flyway:
     locations: filesystem:${ONTOLOGY_DB_MIGRATION_FOLDER:ontology/migration},classpath:db/migration
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}
-          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080/auth}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080}/realms/${KEYCLOAK_REALM:feasibility}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
@@ -38,16 +39,16 @@ management:
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
-  ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_profiles}
-  mappingsFile: ${MAPPINGS_FILE:ontology/codex-term-code-mapping.json}
-  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/codex-code-tree.json}
+  ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_trees}
+  mappingsFile: ${MAPPINGS_FILE:ontology/mapping_cql.json}
+  conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/mapping_tree.json}
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
-  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FEASIBILITY_USER}
-  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FEASIBILITY_POWER_USER}
-  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FEASIBILITY_ADMIN}
+  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FeasibilityUser}
+  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FeasibilityPowerUser}
+  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FeasibilityAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   broker:
     mock:
@@ -59,8 +60,8 @@ app:
     aktin:
       enabled: ${BROKER_CLIENT_AKTIN_ENABLED:false}
       broker:
-        baseUrl: ${AKTIN_BROKER_BASE_URL}
-        apiKey: ${AKTIN_BROKER_API_KEY}
+        baseUrl: ${AKTIN_BROKER_BASE_URL:}
+        apiKey: ${AKTIN_BROKER_API_KEY:}
     dsf:
       enabled: ${BROKER_CLIENT_DSF_ENABLED:false}
       security:
@@ -89,6 +90,7 @@ app:
     threshold:
       sites: ${PRIVACY_THRESHOLD_SITES:3}
       results: ${PRIVACY_THRESHOLD_RESULTS:20}
+      sitesResult: ${PRIVACY_THRESHOLD_SITES_RESULT:20}
     quota:
       soft:
         create:

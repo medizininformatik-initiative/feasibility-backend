@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [4.0.0] - 2023-10-06
+
+### Added
+- Support for self-signed certificates ([#203](https://github.com/medizininformatik-initiative/feasibility-backend/issues/203))
+- New DB tables  ([#180](https://github.com/medizininformatik-initiative/feasibility-backend/issues/180))
+- v3 api endpoint ([#190](https://github.com/medizininformatik-initiative/feasibility-backend/issues/190))
+### Changed
+- Ontology is loaded from GitHub ([#201](https://github.com/medizininformatik-initiative/feasibility-backend/issues/201))
+- Error handling changed to provide more information to the GUI  ([#116](https://github.com/medizininformatik-initiative/feasibility-backend/issues/116))
+### Removed
+- v1 and v2 api endpoints ([#190](https://github.com/medizininformatik-initiative/feasibility-backend/issues/190))
+### Security
+- Update Spring Boot to 3.1.3 ([#188](https://github.com/medizininformatik-initiative/feasibility-backend/issues/188))
+
+The full changelog can be found [here](https://github.com/medizininformatik-initiative/feasibility-backend/milestone/6?closed=1).
+
 ## [3.1.3] - 2023-07-13
 
 ### Changed

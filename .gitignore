@@ -8,7 +8,6 @@ target/
 .apt_generated
 .classpath
 .factorypath
-.project
 .settings
 .springBeans
 .sts4-cache
@@ -46,5 +45,12 @@ googleCodeStyle.xml
 
 
 ### ui-profiles ###
-/ontology/ui_profiles/
+/ontology/ui_trees/
+/ontology/migration/
+/ontology/mapping_cql.json
+/ontology/mapping_fhir.json
+/ontology/mapping_tree.json
+
 /logging/
+
+result.log

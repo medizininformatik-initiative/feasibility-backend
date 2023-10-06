@@ -1,0 +1,12 @@
+DELETE FROM public.criteria_set;
+DELETE FROM public.contextualized_termcode;
+DELETE FROM public.contextualized_termcode_to_criteria_set;
+DELETE FROM public.ui_profile;
+DELETE FROM public.mapping;
+DELETE FROM public.context;
+DELETE FROM public.termcode;
+ALTER SEQUENCE public.criteria_set_id_seq RESTART WITH 1;
+ALTER SEQUENCE public.ui_profile_id_seq RESTART WITH 1;
+ALTER SEQUENCE public.mapping_id_seq RESTART WITH 1;
+ALTER SEQUENCE public.context_id_seq RESTART WITH 1;
+ALTER SEQUENCE public.termcode_id_seq RESTART WITH 1;

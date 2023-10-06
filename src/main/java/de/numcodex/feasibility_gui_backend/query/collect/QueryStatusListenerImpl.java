@@ -90,8 +90,11 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
 
     private void persistResult(Query internalQuery, String siteName, Integer matchesInPopulation)
             throws QueryResultCollectException {
-        var resultLine = new ResultLine(siteName, (matchesInPopulation == null) ? ERROR : SUCCESS,
-            (matchesInPopulation == null) ? 0 : matchesInPopulation);
+        var resultLine = ResultLine.builder()
+                .siteName(siteName)
+                .type((matchesInPopulation == null) ? ERROR : SUCCESS)
+                .result((matchesInPopulation == null) ? 0 : matchesInPopulation)
+                .build();
 
         resultService.addResultLine(internalQuery.getId(), resultLine);
     }

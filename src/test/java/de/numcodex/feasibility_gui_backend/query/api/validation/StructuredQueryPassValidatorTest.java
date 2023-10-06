@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.validation.ConstraintValidatorContext;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -32,19 +31,20 @@ public class StructuredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_validQueryPasses() {
-        var termCode = new TermCode();
-        termCode.setCode("LL2191-6");
-        termCode.setSystem("http://loinc.org");
-        termCode.setDisplay("Geschlecht");
-
-        var inclusionCriterion = new Criterion();
-        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
-
-        var testQuery = new StructuredQuery();
-        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
-        testQuery.setExclusionCriteria(List.of());
-        testQuery.setDisplay("foo");
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
+        var termCode = TermCode.builder()
+                .code("LL2191-6")
+                .system("http://loinc.org")
+                .display("Geschlecht")
+                .build();
+        var inclusionCriterion = Criterion.builder()
+                .termCodes(List.of(termCode))
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+                .exclusionCriteria(List.of())
+                .display("foo")
+                .build();
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testQuery, ctx));
         assertTrue(validationResult);
@@ -52,7 +52,7 @@ public class StructuredQueryPassValidatorTest {
 
     @Test
     public void testIsValid_invalidQueryPasses() {
-        var testQuery = new StructuredQuery();
+        var testQuery = StructuredQuery.builder().build();
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testQuery, ctx));
         assertTrue(validationResult);
     }

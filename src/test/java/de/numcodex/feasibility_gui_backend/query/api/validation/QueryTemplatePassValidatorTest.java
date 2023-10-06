@@ -8,7 +8,6 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Tag;
@@ -32,23 +31,27 @@ public class QueryTemplatePassValidatorTest {
 
     @Test
     public void testIsValid_validQueryPasses() {
-        var termCode = new TermCode();
-        termCode.setCode("LL2191-6");
-        termCode.setSystem("http://loinc.org");
-        termCode.setDisplay("Geschlecht");
+        var termCode = TermCode.builder()
+                .code("LL2191-6")
+                .system("http://loinc.org")
+                .display("Geschlecht")
+                .build();
 
-        var inclusionCriterion = new Criterion();
-        inclusionCriterion.setTermCodes(new ArrayList<>(List.of(termCode)));
+        var inclusionCriterion = Criterion.builder()
+                .termCodes(List.of(termCode))
+                .build();
 
-        var testQuery = new StructuredQuery();
-        testQuery.setInclusionCriteria(List.of(List.of(inclusionCriterion)));
-        testQuery.setExclusionCriteria(List.of());
-        testQuery.setDisplay("foo");
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-
-        var testStoredQuery = new QueryTemplate();
-        testStoredQuery.setContent(testQuery);
-        testStoredQuery.setLabel("test");
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+                .exclusionCriteria(List.of())
+                .display("foo")
+                .build();
+        var testStoredQuery = QueryTemplate.builder()
+                .id(0)
+                .content(testQuery)
+                .label("test")
+                .build();
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testStoredQuery, ctx));
         assertTrue(validationResult);
@@ -56,7 +59,9 @@ public class QueryTemplatePassValidatorTest {
 
     @Test
     public void testIsValid_invalidQueryPasses() {
-        var testStoredQuery = new QueryTemplate();
+        var testStoredQuery = QueryTemplate.builder()
+                .id(0)
+                .build();
 
         var validationResult = assertDoesNotThrow(() -> validator.isValid(testStoredQuery, ctx));
         assertTrue(validationResult);

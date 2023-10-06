@@ -3,7 +3,7 @@ package de.numcodex.feasibility_gui_backend.query.broker.dsf;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.UnsupportedMediaTypeException;
-import org.highmed.fhir.client.FhirWebserviceClient;
+import dev.dsf.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Library;
@@ -144,8 +144,8 @@ public class DSFQueryManagerTest {
 
         assertEquals(businessKey, queryId);
         assertNotNull(library.getName());
-        assertEquals("http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest/0.6.2",
-                task.getInstantiatesUri());
+        assertEquals("http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest|1.0",
+                task.getInstantiatesCanonical());
         assertEquals(1, task.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
                         .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request"))
                 .count());

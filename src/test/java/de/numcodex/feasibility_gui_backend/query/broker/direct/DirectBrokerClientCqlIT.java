@@ -84,7 +84,12 @@ class DirectBrokerClientCqlIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", COMPLETED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(client)
+                .brokerQueryId(brokerQueryId)
+                .brokerSiteId("1")
+                .status(COMPLETED)
+                .build();
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID, statusUpdate);
 
         assertThat(client.getResultSiteIds(brokerQueryId)).containsExactly("1");
@@ -102,7 +107,12 @@ class DirectBrokerClientCqlIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        var statusUpdate = new QueryStatusUpdate(client, brokerQueryId, "1", COMPLETED);
+        var statusUpdate = QueryStatusUpdate.builder()
+                .source(client)
+                .brokerQueryId(brokerQueryId)
+                .brokerSiteId("1")
+                .status(COMPLETED)
+                .build();
         verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(TEST_BACKEND_QUERY_ID, statusUpdate);
 
         assertThat(client.getResultSiteIds(brokerQueryId)).containsExactly("1");

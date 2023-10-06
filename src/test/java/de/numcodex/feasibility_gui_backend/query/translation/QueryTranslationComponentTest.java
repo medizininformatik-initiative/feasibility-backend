@@ -33,7 +33,7 @@ public class QueryTranslationComponentTest {
 
     @BeforeAll
     public static void setUp() {
-        testQuery = new StructuredQuery();
+        testQuery = StructuredQuery.builder().build();
     }
 
     @AfterEach

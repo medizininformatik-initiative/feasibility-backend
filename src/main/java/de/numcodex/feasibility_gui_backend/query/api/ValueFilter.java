@@ -6,26 +6,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Unit;
-import lombok.Data;
+import lombok.Builder;
+
+import java.util.Objects;
 
 import java.util.List;
 
-@Data
 @JsonInclude(Include.NON_NULL)
-public class ValueFilter {
+@Builder
+public record ValueFilter(
+    @JsonProperty(value = "type", required = true) ValueFilterType type,
+    @JsonProperty("selectedConcepts") List<TermCode> selectedConcepts,
+    @JsonProperty("comparator") Comparator comparator,
+    @JsonProperty("unit") Unit quantityUnit,
+    @JsonProperty(value = "value") Double value,
+    @JsonProperty(value = "minValue") Double minValue,
+    @JsonProperty(value = "maxValue")Double maxValue
+) {
 
-    @JsonProperty(value = "type", required = true)
-    private ValueFilterType type;
-    @JsonProperty("selectedConcepts")
-    private List<TermCode> selectedConcepts;
-    @JsonProperty("comparator")
-    private Comparator comparator;
-    @JsonProperty("unit")
-    private Unit quantityUnit;
-    @JsonProperty(value = "value")
-    private Double value;
-    @JsonProperty(value = "minValue")
-    private Double minValue;
-    @JsonProperty(value = "maxValue")
-    private Double maxValue;
+    public ValueFilter {
+        Objects.requireNonNull(type);
+    }
 }

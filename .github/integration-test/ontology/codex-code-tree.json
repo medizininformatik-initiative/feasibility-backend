@@ -1,0 +1,25 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "termCode": {
+            "code": "gender",
+            "display": "Geschlecht",
+            "system": "mii.abide"
+          }
+        }
+      ],
+      "termCode": {
+        "code": "PatientIn",
+        "display": "PatientIn",
+        "system": "mii.abide"
+      }
+    }
+  ],
+  "termCode": {
+    "code": "",
+    "display": "",
+    "system": ""
+  }
+}

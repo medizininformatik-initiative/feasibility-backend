@@ -29,11 +29,10 @@ jobs:
           path: ~/.m2/repository
           key: tests-maven-${{ hashFiles('pom.xml') }}
 
-      - uses: s4u/maven-settings-action@v2
+      - uses: s4u/maven-settings-action@v2.8.0
         with:
           servers: |
-            [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-             {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+            [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -42,10 +41,37 @@ jobs:
           queries: security-and-quality
 
       - name: Run Tests
-        run: mvn -B verify
+        run: mvn -Pdownload-ontology -B verify
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+
+      - name: Upload Feasibility Backend Jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-jar
+          path: target/feasibilityBackend.jar
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and Export to Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          tags: backend:latest
+          outputs: type=docker,dest=/tmp/feasibilityBackend.tar
+
+      - name: Upload Feasibility Backend Image
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-image
+          path: /tmp/feasibilityBackend.tar
 
   security-scan:
     runs-on: ubuntu-latest
@@ -64,14 +90,13 @@ jobs:
         path: ~/.m2/repository
         key: security-scan-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2
+    - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: |
-          [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+          [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Maven Package
-      run: mvn -B -DskipTests package
+      run: mvn -Pdownload-ontology -B -DskipTests package
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
@@ -94,9 +119,66 @@ jobs:
       with:
         sarif_file: trivy-results.sarif
 
+  integration-test:
+    needs: tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Download Feasibility Backend Image
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-image
+          path: /tmp
+
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v1.0.1
+
+      - name: Load Feasibility Backend Image
+        run: docker load --input /tmp/feasibilityBackend.tar
+
+      - name: Download ontology files from github
+        run: .github/scripts/download-and-unpack-ontology.sh
+
+      - name: Run Feasibility Backend with Database, Keycloak and Blaze
+        run: docker-compose -f .github/integration-test/docker-compose.yml up -d
+
+      - name: Wait for Feasibility Backend
+        run: .github/scripts/wait-for-url.sh  http://localhost:8091/actuator/health
+
+      - name: Check if Feasibility Backend is correctly running with the feasibility user
+        run: .github/scripts/check-if-running-as-feasibility-user.sh
+
+      - name: Wait for Blaze
+        run: .github/scripts/wait-for-url.sh  http://localhost:8082/health
+
+      - name: Load Data
+        run: .github/scripts/load-test-data.sh
+
+      - name: Wait for Keycloak
+        run: .github/scripts/wait-for-url.sh  http://localhost:8083/auth/
+
+      - name: Create Test User in Keycloak
+        run: .github/scripts/create-keycloak-user.sh
+
+      - name: Wait for Flare
+        run: .github/scripts/wait-for-url.sh  http://localhost:8092/cache/stats
+
+      - name: Post Test Query
+        run: .github/scripts/post-test-query.sh
+
+      - name: Dump docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
+
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: [ tests, security-scan ]
+    needs:
+      - tests
+      - integration-test
+      - security-scan
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -113,11 +195,10 @@ jobs:
         path: ~/.m2/repository
         key: release-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2
+    - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: |
-          [{"id": "highmed", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"},
-           {"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
+          [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
     - name: Prepare Version
       id: prep
@@ -126,7 +207,7 @@ jobs:
         echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
 
     - name: Maven Package
-      run: mvn -B -DskipTests package
+      run: mvn -Pdownload-ontology -B -DskipTests package
 
     - name: Login to GitHub Docker Registry
       uses: docker/login-action@v1

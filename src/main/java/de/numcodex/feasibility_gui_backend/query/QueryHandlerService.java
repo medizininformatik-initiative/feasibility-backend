@@ -16,6 +16,7 @@ import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateExceptio
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -117,7 +118,10 @@ public class QueryHandlerService {
         return queryTemplateHandler.storeTemplate(queryTemplate, userId);
     }
 
-    public Long saveQuery(Long queryId, SavedQuery savedQueryApi) {
+    public Long saveQuery(Long queryId, String userId, SavedQuery savedQueryApi) {
+        if (savedQueryRepository.existsSavedQueryByLabelAndUserId(savedQueryApi.label(), userId)) {
+            throw new DataIntegrityViolationException(String.format("User %s already has a saved query named %s", userId, savedQueryApi.label()));
+        }
         de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery savedQuery = convertSavedQueryApiToPersistence(savedQueryApi, queryId);
         return savedQueryRepository.save(savedQuery).getId();
     }
@@ -146,23 +150,28 @@ public class QueryHandlerService {
     private Query convertQueryToApi(de.numcodex.feasibility_gui_backend.query.persistence.Query in,
                                     Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQuery)
             throws JsonProcessingException {
-        Query out = new Query();
-        out.setId(in.getId());
-        out.setContent(
-                jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class));
+
         if (savedQuery.isPresent()) {
-            out.setLabel(savedQuery.get().getLabel());
-            out.setComment(savedQuery.get().getComment());
+            return Query.builder()
+                    .id(in.getId())
+                    .content(jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class))
+                    .label(savedQuery.get().getLabel())
+                    .comment(savedQuery.get().getComment())
+                    .build();
+        } else {
+            return Query.builder()
+                    .id(in.getId())
+                    .content(jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class))
+                    .build();
         }
-        return out;
     }
 
     private de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery convertSavedQueryApiToPersistence(
             SavedQuery in, Long queryId) {
         var out = new de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery();
         out.setQuery(queryRepository.getReferenceById(queryId));
-        out.setComment(in.getComment());
-        out.setLabel(in.getLabel());
+        out.setComment(in.comment());
+        out.setLabel(in.label());
         return out;
     }
 
@@ -189,10 +198,17 @@ public class QueryHandlerService {
         queryList.forEach(q -> {
             if (q.getSavedQuery() != null) {
                 ret.add(
-                        new QueryListEntry(q.getId(), q.getSavedQuery().getLabel(), q.getCreatedAt()));
+                        QueryListEntry.builder()
+                                .id(q.getId())
+                                .label(q.getSavedQuery().getLabel())
+                                .createdAt(q.getCreatedAt())
+                                .build());
             } else {
                 ret.add(
-                        new QueryListEntry(q.getId(), null, q.getCreatedAt()));
+                        QueryListEntry.builder()
+                                .id(q.getId())
+                                .createdAt(q.getCreatedAt())
+                                .build());
             }
         });
 

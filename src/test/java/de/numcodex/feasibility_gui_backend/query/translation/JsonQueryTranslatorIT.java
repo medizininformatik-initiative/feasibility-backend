@@ -18,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
@@ -35,8 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
         properties = {
                 "app.cqlTranslationEnabled=true",
                 "app.fhirTranslationEnabled=false",
-                "app.mappingsFile=./ontology/codex-term-code-mapping.json",
-                "app.conceptTreeFile=./ontology/codex-code-tree.json"
+                "app.mappingsFile=./ontology/mapping_cql.json",
+                "app.conceptTreeFile=./ontology/mapping_tree.json"
         }
 )
 @SuppressWarnings("NewClassNamingConvention")
@@ -48,29 +47,30 @@ public class JsonQueryTranslatorIT {
 
     @Test
     public void testTranslate() throws JSONException {
-        var bodyWeightTermCode = new TermCode();
-        bodyWeightTermCode.setSystem("http://snomed.info/sct");
-        bodyWeightTermCode.setDisplay("Body weight (observable entity)");
-        bodyWeightTermCode.setCode("27113001");
-        bodyWeightTermCode.setVersion("v1");
-
-        var kgUnit = new Unit();
-        kgUnit.setCode("kg");
-        kgUnit.setDisplay("kilogram");
-
-        var bodyWeightValueFilter = new ValueFilter();
-        bodyWeightValueFilter.setType(QUANTITY_COMPARATOR);
-        bodyWeightValueFilter.setQuantityUnit(kgUnit);
-        bodyWeightValueFilter.setComparator(GREATER_EQUAL);
-        bodyWeightValueFilter.setValue(50.0);
-
-        var hasBmiGreaterThanFifty = new Criterion();
-        hasBmiGreaterThanFifty.setTermCodes(new ArrayList<>(List.of(bodyWeightTermCode)));
-        hasBmiGreaterThanFifty.setValueFilter(bodyWeightValueFilter);
-
-        var testQuery = new StructuredQuery();
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-        testQuery.setInclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)));
+        var bodyWeightTermCode = TermCode.builder()
+                .code("27113001")
+                .system("http://snomed.info/sct")
+                .version("v1")
+                .display("Body weight (observable entity)")
+                .build();
+        var kgUnit = Unit.builder()
+                .code("kg")
+                .display("kilogram")
+                .build();
+        var bodyWeightValueFilter = ValueFilter.builder()
+                .type(QUANTITY_COMPARATOR)
+                .comparator(GREATER_EQUAL)
+                .quantityUnit(kgUnit)
+                .value(50.0)
+                .build();
+        var hasBmiGreaterThanFifty = Criterion.builder()
+                .termCodes(List.of(bodyWeightTermCode))
+                .valueFilter(bodyWeightValueFilter)
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+                .build();
 
         var translationResult = assertDoesNotThrow(() -> jsonQueryTranslator.translate(testQuery));
 
@@ -108,31 +108,28 @@ public class JsonQueryTranslatorIT {
 
     @Test
     public void testTranslate_SupportsTimeRestrictions() throws JSONException {
-        var dementiaTermCode = new TermCode();
-        dementiaTermCode.setCode("F00");
-        dementiaTermCode.setSystem("http://fhir.de/CodeSystem/dimdi/icd-10-gm");
-        dementiaTermCode.setDisplay("F00");
-
-        var hasDementia = new Criterion();
-        hasDementia.setTermCodes(new ArrayList<>(List.of(dementiaTermCode)));
-
-        var psychologicalDysfunctionTermCode = new TermCode();
-        psychologicalDysfunctionTermCode.setCode("F09");
-        psychologicalDysfunctionTermCode.setSystem("http://fhir.de/CodeSystem/dimdi/icd-10-gm");
-        psychologicalDysfunctionTermCode.setDisplay("F09");
-
-        var timeRestriction = new TimeRestriction();
-        timeRestriction.setAfterDate("2021-09-09");
-        timeRestriction.setBeforeDate("2021-10-09");
-
-        var hasPsychologicalDysfunction = new Criterion();
-        hasPsychologicalDysfunction.setTermCodes(new ArrayList<>(List.of(psychologicalDysfunctionTermCode)));
-        hasPsychologicalDysfunction.setTimeRestriction(timeRestriction);
-
-        var testQuery = new StructuredQuery();
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-        testQuery.setInclusionCriteria(List.of(List.of(hasDementia, hasPsychologicalDysfunction)));
-
+        var dementiaTermCode = TermCode.builder()
+                .code("F00")
+                .system("http://fhir.de/CodeSystem/dimdi/icd-10-gm")
+                .display("F00")
+                .build();
+        var hasDementia = Criterion.builder()
+                .termCodes(List.of(dementiaTermCode))
+                .build();
+        var psychologicalDysfunctionTermCode = TermCode.builder()
+                .code("F09")
+                .system("http://fhir.de/CodeSystem/dimdi/icd-10-gm")
+                .display("F09")
+                .build();
+        var timeRestriction = new TimeRestriction("2021-10-09", "2021-09-09");
+        var hasPsychologicalDysfunction = Criterion.builder()
+                .termCodes(List.of(psychologicalDysfunctionTermCode))
+                .timeRestriction(timeRestriction)
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(hasDementia, hasPsychologicalDysfunction)))
+                .build();
         var translationResult = assertDoesNotThrow(() -> jsonQueryTranslator.translate(testQuery));
 
         var expectedTranslationResult = """
@@ -172,54 +169,55 @@ public class JsonQueryTranslatorIT {
 
     @Test
     public void testTranslate_SupportsAttributeFilters() throws JSONException {
-        var ageTermCode = new TermCode();
-        ageTermCode.setCode("30525-0");
-        ageTermCode.setSystem("http://loinc.org");
-        ageTermCode.setDisplay("Alter");
+        var ageTermCode = TermCode.builder()
+                .code("30525-0")
+                .system("http://loinc.org")
+                .display("Alter")
+                .build();
+        var yearUnit = Unit.builder()
+                .code("a")
+                .display("Jahr")
+                .build();
+        var ageValueFilter = ValueFilter.builder()
+                .type(QUANTITY_COMPARATOR)
+                .comparator(GREATER_THAN)
+                .quantityUnit(yearUnit)
+                .value(18.0)
+                .build();
+        var olderThanEighteen = Criterion.builder()
+                .termCodes(List.of(ageTermCode))
+                .valueFilter(ageValueFilter)
+                .build();
 
-        var yearUnit = new Unit();
-        yearUnit.setCode("a");
-        yearUnit.setDisplay("Jahr");
-
-        var ageValueFilter = new ValueFilter();
-        ageValueFilter.setType(QUANTITY_COMPARATOR);
-        ageValueFilter.setQuantityUnit(yearUnit);
-        ageValueFilter.setComparator(GREATER_THAN);
-        ageValueFilter.setValue(18.0);
-
-        var olderThanEighteen = new Criterion();
-        olderThanEighteen.setTermCodes(new ArrayList<>(List.of(ageTermCode)));
-        olderThanEighteen.setValueFilter(ageValueFilter);
-
-        var bodyTemperatureTermCode = new TermCode();
-        bodyTemperatureTermCode.setCode("8310-5");
-        bodyTemperatureTermCode.setSystem("http://loinc.org");
-        bodyTemperatureTermCode.setDisplay("Körpertemperatur");
-
-        var axillaryMeasureMethod = new TermCode();
-        axillaryMeasureMethod.setCode("LA9370-3");
-        axillaryMeasureMethod.setSystem("http://loinc.org");
-        axillaryMeasureMethod.setDisplay("Axillary");
-
-        var method = new TermCode();
-        method.setCode("method");
-        method.setSystem("abide");
-        method.setDisplay("method");
-
-        var axillaryMeasured = new AttributeFilter();
-        axillaryMeasured.setType(CONCEPT);
-        axillaryMeasured.setSelectedConcepts(List.of(axillaryMeasureMethod));
-        axillaryMeasured.setAttributeCode(method);
-
-        var bodyTemperatureAxillaryMeasured = new Criterion();
-        bodyTemperatureAxillaryMeasured.setTermCodes(new ArrayList<>(List.of(bodyTemperatureTermCode)));
-        bodyTemperatureAxillaryMeasured.setAttributeFilters(new ArrayList<>(List.of(axillaryMeasured)));
-
-        var testQuery = new StructuredQuery();
-        testQuery.setVersion(URI.create("http://to_be_decided.com/draft-2/schema#"));
-        testQuery.setInclusionCriteria(List.of(List.of(olderThanEighteen)));
-        testQuery.setExclusionCriteria(List.of(List.of(bodyTemperatureAxillaryMeasured)));
-
+        var bodyTemperatureTermCode = TermCode.builder()
+                .code("8310-5")
+                .system("http://loinc.org")
+                .display("Körpertemperatur")
+                .build();
+        var axillaryMeasureMethod = TermCode.builder()
+                .code("LA9370-3")
+                .system("http://loinc.org")
+                .display("Axillary")
+                .build();
+        var method = TermCode.builder()
+                .code("method")
+                .system("abide")
+                .display("method")
+                .build();
+        var axillaryMeasured = AttributeFilter.builder()
+                .type(CONCEPT)
+                .selectedConcepts(List.of(axillaryMeasureMethod))
+                .attributeCode(method)
+                .build();
+        var bodyTemperatureAxillaryMeasured = Criterion.builder()
+                .termCodes(List.of(bodyTemperatureTermCode))
+                .attributeFilters(List.of(axillaryMeasured))
+                .build();
+        var testQuery = StructuredQuery.builder()
+                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+                .inclusionCriteria(List.of(List.of(olderThanEighteen)))
+                .exclusionCriteria(List.of(List.of(bodyTemperatureAxillaryMeasured)))
+                .build();
         var translationResult = assertDoesNotThrow(() -> jsonQueryTranslator.translate(testQuery));
 
         var expectedTranslationResult = """

@@ -1,0 +1,23 @@
+[
+  {
+    "attributeSearchParameters": [
+      {
+        "attributeFhirPath": "gender",
+        "attributeKey": {
+          "code": "gender",
+          "display": "Geschlecht",
+          "system": "mii.abide"
+        },
+        "attributeSearchParameter": "gender",
+        "attributeType": "code"
+      }
+    ],
+    "fhirResourceType": "Patient",
+    "key": {
+      "code": "gender",
+      "display": "Geschlecht",
+      "system": "mii.abide"
+    }
+  }
+]
+

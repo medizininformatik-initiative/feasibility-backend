@@ -4,12 +4,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,6 +22,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
 
 @Configuration
 @EnableWebSecurity
@@ -31,8 +37,7 @@ public class WebSecurityConfig {
   public static final String KEY_SPRING_ADDONS_CONFIDENTIAL = "spring-addons-confidential";
   public static final String KEY_SPRING_ADDONS_PUBLIC = "spring-addons-public";
   public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
-  public static final String PATH_API_V1 = "/api/v1";
-  public static final String PATH_API_V2 = "/api/v2";
+  public static final String PATH_API = "/api/v3";
   public static final String PATH_QUERY = "/query";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
@@ -50,6 +55,9 @@ public class WebSecurityConfig {
 
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
+
+  @Autowired
+  private HandlerMappingIntrospector introspector;
 
   public interface Jwt2AuthoritiesConverter extends
       Converter<Jwt, Collection<? extends GrantedAuthority>> {
@@ -90,33 +98,35 @@ public class WebSecurityConfig {
       ServerProperties serverProperties,
       Converter<Jwt, ? extends AbstractAuthenticationToken> authenticationConverter) throws Exception {
 
-    http.oauth2ResourceServer().jwt().jwtAuthenticationConverter(authenticationConverter);
-    http.anonymous();
-
-    http
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-    if (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) {
-      http.requiresChannel().anyRequest().requiresSecure();
-    }
-
-    http.authorizeHttpRequests()
-        .requestMatchers(PATH_API_V2 + PATH_TERMINOLOGY + "/**").hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_USER_ID_MATCHER).hasAuthority(keycloakAdminRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT).hasAuthority(keycloakAdminRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE).hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + PATH_QUERY + PATH_TEMPLATE + "/*").hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_API_V2 + "/**").hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-        .requestMatchers(PATH_API_V1 + "/**").hasAuthority(keycloakAllowedRole)
-        .requestMatchers(PATH_ACTUATOR_HEALTH).anonymous()
-        .requestMatchers(PATH_SWAGGER_UI).anonymous()
-        .requestMatchers(PATH_SWAGGER_CONFIG).anonymous()
-        .anyRequest().authenticated();
-
-    http.cors();
+    http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_TERMINOLOGY + "/**")).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT)).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*")).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_HEALTH)).anonymous()
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_UI)).anonymous()
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_CONFIG)).anonymous()
+                    .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(jwt -> jwt
+                            .jwtAuthenticationConverter(authenticationConverter)
+                    )
+            )
+            .cors(Customizer.withDefaults())
+            .anonymous(Customizer.withDefaults())
+            .sessionManagement((session) -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .requiresChannel(channel -> {
+              if (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) {
+                channel.anyRequest().requiresSecure();
+              }
+            });
     return http.build();
   }
 }
