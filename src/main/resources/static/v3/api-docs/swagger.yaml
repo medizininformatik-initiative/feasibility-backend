@@ -451,6 +451,33 @@ paths:
       security:
         - feasibility_auth:
             - user
+    delete:
+      tags:
+        - templates
+      summary: Delete a query template
+      description: Deletes the query template with the given id
+      operationId: deleteQueryTemplate
+      parameters:
+        - name: queryTemplateId
+          in: path
+          description: ID of the requested query template
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content: {}
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        404:
+          description: Query not found (or user has no access)
+          content: { }
+      security:
+        - feasibility_auth:
+            - user
   /query/template/validate:
     get:
       tags:

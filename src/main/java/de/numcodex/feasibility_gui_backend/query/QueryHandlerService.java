@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -139,6 +140,19 @@ public class QueryHandlerService {
     public List<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> getQueryTemplatesForAuthor(
             String authorId) {
         return queryTemplateRepository.findByAuthor(authorId);
+    }
+
+    public void deleteQueryTemplate(Long queryTemplateId, Principal principal) throws QueryTemplateException {
+        var templates = getQueryTemplatesForAuthor(principal.getName());
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> templateToDelete = templates.stream().
+                filter(t -> t.getId().equals(queryTemplateId)).
+                findFirst();
+
+        if (templateToDelete.isPresent()) {
+            queryTemplateRepository.delete(templateToDelete.get());
+        } else {
+            throw new QueryTemplateException("not found");
+        }
     }
 
     public QueryTemplate convertTemplatePersistenceToApi(
