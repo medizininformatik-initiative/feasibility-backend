@@ -384,6 +384,42 @@ paths:
       security:
         - feasibility_auth:
             - user
+    put:
+      tags:
+        - query
+      summary: "Update a saved query. Only label and comment can be changed"
+      operationId: "updateSavedQuery"
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of the saved query to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The additionally needed information to update a query
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedQuery'
+        required: true
+      responses:
+        200:
+          description: Saved Query successfully updated
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: The query to be updated could not be found
+          content: {}
     delete:
       tags:
         - query
