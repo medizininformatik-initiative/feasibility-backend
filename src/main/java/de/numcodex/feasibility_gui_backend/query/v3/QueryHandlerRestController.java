@@ -233,6 +233,31 @@ public class QueryHandlerRestController {
     return new ResponseEntity<>(getSavedQuerySlotsJson(principal), HttpStatus.OK);
   }
 
+  @PutMapping("/{id}/saved")
+  public ResponseEntity<Object> updateSavedQuery(@PathVariable("id") Long queryId,
+                                                 @RequestBody SavedQuery savedQuery,
+                                                 Principal principal) {
+
+    String authorId;
+    try {
+      authorId = queryHandlerService.getAuthorId(queryId);
+    } catch (QueryNotFoundException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    if (!authorId.equalsIgnoreCase(principal.getName())) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    try {
+      queryHandlerService.updateSavedQuery(queryId, savedQuery);
+      return new ResponseEntity<>(getSavedQuerySlotsJson(principal), HttpStatus.OK);
+    } catch (QueryNotFoundException e) {
+      return new ResponseEntity<>(getSavedQuerySlotsJson(principal), HttpStatus.NOT_FOUND);
+    }
+
+  }
+
   @DeleteMapping("/{id}/saved")
   public ResponseEntity<Object> deleteSavedQuery(@PathVariable("id") Long queryId, Principal principal) {
 

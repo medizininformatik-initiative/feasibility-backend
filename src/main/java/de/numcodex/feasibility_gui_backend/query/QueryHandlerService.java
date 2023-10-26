@@ -128,6 +128,17 @@ public class QueryHandlerService {
         return savedQueryRepository.save(savedQuery).getId();
     }
 
+    public void updateSavedQuery(Long queryId, SavedQuery savedQuery) throws QueryNotFoundException {
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQueryOptional = savedQueryRepository.findByQueryId(queryId);
+        if (savedQueryOptional.isEmpty()) {
+            throw new QueryNotFoundException();
+        }
+        var oldSavedQuery = savedQueryOptional.get();
+        oldSavedQuery.setLabel(savedQuery.label());
+        oldSavedQuery.setComment(savedQuery.comment());
+        savedQueryRepository.save(oldSavedQuery);
+    }
+
     public de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate getQueryTemplate(
             Long queryId, String authorId) throws QueryTemplateException {
         de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate = queryTemplateRepository.findById(
