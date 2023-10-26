@@ -419,7 +419,7 @@ paths:
       security:
         - feasibility_auth:
             - user
-  /query/template/{queryId}:
+  /query/template/{queryTemplateId}:
     get:
       tags:
         - templates
@@ -427,7 +427,7 @@ paths:
       description: Returns the query template with the given id
       operationId: getQueryTemplate
       parameters:
-        - name: queryId
+        - name: queryTemplateId
           in: path
           description: ID of the requested query template
           required: true
@@ -442,6 +442,40 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/QueryTemplate'
+        401:
+          description: Unauthorized - please login first
+          content: { }
+        404:
+          description: Query not found (or user has no access)
+          content: { }
+      security:
+        - feasibility_auth:
+            - user
+    put:
+      tags:
+        - templates
+      summary: Update a query template
+      description: Update the label and comment of a query template
+      operationId: updateQueryTemplate
+      parameters:
+        - name: queryTemplateId
+          in: path
+          description: ID of the query template to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Query template to persist
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryTemplate'
+        required: true
+      responses:
+        200:
+          description: OK
+          content: {}
         401:
           description: Unauthorized - please login first
           content: { }

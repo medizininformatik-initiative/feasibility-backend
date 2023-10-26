@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.security.Principal;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -140,6 +142,23 @@ public class QueryHandlerService {
     public List<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> getQueryTemplatesForAuthor(
             String authorId) {
         return queryTemplateRepository.findByAuthor(authorId);
+    }
+
+    public void updateQueryTemplate(Long queryTemplateId, QueryTemplate queryTemplate, Principal principal) throws QueryTemplateException {
+        var templates = getQueryTemplatesForAuthor(principal.getName());
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> templateToUpdate = templates.stream().
+                filter(t -> t.getId().equals(queryTemplateId)).
+                findFirst();
+
+        if (templateToUpdate.isPresent()) {
+            var template = templateToUpdate.get();
+            template.setLabel(queryTemplate.label());
+            template.setComment(queryTemplate.comment());
+            template.setLastModified(Timestamp.from(Instant.now()));
+            queryTemplateRepository.save(template);
+        } else {
+            throw new QueryTemplateException("not found");
+        }
     }
 
     public void deleteQueryTemplate(Long queryTemplateId, Principal principal) throws QueryTemplateException {

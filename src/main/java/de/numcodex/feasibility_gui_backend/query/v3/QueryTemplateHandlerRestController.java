@@ -121,6 +121,18 @@ public class QueryTemplateHandlerRestController {
     return new ResponseEntity<>(ret, HttpStatus.OK);
   }
 
+  @PutMapping(path = "/{queryTemplateId}")
+  public ResponseEntity<Object> updateQueryTemplate(@PathVariable(value = "queryTemplateId") Long queryTemplateId,
+                                                    @Valid @RequestBody QueryTemplate queryTemplate,
+                                                    Principal principal) {
+    try {
+      queryHandlerService.updateQueryTemplate(queryTemplateId, queryTemplate, principal);
+      return new ResponseEntity<>(HttpStatus.OK);
+    } catch (QueryTemplateException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
   @DeleteMapping(path = "/{queryTemplateId}")
   public ResponseEntity<Object> deleteQueryTemplate(@PathVariable(value = "queryTemplateId") Long queryTemplateId,
                                                     Principal principal) {
