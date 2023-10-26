@@ -422,6 +422,56 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testUpdateSavedQuery_Succeeds() throws Exception {
+        doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .totalNumberOfPatients(100L)
+                .build();
+
+        mockMvc.perform(put(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonUtil.writeValueAsString(savedQuery)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testUpdateSavedQuery_failsWith403OnAuthorMismatch() throws Exception {
+        doReturn("SomeOtherUser").when(queryHandlerService).getAuthorId(any(Long.class));
+
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .totalNumberOfPatients(100L)
+                .build();
+
+        mockMvc.perform(put(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonUtil.writeValueAsString(savedQuery)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    void testUpdateSavedQuery_failsWith404OnAuthorForQueryNotFound() throws Exception {
+        doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
+
+        var savedQuery = SavedQuery.builder()
+                .label("foo")
+                .comment("bar")
+                .totalNumberOfPatients(100L)
+                .build();
+
+        mockMvc.perform(put(URI.create(PATH_API + PATH_QUERY + "/1/saved")).with(csrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonUtil.writeValueAsString(savedQuery)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     void testDeleteSavedQuery_Succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
 
