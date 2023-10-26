@@ -611,15 +611,16 @@ paths:
           schema:
             type: "string"
           example: http://fhir.de/CriteriaSet/bfarm/icd-10-gm
-        - name: contextTermCodeHashList
-          in: body
-          description: "A list of ContextTermCodeHashes"
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
-            example: ["b8318334-7039-33aa-8ed0-85898fffa40b", "a57f98cf-e71d-3695-ae88-59d2c651bf0f", "430654d1-a7df-3c42-a33a-7210ef372bfd"]
+      requestBody:
+        description: A list of ContextTermCodeHashes
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              example: ["b8318334-7039-33aa-8ed0-85898fffa40b", "a57f98cf-e71d-3695-ae88-59d2c651bf0f", "430654d1-a7df-3c42-a33a-7210ef372bfd"]
       responses:
         200:
           description: Ok, return the filtered list of contextualized termcodes that are in the criteria set provided via query param
