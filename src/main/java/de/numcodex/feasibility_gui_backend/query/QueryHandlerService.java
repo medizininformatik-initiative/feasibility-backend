@@ -204,6 +204,7 @@ public class QueryHandlerService {
                         QueryListEntry.builder()
                                 .id(q.getId())
                                 .label(q.getSavedQuery().getLabel())
+                                .comment(q.getSavedQuery().getComment())
                                 .totalNumberOfPatients(q.getSavedQuery().getResultSize())
                                 .createdAt(q.getCreatedAt())
                                 .build());
