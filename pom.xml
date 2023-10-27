@@ -318,7 +318,6 @@
 
   <build>
     <finalName>feasibilityBackend</finalName>
-
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -389,6 +388,9 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <downloadDirectory.base>ontology/</downloadDirectory.base>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -424,42 +426,49 @@
                   </arguments>
                 </configuration>
               </execution>
+            </executions>
+          </plugin>
 
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>wagon-maven-plugin</artifactId>
+            <version>2.0.2</version>
+            <executions>
               <execution>
-                <id>create-ontology-subdirectories</id>
+                <id>download-ontology</id>
                 <phase>generate-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <executable>mkdir</executable>
-                  <arguments>
-                    <argument>ontology/migration</argument>
-                    <argument>ontology/ui_trees</argument>
-                  </arguments>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology</url>
+                  <fromFile>backend.zip</fromFile>
+                  <toDir>${downloadDirectory.base}</toDir>
                 </configuration>
               </execution>
-
               <execution>
-                <id>download-ontology-backend</id>
+                <id>download-mapping</id>
                 <phase>generate-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <executable>curl</executable>
-                  <arguments>
-                    <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/backend.zip</argument>
-                    <argument>-o</argument>
-                    <argument>ontology/backend.zip</argument>
-                  </arguments>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology</url>
+                  <fromFile>mapping.zip</fromFile>
+                  <toDir>${downloadDirectory.base}</toDir>
                 </configuration>
               </execution>
+            </executions>
+          </plugin>
 
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
               <execution>
                 <id>unpack-ontology-backend</id>
-                <phase>generate-resources</phase>
+                <phase>process-resources</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
@@ -474,8 +483,22 @@
               </execution>
 
               <execution>
+                <id>create-ontology-subdirectory</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mkdir</executable>
+                  <arguments>
+                    <argument>ontology/migration/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
                 <id>move-db-script</id>
-                <phase>generate-resources</phase>
+                <phase>process-resources</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
@@ -489,25 +512,8 @@
               </execution>
 
               <execution>
-                <id>download-ontology-mapping</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>curl</executable>
-                  <arguments>
-                    <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/mapping.zip</argument>
-                    <argument>-o</argument>
-                    <argument>ontology/mapping.zip</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
                 <id>unpack-ontology-mapping</id>
-                <phase>generate-resources</phase>
+                <phase>process-resources</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
@@ -523,7 +529,7 @@
 
               <execution>
                 <id>delete-zip-files</id>
-                <phase>generate-resources</phase>
+                <phase>process-resources</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
