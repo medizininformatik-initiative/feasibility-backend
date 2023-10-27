@@ -427,183 +427,170 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <ontoDirectory.download>ontology_dl/</ontoDirectory.download>
+        <ontoDirectory.target>ontology/</ontoDirectory.target>
+      </properties>
       <build>
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>3.1.0</version>
+            <artifactId>wagon-maven-plugin</artifactId>
+            <version>2.0.2</version>
             <executions>
               <execution>
-                <id>delete-ontology-directories</id>
+                <id>download-ontology</id>
                 <phase>generate-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <executable>rm</executable>
-                  <arguments>
-                    <argument>-rf</argument>
-                    <argument>ontology</argument>
-                  </arguments>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology</url>
+                  <fromFile>backend.zip</fromFile>
+                  <toDir>${ontoDirectory.download}</toDir>
                 </configuration>
               </execution>
-
               <execution>
-                <id>create-ontology-directory</id>
+                <id>download-mapping</id>
                 <phase>generate-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <executable>mkdir</executable>
-                  <arguments>
-                    <argument>ontology</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>create-ontology-subdirectories</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mkdir</executable>
-                  <arguments>
-                    <argument>ontology/migration</argument>
-                    <argument>ontology/dse</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>download-ontology-backend</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>curl</executable>
-                  <arguments>
-                    <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology/backend.zip</argument>
-                    <argument>-o</argument>
-                    <argument>ontology/backend.zip</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>unpack-ontology-backend</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>unzip</executable>
-                  <arguments>
-                    <argument>-jod</argument>
-                    <argument>ontology/</argument>
-                    <argument>ontology/backend.zip</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>move-db-script</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mv</executable>
-                  <arguments>
-                    <argument>ontology/R__Load_latest_ui_profile.sql</argument>
-                    <argument>ontology/migration/</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>move-dse-script</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mv</executable>
-                  <arguments>
-                    <argument>ontology/R__load_latest_dse_profiles.sql</argument>
-                    <argument>ontology/migration/</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>move-profile-tree</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mv</executable>
-                  <arguments>
-                    <argument>ontology/profile_tree.json</argument>
-                    <argument>ontology/dse</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>download-ontology-mapping</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>curl</executable>
-                  <arguments>
-                    <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology/mapping.zip</argument>
-                    <argument>-o</argument>
-                    <argument>ontology/mapping.zip</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>unpack-ontology-mapping</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>unzip</executable>
-                  <arguments>
-                    <argument>-jod</argument>
-                    <argument>ontology/</argument>
-                    <argument>ontology/mapping.zip</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>delete-zip-files</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>rm</executable>
-                  <arguments>
-                    <argument>ontology/backend.zip</argument>
-                    <argument>ontology/mapping.zip</argument>
-                  </arguments>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology</url>
+                  <fromFile>mapping.zip</fromFile>
+                  <toDir>${ontoDirectory.download}</toDir>
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>truezip-maven-plugin</artifactId>
+            <version>1.2</version>
+            <executions>
+              <execution>
+                <id>unzip-backend-zip</id>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <fileset>
+                    <directory>${ontoDirectory.download}/backend.zip</directory>
+                    <outputDirectory>${ontoDirectory.download}/backend_unzipped/</outputDirectory>
+                  </fileset>
+                </configuration>
+              </execution>
+              <execution>
+                <id>unzip-mapping-zip</id>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <fileset>
+                    <directory>${ontoDirectory.download}/mapping.zip</directory>
+                    <outputDirectory>${ontoDirectory.download}/mapping_unzipped/</outputDirectory>
+                  </fileset>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>com.coderplus.maven.plugins</groupId>
+            <artifactId>copy-rename-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>rename-file</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>rename</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/mapping_unzipped/mapping/cql/mapping_cql.json</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/mapping_cql.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/mapping_unzipped/mapping/fhir/mapping_fhir.json</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/mapping_fhir.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/mapping_unzipped/mapping/mapping_tree.json</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/mapping_tree.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/mapping_unzipped/mapping/dse_mapping_tree.json</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/dse_mapping_tree.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/backend_unzipped/R__Load_latest_ui_profile.sql</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/migration/R__Load_latest_ui_profile.sql</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/backend_unzipped/R__load_latest_dse_profiles.sql</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/migration/R__load_latest_dse_profiles.sql</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/backend_unzipped/profile_tree.json</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/dse/profile_tree.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>${ontoDirectory.download}/backend_unzipped/terminology_systems.json</sourceFile>
+                      <destinationFile>${ontoDirectory.target}/terminology_systems.json</destinationFile>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <phase>compile</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <delete
+                            dir="${ontoDirectory.download}"
+                            includeemptydirs="true"/>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>3.4.0</version>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${ontoDirectory.download}/</directory>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+                <fileset>
+                  <directory>${ontoDirectory.target}/</directory>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                  <followSymlinks>false</followSymlinks>
+                </fileset>
+              </filesets>
+            </configuration>
           </plugin>
         </plugins>
       </build>
