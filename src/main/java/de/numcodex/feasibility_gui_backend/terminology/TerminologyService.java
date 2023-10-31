@@ -29,8 +29,9 @@ public class TerminologyService {
   private final MappingRepository mappingRepository;
 
   private String uiProfilePath;
-  private static final List<String> SORTED_CATEGORIES = List.of("Einwilligung", "MII_PR_Consent_Einwilligung", "Bioprobe",
-      "Diagnose", "Laboruntersuchung", "Medikamentenverabreichung", "Person", "ProfileSpecimenBioprobe", "Prozedur");
+
+  @Value("${app.ontologyOrder}")
+  private List<String> sortedCategories;
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
   private List<CategoryEntry> categoryEntries = new ArrayList<>();
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
@@ -128,9 +129,18 @@ public class TerminologyService {
   }
 
   public List<CategoryEntry> getCategories() {
-    categoryEntries.sort(
-        Comparator.comparing(value -> SORTED_CATEGORIES.indexOf(value.getDisplay())));
-    return categoryEntries;
+    var sortedCategoryEntries = new ArrayList<CategoryEntry>();
+
+    List<CategoryEntry> found = categoryEntries.stream().filter(value -> sortedCategories.contains(value.getDisplay())).collect(Collectors.toList());
+    List<CategoryEntry> notFound = categoryEntries.stream().filter(value -> !sortedCategories.contains(value.getDisplay())).collect(Collectors.toList());
+
+    found.sort(Comparator.comparing(value -> sortedCategories.indexOf(value.getDisplay())));
+    notFound.sort(Comparator.comparing(CategoryEntry::getDisplay));
+
+    sortedCategoryEntries.addAll(found);
+    sortedCategoryEntries.addAll(notFound);
+
+    return sortedCategoryEntries;
   }
 
   public List<TerminologyEntry> getSelectableEntries(String query, UUID categoryId) {

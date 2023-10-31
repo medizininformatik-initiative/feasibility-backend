@@ -1,0 +1,60 @@
+{
+    "children": [
+        {
+            "context": {
+                "code": "CategoryA",
+                "display": "CategoryA",
+                "system": "fdpg.mii.cds",
+                "version": "1.0.0"
+            },
+            "display": "Termcode A_1",
+            "id": "33ca0320-81e5-406f-bdfd-c649e443ddd6",
+            "leaf": true,
+            "selectable": true,
+            "termCodes": [
+                {
+                    "code": "tcA_1",
+                    "display": "Termcode A_1",
+                    "system": "http://some.system/",
+                    "version": "http://some.system/123/version/456"
+                }
+            ]
+        },
+        {
+            "context": {
+                "code": "CategoryA",
+                "display": "CategoryA",
+                "system": "fdpg.mii.cds",
+                "version": "1.0.0"
+            },
+            "display": "Termcode A_2",
+            "id": "0da2a746-d23f-4668-9160-51d83edbd02c",
+            "leaf": true,
+            "selectable": true,
+            "termCodes": [
+                {
+                    "code": "tcA_2",
+                    "display": "Termcode A_2",
+                    "system": "http://some.system/",
+                    "version": "http://some.system/123/version/456"
+                }
+            ]
+        }
+    ],
+    "context": {
+        "code": "CategoryA",
+        "display": "CategoryA",
+        "system": "fdpg.mii.cds"
+    },
+    "display": "CategoryA",
+    "id": "30a20f30-77db-11ee-b962-0242ac120002",
+    "leaf": false,
+    "selectable": false,
+    "termCodes": [
+        {
+            "code": "CategoryA",
+            "display": "CategoryA",
+            "system": "fdpg.mii.cds"
+        }
+    ]
+}
