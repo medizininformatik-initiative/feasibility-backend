@@ -182,7 +182,7 @@ public class QueryTemplateHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testUpdateQueryTemplate_succeeds() throws Exception {
-        doNothing().when(queryHandlerService).updateQueryTemplate(any(Long.class), any(QueryTemplate.class), any(Principal.class));
+        doNothing().when(queryHandlerService).updateQueryTemplate(any(Long.class), any(QueryTemplate.class), any(String.class));
 
         mockMvc.perform(put(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/1")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -202,7 +202,7 @@ public class QueryTemplateHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testUpdateQueryTemplate_failsOnTemplateExceptionWith404() throws Exception {
-        doThrow(QueryTemplateException.class).when(queryHandlerService).updateQueryTemplate(any(Long.class), any(QueryTemplate.class), any(Principal.class));
+        doThrow(QueryTemplateException.class).when(queryHandlerService).updateQueryTemplate(any(Long.class), any(QueryTemplate.class), any(String.class));
 
         mockMvc.perform(put(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE+ "/1")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -213,7 +213,7 @@ public class QueryTemplateHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testDeleteQueryTemplate_succeeds() throws Exception {
-        doNothing().when(queryHandlerService).deleteQueryTemplate(any(Long.class), any(Principal.class));
+        doNothing().when(queryHandlerService).deleteQueryTemplate(any(Long.class), any(String.class));
 
         mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/1")).with(csrf()))
                 .andExpect(status().isOk());
@@ -222,7 +222,7 @@ public class QueryTemplateHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testDeleteQueryTemplate_failsWith404OnNotFound() throws Exception {
-        doThrow(QueryTemplateException.class).when(queryHandlerService).deleteQueryTemplate(any(Long.class), any(Principal.class));
+        doThrow(QueryTemplateException.class).when(queryHandlerService).deleteQueryTemplate(any(Long.class), any(String.class));
 
         mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/1")).with(csrf()))
                 .andExpect(status().isNotFound());

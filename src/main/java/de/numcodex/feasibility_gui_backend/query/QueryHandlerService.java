@@ -21,13 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
-import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -144,8 +142,8 @@ public class QueryHandlerService {
         return queryTemplateRepository.findByAuthor(authorId);
     }
 
-    public void updateQueryTemplate(Long queryTemplateId, QueryTemplate queryTemplate, Principal principal) throws QueryTemplateException {
-        var templates = getQueryTemplatesForAuthor(principal.getName());
+    public void updateQueryTemplate(Long queryTemplateId, QueryTemplate queryTemplate, String authorId) throws QueryTemplateException {
+        var templates = getQueryTemplatesForAuthor(authorId);
         Optional<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> templateToUpdate = templates.stream().
                 filter(t -> t.getId().equals(queryTemplateId)).
                 findFirst();
@@ -161,8 +159,8 @@ public class QueryHandlerService {
         }
     }
 
-    public void deleteQueryTemplate(Long queryTemplateId, Principal principal) throws QueryTemplateException {
-        var templates = getQueryTemplatesForAuthor(principal.getName());
+    public void deleteQueryTemplate(Long queryTemplateId, String authorId) throws QueryTemplateException {
+        var templates = getQueryTemplatesForAuthor(authorId);
         Optional<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> templateToDelete = templates.stream().
                 filter(t -> t.getId().equals(queryTemplateId)).
                 findFirst();

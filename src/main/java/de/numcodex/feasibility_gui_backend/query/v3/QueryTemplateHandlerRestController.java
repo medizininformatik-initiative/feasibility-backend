@@ -126,7 +126,7 @@ public class QueryTemplateHandlerRestController {
                                                     @Valid @RequestBody QueryTemplate queryTemplate,
                                                     Principal principal) {
     try {
-      queryHandlerService.updateQueryTemplate(queryTemplateId, queryTemplate, principal);
+      queryHandlerService.updateQueryTemplate(queryTemplateId, queryTemplate, principal.getName());
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (QueryTemplateException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -137,7 +137,7 @@ public class QueryTemplateHandlerRestController {
   public ResponseEntity<Object> deleteQueryTemplate(@PathVariable(value = "queryTemplateId") Long queryTemplateId,
                                                     Principal principal) {
     try {
-      queryHandlerService.deleteQueryTemplate(queryTemplateId, principal);
+      queryHandlerService.deleteQueryTemplate(queryTemplateId, principal.getName());
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (QueryTemplateException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
