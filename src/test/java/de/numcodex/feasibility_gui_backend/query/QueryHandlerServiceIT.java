@@ -515,7 +515,7 @@ public class QueryHandlerServiceIT {
                 .content(createValidStructuredQuery("foo"))
                 .build();
 
-        var queryTemplateId = queryHandlerService.storeQueryTemplate(originalQueryTemplate, CREATOR);
+        queryHandlerService.storeQueryTemplate(originalQueryTemplate, CREATOR);
         assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
         assertThrows(QueryTemplateException.class, () -> queryHandlerService.deleteQueryTemplate(0L, "unknown-creator"));
         assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
