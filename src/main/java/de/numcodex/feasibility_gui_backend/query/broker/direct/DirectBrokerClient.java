@@ -78,6 +78,7 @@ public abstract class DirectBrokerClient implements BrokerClient {
     return findQuery(brokerQueryId).hasResult() ? Collections.singletonList(SITE_ID_LOCAL) : Collections.emptyList();
   }
 
+  @Override
   public String getSiteName(String siteId) throws SiteNotFoundException {
     if (SITE_ID_LOCAL.equals(siteId)) {
       return SITE_NAME_LOCAL;
