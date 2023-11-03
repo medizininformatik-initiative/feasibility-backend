@@ -143,7 +143,7 @@ public class QueryTemplateHandlerRestController {
                 .comment(convertedQuery.comment())
                 .lastModified(convertedQuery.lastModified())
                 .createdBy(convertedQuery.createdBy())
-                .invalidTerms(convertedQuery.invalidTerms())
+                .invalidTerms(invalidTermCodes)
                 .isValid(convertedQuery.isValid())
                 .build();
         ret.add(convertedQueryWithoutContent);
