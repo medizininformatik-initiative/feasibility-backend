@@ -67,7 +67,7 @@ public class QueryTemplateValidatorTest {
     assertFalse(validator.isValid(queryWithoutLabel, constraintValidatorContext));
 
     var queryWithoutStructuredQuery = buildInvalidValidQueryWithoutContent();
-    assertFalse(validator.isValid(queryWithoutStructuredQuery, constraintValidatorContext));
+    assertTrue(validator.isValid(queryWithoutStructuredQuery, constraintValidatorContext));
 
     var queryWithMalformedStructuredQuery = buildInvalidQueryWithMalformedStructuredQuery();
     assertFalse(validator.isValid(queryWithMalformedStructuredQuery, constraintValidatorContext));

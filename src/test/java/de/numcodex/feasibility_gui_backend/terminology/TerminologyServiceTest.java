@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,6 +31,8 @@ class TerminologyServiceTest {
 
     private static UUID CATEGORY_1_ID = UUID.fromString("2ec77ac6-2547-2aff-031b-337d9ff80cff");
     private static UUID CATEGORY_2_ID = UUID.fromString("457b3f3b-bf4e-45da-b676-dc63d31942dd");
+    private static UUID CATEGORY_A_ID = UUID.fromString("30a20f30-77db-11ee-b962-0242ac120002");
+    private static UUID CATEGORY_B_ID = UUID.fromString("385d2db8-77db-11ee-b962-0242ac120002");
     private static UUID VALID_NODE_ID_CAT1 = UUID.fromString("72ceaea9-c1ff-2e94-5fc0-7ba34feca654");
     private static UUID VALID_NODE_ID_CAT2 = UUID.fromString("33ca0320-81e5-406f-bdfd-c649e443ddd6");
 
@@ -81,17 +84,40 @@ class TerminologyServiceTest {
     }
 
     @Test
-    void testGetCategories() throws IOException {
+    void testGetCategories_order1() throws IOException {
         var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        var categoriesResult = assertDoesNotThrow(() -> terminologyService.getCategories());
+        ReflectionTestUtils.setField(terminologyService, "sortedCategories", List.of("Category2", "Category3", "Category1"));
+
+        var categoriesResult = assertDoesNotThrow(terminologyService::getCategories);
         assertNotNull(categoriesResult);
         assertFalse(categoriesResult.isEmpty());
         assertThat(categoriesResult)
-                .hasSize(2)
+                .hasSize(4)
                 .extracting(CategoryEntry::getDisplay, CategoryEntry::getCatId)
-                .containsExactlyInAnyOrder(
+                .containsExactly(
+                        tuple("Category2", CATEGORY_2_ID),
                         tuple("Category1", CATEGORY_1_ID),
-                        tuple("Category2", CATEGORY_2_ID)
+                        tuple("CategoryA", CATEGORY_A_ID),
+                        tuple("CategoryB", CATEGORY_B_ID)
+                );
+    }
+
+    @Test
+    void testGetCategories_order2() throws IOException {
+        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        ReflectionTestUtils.setField(terminologyService, "sortedCategories", List.of("CategoryB", "CategoryX", "CategoryY"));
+
+        var categoriesResult = assertDoesNotThrow(terminologyService::getCategories);
+        assertNotNull(categoriesResult);
+        assertFalse(categoriesResult.isEmpty());
+        assertThat(categoriesResult)
+                .hasSize(4)
+                .extracting(CategoryEntry::getDisplay, CategoryEntry::getCatId)
+                .containsExactly(
+                        tuple("CategoryB", CATEGORY_B_ID),
+                        tuple("Category1", CATEGORY_1_ID),
+                        tuple("Category2", CATEGORY_2_ID),
+                        tuple("CategoryA", CATEGORY_A_ID)
                 );
     }
 

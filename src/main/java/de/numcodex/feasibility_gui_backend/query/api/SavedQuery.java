@@ -9,7 +9,8 @@ import lombok.Builder;
 @Builder
 public record SavedQuery(
     @JsonProperty String label,
-    @JsonProperty String comment
+    @JsonProperty String comment,
+    @JsonProperty Long totalNumberOfPatients
 ) {
 
 }

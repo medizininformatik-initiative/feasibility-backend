@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
@@ -10,23 +12,26 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.persistence.Query;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
-import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
+import de.numcodex.feasibility_gui_backend.query.dispatch.QueryHashCalculator;
+import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 
 import java.net.URI;
 import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -39,8 +44,7 @@ import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.Resu
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("query")
 @Tag("handler")
@@ -82,10 +86,23 @@ public class QueryHandlerServiceIT {
     private QueryRepository queryRepository;
 
     @Autowired
+    private SavedQueryRepository savedQueryRepository;
+
+    @Autowired
+    private QueryContentRepository queryContentRepository;
+
+    @Autowired
     private QueryDispatchRepository queryDispatchRepository;
 
     @Autowired
     private ResultService resultService;
+
+    @Autowired
+    private QueryHashCalculator queryHashCalculator;
+
+    @Autowired
+    @Qualifier("translation")
+    private ObjectMapper jsonUtil;
 
     @Test
     public void testRunQuery() {
@@ -98,6 +115,52 @@ public class QueryHandlerServiceIT {
 
         assertThat(queryRepository.count()).isOne();
         assertThat(queryDispatchRepository.count()).isOne();
+    }
+
+    @Test
+    public void testGetQuery_succeeds() throws JsonProcessingException {
+        var fakeContent = new QueryContent("{}");
+        fakeContent.setHash("a2189dffb");
+        queryContentRepository.save(fakeContent);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(fakeContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var loadedQuery = queryHandlerService.getQuery(queryId);
+
+        assertThat(loadedQuery).isNotNull();
+        assertThat(jsonUtil.writeValueAsString(loadedQuery.content())).isEqualTo(fakeContent.getQueryContent());
+    }
+
+    @Test
+    public void testGetQuery_UnknownQueryIdReturnsNull() throws JsonProcessingException {
+        var query = queryHandlerService.getQuery(UNKNOWN_QUERY_ID);
+
+        assertThat(query).isNull();
+    }
+
+    @Test
+    public void testGetQueryContent_succeeds() throws JsonProcessingException {
+        var fakeContent = new QueryContent("{}");
+        fakeContent.setHash("a2189dffb");
+        queryContentRepository.save(fakeContent);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(fakeContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var loadedQueryContent = queryHandlerService.getQueryContent(queryId);
+
+        assertThat(loadedQueryContent).isNotNull();
+        assertThat(jsonUtil.writeValueAsString(loadedQueryContent)).isEqualTo(fakeContent.getQueryContent());
+    }
+
+    @Test
+    public void testGetQueryContent_UnknownQueryIdReturnsNull() throws JsonProcessingException {
+        var queryContent = queryHandlerService.getQueryContent(UNKNOWN_QUERY_ID);
+
+        assertThat(queryContent).isNull();
     }
 
     // This behavior seems to be necessary since the UI is polling constantly.
@@ -216,6 +279,67 @@ public class QueryHandlerServiceIT {
     }
 
     @Test
+    public void testGetQuery_nullOnNotFound() throws JsonProcessingException {
+        var queryFromDb = queryHandlerService.getQuery(1L);
+
+        assertThat(queryFromDb).isNull();
+    }
+
+    @Test
+    public void testGetQuery_succeedsWithNoSavedQuery() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var queryFromDb = queryHandlerService.getQuery(queryId);
+
+        assertThat(queryFromDb.label()).isNull();
+        assertThat(queryFromDb.comment()).isNull();
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery("foo").inclusionCriteria());
+    }
+
+    @Test
+    public void testGetQuery_succeedsWithSavedQuery() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+        var savedQuery = new SavedQuery(LABEL, COMMENT, 150L);
+        queryHandlerService.saveQuery(queryId, CREATOR, savedQuery);
+
+        var queryFromDb = queryHandlerService.getQuery(queryId);
+
+        assertThat(queryFromDb.label()).isEqualTo(LABEL);
+        assertThat(queryFromDb.comment()).isEqualTo(COMMENT);
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery("foo").inclusionCriteria());
+    }
+
+    @Test
+    public void testGetQueryContent_nullIfNotFound() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var queryContentFromDb = queryHandlerService.getQueryContent(++queryId);
+
+        assertThat(queryContentFromDb).isNull();
+    }
+
+    @Test
     public void testGetAuthorId_UnknownQueryIdThrows() {
         assertThrows(QueryNotFoundException.class,
             () -> queryHandlerService.getAuthorId(UNKNOWN_QUERY_ID));
@@ -232,8 +356,8 @@ public class QueryHandlerServiceIT {
         var queryId2 = queryRepository.save(query2).getId();
         var label = "label-152431";
 
-        var savedQuery1 = new SavedQuery(label, "comment-152508");
-        var savedQuery2 = new SavedQuery(label, "comment-152546");
+        var savedQuery1 = new SavedQuery(label, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label, "comment-152546", 200L);
 
         assertThat(queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1)).isNotNull();
         assertThrows(DataIntegrityViolationException.class,
@@ -252,8 +376,8 @@ public class QueryHandlerServiceIT {
         var label1 = "label-152431";
         var label2 = "label-160123";
 
-        var savedQuery1 = new SavedQuery(label1, "comment-152508");
-        var savedQuery2 = new SavedQuery(label2, "comment-152546");
+        var savedQuery1 = new SavedQuery(label1, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label2, "comment-152546", 200L);
 
         assertThat(queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1)).isNotNull();
         assertDoesNotThrow(() -> queryHandlerService.saveQuery(queryId2, CREATOR, savedQuery2));
@@ -271,11 +395,63 @@ public class QueryHandlerServiceIT {
         var queryId2 = queryRepository.save(query2).getId();
         var label = "label-152431";
 
-        var savedQuery1 = new SavedQuery(label, "comment-152508");
-        var savedQuery2 = new SavedQuery(label, "comment-152546");
+        var savedQuery1 = new SavedQuery(label, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label, "comment-152546", 200L);
 
         assertThat(queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1)).isNotNull();
         assertDoesNotThrow(() -> queryHandlerService.saveQuery(queryId2, otherCreator, savedQuery2));
+    }
+
+    @Test
+    public void testDeleteSavedQuery_succeeds() throws QueryNotFoundException {
+        var query1 = new Query();
+        query1.setCreatedBy(CREATOR);
+        var query2 = new Query();
+        query2.setCreatedBy(CREATOR);
+        var queryId1 = queryRepository.save(query1).getId();
+        var queryId2 = queryRepository.save(query2).getId();
+        var label1 = "label-152431";
+        var label2 = "label-152432";
+
+        var savedQuery1 = new SavedQuery(label1, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label2, "comment-152546", 200L);
+
+        queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1);
+        queryHandlerService.saveQuery(queryId2, CREATOR, savedQuery2);
+
+        assertThat(queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR)).isEqualTo(2);
+
+        queryHandlerService.deleteSavedQuery(queryId1);
+        assertThat(queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR)).isEqualTo(1);
+        queryHandlerService.deleteSavedQuery(queryId2);
+        assertThat(queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR)).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeleteSavedQuery_failsOnUnknownQueryId() throws QueryNotFoundException {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        var label = "label-152431";
+
+        var savedQuery = new SavedQuery(label, "comment-152508", 100L);
+
+        queryHandlerService.saveQuery(queryId, CREATOR, savedQuery);
+
+        assertThrows(QueryNotFoundException.class, () -> queryHandlerService.deleteSavedQuery(queryId + 1));
+    }
+
+    @Test
+    public void testGetAmountOfQueriesByUserAndInterval() throws JsonProcessingException {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        queryRepository.save(query).getId();
+
+        var count0 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, 0);
+        var count1 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, 1);
+
+        assertThat(count0).isEqualTo(0);
+        assertThat(count1).isEqualTo(1);
     }
 
     @Test
@@ -286,7 +462,7 @@ public class QueryHandlerServiceIT {
                 .comment(COMMENT)
                 .createdBy(CREATOR)
                 .lastModified(TIME_STRING)
-                .content(createValidStructuredQuery())
+                .content(createValidStructuredQuery("foo"))
                 .build();
 
         assertDoesNotThrow(() -> queryHandlerService.storeQueryTemplate(queryTemplate, CREATOR));
@@ -302,7 +478,7 @@ public class QueryHandlerServiceIT {
                 .comment(COMMENT)
                 .createdBy(CREATOR)
                 .lastModified(TIME_STRING)
-                .content(createValidStructuredQuery())
+                .content(createValidStructuredQuery("foo"))
                 .build();
 
         var queryTemplate2 = QueryTemplate.builder()
@@ -310,7 +486,7 @@ public class QueryHandlerServiceIT {
                 .comment(COMMENT)
                 .createdBy(CREATOR)
                 .lastModified(TIME_STRING)
-                .content(createValidStructuredQuery())
+                .content(createValidStructuredQuery("foo"))
                 .build();
 
         assertDoesNotThrow(() -> queryHandlerService.storeQueryTemplate(queryTemplate1, CREATOR));
@@ -319,34 +495,209 @@ public class QueryHandlerServiceIT {
 
     @Test
     @DisplayName("storeQueryTemplate() -> same labels for different user id succeeds")
-    public void storeQueryTemplate_SameSavedQueryLabelsForDifferentUsersSucceeds() throws Exception {
+    public void storeQueryTemplate_SameSavedQueryLabelsForDifferentUsersSucceeds() {
         var queryTemplate = QueryTemplate.builder()
                 .label(LABEL)
                 .comment(COMMENT)
                 .createdBy(CREATOR)
                 .lastModified(TIME_STRING)
-                .content(createValidStructuredQuery())
+                .content(createValidStructuredQuery("foo"))
                 .build();
 
         assertDoesNotThrow(() -> queryHandlerService.storeQueryTemplate(queryTemplate, CREATOR));
         assertDoesNotThrow(() -> queryHandlerService.storeQueryTemplate(queryTemplate, "some-other-creator"));
     }
 
-    private StructuredQuery createValidStructuredQuery() {
+    @Test
+    public void testGetQueryTemplate_succeeds() throws QueryTemplateException {
+        var queryTemplate = QueryTemplate.builder()
+                .label(LABEL)
+                .comment(COMMENT)
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("foo"))
+                .build();
+        var queryTemplateId = queryHandlerService.storeQueryTemplate(queryTemplate, CREATOR);
+
+        de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate loadedQueryTemplate
+                = assertDoesNotThrow(() -> queryHandlerService.getQueryTemplate(queryTemplateId, CREATOR));
+        assertThat(loadedQueryTemplate.getLabel()).isEqualTo(LABEL);
+        assertThat(loadedQueryTemplate.getComment()).isEqualTo(COMMENT);
+        assertThat(loadedQueryTemplate.getLastModified().toString()).isEqualTo(TIME_STRING);
+    }
+
+    @Test
+    public void testGetQueryTemplate_UnknownQueryIdThrows() {
+        assertThrows(QueryTemplateException.class, () -> queryHandlerService.getQueryTemplate(0L, CREATOR));
+    }
+
+    @Test
+    public void testGetQueryTemplate_WrongAuthorThrows() throws QueryTemplateException {
+        var queryTemplate = QueryTemplate.builder()
+                .label(LABEL)
+                .comment(COMMENT)
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("foo"))
+                .build();
+        var queryTemplateId = queryHandlerService.storeQueryTemplate(queryTemplate, CREATOR);
+
+        assertThrows(QueryTemplateException.class, () -> queryHandlerService.getQueryTemplate(queryTemplateId, "unknown-creator"));
+    }
+
+    @Test
+    public void testGetQueryTemplatesForAuthor_succeeds() {
+        var queryTemplate = QueryTemplate.builder()
+                .label(LABEL)
+                .comment(COMMENT)
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("foo"))
+                .build();
+
+        assertDoesNotThrow(() -> queryHandlerService.storeQueryTemplate(queryTemplate, CREATOR));
+
+        assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
+        assertThat(queryHandlerService.getQueryTemplatesForAuthor("unknown-creator").size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testUpdateQueryTemplate_succeeds() throws QueryTemplateException, JsonProcessingException {
+        var originalQueryTemplate = QueryTemplate.builder()
+                .label(LABEL)
+                .comment(COMMENT)
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("foo"))
+                .build();
+
+        var updatedQueryTemplate = QueryTemplate.builder()
+                .label(LABEL + "-modified")
+                .comment(COMMENT + "-modified")
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("bar"))
+                .build();
+
+        var queryTemplateId = queryHandlerService.storeQueryTemplate(originalQueryTemplate, CREATOR);
+
+        assertDoesNotThrow(() -> queryHandlerService.updateQueryTemplate(queryTemplateId, updatedQueryTemplate, CREATOR));
+        de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate loadedQueryTemplate
+                = assertDoesNotThrow(() -> queryHandlerService.getQueryTemplate(queryTemplateId, CREATOR));
+
+        var loadedQueryContent = jsonUtil.readValue(loadedQueryTemplate.getQuery().getQueryContent().getQueryContent(), StructuredQuery.class);
+
+        assertThat(loadedQueryTemplate.getLabel()).isEqualTo(updatedQueryTemplate.label());
+        assertThat(loadedQueryTemplate.getComment()).isEqualTo(updatedQueryTemplate.comment());
+        // Query Content shall remain untouched - so check against the original instead of the updated content
+        assertThat(loadedQueryContent.display()).isEqualTo(originalQueryTemplate.content().display());
+    }
+
+    @Test
+    public void testUpdateQueryTemplate_throwsOnUnknownId() throws QueryTemplateException, JsonProcessingException {
+        var updatedQueryTemplate = QueryTemplate.builder()
+                .label(LABEL + "-modified")
+                .comment(COMMENT + "-modified")
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("bar"))
+                .build();
+
+        assertThrows(QueryTemplateException.class, () -> queryHandlerService.updateQueryTemplate(0L, updatedQueryTemplate, CREATOR));
+    }
+
+    @Test
+    public void testDeleteQueryTemplate_succeeds() throws QueryTemplateException, JsonProcessingException {
+        var originalQueryTemplate = QueryTemplate.builder()
+                .label(LABEL)
+                .comment(COMMENT)
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("foo"))
+                .build();
+
+        var queryTemplateId = queryHandlerService.storeQueryTemplate(originalQueryTemplate, CREATOR);
+        assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
+        assertDoesNotThrow(() -> queryHandlerService.deleteQueryTemplate(queryTemplateId, CREATOR));
+        assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeleteQueryTemplate_throwsOnUnknownId() throws QueryTemplateException, JsonProcessingException {
+        assertThrows(QueryTemplateException.class, () -> queryHandlerService.deleteQueryTemplate(0L, CREATOR));
+    }
+
+    @Test
+    public void testDeleteQueryTemplate_throwsOnWrongAuthor() throws QueryTemplateException, JsonProcessingException {
+        var originalQueryTemplate = QueryTemplate.builder()
+                .label(LABEL)
+                .comment(COMMENT)
+                .createdBy(CREATOR)
+                .lastModified(TIME_STRING)
+                .content(createValidStructuredQuery("foo"))
+                .build();
+
+        queryHandlerService.storeQueryTemplate(originalQueryTemplate, CREATOR);
+        assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
+        assertThrows(QueryTemplateException.class, () -> queryHandlerService.deleteQueryTemplate(0L, "unknown-creator"));
+        assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
+    }
+
+    @DisplayName("getRetryAfterTime() -> return 0 on empty")
+    public void getRetryAfterTime_zeroOnEmpty() {
+        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, 1000000L);
+        assertThat(retryAfterTime).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("getRetryAfterTime() -> return >0 on non empty")
+    public void getRetryAfterTime_nonZeroOnNotEmpty() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        queryRepository.save(query);
+        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, 1000000L);
+        assertThat(retryAfterTime).isGreaterThan(0L);
+    }
+
+    @Test
+    @DisplayName("getAmountOfSavedQueriesByUser() -> return list size")
+    public void getAmountOfSavedQueriesByUser_listSizeWhenNotEmpty() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        var label = "label-152431";
+        var savedQuery = new SavedQuery(label, "comment-152508", 100L);
+        queryHandlerService.saveQuery(queryId, CREATOR, savedQuery);
+
+        var queryAmount = queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR);
+
+        assertEquals(queryAmount, 1);
+    }
+
+    @Test
+    @DisplayName("getAmountOfSavedQueriesByUser() -> return 0 on empty")
+    public void getAmountOfSavedQueriesByUser_zeroOnEmpty() {
+        var queryAmount = queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR);
+
+        assertEquals(queryAmount, 0L);
+    }
+
+    private StructuredQuery createValidStructuredQuery(String display) {
         var termCode = TermCode.builder()
-                .code("LL2191-6")
-                .system("http://loinc.org")
-                .display("Geschlecht")
-                .build();
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
         var inclusionCriterion = Criterion.builder()
-                .termCodes(List.of(termCode))
-                .attributeFilters(List.of())
-                .build();
+            .termCodes(List.of(termCode))
+            .attributeFilters(List.of())
+            .build();
         return StructuredQuery.builder()
-                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
-                .exclusionCriteria(List.of())
-                .display("foo")
-                .build();
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .display(display)
+            .build();
     }
 }

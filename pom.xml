@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.3</version>
+    <version>3.1.5</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>4.0.0</version>
+  <version>4.1.0</version>
 
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
@@ -26,7 +26,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v2.1.13-RC</ontology-tag>
+    <ontology-tag>v2.1.24</ontology-tag>
   </properties>
 
   <dependencies>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20230227</version>
+      <version>20231013</version>
     </dependency>
 
     <dependency>
@@ -198,7 +198,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>0.2.0-alpha.1</version>
+      <version>0.2.0</version>
     </dependency>
 
     <dependency>
