@@ -103,6 +103,7 @@ public class QueryTranslatorSpringConfig {
                     "frailtyscore"),
                 entry("http://terminology.hl7.org/CodeSystem/consentcategorycodes", "consentcategory"),
                 entry("urn:oid:2.16.840.1.113883.3.1937.777.24.5.3", "consent"),
+                entry("http://hl7.org/fhir/sid/icd-o-3", "icdo3"),
                 entry("http://hl7.org/fhir/consent-provision-type", "provisiontype"))));
     }
 
