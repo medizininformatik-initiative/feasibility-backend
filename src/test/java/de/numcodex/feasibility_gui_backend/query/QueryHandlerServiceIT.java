@@ -12,6 +12,7 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.dispatch.QueryHashCalculator;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
@@ -22,6 +23,7 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpri
 
 import java.net.URI;
 import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -41,8 +44,7 @@ import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.Resu
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("query")
 @Tag("handler")
@@ -84,7 +86,7 @@ public class QueryHandlerServiceIT {
     private QueryRepository queryRepository;
 
     @Autowired
-    private QueryContentRepository queryContentRepository;
+    private SavedQueryRepository savedQueryRepository;
 
     @Autowired
     private QueryDispatchRepository queryDispatchRepository;
@@ -92,8 +94,12 @@ public class QueryHandlerServiceIT {
     @Autowired
     private ResultService resultService;
 
-    @Spy
-    private ObjectMapper jsonUtil = new ObjectMapper();
+    @Autowired
+    private QueryHashCalculator queryHashCalculator;
+
+    @Autowired
+    @Qualifier("translation")
+    private ObjectMapper jsonUtil;
 
     @Test
     public void testRunQuery() {
@@ -270,6 +276,83 @@ public class QueryHandlerServiceIT {
     }
 
     @Test
+    public void testGetQuery_nullOnNotFound() throws JsonProcessingException {
+        var queryFromDb = queryHandlerService.getQuery(1L);
+
+        assertThat(queryFromDb).isNull();
+    }
+
+    @Test
+    public void testGetQuery_succeedsWithNoSavedQuery() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var queryFromDb = queryHandlerService.getQuery(queryId);
+
+        assertThat(queryFromDb.label()).isNull();
+        assertThat(queryFromDb.comment()).isNull();
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
+    }
+
+    @Test
+    public void testGetQuery_succeedsWithSavedQuery() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+        var savedQuery = new SavedQuery(LABEL, COMMENT, 150L);
+        queryHandlerService.saveQuery(queryId, CREATOR, savedQuery);
+
+        var queryFromDb = queryHandlerService.getQuery(queryId);
+
+        assertThat(queryFromDb.label()).isEqualTo(LABEL);
+        assertThat(queryFromDb.comment()).isEqualTo(COMMENT);
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
+    }
+
+    @Test
+    public void testGetQueryContent_succeeds() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var queryContentFromDb = queryHandlerService.getQueryContent(queryId);
+
+        assertThat(queryContentFromDb.inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
+    }
+
+    @Test
+    public void testGetQueryContent_nullIfNotFound() throws JsonProcessingException {
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
+        var queryContent = new QueryContent(queryContentString);
+        queryContent.setHash(queryContentHash);
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        query.setQueryContent(queryContent);
+        var queryId = queryRepository.save(query).getId();
+
+        var queryContentFromDb = queryHandlerService.getQueryContent(++queryId);
+
+        assertThat(queryContentFromDb).isNull();
+    }
+
+    @Test
     public void testGetAuthorId_UnknownQueryIdThrows() {
         assertThrows(QueryNotFoundException.class,
             () -> queryHandlerService.getAuthorId(UNKNOWN_QUERY_ID));
@@ -286,8 +369,8 @@ public class QueryHandlerServiceIT {
         var queryId2 = queryRepository.save(query2).getId();
         var label = "label-152431";
 
-        var savedQuery1 = new SavedQuery(label, "comment-152508");
-        var savedQuery2 = new SavedQuery(label, "comment-152546");
+        var savedQuery1 = new SavedQuery(label, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label, "comment-152546", 200L);
 
         assertThat(queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1)).isNotNull();
         assertThrows(DataIntegrityViolationException.class,
@@ -306,8 +389,8 @@ public class QueryHandlerServiceIT {
         var label1 = "label-152431";
         var label2 = "label-160123";
 
-        var savedQuery1 = new SavedQuery(label1, "comment-152508");
-        var savedQuery2 = new SavedQuery(label2, "comment-152546");
+        var savedQuery1 = new SavedQuery(label1, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label2, "comment-152546", 200L);
 
         assertThat(queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1)).isNotNull();
         assertDoesNotThrow(() -> queryHandlerService.saveQuery(queryId2, CREATOR, savedQuery2));
@@ -325,11 +408,63 @@ public class QueryHandlerServiceIT {
         var queryId2 = queryRepository.save(query2).getId();
         var label = "label-152431";
 
-        var savedQuery1 = new SavedQuery(label, "comment-152508");
-        var savedQuery2 = new SavedQuery(label, "comment-152546");
+        var savedQuery1 = new SavedQuery(label, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label, "comment-152546", 200L);
 
         assertThat(queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1)).isNotNull();
         assertDoesNotThrow(() -> queryHandlerService.saveQuery(queryId2, otherCreator, savedQuery2));
+    }
+
+    @Test
+    public void testDeleteSavedQuery_succeeds() throws QueryNotFoundException {
+        var query1 = new Query();
+        query1.setCreatedBy(CREATOR);
+        var query2 = new Query();
+        query2.setCreatedBy(CREATOR);
+        var queryId1 = queryRepository.save(query1).getId();
+        var queryId2 = queryRepository.save(query2).getId();
+        var label1 = "label-152431";
+        var label2 = "label-152432";
+
+        var savedQuery1 = new SavedQuery(label1, "comment-152508", 100L);
+        var savedQuery2 = new SavedQuery(label2, "comment-152546", 200L);
+
+        queryHandlerService.saveQuery(queryId1, CREATOR, savedQuery1);
+        queryHandlerService.saveQuery(queryId2, CREATOR, savedQuery2);
+
+        assertThat(queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR)).isEqualTo(2);
+
+        queryHandlerService.deleteSavedQuery(queryId1);
+        assertThat(queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR)).isEqualTo(1);
+        queryHandlerService.deleteSavedQuery(queryId2);
+        assertThat(queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR)).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeleteSavedQuery_failsOnUnknownQueryId() throws QueryNotFoundException {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        var label = "label-152431";
+
+        var savedQuery = new SavedQuery(label, "comment-152508", 100L);
+
+        queryHandlerService.saveQuery(queryId, CREATOR, savedQuery);
+
+        assertThrows(QueryNotFoundException.class, () -> queryHandlerService.deleteSavedQuery(queryId + 1));
+    }
+
+    @Test
+    public void testGetAmountOfQueriesByUserAndInterval() throws JsonProcessingException {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        queryRepository.save(query).getId();
+
+        var count0 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, 0);
+        var count1 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, 1);
+
+        assertThat(count0).isEqualTo(0);
+        assertThat(count1).isEqualTo(1);
     }
 
     @Test
@@ -521,7 +656,46 @@ public class QueryHandlerServiceIT {
         assertThat(queryHandlerService.getQueryTemplatesForAuthor(CREATOR).size()).isEqualTo(1);
     }
 
-    private StructuredQuery createValidStructuredQuery(String display) {
+    @DisplayName("getRetryAfterTime() -> return 0 on empty")
+    public void getRetryAfterTime_zeroOnEmpty() {
+        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, 1000000L);
+        assertThat(retryAfterTime).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("getRetryAfterTime() -> return >0 on non empty")
+    public void getRetryAfterTime_nonZeroOnNotEmpty() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        queryRepository.save(query);
+        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, 1000000L);
+        assertThat(retryAfterTime).isGreaterThan(0L);
+    }
+
+    @Test
+    @DisplayName("getAmountOfSavedQueriesByUser() -> return list size")
+    public void getAmountOfSavedQueriesByUser_listSizeWhenNotEmpty() {
+        var query = new Query();
+        query.setCreatedBy(CREATOR);
+        var queryId = queryRepository.save(query).getId();
+        var label = "label-152431";
+        var savedQuery = new SavedQuery(label, "comment-152508", 100L);
+        queryHandlerService.saveQuery(queryId, CREATOR, savedQuery);
+
+        var queryAmount = queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR);
+
+        assertEquals(queryAmount, 1);
+    }
+
+    @Test
+    @DisplayName("getAmountOfSavedQueriesByUser() -> return 0 on empty")
+    public void getAmountOfSavedQueriesByUser_zeroOnEmpty() {
+        var queryAmount = queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR);
+
+        assertEquals(queryAmount, 0L);
+    }
+
+    private StructuredQuery createValidStructuredQuery() {
         var termCode = TermCode.builder()
                 .code("LL2191-6")
                 .system("http://loinc.org")

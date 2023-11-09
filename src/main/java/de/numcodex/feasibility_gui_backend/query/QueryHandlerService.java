@@ -127,6 +127,17 @@ public class QueryHandlerService {
         return savedQueryRepository.save(savedQuery).getId();
     }
 
+    public void updateSavedQuery(Long queryId, SavedQuery savedQuery) throws QueryNotFoundException {
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.SavedQuery> savedQueryOptional = savedQueryRepository.findByQueryId(queryId);
+        if (savedQueryOptional.isEmpty()) {
+            throw new QueryNotFoundException();
+        }
+        var oldSavedQuery = savedQueryOptional.get();
+        oldSavedQuery.setLabel(savedQuery.label());
+        oldSavedQuery.setComment(savedQuery.comment());
+        savedQueryRepository.save(oldSavedQuery);
+    }
+
     public de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate getQueryTemplate(
             Long queryId, String authorId) throws QueryTemplateException {
         de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate queryTemplate = queryTemplateRepository.findById(
@@ -203,6 +214,7 @@ public class QueryHandlerService {
         out.setQuery(queryRepository.getReferenceById(queryId));
         out.setComment(in.comment());
         out.setLabel(in.label());
+        out.setResultSize(in.totalNumberOfPatients());
         return out;
     }
 
@@ -232,6 +244,8 @@ public class QueryHandlerService {
                         QueryListEntry.builder()
                                 .id(q.getId())
                                 .label(q.getSavedQuery().getLabel())
+                                .comment(q.getSavedQuery().getComment())
+                                .totalNumberOfPatients(q.getSavedQuery().getResultSize())
                                 .createdAt(q.getCreatedAt())
                                 .build());
             } else {
@@ -251,6 +265,24 @@ public class QueryHandlerService {
     }
 
     public Long getRetryAfterTime(String userId, int offset, long interval) {
-        return 60 * interval - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+        try {
+            return 60 * interval - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+        } catch (NullPointerException e) {
+            return 0L;
+        }
+    }
+
+    public Long getAmountOfSavedQueriesByUser(String userId) {
+        var queries = queryRepository.findSavedQueriesByAuthor(userId);
+        return queries.map(queryList -> (long) queryList.size()).orElse(0L);
+    }
+
+    public void deleteSavedQuery(Long queryId) throws QueryNotFoundException {
+        var savedQueryOptional = savedQueryRepository.findByQueryId(queryId);
+        if (savedQueryOptional.isPresent()) {
+            savedQueryRepository.deleteById(savedQueryOptional.get().getId());
+        } else {
+            throw new QueryNotFoundException();
+        }
     }
 }

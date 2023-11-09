@@ -12,7 +12,8 @@ public enum FeasibilityIssue {
     QUOTA_EXCEEDED(10002, "Too many requests - quota reached", IssueType.BUSY, Severity.ERROR),
     POLLING_LIMIT_EXCEEDED(10003, "Too many requests - polling limit exceeded", IssueType.BUSY, Severity.ERROR),
     PRIVACY_RESTRICTION_RESULT_SIZE(10004, "Total number of results below threshold", IssueType.BUSY, Severity.ERROR),
-    PRIVACY_RESTRICTION_RESULT_SITES(10005, "Too few responding sites", IssueType.BUSY, Severity.ERROR);
+    PRIVACY_RESTRICTION_RESULT_SITES(10005, "Too few responding sites", IssueType.BUSY, Severity.ERROR),
+    SAVED_QUERY_STORAGE_FULL(10006, "Saved query limit reached. Please delete old saved queries before trying to create new ones.", IssueType.FORBIDDEN, Severity.ERROR);
 
     private static final FeasibilityIssue[] VALUES;
 

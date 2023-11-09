@@ -12,7 +12,9 @@ import java.sql.Timestamp;
 public record QueryListEntry(
     @JsonProperty long id,
     @JsonProperty String label,
-    @JsonProperty Timestamp createdAt
+    @JsonProperty String comment,
+    @JsonProperty Timestamp createdAt,
+    @JsonProperty Long totalNumberOfPatients
 )  {
 
 }

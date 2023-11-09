@@ -50,6 +50,7 @@ app:
   keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FeasibilityPowerUser}
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FeasibilityAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
+  maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}

@@ -346,9 +346,99 @@ paths:
               $ref: '#/components/schemas/SavedQuery'
         required: true
       responses:
-        204:
+        200:
           description: Saved Query successfully stored
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
+        401:
+          description: Unauthorized - please login first
           content: {}
+        403:
+          description: Forbidden - insufficient access rights, or no free slots left
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        severity:
+                          type: string
+        404:
+          description: The query for which the additional information should be stored could not be found
+          content: {}
+        409:
+          description: Query has already been saved
+          content: {}
+      security:
+        - feasibility_auth:
+            - user
+    put:
+      tags:
+        - query
+      summary: "Update a saved query. Only label and comment can be changed"
+      operationId: "updateSavedQuery"
+      parameters:
+        - name: queryId
+          in: path
+          description: ID of the saved query to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The additionally needed information to update a query
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedQuery'
+        required: true
+      responses:
+        200:
+          description: Saved Query successfully updated
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
+        401:
+          description: Unauthorized - please login first
+          content: {}
+        403:
+          description: Forbidden - insufficient access rights
+          content: {}
+        404:
+          description: The query to be updated could not be found
+          content: {}
+    delete:
+      tags:
+        - query
+      summary: "Remove a saved query from a given query"
+      operationId: "deleteSavedQuery"
+      parameters:
+        - name: "queryId"
+          in: "path"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
         401:
           description: Unauthorized - please login first
           content: { }
@@ -358,9 +448,19 @@ paths:
         404:
           description: The query for which the additional information should be stored could not be found
           content: {}
-        409:
-          description: Query has already been saved
-          content: {}
+  /query/saved-query-slots:
+    get:
+      tags:
+        - query
+      summary: "Show how many saved query slots a user already used and how many he has left."
+      operationId: "getSavedQuerySlots"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SavedQuerySlots"
       security:
         - feasibility_auth:
             - user
@@ -889,6 +989,25 @@ components:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
           example: I wanted to see how many patients I could find for my study XYZ
+        totalNumberOfPatients:
+          type: integer
+          format: int64
+          description: The number of results that were found for this query.
+          example: 12345
+    SavedQuerySlots:
+      type: object
+      required:
+        - used
+        - total
+      properties:
+        used:
+          type: integer
+          description: The amount of used saved query slots for a user.
+          example: 2
+        total:
+          type: integer
+          description: The total amount of saved query slots per user.
+          example: 10
     TermCode:
       description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
       type: object

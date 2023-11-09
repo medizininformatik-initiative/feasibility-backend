@@ -23,12 +23,12 @@ public class SavedQuery {
   @OneToOne(fetch = FetchType.LAZY)
   private Query query;
 
-  @Column(name = "deleted")
-  private Timestamp deleted;
-
   @Column(name = "label", nullable = false)
   private String label;
 
   @Column(name = "comment")
   private String comment;
+
+  @Column(name = "result_size")
+  private Long resultSize;
 }
