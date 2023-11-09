@@ -15,6 +15,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 The full changelog can be found [here](https://todo).
 
+## [4.1.0] - 2023-11-09
+
+### Added
+- Make order of main categories configurable ([#219](https://github.com/medizininformatik-initiative/feasibility-backend/issues/219))
+- Save and load query results for saved queries ([#199](https://github.com/medizininformatik-initiative/feasibility-backend/issues/199))
+- Support CRUD for query templates ([#214](https://github.com/medizininformatik-initiative/feasibility-backend/issues/214))
+
+### Fixed
+- Fix code scanning alert - parser confusion leads to OOM ([#221](https://github.com/medizininformatik-initiative/feasibility-backend/issues/221))
+- Fix code scanning alert - Missing Override annotation ([#223](https://github.com/medizininformatik-initiative/feasibility-backend/issues/223))
+- Fix code scanning alert - Unread local variable ([#222](https://github.com/medizininformatik-initiative/feasibility-backend/issues/222))
+
+### Security
+- Update Spring Boot to 3.1.5 ([#227](https://github.com/medizininformatik-initiative/feasibility-backend/issues/227))
+
 ## [4.0.0] - 2023-10-06
 
 ### Added

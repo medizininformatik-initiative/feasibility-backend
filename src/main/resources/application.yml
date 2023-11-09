@@ -40,7 +40,7 @@ management:
 app:
   # AKTIN or DSF or MOCK or DIRECT
   ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_trees}
-  ontologyOrder: ${ONTOLOGY_ORDER:Diagnose, Prozedur, Person, Laboruntersuchung, Medikamente, Bioprobe, Einwilligung}
+  ontologyOrder: ${ONTOLOGY_ORDER:Diagnose, Prozedur, Person, Laboruntersuchung, Medikamentenverabreichung, Bioprobe, Einwilligung}
   mappingsFile: ${MAPPINGS_FILE:ontology/mapping_cql.json}
   conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/mapping_tree.json}
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
