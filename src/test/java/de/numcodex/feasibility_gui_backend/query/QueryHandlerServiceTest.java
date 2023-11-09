@@ -69,14 +69,19 @@ class QueryHandlerServiceTest {
 
     @Mock
     private SavedQueryRepository savedQueryRepository;
-    @Spy
-    private ObjectMapper jsonUtil = new ObjectMapper();
 
     private QueryHandlerService queryHandlerService;
 
     private QueryHandlerService createQueryHandlerService() {
         return new QueryHandlerService(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
                 resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
+    }
+
+    @BeforeEach
+    void setUp() {
+        Mockito.reset(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
+            resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
+        queryHandlerService = createQueryHandlerService();
     }
 
     @BeforeEach
@@ -98,12 +103,6 @@ class QueryHandlerServiceTest {
         StepVerifier.create(queryHandlerService.runQuery(testStructuredQuery, "uerid"))
                 .expectError(QueryDispatchException.class)
                 .verify();
-    }
-
-    void setUp() {
-        Mockito.reset(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
-                resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
-        queryHandlerService = createQueryHandlerService();
     }
 
     @Test

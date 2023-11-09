@@ -89,6 +89,9 @@ public class QueryHandlerServiceIT {
     private SavedQueryRepository savedQueryRepository;
 
     @Autowired
+    private QueryContentRepository queryContentRepository;
+
+    @Autowired
     private QueryDispatchRepository queryDispatchRepository;
 
     @Autowired
@@ -284,7 +287,7 @@ public class QueryHandlerServiceIT {
 
     @Test
     public void testGetQuery_succeedsWithNoSavedQuery() throws JsonProcessingException {
-        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
         var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
         var queryContent = new QueryContent(queryContentString);
         queryContent.setHash(queryContentHash);
@@ -297,12 +300,12 @@ public class QueryHandlerServiceIT {
 
         assertThat(queryFromDb.label()).isNull();
         assertThat(queryFromDb.comment()).isNull();
-        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery("foo").inclusionCriteria());
     }
 
     @Test
     public void testGetQuery_succeedsWithSavedQuery() throws JsonProcessingException {
-        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
         var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
         var queryContent = new QueryContent(queryContentString);
         queryContent.setHash(queryContentHash);
@@ -317,28 +320,12 @@ public class QueryHandlerServiceIT {
 
         assertThat(queryFromDb.label()).isEqualTo(LABEL);
         assertThat(queryFromDb.comment()).isEqualTo(COMMENT);
-        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
-    }
-
-    @Test
-    public void testGetQueryContent_succeeds() throws JsonProcessingException {
-        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
-        var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
-        var queryContent = new QueryContent(queryContentString);
-        queryContent.setHash(queryContentHash);
-        var query = new Query();
-        query.setCreatedBy(CREATOR);
-        query.setQueryContent(queryContent);
-        var queryId = queryRepository.save(query).getId();
-
-        var queryContentFromDb = queryHandlerService.getQueryContent(queryId);
-
-        assertThat(queryContentFromDb.inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery("foo").inclusionCriteria());
     }
 
     @Test
     public void testGetQueryContent_nullIfNotFound() throws JsonProcessingException {
-        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
         var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
         var queryContent = new QueryContent(queryContentString);
         queryContent.setHash(queryContentHash);
@@ -695,21 +682,22 @@ public class QueryHandlerServiceIT {
         assertEquals(queryAmount, 0L);
     }
 
-    private StructuredQuery createValidStructuredQuery() {
+    private StructuredQuery createValidStructuredQuery(String display) {
         var termCode = TermCode.builder()
-                .code("LL2191-6")
-                .system("http://loinc.org")
-                .display("Geschlecht")
-                .build();
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
         var inclusionCriterion = Criterion.builder()
-                .termCodes(List.of(termCode))
-                .attributeFilters(List.of())
-                .build();
+            .termCodes(List.of(termCode))
+            .attributeFilters(List.of())
+            .build();
         return StructuredQuery.builder()
-                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
-                .exclusionCriteria(List.of())
-                .display(display)
-                .build();
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .display(display)
+            .build();
     }
 }
