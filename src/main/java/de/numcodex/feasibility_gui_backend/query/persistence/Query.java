@@ -27,7 +27,7 @@ public class Query {
     @Column(name = "created_by", updatable = false)
     private String createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(referencedColumnName = "id", name = "query_content_id")
     private QueryContent queryContent;
 
