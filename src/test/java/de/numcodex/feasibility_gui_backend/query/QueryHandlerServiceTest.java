@@ -1,5 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
@@ -11,12 +14,19 @@ import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.test.StepVerifier;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import java.net.URI;
 import java.sql.Timestamp;
@@ -70,8 +80,29 @@ class QueryHandlerServiceTest {
     @BeforeEach
     void setUp() {
         Mockito.reset(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
-                resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
+            resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
         queryHandlerService = createQueryHandlerService();
+    }
+
+    @BeforeEach
+    public void resetMocks() {
+        Mockito.reset(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
+                resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
+    }
+
+
+    @Test
+    public void testRunQuery_failsWithMonoErrorOnQueryDispatchException() throws QueryDispatchException {
+        var testStructuredQuery = StructuredQuery.builder()
+                .inclusionCriteria(List.of(List.of()))
+                .exclusionCriteria(List.of(List.of()))
+                .build();
+        var queryHandlerService = createQueryHandlerService();
+        doThrow(QueryDispatchException.class).when(queryDispatcher).enqueueNewQuery(any(StructuredQuery.class), any(String.class));
+
+        StepVerifier.create(queryHandlerService.runQuery(testStructuredQuery, "uerid"))
+                .expectError(QueryDispatchException.class)
+                .verify();
     }
 
     @Test

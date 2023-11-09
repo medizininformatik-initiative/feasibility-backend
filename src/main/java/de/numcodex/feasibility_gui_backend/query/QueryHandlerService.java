@@ -26,7 +26,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -152,6 +151,36 @@ public class QueryHandlerService {
     public List<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> getQueryTemplatesForAuthor(
             String authorId) {
         return queryTemplateRepository.findByAuthor(authorId);
+    }
+
+    public void updateQueryTemplate(Long queryTemplateId, QueryTemplate queryTemplate, String authorId) throws QueryTemplateException {
+        var templates = getQueryTemplatesForAuthor(authorId);
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> templateToUpdate = templates.stream().
+                filter(t -> t.getId().equals(queryTemplateId)).
+                findFirst();
+
+        if (templateToUpdate.isPresent()) {
+            var template = templateToUpdate.get();
+            template.setLabel(queryTemplate.label());
+            template.setComment(queryTemplate.comment());
+            template.setLastModified(Timestamp.from(Instant.now()));
+            queryTemplateRepository.save(template);
+        } else {
+            throw new QueryTemplateException("not found");
+        }
+    }
+
+    public void deleteQueryTemplate(Long queryTemplateId, String authorId) throws QueryTemplateException {
+        var templates = getQueryTemplatesForAuthor(authorId);
+        Optional<de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate> templateToDelete = templates.stream().
+                filter(t -> t.getId().equals(queryTemplateId)).
+                findFirst();
+
+        if (templateToDelete.isPresent()) {
+            queryTemplateRepository.delete(templateToDelete.get());
+        } else {
+            throw new QueryTemplateException("not found");
+        }
     }
 
     public QueryTemplate convertTemplatePersistenceToApi(
