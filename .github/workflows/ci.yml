@@ -148,8 +148,8 @@ jobs:
       - name: Wait for Feasibility Backend
         run: .github/scripts/wait-for-url.sh  http://localhost:8091/actuator/health
 
-      - name: Check if Feasibility Backend is correctly running with the feasibility user
-        run: .github/scripts/check-if-running-as-feasibility-user.sh
+      - name: Check if Feasibility Backend is correctly running with userid 10001
+        run: .github/scripts/check-if-running-as-user-10001.sh
 
       - name: Wait for Blaze
         run: .github/scripts/wait-for-url.sh  http://localhost:8082/health
