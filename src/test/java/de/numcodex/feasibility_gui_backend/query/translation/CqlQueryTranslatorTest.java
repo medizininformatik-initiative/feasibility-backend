@@ -1,13 +1,12 @@
 package de.numcodex.feasibility_gui_backend.query.translation;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.sq2cql.Translator;
-import de.numcodex.sq2cql.model.cql.Library;
+import de.numcodex.sq2cql.model.cql.Container;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -102,7 +101,7 @@ public class CqlQueryTranslatorTest {
                 .display("foo")
                 .build();
 
-        var resultLibraryMock = mock(Library.class);
+        var resultLibraryMock = mock(Container.class);
         when(resultLibraryMock.print()).thenReturn("bar");
         when(translator.toCql(any(de.numcodex.sq2cql.model.structured_query.StructuredQuery.class)))
                 .thenReturn(resultLibraryMock);
