@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 The full changelog can be found [here](https://todo).
 
+## [4.2.0] - 2023-11-17
+
+### Changed
+- Updated ontology and sq2cql to new version
+
 ## [4.1.0] - 2023-11-09
 
 ### Added
