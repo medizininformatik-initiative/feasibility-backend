@@ -38,12 +38,14 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
     private final FhirSecurityContextProvider securityContextProvider;
     private FhirSecurityContext securityContext;
     private final FhirProxyContext proxyContext;
+    private boolean logRequests;
 
 
     public DSFFhirWebClientProvider(FhirContext fhirContext, String webserviceBaseUrl, int webserviceReadTimeout,
                                     int webserviceConnectTimeout, String websocketUrl,
                                     FhirSecurityContextProvider securityContextProvider,
-                                    FhirProxyContext proxyContext) {
+                                    FhirProxyContext proxyContext,
+                                    boolean logRequests) {
         this.fhirContext = fhirContext;
         this.webserviceBaseUrl = webserviceBaseUrl;
         this.webserviceReadTimeout = webserviceReadTimeout;
@@ -51,6 +53,7 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
         this.websocketUrl = websocketUrl;
         this.securityContextProvider = securityContextProvider;
         this.proxyContext = proxyContext;
+        this.logRequests = logRequests;
     }
 
     @Override
@@ -76,7 +79,7 @@ class DSFFhirWebClientProvider implements FhirWebClientProvider {
                 proxyContext.getPassword(),
                 webserviceConnectTimeout,
                 webserviceReadTimeout,
-                true,
+                logRequests,
                 null,
                 fhirContext,
                 cleaner);

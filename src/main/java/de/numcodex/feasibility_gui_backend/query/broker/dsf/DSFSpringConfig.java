@@ -43,6 +43,9 @@ public class DSFSpringConfig {
     @Value("${app.broker.dsf.webservice.connectTimeout}")
     private int webserviceConnectTimeout;
 
+    @Value("${app.broker.dsf.webservice.logRequests}")
+    private boolean logRequests;
+
     @Value("${app.broker.dsf.websocket.url}")
     private String websocketUrl;
 
@@ -102,7 +105,7 @@ public class DSFSpringConfig {
                                                 FhirSecurityContextProvider securityContextProvider,
                                                 FhirProxyContext proxyContext) {
         return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, webserviceReadTimeout,
-                webserviceConnectTimeout, websocketUrl, securityContextProvider, proxyContext);
+                webserviceConnectTimeout, websocketUrl, securityContextProvider, proxyContext, logRequests);
     }
 
 }
