@@ -45,10 +45,12 @@ The DIRECT path can be run **either** with FLARE **or** with a CQL compatible se
 Result counts from the direct path can be obfuscated for privacy reasons. The current implementation
 handles obfuscation by adding or subtracting a random number <=5.
 
-| EnvVar                               | Description                                                                    | Example | Default |
-|--------------------------------------|--------------------------------------------------------------------------------|---------|---------|
-| BROKER_CLIENT_DIRECT_USE_CQL         | Whether to use a CQL server or not.                                            |         | false   |
-| BROKER_CLIENT_OBFUSCATE_RESULT_COUNT | Whether the result counts retrieved from the direct broker shall be obfuscated |         | false   |
+| EnvVar                                    | Description                                                                    | Example            | Default |
+|-------------------------------------------|--------------------------------------------------------------------------------|--------------------|---------|
+| BROKER_CLIENT_DIRECT_AUTH_BASIC_USERNAME  | Username to use to connect to flare or directly to the FHIR server via CQL     | feas-user          |         |
+| BROKER_CLIENT_DIRECT_AUTH_BASIC_PASSWORD  | Password for that user                                                         | verysecurepassword |         |
+| BROKER_CLIENT_DIRECT_USE_CQL              | Whether to use a CQL server or not.                                            |                    | false   |
+| BROKER_CLIENT_OBFUSCATE_RESULT_COUNT      | Whether the result counts retrieved from the direct broker shall be obfuscated |                    | false   |
 
 This is irrelevant if _BROKER_CLIENT_DIRECT_ENABLED_ is set to false.
 
