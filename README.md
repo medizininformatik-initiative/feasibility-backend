@@ -34,7 +34,7 @@
 | QUERY_VALIDATION_ENABLED                 | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                             |
 | QUERYRESULT_EXPIRY_MINUTES               | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                |
 | QUERYRESULT_PUBLIC_KEY                   | The public key in Base64-encoded DER format without banners and line breaks. Mandatory if _QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION_ is _false_                         |
-| QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION  | Disable encryption of the result log file.                                                                                                                             | true / false     |                                                  |                                                                         
+| QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION  | Disable encryption of the result log file.                                                                                                                             | true / false     |                                                  |
 | ALLOWED_ORIGINS                          | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                 |
 | MAX_SAVED_QUERIES_PER_USER              | How many slots does a user have to store saved queries.                                                                                                                |                  | 10                                               |
 
@@ -94,9 +94,9 @@ In order to run the backend using the DSF path, the following environment variab
 | DSF_PROXY_USERNAME             | Proxy username to be used.                                                                                            |                      |         |
 | DSF_PROXY_PASSWORD             | Proxy password to be used.                                                                                            |                      |         |
 | DSF_WEBSERVICE_BASE_URL        | Base URL pointing to the local ZARS FHIR server.                                                                      | `https://zars/fhir`  |         |
+| DSF_WEBSERVICE_LOG_REQUESTS    | Log webservice client communication at log level INFO or below (**WARNING**: potentially contains sensitive data)     | `true`               | `false` |
 | DSF_WEBSOCKET_URL              | URL pointing to the local ZARS FHIR server websocket endpoint.                                                        | `wss://zars/fhir/ws` |         |
 | DSF_ORGANIZATION_ID            | Identifier for the local organization this backend is part of.                                                        | `MY ZARS`            |         |
-
 
 ### Privacy and Obfuscation
 
