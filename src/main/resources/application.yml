@@ -56,6 +56,10 @@ app:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
     direct:
+      auth:
+        basic:
+          username: ${BROKER_CLIENT_DIRECT_AUTH_BASIC_USERNAME:}
+          password: ${BROKER_CLIENT_DIRECT_AUTH_BASIC_PASSWORD:}
       enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
       useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
       obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
@@ -79,6 +83,7 @@ app:
         baseUrl: ${DSF_WEBSERVICE_BASE_URL}
         readTimeout: 20000
         connectTimeout: 2000
+        logRequests: ${DSF_WEBSERVICE_LOG_REQUESTS:false}
       websocket:
         url: ${DSF_WEBSOCKET_URL}
       organizationId: ${DSF_ORGANIZATION_ID}

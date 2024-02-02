@@ -823,9 +823,13 @@ components:
           format: int64
         label:
           type: string
-        created_at:
+        comment:
+          type: string
+        createdAt:
           type: string
           format: 'date-time'
+        totalNumberOfPatients:
+          type: integer
     Query:
       type: object
       required:
