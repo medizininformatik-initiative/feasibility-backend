@@ -4,16 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [UNRELEASED] - yyyy-mm-dd
+## [4.3.0] - 2024-02-02
 
 ### Added
+- Basic auth for direct broker ([#210](https://github.com/medizininformatik-initiative/feasibility-backend/issues/210))
 ### Changed
-### Deprecated
-### Removed
-### Fixed
+- Updated sq2cql to 0.2.14 ([#253](https://github.com/medizininformatik-initiative/feasibility-backend/issues/253))
+- Reduce verbosity of DSF Webservice client ([#247](https://github.com/medizininformatik-initiative/feasibility-backend/issues/247))
 ### Security
-
-The full changelog can be found [here](https://todo).
+- Updated spring boot to 3.2.2 ([#251](https://github.com/medizininformatik-initiative/feasibility-backend/issues/251))
 
 ## [4.2.0] - 2023-11-17
 
