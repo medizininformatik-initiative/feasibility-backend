@@ -88,6 +88,11 @@
     <!-- Fix CVE-2023-52428. Remove exclusion and manual inclusion when update is included in spring-boot-starter-oauth2-resource-server -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
       <exclusions>
         <exclusion>
