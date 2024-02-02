@@ -45,6 +45,8 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           fail_ci_if_error: true
 
@@ -128,7 +130,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Feasibility Backend Image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: backend-image
           path: /tmp
