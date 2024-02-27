@@ -184,7 +184,7 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
-    public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
+    public void testValidate2QueryEndpoint_SucceedsOnValidQuery() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
 
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
@@ -192,18 +192,28 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.invalidTerms").isEmpty());
     }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
-        var testQuery = StructuredQuery.builder().build();
+    public void testValidate2QueryEndpoint_SucceedsDespiteInvalidTermcodesWith200() throws Exception {
+        StructuredQuery testQuery = createValidStructuredQuery();
+        var invalidTermCode = TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
+
+        doReturn(List.of(invalidTermCode)).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.invalidTerms").exists())
+            .andExpect(jsonPath("$.invalidTerms").isNotEmpty());
     }
 
     @Test

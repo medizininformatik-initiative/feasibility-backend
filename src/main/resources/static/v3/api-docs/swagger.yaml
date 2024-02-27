@@ -109,6 +109,35 @@ paths:
       security:
         - feasibility_auth:
             - user
+  /query/validate:
+    post:
+      tags:
+        - query
+        - validation
+      summary: Validates a submitted (structured) query to check for schema violations or invalid termCodes
+      operationId: validateQuery
+      requestBody:
+        description: Structured query to validate
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredQuery'
+        required: true
+      responses:
+        200:
+          description: Query adheres to json schema. If invalid termCodes are present, they will be in the response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidatedStructuredQuery'
+        400:
+          description: Query does not adhere to json schema
+          content: { }
+        401:
+          description: Unauthorized - please login first
+          content: { }
   /query/by-user/{userId}:
     get:
       tags:
@@ -987,6 +1016,18 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CriterionList"
+    ValidatedStructuredQuery:
+      type: object
+      required:
+        - query
+        - invalidTerms
+      properties:
+        query:
+          $ref: "#/components/schemas/StructuredQuery"
+        invalidTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
     SavedQuery:
       type: object
       required:

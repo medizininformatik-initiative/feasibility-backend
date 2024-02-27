@@ -62,4 +62,46 @@ public class TermCodeValidation {
 
     return invalidTermCodes;
   }
+
+  private Criterion removeFilters(Criterion in) {
+    return Criterion.builder()
+        .termCodes(in.termCodes())
+        .context(in.context())
+        .build();
+  }
+
+  public List<Criterion> getInvalidCriteria(StructuredQuery structuredQuery) {
+    var invalidCriteria = new ArrayList<Criterion>();
+
+    List<List<Criterion>> combinedCriteria;
+
+    if (structuredQuery.exclusionCriteria() != null && !structuredQuery.exclusionCriteria().isEmpty()) {
+      combinedCriteria = Stream.of(
+          structuredQuery.inclusionCriteria(),
+          structuredQuery.exclusionCriteria()).flatMap(
+          Collection::stream).toList();
+    } else {
+      combinedCriteria = structuredQuery.inclusionCriteria();
+    }
+
+    for (List<Criterion> criterionList : combinedCriteria) {
+      for (Criterion criterion : criterionList) {
+        if (criterion.context() == null) {
+          log.debug("Missing context");
+          invalidCriteria.add(removeFilters(criterion));
+        }
+        for (TermCode termCode : criterion.termCodes()) {
+          if (terminologyService.isExistingTermCode(termCode.system(), termCode.code(), termCode.version())) {
+            log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code(), termCode.version());
+          } else {
+            log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
+                termCode.version());
+            invalidCriteria.add(removeFilters(criterion));
+          }
+        }
+      }
+    }
+
+    return invalidCriteria;
+  }
 }
