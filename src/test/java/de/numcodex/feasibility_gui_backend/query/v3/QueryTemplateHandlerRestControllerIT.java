@@ -28,7 +28,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
-import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -162,7 +161,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
 
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE+ "?skipValidation=true")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(listSize))
                 .andExpect(jsonPath("$.[0].id").exists());
@@ -177,6 +176,47 @@ public class QueryTemplateHandlerRestControllerIT {
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetQueryTemplateListWithValidation_succeedsWithoutValidationErrors() throws Exception {
+        int listSize = 5;
+        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
+        doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(listSize))
+            .andExpect(jsonPath("$.[*].id").exists())
+            .andExpect(jsonPath("$.[*].isValid", Matchers.not(Matchers.contains(false))));
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetQueryTemplateListWithValidation_succeedsWithValidationErrors() throws Exception {
+        int listSize = 5;
+        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
+        doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
+        doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(listSize));
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetQueryTemplateListWithValidation_emptyListOnJsonErrors() throws Exception {
+        int listSize = 5;
+        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
+        doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
+        doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
@@ -226,47 +266,6 @@ public class QueryTemplateHandlerRestControllerIT {
 
         mockMvc.perform(delete(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/1")).with(csrf()))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateTemplates_succeedsWithoutValidationErrors() throws Exception {
-        int listSize = 5;
-        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
-        doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
-
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/validate")).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(listSize))
-                .andExpect(jsonPath("$.[*].id").exists())
-                .andExpect(jsonPath("$.[*].isValid", Matchers.not(Matchers.contains(false))));
-    }
-
-    @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateTemplates_succeedsWithValidationErrors() throws Exception {
-        int listSize = 5;
-        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
-        doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
-
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/validate")).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(listSize));
-    }
-
-    @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateTemplates_emptyListOnJsonErrors() throws Exception {
-        int listSize = 5;
-        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
-        doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
-
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/validate")).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @NotNull

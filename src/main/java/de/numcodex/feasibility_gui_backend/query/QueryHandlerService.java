@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -14,6 +15,7 @@ import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
+import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -57,6 +59,9 @@ public class QueryHandlerService {
 
     @NonNull
     private final SavedQueryRepository savedQueryRepository;
+
+    @NonNull
+    private final TermCodeValidation termCodeValidation;
 
     @NonNull
     private ObjectMapper jsonUtil;
@@ -235,28 +240,44 @@ public class QueryHandlerService {
         return queryRepository.getAuthor(queryId).orElseThrow(QueryNotFoundException::new);
     }
 
-    public List<QueryListEntry> convertQueriesToQueryListEntries(List<de.numcodex.feasibility_gui_backend.query.persistence.Query> queryList) {
+    public QueryListEntry convertQueryToQueryListEntry(de.numcodex.feasibility_gui_backend.query.persistence.Query query,
+                                                       boolean skipValidation) {
+        List<TermCode> invalidTermCodes;
+        if (skipValidation) {
+            invalidTermCodes = List.of();
+        } else {
+          try {
+            var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
+            invalidTermCodes = termCodeValidation.getInvalidTermCodes(sq);
+          } catch (JsonProcessingException e) {
+              invalidTermCodes = List.of();
+          }
+        }
+
+        if (query.getSavedQuery() != null) {
+            return
+                QueryListEntry.builder()
+                    .id(query.getId())
+                    .label(query.getSavedQuery().getLabel())
+                    .comment(query.getSavedQuery().getComment())
+                    .totalNumberOfPatients(query.getSavedQuery().getResultSize())
+                    .createdAt(query.getCreatedAt())
+                    .invalidTerms(invalidTermCodes)
+                    .build();
+        } else {
+            return
+                QueryListEntry.builder()
+                    .id(query.getId())
+                    .createdAt(query.getCreatedAt())
+                    .invalidTerms(invalidTermCodes)
+                    .build();
+        }
+    }
+
+    public List<QueryListEntry> convertQueriesToQueryListEntries(List<de.numcodex.feasibility_gui_backend.query.persistence.Query> queryList,
+                                                                 boolean skipValidation) {
         var ret = new ArrayList<QueryListEntry>();
-
-        queryList.forEach(q -> {
-            if (q.getSavedQuery() != null) {
-                ret.add(
-                        QueryListEntry.builder()
-                                .id(q.getId())
-                                .label(q.getSavedQuery().getLabel())
-                                .comment(q.getSavedQuery().getComment())
-                                .totalNumberOfPatients(q.getSavedQuery().getResultSize())
-                                .createdAt(q.getCreatedAt())
-                                .build());
-            } else {
-                ret.add(
-                        QueryListEntry.builder()
-                                .id(q.getId())
-                                .createdAt(q.getCreatedAt())
-                                .build());
-            }
-        });
-
+        queryList.forEach(q -> ret.add(convertQueryToQueryListEntry(q, skipValidation)));
         return ret;
     }
 

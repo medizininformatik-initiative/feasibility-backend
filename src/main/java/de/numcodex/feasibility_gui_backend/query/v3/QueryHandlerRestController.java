@@ -185,11 +185,12 @@ public class QueryHandlerRestController {
   @GetMapping("")
   public List<QueryListEntry> getQueryList(
       @RequestParam(name = "filter", required = false) String filter,
+      @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
       Principal principal) {
     var userId = principal.getName();
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList = queryHandlerService.getQueryListForAuthor(userId, savedOnly);
-    return queryHandlerService.convertQueriesToQueryListEntries(queryList);
+    return queryHandlerService.convertQueriesToQueryListEntries(queryList, skipValidation);
   }
 
   @PostMapping("/{id}/saved")
@@ -296,7 +297,7 @@ public class QueryHandlerRestController {
       @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
-    return queryHandlerService.convertQueriesToQueryListEntries(queryList);
+    return queryHandlerService.convertQueriesToQueryListEntries(queryList, true);
   }
 
   @GetMapping("/{id}")
