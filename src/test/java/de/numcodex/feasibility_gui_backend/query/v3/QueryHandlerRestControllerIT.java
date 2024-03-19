@@ -49,7 +49,6 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.S
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -274,14 +273,42 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
-    public void testGetQueryList_Succeeds() throws Exception {
+    public void testGetQueryList_SucceedsWithValidation() throws Exception {
         long queryId = 1;
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
-        doReturn(List.of(createValidQueryListEntry(queryId))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
+        doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(queryId))
+                .andExpect(jsonPath("$[0].invalidTerms").isNotEmpty());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetQueryList_SucceedsWithoutValidation() throws Exception {
+        long queryId = 1;
+        doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
+        doReturn(List.of(createValidQueryListEntry(queryId, true))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(queryId))
+            .andExpect(jsonPath("$[0].invalidTerms").isArray())
+            .andExpect(jsonPath("$[0].invalidTerms").isEmpty());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetQueryList_SucceedsWithoutDefiningSkipValidation() throws Exception {
+        long queryId = 1;
+        doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
+        doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(queryId));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(queryId))
+            .andExpect(jsonPath("$[0].invalidTerms").isNotEmpty());
     }
 
     @Test
@@ -290,7 +317,7 @@ public class QueryHandlerRestControllerIT {
         long queryId = 1;
         String userId = "user1";
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
-        doReturn(List.of(createValidQueryListEntry(queryId))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
+        doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/by-user/" + userId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -302,7 +329,7 @@ public class QueryHandlerRestControllerIT {
     public void testGetQueryListForUser_ReturnsEmptyOnUnknownUser() throws Exception {
         String userId = "user1";
         doReturn(List.of()).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
-        doReturn(List.of()).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
+        doReturn(List.of()).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/by-user/" + userId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -656,12 +683,22 @@ public class QueryHandlerRestControllerIT {
     }
 
     @NotNull
-    private static QueryListEntry createValidQueryListEntry(long id) {
+    private static QueryListEntry createValidQueryListEntry(long id, boolean skipValidation) {
         return QueryListEntry.builder()
                 .id(id)
                 .label("abc")
                 .createdAt(new Timestamp(new java.util.Date().getTime()))
+                .invalidTerms(skipValidation ? List.of() : List.of(createTermCode()))
                 .build();
+    }
+
+    @NotNull
+    private static TermCode createTermCode() {
+        return TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
     }
 
     @NotNull

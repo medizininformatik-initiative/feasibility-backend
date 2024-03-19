@@ -97,22 +97,31 @@ public class QueryTemplateHandlerRestController {
   }
 
   @GetMapping(path = "")
-  public ResponseEntity<Object> getQueryTemplates(Principal principal) {
+  public ResponseEntity<Object> getQueryTemplates(
+      @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
+      Principal principal) {
 
     var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());
     var ret = new ArrayList<QueryTemplate>();
     queries.forEach(q -> {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
+        List<TermCode> invalidTermCodes;
+        if (skipValidation) {
+          invalidTermCodes = List.of();
+        } else {
+          invalidTermCodes = termCodeValidation.getInvalidTermCodes(
+              convertedQuery.content());
+        }
         var convertedQueryWithoutContent = QueryTemplate.builder()
-                .id(convertedQuery.id())
-                .label(convertedQuery.label())
-                .comment(convertedQuery.comment())
-                .lastModified(convertedQuery.lastModified())
-                .createdBy(convertedQuery.createdBy())
-                .invalidTerms(convertedQuery.invalidTerms())
-                .isValid(convertedQuery.isValid())
-                .build();
+            .id(convertedQuery.id())
+            .label(convertedQuery.label())
+            .comment(convertedQuery.comment())
+            .lastModified(convertedQuery.lastModified())
+            .createdBy(convertedQuery.createdBy())
+            .invalidTerms(invalidTermCodes)
+            .isValid(convertedQuery.isValid())
+            .build();
         ret.add(convertedQueryWithoutContent);
       } catch (JsonProcessingException e) {
         log.error("Error converting query");
@@ -143,32 +152,4 @@ public class QueryTemplateHandlerRestController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
-
-  @GetMapping(path = "/validate")
-  public ResponseEntity<Object> validateTemplates(Principal principal) {
-
-    var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());
-    var ret = new ArrayList<QueryTemplate>();
-    queries.forEach(q -> {
-      try {
-        QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
-        List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
-            convertedQuery.content());
-        var convertedQueryWithoutContent = QueryTemplate.builder()
-                .id(convertedQuery.id())
-                .label(convertedQuery.label())
-                .comment(convertedQuery.comment())
-                .lastModified(convertedQuery.lastModified())
-                .createdBy(convertedQuery.createdBy())
-                .invalidTerms(invalidTermCodes)
-                .isValid(convertedQuery.isValid())
-                .build();
-        ret.add(convertedQueryWithoutContent);
-      } catch (JsonProcessingException e) {
-        log.error("Error converting query");
-      }
-    });
-    return new ResponseEntity<>(ret, HttpStatus.OK);
-  }
-
 }
