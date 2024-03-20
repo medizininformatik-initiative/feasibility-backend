@@ -184,7 +184,7 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
-    public void testValidate2QueryEndpoint_SucceedsOnValidQuery() throws Exception {
+    public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
 
         doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
@@ -193,27 +193,23 @@ public class QueryHandlerRestControllerIT {
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.invalidTerms").isEmpty());
+            .andExpect(jsonPath("$.invalidCriteria").isEmpty());
     }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidate2QueryEndpoint_SucceedsDespiteInvalidTermcodesWith200() throws Exception {
+    public void testValidateQueryEndpoint_SucceedsDespiteInvalidTermcodesWith200() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
-        var invalidTermCode = TermCode.builder()
-            .code("LL2191-6")
-            .system("http://loinc.org")
-            .display("Geschlecht")
-            .build();
+        var invalidCriterion = createInvalidCriterion();
 
-        doReturn(List.of(invalidTermCode)).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of(invalidCriterion)).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.invalidTerms").exists())
-            .andExpect(jsonPath("$.invalidTerms").isNotEmpty());
+            .andExpect(jsonPath("$.invalidCriteria").exists())
+            .andExpect(jsonPath("$.invalidCriteria").isNotEmpty());
     }
 
     @Test
@@ -708,6 +704,14 @@ public class QueryHandlerRestControllerIT {
             .code("LL2191-6")
             .system("http://loinc.org")
             .display("Geschlecht")
+            .build();
+    }
+
+    @NotNull
+    private static Criterion createInvalidCriterion() {
+        return Criterion.builder()
+            .termCodes(List.of(createTermCode()))
+            .context(null)
             .build();
     }
 
