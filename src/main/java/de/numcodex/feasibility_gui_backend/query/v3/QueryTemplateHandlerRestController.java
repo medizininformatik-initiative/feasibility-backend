@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.v3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
@@ -76,19 +77,19 @@ public class QueryTemplateHandlerRestController {
     try {
       var query = queryHandlerService.getQueryTemplate(queryId, principal.getName());
       var queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
-      List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(
+      List<Criterion> invalidCriteria = termCodeValidation.getInvalidCriteria(
           queryTemplate.content());
-      var queryTemplateWithInvalidTermCodes = QueryTemplate.builder()
+      var queryTemplateWithInvalidCritiera = QueryTemplate.builder()
               .id(queryTemplate.id())
               .content(queryTemplate.content())
               .label(queryTemplate.label())
               .comment(queryTemplate.comment())
               .lastModified(queryTemplate.lastModified())
               .createdBy(queryTemplate.createdBy())
-              .invalidTerms(invalidTermCodes)
+              .invalidCriteria(invalidCriteria)
               .isValid(queryTemplate.isValid())
               .build();
-      return new ResponseEntity<>(queryTemplateWithInvalidTermCodes, HttpStatus.OK);
+      return new ResponseEntity<>(queryTemplateWithInvalidCritiera, HttpStatus.OK);
     } catch (JsonProcessingException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (QueryTemplateException e) {
@@ -106,11 +107,11 @@ public class QueryTemplateHandlerRestController {
     queries.forEach(q -> {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
-        List<TermCode> invalidTermCodes;
+        List<Criterion> invalidCriteria;
         if (skipValidation) {
-          invalidTermCodes = List.of();
+          invalidCriteria = List.of();
         } else {
-          invalidTermCodes = termCodeValidation.getInvalidTermCodes(
+          invalidCriteria = termCodeValidation.getInvalidCriteria(
               convertedQuery.content());
         }
         var convertedQueryWithoutContent = QueryTemplate.builder()
@@ -119,7 +120,7 @@ public class QueryTemplateHandlerRestController {
             .comment(convertedQuery.comment())
             .lastModified(convertedQuery.lastModified())
             .createdBy(convertedQuery.createdBy())
-            .invalidTerms(invalidTermCodes)
+            .invalidCriteria(invalidCriteria)
             .isValid(convertedQuery.isValid())
             .build();
         ret.add(convertedQueryWithoutContent);

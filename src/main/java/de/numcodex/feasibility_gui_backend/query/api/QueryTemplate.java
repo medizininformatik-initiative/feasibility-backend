@@ -3,7 +3,7 @@ package de.numcodex.feasibility_gui_backend.query.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.query.api.validation.QueryTemplateValidation;
 import lombok.Builder;
 
@@ -19,7 +19,7 @@ public record QueryTemplate(
     @JsonProperty String comment,
     @JsonProperty String lastModified,
     @JsonProperty String createdBy,
-    @JsonProperty List<TermCode> invalidTerms,
+    @JsonProperty List<Criterion> invalidCriteria,
     @JsonProperty Boolean isValid
 ) {
 

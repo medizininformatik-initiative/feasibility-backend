@@ -123,7 +123,7 @@ public class QueryTemplateValidatorTest {
             .comment(validQuery.comment())
             .lastModified(validQuery.lastModified())
             .createdBy(validQuery.createdBy())
-            .invalidTerms(validQuery.invalidTerms())
+            .invalidCriteria(validQuery.invalidCriteria())
             .isValid(validQuery.isValid())
             .build();
   }
@@ -136,7 +136,7 @@ public class QueryTemplateValidatorTest {
             .comment(validQuery.comment())
             .lastModified(validQuery.lastModified())
             .createdBy(validQuery.createdBy())
-            .invalidTerms(validQuery.invalidTerms())
+            .invalidCriteria(validQuery.invalidCriteria())
             .isValid(validQuery.isValid())
             .build();
   }
@@ -155,7 +155,7 @@ public class QueryTemplateValidatorTest {
             .comment(validQuery.comment())
             .lastModified(validQuery.lastModified())
             .createdBy(validQuery.createdBy())
-            .invalidTerms(validQuery.invalidTerms())
+            .invalidCriteria(validQuery.invalidCriteria())
             .isValid(validQuery.isValid())
             .build();
   }

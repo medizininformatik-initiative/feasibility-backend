@@ -36,34 +36,41 @@ class TermCodeValidationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"true", "false"})
-    void getInvalidTermCodes_emptyOnValidTermcodes(boolean withExclusionCriteria) {
+    void getInvalidCriteria_emptyOnValidCriteria(boolean withExclusionCriteria) {
         doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var invalidTermCodes = termCodeValidation.getInvalidTermCodes(createValidStructuredQuery(withExclusionCriteria));
+        var invalidCriteria = termCodeValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
 
-        assertTrue(invalidTermCodes.isEmpty());
+        assertTrue(invalidCriteria.isEmpty());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"true", "false"})
-    void getInvalidTermCodes_notEmptyOnInvalidTermcode(boolean withExclusionCriteria) {
+    void getInvalidCriteria_notEmptyOnInvalidTermcode(boolean withExclusionCriteria) {
         doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var invalidTermCodes = termCodeValidation.getInvalidTermCodes(createValidStructuredQuery(withExclusionCriteria));
+        var invalidCriteria = termCodeValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
 
-        assertFalse(invalidTermCodes.isEmpty());
-        assertEquals(withExclusionCriteria ? 2 : 1, invalidTermCodes.size());
+        assertFalse(invalidCriteria.isEmpty());
+        assertEquals(withExclusionCriteria ? 2 : 1, invalidCriteria.size());
     }
 
     @NotNull
     private static StructuredQuery createValidStructuredQuery(boolean withExclusionCriteria) {
+        var context = TermCode.builder()
+            .code("Laboruntersuchung")
+            .system("fdpg.mii.cds")
+            .display("Laboruntersuchung")
+            .version("1.0.0")
+            .build();
         var termCode = TermCode.builder()
-                .code("LL2191-6")
+                .code("19113-0")
                 .system("http://loinc.org")
-                .display("Geschlecht")
+                .display("IgE")
                 .build();
         var criterion = Criterion.builder()
                 .termCodes(List.of(termCode))
+                .context(context)
                 .attributeFilters(List.of())
                 .build();
         return StructuredQuery.builder()

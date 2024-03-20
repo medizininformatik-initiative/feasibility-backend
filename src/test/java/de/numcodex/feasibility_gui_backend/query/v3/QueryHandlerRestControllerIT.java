@@ -130,7 +130,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
 
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -152,7 +152,7 @@ public class QueryHandlerRestControllerIT {
         var dispatchError = new QueryDispatchException("something went wrong");
 
         doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -170,7 +170,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
 
         doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(Integer.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -187,7 +187,7 @@ public class QueryHandlerRestControllerIT {
     public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
 
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -198,7 +198,7 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateQueryEndpoint_SucceedsDespiteInvalidTermcodesWith200() throws Exception {
+    public void testValidateQueryEndpoint_SucceedsDespiteInvalidCriteriaWith200() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var invalidCriterion = createInvalidCriterion();
 
@@ -223,7 +223,7 @@ public class QueryHandlerRestControllerIT {
         Optional<UserBlacklist> userBlacklistOptional = Optional.of(userBlacklistEntry);
         doReturn(userBlacklistOptional).when(userBlacklistRepository).findByUserId(any(String.class));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -242,7 +242,7 @@ public class QueryHandlerRestControllerIT {
 
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -263,7 +263,7 @@ public class QueryHandlerRestControllerIT {
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -287,7 +287,7 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "false"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(queryId))
-                .andExpect(jsonPath("$[0].invalidTerms").isNotEmpty());
+                .andExpect(jsonPath("$[0].invalidCriteria").isNotEmpty());
     }
 
     @Test
@@ -300,8 +300,8 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "true"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(queryId))
-            .andExpect(jsonPath("$[0].invalidTerms").isArray())
-            .andExpect(jsonPath("$[0].invalidTerms").isEmpty());
+            .andExpect(jsonPath("$[0].invalidCriteria").isArray())
+            .andExpect(jsonPath("$[0].invalidCriteria").isEmpty());
     }
 
     @Test
@@ -314,7 +314,7 @@ public class QueryHandlerRestControllerIT {
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(queryId))
-            .andExpect(jsonPath("$[0].invalidTerms").isNotEmpty());
+            .andExpect(jsonPath("$[0].invalidCriteria").isNotEmpty());
     }
 
     @Test
@@ -348,7 +348,7 @@ public class QueryHandlerRestControllerIT {
         long queryId = 1;
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -361,7 +361,7 @@ public class QueryHandlerRestControllerIT {
         long queryId = 1;
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isForbidden());
@@ -694,7 +694,7 @@ public class QueryHandlerRestControllerIT {
                 .id(id)
                 .label("abc")
                 .createdAt(new Timestamp(new java.util.Date().getTime()))
-                .invalidTerms(skipValidation ? List.of() : List.of(createTermCode()))
+                .invalidCriteria(skipValidation ? List.of() : List.of(createInvalidCriterion()))
                 .build();
     }
 
@@ -722,7 +722,7 @@ public class QueryHandlerRestControllerIT {
                 .content(createValidStructuredQuery())
                 .label("test")
                 .comment("test")
-                .invalidTerms(List.of())
+                .invalidCriteria(List.of())
                 .build();
     }
 

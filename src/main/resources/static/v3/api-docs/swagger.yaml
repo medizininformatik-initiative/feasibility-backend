@@ -840,7 +840,7 @@ components:
       required:
         - id
         - label
-        - invalidTerms
+        - invalidCriteria
       properties:
         id:
           type: integer
@@ -854,10 +854,10 @@ components:
           format: 'date-time'
         totalNumberOfPatients:
           type: integer
-        invalidTerms:
+        invalidCriteria:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/Criterion"
     Query:
       type: object
       required:
@@ -873,10 +873,10 @@ components:
           type: string
         results:
           $ref: "#/components/schemas/QueryResult"
-        invalidTerms:
+        invalidCriteria:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/Criterion"
     QueryResultSummary:
       type: object
       properties:
@@ -940,7 +940,7 @@ components:
       type: object
       required:
         - label
-        - invalidTerms
+        - invalidCriteria
       properties:
         id:
           type: integer
@@ -959,10 +959,10 @@ components:
         createdBy:
           type: string
           description: Keycloak id of the user who created the query
-        invalidTerms:
+        invalidCriteria:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/Criterion"
         isValid:
           type: boolean
           description: is the query valid?
@@ -990,10 +990,10 @@ components:
         createdBy:
           type: string
           description: Keycloak id of the user who created the query
-        invalidTerms:
+        invalidCriteria:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/Criterion"
     StructuredQuery:
       type: object
       required:
@@ -1020,14 +1020,14 @@ components:
       type: object
       required:
         - query
-        - invalidTerms
+        - invalidCriteria
       properties:
         query:
           $ref: "#/components/schemas/StructuredQuery"
-        invalidTerms:
+        invalidCriteria:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/Criterion"
     SavedQuery:
       type: object
       required:
