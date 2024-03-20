@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -242,15 +242,15 @@ public class QueryHandlerService {
 
     public QueryListEntry convertQueryToQueryListEntry(de.numcodex.feasibility_gui_backend.query.persistence.Query query,
                                                        boolean skipValidation) {
-        List<TermCode> invalidTermCodes;
+        List<Criterion> invalidCriteria;
         if (skipValidation) {
-            invalidTermCodes = List.of();
+            invalidCriteria = List.of();
         } else {
           try {
             var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
-            invalidTermCodes = termCodeValidation.getInvalidTermCodes(sq);
+              invalidCriteria = termCodeValidation.getInvalidCriteria(sq);
           } catch (JsonProcessingException e) {
-              invalidTermCodes = List.of();
+              invalidCriteria = List.of();
           }
         }
 
@@ -262,14 +262,14 @@ public class QueryHandlerService {
                     .comment(query.getSavedQuery().getComment())
                     .totalNumberOfPatients(query.getSavedQuery().getResultSize())
                     .createdAt(query.getCreatedAt())
-                    .invalidTerms(invalidTermCodes)
+                    .invalidCriteria(invalidCriteria)
                     .build();
         } else {
             return
                 QueryListEntry.builder()
                     .id(query.getId())
                     .createdAt(query.getCreatedAt())
-                    .invalidTerms(invalidTermCodes)
+                    .invalidCriteria(invalidCriteria)
                     .build();
         }
     }

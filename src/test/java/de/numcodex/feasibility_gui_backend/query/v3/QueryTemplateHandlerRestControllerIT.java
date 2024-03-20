@@ -121,7 +121,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         doReturn(createValidPersistenceQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -135,7 +135,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         doThrow(QueryTemplateException.class).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isNotFound());
@@ -148,7 +148,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         doReturn(createValidPersistenceQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isInternalServerError());
@@ -184,7 +184,7 @@ public class QueryTemplateHandlerRestControllerIT {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
             .andExpect(status().isOk())
@@ -199,7 +199,7 @@ public class QueryTemplateHandlerRestControllerIT {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of(createInvalidCriterion())).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
             .andExpect(status().isOk())
@@ -212,7 +212,7 @@ public class QueryTemplateHandlerRestControllerIT {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of(createTermCode())).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(List.of(createInvalidCriterion())).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
             .andExpect(status().isOk())
@@ -275,7 +275,7 @@ public class QueryTemplateHandlerRestControllerIT {
                 .content(createValidStructuredQuery())
                 .label("TestLabel")
                 .comment("TestComment")
-                .invalidTerms(List.of())
+                .invalidCriteria(List.of())
                 .isValid(true)
                 .build();
     }
@@ -309,7 +309,7 @@ public class QueryTemplateHandlerRestControllerIT {
                 .comment("TestComment")
                 .lastModified(new Timestamp(new java.util.Date().getTime()).toString())
                 .createdBy("someone")
-                .invalidTerms(List.of())
+                .invalidCriteria(List.of())
                 .isValid(true)
                 .build();
     }
@@ -335,5 +335,13 @@ public class QueryTemplateHandlerRestControllerIT {
                 .system("http://loinc.org")
                 .display("Geschlecht")
                 .build();
+    }
+
+    @NotNull
+    private static Criterion createInvalidCriterion() {
+        return Criterion.builder()
+            .context(null)
+            .termCodes(List.of(createTermCode()))
+            .build();
     }
 }

@@ -1,17 +1,13 @@
 package de.numcodex.feasibility_gui_backend.query.v3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.query.api.Query;
-import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
-import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
-import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssues;
 import de.numcodex.feasibility_gui_backend.query.api.status.SavedQuerySlots;
@@ -307,15 +303,15 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var query = queryHandlerService.getQuery(queryId);
-    List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(query.content());
-    var queryWithInvalidTerms = Query.builder()
+    List<Criterion> invalidCriteria = termCodeValidation.getInvalidCriteria(query.content());
+    var queryWithInvalidCriteria = Query.builder()
             .id(query.id())
             .content(query.content())
             .label(query.label())
             .comment(query.comment())
-            .invalidTerms(invalidTermCodes)
+            .invalidCriteria(invalidCriteria)
             .build();
-    return new ResponseEntity<>(queryWithInvalidTerms, HttpStatus.OK);
+    return new ResponseEntity<>(queryWithInvalidCriteria, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
@@ -404,9 +400,14 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("/validate")
-  public ResponseEntity<Object> validateStructuredQuery(
+  public ResponseEntity<ValidatedStructuredQuery> validateStructuredQuery(
       @Valid @RequestBody StructuredQuery query) {
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    var invalidCriteria = termCodeValidation.getInvalidCriteria(query);
+    var validatedQuery = ValidatedStructuredQuery.builder()
+        .query(query)
+        .invalidCriteria(invalidCriteria)
+        .build();
+    return new ResponseEntity<>(validatedQuery, HttpStatus.OK);
   }
 
   private boolean hasAccess(Long queryId, Authentication authentication) {

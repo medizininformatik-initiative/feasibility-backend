@@ -112,12 +112,9 @@ class QueryHandlerServiceTest {
     void convertQueriesToQueryListEntries(String withSavedQuery, String skipValidation) throws JsonProcessingException {
         var queryList = List.of(createQuery(Boolean.parseBoolean(withSavedQuery)));
         if (!Boolean.parseBoolean(skipValidation)) {
-            doReturn(List.of(TermCode.builder()
-                .code("LL2191-6")
-                .system("http://loinc.org")
-                .display("Geschlecht")
-                .build()
-            )).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+            doReturn(
+                List.of(createInvalidCriterion())
+            ).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
         }
 
         List<QueryListEntry> queryListEntries = queryHandlerService.convertQueriesToQueryListEntries(queryList, Boolean.parseBoolean(skipValidation));
@@ -130,9 +127,9 @@ class QueryHandlerServiceTest {
             assertThat(queryListEntries.get(0).totalNumberOfPatients()).isEqualTo(RESULT_SIZE);
         }
         if (Boolean.parseBoolean(skipValidation)) {
-            assertThat(queryListEntries.get(0).invalidTerms().size()).isEqualTo(0);
+            assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(0);
         } else {
-            assertThat(queryListEntries.get(0).invalidTerms().size()).isEqualTo(1);
+            assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(1);
         }
     }
 
@@ -146,7 +143,7 @@ class QueryHandlerServiceTest {
         assertThat(queryListEntries.size()).isEqualTo(1);
         assertThat(queryListEntries.get(0).id()).isEqualTo(QUERY_ID);
         assertThat(queryListEntries.get(0).createdAt()).isEqualTo(LAST_MODIFIED);
-        assertThat(queryListEntries.get(0).invalidTerms().size()).isEqualTo(0);
+        assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(0);
     }
 
     private Query createQuery(boolean withSavedQuery) throws JsonProcessingException {
@@ -194,5 +191,17 @@ class QueryHandlerServiceTest {
                 .exclusionCriteria(List.of())
                 .display("foo")
                 .build();
+    }
+
+    private Criterion createInvalidCriterion() {
+        var termCode = TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
+        return Criterion.builder()
+            .context(null)
+            .termCodes(List.of(termCode))
+            .build();
     }
 }

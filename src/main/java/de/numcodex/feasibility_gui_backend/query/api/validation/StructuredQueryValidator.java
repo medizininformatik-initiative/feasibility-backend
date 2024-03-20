@@ -13,6 +13,8 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.stream.Collectors;
+
 /**
  * Validator for {@link StructuredQuery} that does an actual check based on a JSON schema.
  */
@@ -47,8 +49,11 @@ public class StructuredQueryValidator implements ConstraintValidator<StructuredQ
       var jsonSubject = new JSONObject(jsonUtil.writeValueAsString(structuredQuery));
       jsonSchema.validate(jsonSubject);
       return true;
-    } catch (ValidationException | JsonProcessingException e) {
-      log.debug("Structured query is invalid", e);
+    } catch (ValidationException e) {
+      log.error("Structured query is invalid: {}", e.getCausingExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining(" ## ")));
+      return false;
+    } catch (JsonProcessingException jpe) {
+      log.debug("Could not process JSON", jpe);
       return false;
     }
   }
