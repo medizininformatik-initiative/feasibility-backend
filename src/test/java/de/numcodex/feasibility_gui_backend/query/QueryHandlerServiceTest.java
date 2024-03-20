@@ -127,14 +127,14 @@ class QueryHandlerServiceTest {
             assertThat(queryListEntries.get(0).totalNumberOfPatients()).isEqualTo(RESULT_SIZE);
         }
         if (Boolean.parseBoolean(skipValidation)) {
-            assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(0);
+            assertThat(queryListEntries.get(0).isValid()).isNull();
         } else {
-            assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(1);
+            assertThat(queryListEntries.get(0).isValid()).isNotNull();
         }
     }
 
     @Test
-    void convertQueriesToQueryListEntries_JsonProcessingExceptionCausesEmptyList() throws JsonProcessingException {
+    void convertQueriesToQueryListEntries_JsonProcessingExceptionCausesInvalidQuery() throws JsonProcessingException {
         var queryList = List.of(createQuery(false));
         doThrow(JsonProcessingException.class).when(jsonUtil).readValue(any(String.class), any(Class.class));
 
@@ -143,7 +143,7 @@ class QueryHandlerServiceTest {
         assertThat(queryListEntries.size()).isEqualTo(1);
         assertThat(queryListEntries.get(0).id()).isEqualTo(QUERY_ID);
         assertThat(queryListEntries.get(0).createdAt()).isEqualTo(LAST_MODIFIED);
-        assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(0);
+        assertThat(queryListEntries.get(0).isValid()).isFalse();
     }
 
     private Query createQuery(boolean withSavedQuery) throws JsonProcessingException {

@@ -1,8 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.v3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.numcodex.feasibility_gui_backend.common.api.Criterion;
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
@@ -303,15 +301,13 @@ public class QueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var query = queryHandlerService.getQuery(queryId);
-    List<Criterion> invalidCriteria = termCodeValidation.getInvalidCriteria(query.content());
-    var queryWithInvalidCriteria = Query.builder()
+    var annotatedQuery = Query.builder()
             .id(query.id())
-            .content(query.content())
+            .content(termCodeValidation.annotateStructuredQuery(query.content()))
             .label(query.label())
             .comment(query.comment())
-            .invalidCriteria(invalidCriteria)
             .build();
-    return new ResponseEntity<>(queryWithInvalidCriteria, HttpStatus.OK);
+    return new ResponseEntity<>(annotatedQuery, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
@@ -400,14 +396,9 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("/validate")
-  public ResponseEntity<ValidatedStructuredQuery> validateStructuredQuery(
+  public ResponseEntity<StructuredQuery> validateStructuredQuery(
       @Valid @RequestBody StructuredQuery query) {
-    var invalidCriteria = termCodeValidation.getInvalidCriteria(query);
-    var validatedQuery = ValidatedStructuredQuery.builder()
-        .query(query)
-        .invalidCriteria(invalidCriteria)
-        .build();
-    return new ResponseEntity<>(validatedQuery, HttpStatus.OK);
+    return new ResponseEntity<>(termCodeValidation.annotateStructuredQuery(query), HttpStatus.OK);
   }
 
   private boolean hasAccess(Long queryId, Authentication authentication) {

@@ -694,7 +694,6 @@ public class QueryHandlerRestControllerIT {
                 .id(id)
                 .label("abc")
                 .createdAt(new Timestamp(new java.util.Date().getTime()))
-                .invalidCriteria(skipValidation ? List.of() : List.of(createInvalidCriterion()))
                 .build();
     }
 
@@ -722,7 +721,6 @@ public class QueryHandlerRestControllerIT {
                 .content(createValidStructuredQuery())
                 .label("test")
                 .comment("test")
-                .invalidCriteria(List.of())
                 .build();
     }
 

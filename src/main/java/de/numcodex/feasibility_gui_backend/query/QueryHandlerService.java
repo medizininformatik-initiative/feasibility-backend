@@ -242,35 +242,52 @@ public class QueryHandlerService {
 
     public QueryListEntry convertQueryToQueryListEntry(de.numcodex.feasibility_gui_backend.query.persistence.Query query,
                                                        boolean skipValidation) {
-        List<Criterion> invalidCriteria;
-        if (skipValidation) {
-            invalidCriteria = List.of();
-        } else {
-          try {
-            var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
-              invalidCriteria = termCodeValidation.getInvalidCriteria(sq);
-          } catch (JsonProcessingException e) {
-              invalidCriteria = List.of();
-          }
+        boolean isValid = true;
+        if (!skipValidation) {
+            try {
+                var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
+                isValid = termCodeValidation.isValid(sq);
+            } catch (JsonProcessingException e) {
+                isValid = false;
+            }
         }
 
         if (query.getSavedQuery() != null) {
-            return
-                QueryListEntry.builder()
-                    .id(query.getId())
-                    .label(query.getSavedQuery().getLabel())
-                    .comment(query.getSavedQuery().getComment())
-                    .totalNumberOfPatients(query.getSavedQuery().getResultSize())
-                    .createdAt(query.getCreatedAt())
-                    .invalidCriteria(invalidCriteria)
-                    .build();
+            if (skipValidation) {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .label(query.getSavedQuery().getLabel())
+                        .comment(query.getSavedQuery().getComment())
+                        .totalNumberOfPatients(query.getSavedQuery().getResultSize())
+                        .createdAt(query.getCreatedAt())
+                        .build();
+            } else {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .label(query.getSavedQuery().getLabel())
+                        .comment(query.getSavedQuery().getComment())
+                        .totalNumberOfPatients(query.getSavedQuery().getResultSize())
+                        .createdAt(query.getCreatedAt())
+                        .isValid(isValid)
+                        .build();
+            }
         } else {
-            return
-                QueryListEntry.builder()
-                    .id(query.getId())
-                    .createdAt(query.getCreatedAt())
-                    .invalidCriteria(invalidCriteria)
-                    .build();
+            if (skipValidation) {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .createdAt(query.getCreatedAt())
+                        .build();
+            } else {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .createdAt(query.getCreatedAt())
+                        .isValid(isValid)
+                        .build();
+            }
         }
     }
 

@@ -275,7 +275,6 @@ public class QueryTemplateHandlerRestControllerIT {
                 .content(createValidStructuredQuery())
                 .label("TestLabel")
                 .comment("TestComment")
-                .invalidCriteria(List.of())
                 .isValid(true)
                 .build();
     }
@@ -309,7 +308,6 @@ public class QueryTemplateHandlerRestControllerIT {
                 .comment("TestComment")
                 .lastModified(new Timestamp(new java.util.Date().getTime()).toString())
                 .createdBy("someone")
-                .invalidCriteria(List.of())
                 .isValid(true)
                 .build();
     }

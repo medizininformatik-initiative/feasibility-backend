@@ -77,16 +77,13 @@ public class QueryTemplateHandlerRestController {
     try {
       var query = queryHandlerService.getQueryTemplate(queryId, principal.getName());
       var queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
-      List<Criterion> invalidCriteria = termCodeValidation.getInvalidCriteria(
-          queryTemplate.content());
       var queryTemplateWithInvalidCritiera = QueryTemplate.builder()
               .id(queryTemplate.id())
-              .content(queryTemplate.content())
+              .content(termCodeValidation.annotateStructuredQuery(queryTemplate.content()))
               .label(queryTemplate.label())
               .comment(queryTemplate.comment())
               .lastModified(queryTemplate.lastModified())
               .createdBy(queryTemplate.createdBy())
-              .invalidCriteria(invalidCriteria)
               .isValid(queryTemplate.isValid())
               .build();
       return new ResponseEntity<>(queryTemplateWithInvalidCritiera, HttpStatus.OK);
@@ -107,23 +104,28 @@ public class QueryTemplateHandlerRestController {
     queries.forEach(q -> {
       try {
         QueryTemplate convertedQuery = queryHandlerService.convertTemplatePersistenceToApi(q);
-        List<Criterion> invalidCriteria;
         if (skipValidation) {
-          invalidCriteria = List.of();
+          ret.add(
+              QueryTemplate.builder()
+                  .id(convertedQuery.id())
+                  .label(convertedQuery.label())
+                  .comment(convertedQuery.comment())
+                  .lastModified(convertedQuery.lastModified())
+                  .createdBy(convertedQuery.createdBy())
+                  .build()
+          );
         } else {
-          invalidCriteria = termCodeValidation.getInvalidCriteria(
-              convertedQuery.content());
+          ret.add(
+              QueryTemplate.builder()
+                  .id(convertedQuery.id())
+                  .label(convertedQuery.label())
+                  .comment(convertedQuery.comment())
+                  .lastModified(convertedQuery.lastModified())
+                  .createdBy(convertedQuery.createdBy())
+                  .isValid(termCodeValidation.isValid(convertedQuery.content()))
+                  .build()
+          );
         }
-        var convertedQueryWithoutContent = QueryTemplate.builder()
-            .id(convertedQuery.id())
-            .label(convertedQuery.label())
-            .comment(convertedQuery.comment())
-            .lastModified(convertedQuery.lastModified())
-            .createdBy(convertedQuery.createdBy())
-            .invalidCriteria(invalidCriteria)
-            .isValid(convertedQuery.isValid())
-            .build();
-        ret.add(convertedQueryWithoutContent);
       } catch (JsonProcessingException e) {
         log.error("Error converting query");
       }
