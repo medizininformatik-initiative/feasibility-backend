@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doThrow;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -113,8 +114,8 @@ class QueryHandlerServiceTest {
         var queryList = List.of(createQuery(Boolean.parseBoolean(withSavedQuery)));
         if (!Boolean.parseBoolean(skipValidation)) {
             doReturn(
-                List.of(createInvalidCriterion())
-            ).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
+                new Random().nextBoolean()
+            ).when(structuredQueryValidation).isValid(any(StructuredQuery.class));
         }
 
         List<QueryListEntry> queryListEntries = queryHandlerService.convertQueriesToQueryListEntries(queryList, Boolean.parseBoolean(skipValidation));

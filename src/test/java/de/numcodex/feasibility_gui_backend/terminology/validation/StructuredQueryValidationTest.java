@@ -7,6 +7,7 @@ import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,23 +37,56 @@ class StructuredQueryValidationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"true", "false"})
-    void getInvalidCriteria_emptyOnValidCriteria(boolean withExclusionCriteria) {
+    void isValid_trueOnValidCriteria(boolean withExclusionCriteria) {
         doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var invalidCriteria = structuredQueryValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
+        var isValid = structuredQueryValidation.isValid(createValidStructuredQuery(withExclusionCriteria));
 
-        assertTrue(invalidCriteria.isEmpty());
+        assertTrue(isValid);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"true", "false"})
-    void getInvalidCriteria_notEmptyOnInvalidTermcode(boolean withExclusionCriteria) {
+    void isValid_falseOnInvalidCriteria(boolean withExclusionCriteria) {
         doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var invalidCriteria = structuredQueryValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
+        var isValid = structuredQueryValidation.isValid(createValidStructuredQuery(withExclusionCriteria));
 
-        assertFalse(invalidCriteria.isEmpty());
-        assertEquals(withExclusionCriteria ? 2 : 1, invalidCriteria.size());
+        assertFalse(isValid);
+    }
+
+    @Test
+    void isValid_falseOnMissingContext() {
+        var isValid = structuredQueryValidation.isValid(createStructuredQueryWithoutContext());
+
+        assertFalse(isValid);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"true", "false"})
+    void annotateStructuredQuery_emptyIssuesOnValidCriteria(boolean withExclusionCriteria) {
+        doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria));
+
+        assertTrue(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"true", "false"})
+    void annotateStructuredQuery_nonEmptyIssuesOnInvalidCriteria(boolean withExclusionCriteria) {
+        doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria));
+
+      assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+    }
+
+    @Test
+    void annotateStructuredQuery_nonEmptyIssuesOnMissingContext() {
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createStructuredQueryWithoutContext());
+
+        assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
     }
 
     @NotNull
@@ -79,5 +113,24 @@ class StructuredQueryValidationTest {
                 .exclusionCriteria(withExclusionCriteria ? List.of(List.of(criterion)) : List.of())
                 .display("foo")
                 .build();
+    }
+
+    @NotNull
+    private static StructuredQuery createStructuredQueryWithoutContext() {
+        var termCode = TermCode.builder()
+            .code("19113-0")
+            .system("http://loinc.org")
+            .display("IgE")
+            .build();
+        var criterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .attributeFilters(List.of())
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(criterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .build();
     }
 }

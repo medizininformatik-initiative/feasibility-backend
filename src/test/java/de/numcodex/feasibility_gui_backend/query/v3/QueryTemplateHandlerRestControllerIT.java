@@ -7,17 +7,19 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssue;
 import de.numcodex.feasibility_gui_backend.query.api.validation.QueryTemplateValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.Query;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
-import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,6 +36,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -118,10 +122,11 @@ public class QueryTemplateHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testGetQueryTemplate_succeeds() throws Exception {
         long queryTemplateId = 1;
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn(createValidPersistenceQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -132,10 +137,11 @@ public class QueryTemplateHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testGetQueryTemplate_failsOnNotFound() throws Exception {
         long queryTemplateId = 1;
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doThrow(QueryTemplateException.class).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isNotFound());
@@ -145,10 +151,11 @@ public class QueryTemplateHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testGetQueryTemplate_failsOnJsonError() throws Exception {
         long queryTemplateId = 1;
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn(createValidPersistenceQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isInternalServerError());
@@ -178,32 +185,21 @@ public class QueryTemplateHandlerRestControllerIT {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testGetQueryTemplateListWithValidation_succeedsWithoutValidationErrors() throws Exception {
+    public void testGetQueryTemplateListWithValidation_succeeds(boolean isValid) throws Exception {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(isValid).when(structuredQueryValidation).isValid(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(listSize))
             .andExpect(jsonPath("$.[*].id").exists())
-            .andExpect(jsonPath("$.[*].isValid", Matchers.not(Matchers.contains(false))));
-    }
-
-    @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testGetQueryTemplateListWithValidation_succeedsWithValidationErrors() throws Exception {
-        int listSize = 5;
-        doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
-        doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of(createInvalidCriterion())).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
-
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(listSize));
+            .andExpect(jsonPath("$.[*].isValid").exists())
+            .andExpect(jsonPath("$.[*].isValid", everyItem(equalTo(isValid))));
     }
 
     @Test
@@ -212,7 +208,7 @@ public class QueryTemplateHandlerRestControllerIT {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(List.of(createInvalidCriterion())).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(false).when(structuredQueryValidation).isValid(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf()))
             .andExpect(status().isOk())
@@ -317,6 +313,7 @@ public class QueryTemplateHandlerRestControllerIT {
         var inclusionCriterion = Criterion.builder()
                 .termCodes(List.of(createTermCode()))
                 .attributeFilters(List.of())
+                .context(createTermCode())
                 .build();
         return StructuredQuery.builder()
                 .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
@@ -324,6 +321,27 @@ public class QueryTemplateHandlerRestControllerIT {
                 .exclusionCriteria(List.of())
                 .display("foo")
                 .build();
+    }
+
+    @NotNull
+    private static StructuredQuery createValidAnnotatedStructuredQuery(boolean withIssues) {
+        var termCode = TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
+        var inclusionCriterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .attributeFilters(List.of())
+            .context(termCode)
+            .validationIssues(withIssues ? List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID) : List.of())
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .build();
     }
 
     @NotNull
