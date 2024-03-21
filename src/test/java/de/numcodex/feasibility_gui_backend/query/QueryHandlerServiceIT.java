@@ -24,7 +24,7 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpri
 import java.net.URI;
 import java.util.List;
 
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -102,7 +102,7 @@ public class QueryHandlerServiceIT {
     private QueryHashCalculator queryHashCalculator;
 
     @MockBean
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     @Autowired
     @Qualifier("translation")

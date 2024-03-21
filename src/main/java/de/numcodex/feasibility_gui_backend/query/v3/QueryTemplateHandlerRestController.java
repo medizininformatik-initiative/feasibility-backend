@@ -1,15 +1,14 @@
 package de.numcodex.feasibility_gui_backend.query.v3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.numcodex.feasibility_gui_backend.common.api.Criterion;
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
+
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.List;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Context;
@@ -33,13 +32,13 @@ Rest Interface for the UI to send and receive query templates from the backend.
 public class QueryTemplateHandlerRestController {
 
   private final QueryHandlerService queryHandlerService;
-  private final TermCodeValidation termCodeValidation;
+  private final StructuredQueryValidation structuredQueryValidation;
   private final String apiBaseUrl;
 
   public QueryTemplateHandlerRestController(QueryHandlerService queryHandlerService,
-      TermCodeValidation termCodeValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
+                                            StructuredQueryValidation structuredQueryValidation, @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
-    this.termCodeValidation = termCodeValidation;
+    this.structuredQueryValidation = structuredQueryValidation;
     this.apiBaseUrl = apiBaseUrl;
   }
 
@@ -79,7 +78,7 @@ public class QueryTemplateHandlerRestController {
       var queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
       var queryTemplateWithInvalidCritiera = QueryTemplate.builder()
               .id(queryTemplate.id())
-              .content(termCodeValidation.annotateStructuredQuery(queryTemplate.content()))
+              .content(structuredQueryValidation.annotateStructuredQuery(queryTemplate.content()))
               .label(queryTemplate.label())
               .comment(queryTemplate.comment())
               .lastModified(queryTemplate.lastModified())
@@ -122,7 +121,7 @@ public class QueryTemplateHandlerRestController {
                   .comment(convertedQuery.comment())
                   .lastModified(convertedQuery.lastModified())
                   .createdBy(convertedQuery.createdBy())
-                  .isValid(termCodeValidation.isValid(convertedQuery.content()))
+                  .isValid(structuredQueryValidation.isValid(convertedQuery.content()))
                   .build()
           );
         }

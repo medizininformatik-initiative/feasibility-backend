@@ -22,16 +22,16 @@ import static org.mockito.Mockito.*;
 
 @Tag("terminology")
 @ExtendWith(MockitoExtension.class)
-class TermCodeValidationTest {
+class StructuredQueryValidationTest {
 
     @Mock
     private TerminologyService terminologyService;
 
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     @BeforeEach
     void setUp() {
-        termCodeValidation = new TermCodeValidation(terminologyService);
+        structuredQueryValidation = new StructuredQueryValidation(terminologyService);
     }
 
     @ParameterizedTest
@@ -39,7 +39,7 @@ class TermCodeValidationTest {
     void getInvalidCriteria_emptyOnValidCriteria(boolean withExclusionCriteria) {
         doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var invalidCriteria = termCodeValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
+        var invalidCriteria = structuredQueryValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
 
         assertTrue(invalidCriteria.isEmpty());
     }
@@ -49,7 +49,7 @@ class TermCodeValidationTest {
     void getInvalidCriteria_notEmptyOnInvalidTermcode(boolean withExclusionCriteria) {
         doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var invalidCriteria = termCodeValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
+        var invalidCriteria = structuredQueryValidation.getInvalidCriteria(createValidStructuredQuery(withExclusionCriteria));
 
         assertFalse(invalidCriteria.isEmpty());
         assertEquals(withExclusionCriteria ? 2 : 1, invalidCriteria.size());

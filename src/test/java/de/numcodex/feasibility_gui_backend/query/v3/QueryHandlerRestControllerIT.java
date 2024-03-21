@@ -16,7 +16,8 @@ import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelp
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
+
 import java.sql.Timestamp;
 import java.util.Optional;
 
@@ -79,7 +80,7 @@ public class QueryHandlerRestControllerIT {
     private QueryHandlerService queryHandlerService;
 
     @MockBean
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     @MockBean
     private RateLimitingInterceptor rateLimitingInterceptor;
@@ -130,7 +131,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
 
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -152,7 +153,7 @@ public class QueryHandlerRestControllerIT {
         var dispatchError = new QueryDispatchException("something went wrong");
 
         doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -170,7 +171,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
 
         doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(Integer.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -187,7 +188,7 @@ public class QueryHandlerRestControllerIT {
     public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
 
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -202,7 +203,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
         var invalidCriterion = createInvalidCriterion();
 
-        doReturn(List.of(invalidCriterion)).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of(invalidCriterion)).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -223,7 +224,7 @@ public class QueryHandlerRestControllerIT {
         Optional<UserBlacklist> userBlacklistOptional = Optional.of(userBlacklistEntry);
         doReturn(userBlacklistOptional).when(userBlacklistRepository).findByUserId(any(String.class));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -242,7 +243,7 @@ public class QueryHandlerRestControllerIT {
 
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -263,7 +264,7 @@ public class QueryHandlerRestControllerIT {
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -348,7 +349,7 @@ public class QueryHandlerRestControllerIT {
         long queryId = 1;
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -361,7 +362,7 @@ public class QueryHandlerRestControllerIT {
         long queryId = 1;
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+        doReturn(List.of()).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isForbidden());

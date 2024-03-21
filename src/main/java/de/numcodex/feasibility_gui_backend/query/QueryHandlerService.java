@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -15,7 +14,7 @@ import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -61,7 +60,7 @@ public class QueryHandlerService {
     private final SavedQueryRepository savedQueryRepository;
 
     @NonNull
-    private final TermCodeValidation termCodeValidation;
+    private final StructuredQueryValidation structuredQueryValidation;
 
     @NonNull
     private ObjectMapper jsonUtil;
@@ -246,7 +245,7 @@ public class QueryHandlerService {
         if (!skipValidation) {
             try {
                 var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
-                isValid = termCodeValidation.isValid(sq);
+                isValid = structuredQueryValidation.isValid(sq);
             } catch (JsonProcessingException e) {
                 isValid = false;
             }

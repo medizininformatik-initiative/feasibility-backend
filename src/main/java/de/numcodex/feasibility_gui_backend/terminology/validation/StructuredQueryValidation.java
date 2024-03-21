@@ -6,7 +6,6 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.MutableStructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssue;
-import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssues;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,12 +17,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class TermCodeValidation {
+public class StructuredQueryValidation {
 
   private final TerminologyService terminologyService;
 
   @Autowired
-  public TermCodeValidation(TerminologyService terminologyService) {
+  public StructuredQueryValidation(TerminologyService terminologyService) {
     this.terminologyService = terminologyService;
   }
 
@@ -94,7 +93,7 @@ public class TermCodeValidation {
     for (List<MutableCriterion> inclusionCriteria : mutableStructuredQuery.getInclusionCriteria()) {
       for (MutableCriterion criterion : inclusionCriteria) {
         if (criterion.getContext() == null) {
-          criterion.setValidationIssues(new ValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID)));
+          criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
           continue;
         }
         for (TermCode termCode : criterion.getTermCodes()) {
@@ -103,7 +102,7 @@ public class TermCodeValidation {
           } else {
             log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
                 termCode.version());
-            criterion.setValidationIssues(new ValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID)));
+            criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
           }
         }
       }
@@ -112,7 +111,7 @@ public class TermCodeValidation {
     for (List<MutableCriterion> exclusionCriteria : mutableStructuredQuery.getExclusionCriteria()) {
       for (MutableCriterion criterion : exclusionCriteria) {
         if (criterion.getContext() == null) {
-          criterion.setValidationIssues(new ValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID)));
+          criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
           continue;
         }
         for (TermCode termCode : criterion.getTermCodes()) {
@@ -121,7 +120,7 @@ public class TermCodeValidation {
           } else {
             log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
                 termCode.version());
-            criterion.setValidationIssues(new ValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID)));
+            criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
           }
         }
       }

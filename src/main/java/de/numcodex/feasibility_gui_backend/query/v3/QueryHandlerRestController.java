@@ -14,7 +14,7 @@ import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistReposi
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.InvalidAuthenticationException;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingService;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Context;
@@ -48,7 +48,7 @@ public class QueryHandlerRestController {
 
   public static final String HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY = "X-Detailed-Obfuscated-Result-Was-Empty";
   private final QueryHandlerService queryHandlerService;
-  private final TermCodeValidation termCodeValidation;
+  private final StructuredQueryValidation structuredQueryValidation;
   private final RateLimitingService rateLimitingService;
   private final UserBlacklistRepository userBlacklistRepository;
   private final AuthenticationHelper authenticationHelper;
@@ -85,13 +85,13 @@ public class QueryHandlerRestController {
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       RateLimitingService rateLimitingService,
-      TermCodeValidation termCodeValidation,
+      StructuredQueryValidation structuredQueryValidation,
       UserBlacklistRepository userBlacklistRepository,
       AuthenticationHelper authenticationHelper,
       @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
     this.rateLimitingService = rateLimitingService;
-    this.termCodeValidation = termCodeValidation;
+    this.structuredQueryValidation = structuredQueryValidation;
     this.userBlacklistRepository = userBlacklistRepository;
     this.authenticationHelper = authenticationHelper;
     this.apiBaseUrl = apiBaseUrl;
@@ -303,7 +303,7 @@ public class QueryHandlerRestController {
     var query = queryHandlerService.getQuery(queryId);
     var annotatedQuery = Query.builder()
             .id(query.id())
-            .content(termCodeValidation.annotateStructuredQuery(query.content()))
+            .content(structuredQueryValidation.annotateStructuredQuery(query.content()))
             .label(query.label())
             .comment(query.comment())
             .build();
@@ -398,7 +398,7 @@ public class QueryHandlerRestController {
   @PostMapping("/validate")
   public ResponseEntity<StructuredQuery> validateStructuredQuery(
       @Valid @RequestBody StructuredQuery query) {
-    return new ResponseEntity<>(termCodeValidation.annotateStructuredQuery(query), HttpStatus.OK);
+    return new ResponseEntity<>(structuredQueryValidation.annotateStructuredQuery(query), HttpStatus.OK);
   }
 
   private boolean hasAccess(Long queryId, Authentication authentication) {

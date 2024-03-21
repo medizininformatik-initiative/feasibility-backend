@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.query.api.AttributeFilter;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
-import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssues;
+import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssue;
 import lombok.Builder;
 import lombok.Data;
 
@@ -21,7 +21,7 @@ public class MutableCriterion {
     @JsonProperty("attributeFilters") List<AttributeFilter> attributeFilters;
     @JsonProperty("valueFilter") ValueFilter valueFilter;
     @JsonProperty("timeRestriction") TimeRestriction timeRestriction;
-    @JsonProperty("issues") ValidationIssues validationIssues;
+    @JsonProperty("issues") List<ValidationIssue> validationIssues;
 
     public static MutableCriterion createMutableCriterion (Criterion criterion) {
       return MutableCriterion.builder()

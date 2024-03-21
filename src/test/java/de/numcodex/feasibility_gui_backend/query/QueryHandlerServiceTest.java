@@ -11,7 +11,7 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,13 +70,13 @@ class QueryHandlerServiceTest {
     private SavedQueryRepository savedQueryRepository;
 
     @Mock
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     private QueryHandlerService queryHandlerService;
 
     private QueryHandlerService createQueryHandlerService() {
         return new QueryHandlerService(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
-                resultService, queryTemplateRepository, savedQueryRepository, termCodeValidation, jsonUtil);
+                resultService, queryTemplateRepository, savedQueryRepository, structuredQueryValidation, jsonUtil);
     }
 
     @BeforeEach
@@ -114,7 +114,7 @@ class QueryHandlerServiceTest {
         if (!Boolean.parseBoolean(skipValidation)) {
             doReturn(
                 List.of(createInvalidCriterion())
-            ).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+            ).when(structuredQueryValidation).getInvalidCriteria(any(StructuredQuery.class));
         }
 
         List<QueryListEntry> queryListEntries = queryHandlerService.convertQueriesToQueryListEntries(queryList, Boolean.parseBoolean(skipValidation));
