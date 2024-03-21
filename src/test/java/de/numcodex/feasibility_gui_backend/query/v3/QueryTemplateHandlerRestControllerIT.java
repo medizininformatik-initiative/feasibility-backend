@@ -126,7 +126,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         doReturn(createValidPersistenceQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -141,7 +141,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         doThrow(QueryTemplateException.class).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doReturn(createValidApiQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isNotFound());
@@ -155,7 +155,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
         doReturn(createValidPersistenceQueryTemplateToGet(queryTemplateId)).when(queryHandlerService).getQueryTemplate(any(Long.class), any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/" + queryTemplateId)).with(csrf()))
                 .andExpect(status().isInternalServerError());

@@ -133,7 +133,7 @@ public class QueryHandlerRestControllerIT {
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -156,7 +156,7 @@ public class QueryHandlerRestControllerIT {
         var dispatchError = new QueryDispatchException("something went wrong");
 
         doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -175,7 +175,7 @@ public class QueryHandlerRestControllerIT {
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(Integer.class));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -193,7 +193,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -209,7 +209,7 @@ public class QueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(true);
 
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -231,7 +231,7 @@ public class QueryHandlerRestControllerIT {
         Optional<UserBlacklist> userBlacklistOptional = Optional.of(userBlacklistEntry);
         doReturn(userBlacklistOptional).when(userBlacklistRepository).findByUserId(any(String.class));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -251,7 +251,7 @@ public class QueryHandlerRestControllerIT {
 
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -273,7 +273,7 @@ public class QueryHandlerRestControllerIT {
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -360,7 +360,7 @@ public class QueryHandlerRestControllerIT {
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -374,7 +374,7 @@ public class QueryHandlerRestControllerIT {
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isForbidden());

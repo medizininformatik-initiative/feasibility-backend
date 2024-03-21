@@ -67,7 +67,7 @@ class StructuredQueryValidationTest {
     void annotateStructuredQuery_emptyIssuesOnValidCriteria(boolean withExclusionCriteria) {
         doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria));
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), false);
 
         assertTrue(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
     }
@@ -77,14 +77,14 @@ class StructuredQueryValidationTest {
     void annotateStructuredQuery_nonEmptyIssuesOnInvalidCriteria(boolean withExclusionCriteria) {
         doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
-        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria));
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), false);
 
       assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
     }
 
     @Test
     void annotateStructuredQuery_nonEmptyIssuesOnMissingContext() {
-        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createStructuredQueryWithoutContext());
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createStructuredQueryWithoutContext(), false);
 
         assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
     }

@@ -30,17 +30,18 @@ public class StructuredQueryValidation {
    * iterations may contain checking for availability of values and units of the term codes as well.
    *
    * @param structuredQuery the structured query to check
+   * @param skipValidation if set to true, the issues list will always be empty
    * @return the structuredQuery with issue annotation
    */
-  public StructuredQuery annotateStructuredQuery(StructuredQuery structuredQuery) {
+  public StructuredQuery annotateStructuredQuery(StructuredQuery structuredQuery, boolean skipValidation) {
     var mutableStructuredQuery = MutableStructuredQuery.createMutableStructuredQuery(structuredQuery);
 
     for (List<MutableCriterion> inclusionCriteria : mutableStructuredQuery.getInclusionCriteria()) {
-      annotateCriteria(inclusionCriteria);
+      annotateCriteria(inclusionCriteria, skipValidation);
     }
 
     for (List<MutableCriterion> exclusionCriteria : mutableStructuredQuery.getExclusionCriteria()) {
-      annotateCriteria(exclusionCriteria);
+      annotateCriteria(exclusionCriteria, skipValidation);
     }
 
     return StructuredQuery.createImmutableStructuredQuery(mutableStructuredQuery);
@@ -75,8 +76,12 @@ public class StructuredQueryValidation {
     return true;
   }
 
-  private void annotateCriteria(List<MutableCriterion> criteria) {
+  private void annotateCriteria(List<MutableCriterion> criteria, boolean skipValidation) {
     for (MutableCriterion criterion : criteria) {
+      if (skipValidation) {
+        criterion.setValidationIssues(List.of());
+        continue;
+      }
       if (criterion.getContext() == null) {
         criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
         continue;

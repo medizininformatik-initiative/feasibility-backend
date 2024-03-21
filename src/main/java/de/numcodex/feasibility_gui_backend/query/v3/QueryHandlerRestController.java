@@ -296,6 +296,7 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}")
   public ResponseEntity<Object> getQuery(@PathVariable("id") Long queryId,
+                                         @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
       Authentication authentication) throws JsonProcessingException {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -303,7 +304,7 @@ public class QueryHandlerRestController {
     var query = queryHandlerService.getQuery(queryId);
     var annotatedQuery = Query.builder()
             .id(query.id())
-            .content(structuredQueryValidation.annotateStructuredQuery(query.content()))
+            .content(structuredQueryValidation.annotateStructuredQuery(query.content(), skipValidation))
             .label(query.label())
             .comment(query.comment())
             .build();
@@ -398,7 +399,7 @@ public class QueryHandlerRestController {
   @PostMapping("/validate")
   public ResponseEntity<StructuredQuery> validateStructuredQuery(
       @Valid @RequestBody StructuredQuery query) {
-    return new ResponseEntity<>(structuredQueryValidation.annotateStructuredQuery(query), HttpStatus.OK);
+    return new ResponseEntity<>(structuredQueryValidation.annotateStructuredQuery(query, false), HttpStatus.OK);
   }
 
   private boolean hasAccess(Long queryId, Authentication authentication) {

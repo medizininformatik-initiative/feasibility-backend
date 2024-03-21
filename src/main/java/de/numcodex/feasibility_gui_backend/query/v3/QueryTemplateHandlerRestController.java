@@ -71,6 +71,7 @@ public class QueryTemplateHandlerRestController {
 
   @GetMapping(path = "/{queryId}")
   public ResponseEntity<Object> getQueryTemplate(@PathVariable(value = "queryId") Long queryId,
+                                                 @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
       Principal principal) {
 
     try {
@@ -78,7 +79,7 @@ public class QueryTemplateHandlerRestController {
       var queryTemplate = queryHandlerService.convertTemplatePersistenceToApi(query);
       var queryTemplateWithInvalidCritiera = QueryTemplate.builder()
               .id(queryTemplate.id())
-              .content(structuredQueryValidation.annotateStructuredQuery(queryTemplate.content()))
+              .content(structuredQueryValidation.annotateStructuredQuery(queryTemplate.content(), skipValidation))
               .label(queryTemplate.label())
               .comment(queryTemplate.comment())
               .lastModified(queryTemplate.lastModified())
