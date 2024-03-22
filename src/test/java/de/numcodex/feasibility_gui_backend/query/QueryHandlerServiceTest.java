@@ -11,7 +11,7 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doThrow;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,13 +71,13 @@ class QueryHandlerServiceTest {
     private SavedQueryRepository savedQueryRepository;
 
     @Mock
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     private QueryHandlerService queryHandlerService;
 
     private QueryHandlerService createQueryHandlerService() {
         return new QueryHandlerService(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
-                resultService, queryTemplateRepository, savedQueryRepository, termCodeValidation, jsonUtil);
+                resultService, queryTemplateRepository, savedQueryRepository, structuredQueryValidation, jsonUtil);
     }
 
     @BeforeEach
@@ -113,8 +114,8 @@ class QueryHandlerServiceTest {
         var queryList = List.of(createQuery(Boolean.parseBoolean(withSavedQuery)));
         if (!Boolean.parseBoolean(skipValidation)) {
             doReturn(
-                List.of(createInvalidCriterion())
-            ).when(termCodeValidation).getInvalidCriteria(any(StructuredQuery.class));
+                new Random().nextBoolean()
+            ).when(structuredQueryValidation).isValid(any(StructuredQuery.class));
         }
 
         List<QueryListEntry> queryListEntries = queryHandlerService.convertQueriesToQueryListEntries(queryList, Boolean.parseBoolean(skipValidation));
@@ -127,14 +128,14 @@ class QueryHandlerServiceTest {
             assertThat(queryListEntries.get(0).totalNumberOfPatients()).isEqualTo(RESULT_SIZE);
         }
         if (Boolean.parseBoolean(skipValidation)) {
-            assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(0);
+            assertThat(queryListEntries.get(0).isValid()).isNull();
         } else {
-            assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(1);
+            assertThat(queryListEntries.get(0).isValid()).isNotNull();
         }
     }
 
     @Test
-    void convertQueriesToQueryListEntries_JsonProcessingExceptionCausesEmptyList() throws JsonProcessingException {
+    void convertQueriesToQueryListEntries_JsonProcessingExceptionCausesInvalidQuery() throws JsonProcessingException {
         var queryList = List.of(createQuery(false));
         doThrow(JsonProcessingException.class).when(jsonUtil).readValue(any(String.class), any(Class.class));
 
@@ -143,7 +144,7 @@ class QueryHandlerServiceTest {
         assertThat(queryListEntries.size()).isEqualTo(1);
         assertThat(queryListEntries.get(0).id()).isEqualTo(QUERY_ID);
         assertThat(queryListEntries.get(0).createdAt()).isEqualTo(LAST_MODIFIED);
-        assertThat(queryListEntries.get(0).invalidCriteria().size()).isEqualTo(0);
+        assertThat(queryListEntries.get(0).isValid()).isFalse();
     }
 
     private Query createQuery(boolean withSavedQuery) throws JsonProcessingException {

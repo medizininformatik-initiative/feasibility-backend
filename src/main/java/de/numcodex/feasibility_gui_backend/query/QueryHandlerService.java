@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
@@ -15,7 +14,7 @@ import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateException;
 import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -61,7 +60,7 @@ public class QueryHandlerService {
     private final SavedQueryRepository savedQueryRepository;
 
     @NonNull
-    private final TermCodeValidation termCodeValidation;
+    private final StructuredQueryValidation structuredQueryValidation;
 
     @NonNull
     private ObjectMapper jsonUtil;
@@ -242,35 +241,52 @@ public class QueryHandlerService {
 
     public QueryListEntry convertQueryToQueryListEntry(de.numcodex.feasibility_gui_backend.query.persistence.Query query,
                                                        boolean skipValidation) {
-        List<Criterion> invalidCriteria;
-        if (skipValidation) {
-            invalidCriteria = List.of();
-        } else {
-          try {
-            var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
-              invalidCriteria = termCodeValidation.getInvalidCriteria(sq);
-          } catch (JsonProcessingException e) {
-              invalidCriteria = List.of();
-          }
+        boolean isValid = true;
+        if (!skipValidation) {
+            try {
+                var sq = jsonUtil.readValue(query.getQueryContent().getQueryContent(), StructuredQuery.class);
+                isValid = structuredQueryValidation.isValid(sq);
+            } catch (JsonProcessingException e) {
+                isValid = false;
+            }
         }
 
         if (query.getSavedQuery() != null) {
-            return
-                QueryListEntry.builder()
-                    .id(query.getId())
-                    .label(query.getSavedQuery().getLabel())
-                    .comment(query.getSavedQuery().getComment())
-                    .totalNumberOfPatients(query.getSavedQuery().getResultSize())
-                    .createdAt(query.getCreatedAt())
-                    .invalidCriteria(invalidCriteria)
-                    .build();
+            if (skipValidation) {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .label(query.getSavedQuery().getLabel())
+                        .comment(query.getSavedQuery().getComment())
+                        .totalNumberOfPatients(query.getSavedQuery().getResultSize())
+                        .createdAt(query.getCreatedAt())
+                        .build();
+            } else {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .label(query.getSavedQuery().getLabel())
+                        .comment(query.getSavedQuery().getComment())
+                        .totalNumberOfPatients(query.getSavedQuery().getResultSize())
+                        .createdAt(query.getCreatedAt())
+                        .isValid(isValid)
+                        .build();
+            }
         } else {
-            return
-                QueryListEntry.builder()
-                    .id(query.getId())
-                    .createdAt(query.getCreatedAt())
-                    .invalidCriteria(invalidCriteria)
-                    .build();
+            if (skipValidation) {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .createdAt(query.getCreatedAt())
+                        .build();
+            } else {
+                return
+                    QueryListEntry.builder()
+                        .id(query.getId())
+                        .createdAt(query.getCreatedAt())
+                        .isValid(isValid)
+                        .build();
+            }
         }
     }
 

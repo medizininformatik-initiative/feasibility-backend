@@ -131,7 +131,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidatedStructuredQuery'
+                  $ref: '#/components/schemas/StructuredQuery'
         400:
           description: Query does not adhere to json schema
           content: { }
@@ -159,6 +159,13 @@ paths:
             type: string
             enum:
               - saved
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: successful operation
@@ -195,6 +202,13 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: OK
@@ -840,7 +854,6 @@ components:
       required:
         - id
         - label
-        - invalidCriteria
       properties:
         id:
           type: integer
@@ -854,10 +867,8 @@ components:
           format: 'date-time'
         totalNumberOfPatients:
           type: integer
-        invalidCriteria:
-          type: array
-          items:
-            $ref: "#/components/schemas/Criterion"
+        isValid:
+          type: boolean
     Query:
       type: object
       required:
@@ -873,10 +884,6 @@ components:
           type: string
         results:
           $ref: "#/components/schemas/QueryResult"
-        invalidCriteria:
-          type: array
-          items:
-            $ref: "#/components/schemas/Criterion"
     QueryResultSummary:
       type: object
       properties:
@@ -940,7 +947,6 @@ components:
       type: object
       required:
         - label
-        - invalidCriteria
       properties:
         id:
           type: integer
@@ -959,10 +965,6 @@ components:
         createdBy:
           type: string
           description: Keycloak id of the user who created the query
-        invalidCriteria:
-          type: array
-          items:
-            $ref: "#/components/schemas/Criterion"
         isValid:
           type: boolean
           description: is the query valid?
@@ -990,10 +992,6 @@ components:
         createdBy:
           type: string
           description: Keycloak id of the user who created the query
-        invalidCriteria:
-          type: array
-          items:
-            $ref: "#/components/schemas/Criterion"
     StructuredQuery:
       type: object
       required:
@@ -1016,18 +1014,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CriterionList"
-    ValidatedStructuredQuery:
-      type: object
-      required:
-        - query
-        - invalidCriteria
-      properties:
-        query:
-          $ref: "#/components/schemas/StructuredQuery"
-        invalidCriteria:
-          type: array
-          items:
-            $ref: "#/components/schemas/Criterion"
     SavedQuery:
       type: object
       required:
@@ -1161,6 +1147,10 @@ components:
           $ref: "#/components/schemas/ValueFilter"
         timeRestriction:
           $ref: "#/components/schemas/TimeRestriction"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationIssue"
     CriterionList:
       type: array
       items:
@@ -1217,7 +1207,18 @@ components:
           $ref: "#/components/schemas/TermCode"
         context:
           $ref: "#/components/schemas/TermCode"
-
+    ValidationIssue:
+      type: object
+      required:
+        - code
+        - detail
+      properties:
+        code:
+          type: string
+          example: VAL-20001
+        detail:
+          type: string
+          example: The combination of context and termcode(s) is not found.
   securitySchemes:
     feasibility_auth:
       type: oauth2
