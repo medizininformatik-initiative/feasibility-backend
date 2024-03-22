@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,8 +37,8 @@ class StructuredQueryValidationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    void isValid_trueOnValidCriteria(boolean withExclusionCriteria) {
+    @ValueSource(booleans = {true, false})
+    void testIsValid_trueOnValidCriteria(boolean withExclusionCriteria) {
         doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
         var isValid = structuredQueryValidation.isValid(createValidStructuredQuery(withExclusionCriteria));
@@ -46,8 +47,8 @@ class StructuredQueryValidationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    void isValid_falseOnInvalidCriteria(boolean withExclusionCriteria) {
+    @ValueSource(booleans = {true, false})
+    void testIsValid_falseOnInvalidCriteria(boolean withExclusionCriteria) {
         doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
 
         var isValid = structuredQueryValidation.isValid(createValidStructuredQuery(withExclusionCriteria));
@@ -56,37 +57,54 @@ class StructuredQueryValidationTest {
     }
 
     @Test
-    void isValid_falseOnMissingContext() {
+    void testIsValid_falseOnMissingContext() {
         var isValid = structuredQueryValidation.isValid(createStructuredQueryWithoutContext());
 
         assertFalse(isValid);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    void annotateStructuredQuery_emptyIssuesOnValidCriteria(boolean withExclusionCriteria) {
-        doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+    @CsvSource({"true,true", "true,false", "false,true", "false,false"})
+    void testAnnotateStructuredQuery_emptyIssuesOnValidCriteriaOrSkippedValidation(String withExclusionCriteriaString, String skipValidationString) {
+        boolean withExclusionCriteria = Boolean.parseBoolean(withExclusionCriteriaString);
+        boolean skipValidation = Boolean.parseBoolean(skipValidationString);
+        if (!skipValidation) {
+            doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+        }
 
-        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), false);
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), skipValidation);
 
         assertTrue(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    void annotateStructuredQuery_nonEmptyIssuesOnInvalidCriteria(boolean withExclusionCriteria) {
-        doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+    @CsvSource({"true,true", "true,false", "false,true", "false,false"})
+    void testAnnotateStructuredQuery_nonEmptyIssuesOnInvalidCriteria(String withExclusionCriteriaString, String skipValidationString) {
+        boolean withExclusionCriteria = Boolean.parseBoolean(withExclusionCriteriaString);
+        boolean skipValidation = Boolean.parseBoolean(skipValidationString);
+        if (!skipValidation) {
+            doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+        }
 
-        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), false);
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), skipValidation);
 
-      assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        if (skipValidation) {
+            assertTrue(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        } else {
+            assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        }
     }
 
-    @Test
-    void annotateStructuredQuery_nonEmptyIssuesOnMissingContext() {
-        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createStructuredQueryWithoutContext(), false);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testAnnotateStructuredQuery_nonEmptyIssuesOnMissingContext(boolean skipValidation) {
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createStructuredQueryWithoutContext(), skipValidation);
 
-        assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        if (skipValidation) {
+            assertTrue(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        } else {
+            assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        }
     }
 
     @NotNull
