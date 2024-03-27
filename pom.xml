@@ -395,42 +395,6 @@
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>3.1.0</version>
-            <executions>
-              <execution>
-                <id>delete-ontology-directories</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>rm</executable>
-                  <arguments>
-                    <argument>-rf</argument>
-                    <argument>ontology</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>create-ontology-directory</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mkdir</executable>
-                  <arguments>
-                    <argument>ontology</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
             <artifactId>wagon-maven-plugin</artifactId>
             <version>2.0.2</version>
             <executions>
@@ -463,82 +427,141 @@
 
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
+            <artifactId>truezip-maven-plugin</artifactId>
+            <version>1.2</version>
+            <executions>
+              <execution>
+                <id>unzip-backend-zip</id>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <fileset>
+                    <directory>ontology/backend.zip</directory>
+                    <outputDirectory>ontology/backend_unzipped/</outputDirectory>
+                  </fileset>
+                </configuration>
+              </execution>
+              <execution>
+                <id>unzip-mapping-zip</id>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <fileset>
+                    <directory>ontology/mapping.zip</directory>
+                    <outputDirectory>ontology/mapping_unzipped/</outputDirectory>
+                  </fileset>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>com.coderplus.maven.plugins</groupId>
+            <artifactId>copy-rename-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>rename-file</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>rename</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <sourceFile>ontology/mapping_unzipped/ontology/mapping/mapping_cql.json</sourceFile>
+                      <destinationFile>ontology/mapping_cql.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>ontology/mapping_unzipped/ontology/mapping/mapping_fhir.json</sourceFile>
+                      <destinationFile>ontology/mapping_fhir.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>ontology/mapping_unzipped/ontology/mapping/mapping_tree.json</sourceFile>
+                      <destinationFile>ontology/mapping_tree.json</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>ontology/backend_unzipped/ontology/backend/R__Load_latest_ui_profile.sql</sourceFile>
+                      <destinationFile>ontology/migration/R__Load_latest_ui_profile.sql</destinationFile>
+                    </fileSet>
+                    <fileSet>
+                      <sourceFile>ontology/backend_unzipped/ontology/backend/</sourceFile>
+                      <destinationFile>ontology/ui_trees/</destinationFile>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
             <version>3.1.0</version>
             <executions>
               <execution>
-                <id>unpack-ontology-backend</id>
-                <phase>process-resources</phase>
+                <id>delete onto folder</id>
+                <phase>initialize</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>clean</goal>
                 </goals>
                 <configuration>
-                  <executable>unzip</executable>
-                  <arguments>
-                    <argument>-jod</argument>
-                    <argument>ontology/ui_trees/</argument>
-                    <argument>ontology/backend.zip</argument>
-                  </arguments>
+                  <filesets>
+                    <!-- When not deleting all subdirectories first, the directories will not be deleted at all-->
+                    <fileset>
+                      <directory>ontology/</directory>
+                      <includes>
+                        <include>**/*</include>
+                      </includes>
+                    </fileset>
+                    <fileset>
+                      <directory>/</directory>
+                      <includes>
+                        <include>ontology</include>
+                      </includes>
+                    </fileset>
+                  </filesets>
                 </configuration>
               </execution>
-
               <execution>
-                <id>create-ontology-subdirectory</id>
+                <id>rename-file</id>
                 <phase>process-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>clean</goal>
                 </goals>
                 <configuration>
-                  <executable>mkdir</executable>
-                  <arguments>
-                    <argument>ontology/migration/</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>move-db-script</id>
-                <phase>process-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mv</executable>
-                  <arguments>
-                    <argument>ontology/ui_trees/R__Load_latest_ui_profile.sql</argument>
-                    <argument>ontology/migration/</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>unpack-ontology-mapping</id>
-                <phase>process-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>unzip</executable>
-                  <arguments>
-                    <argument>-jod</argument>
-                    <argument>ontology/</argument>
-                    <argument>ontology/mapping.zip</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>delete-zip-files</id>
-                <phase>process-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>rm</executable>
-                  <arguments>
-                    <argument>ontology/backend.zip</argument>
-                    <argument>ontology/mapping.zip</argument>
-                  </arguments>
+                  <filesets>
+                    <fileset>
+                      <directory>ontology/</directory>
+                      <includes>
+                        <include>backend.zip</include>
+                        <include>mapping.zip</include>
+                      </includes>
+                    </fileset>
+                    <!-- When not deleting all subdirectories first, the directories will not be deleted at all-->
+                    <fileset>
+                      <directory>ontology/mapping_unzipped</directory>
+                      <includes>
+                        <include>**/*</include>
+                      </includes>
+                    </fileset>
+                    <fileset>
+                      <directory>ontology/backend_unzipped</directory>
+                      <includes>
+                        <include>**/*</include>
+                      </includes>
+                    </fileset>
+                    <fileset>
+                      <directory>ontology/</directory>
+                      <includes>
+                        <include>backend_unzipped</include>
+                        <include>mapping_unzipped</include>
+                      </includes>
+                    </fileset>
+                  </filesets>
                 </configuration>
               </execution>
             </executions>
