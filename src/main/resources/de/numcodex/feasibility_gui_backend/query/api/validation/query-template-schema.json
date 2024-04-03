@@ -26,11 +26,11 @@
       "type": "string",
       "description": "The user id in the authentication service of the user that created the query."
     },
-    "invalidTerms": {
+    "invalidCriteria": {
       "type": "array",
-      "description": "An array of Terms that did not pass validation. This is only filled when reading from the backend.",
+      "description": "An array of Criteria that did not pass validation. This is only filled when reading from the backend.",
       "items": {
-        "$ref": "query-schema.json#/definitions/termCode"
+        "$ref": "query-schema.json#/definitions/criterion"
       }
     }
   },

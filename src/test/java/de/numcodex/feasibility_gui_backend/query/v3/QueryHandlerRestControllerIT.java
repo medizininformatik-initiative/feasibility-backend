@@ -8,6 +8,7 @@ import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
+import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssue;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklist;
@@ -16,7 +17,8 @@ import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelp
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
+
 import java.sql.Timestamp;
 import java.util.Optional;
 
@@ -49,7 +51,6 @@ import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.S
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -80,7 +81,7 @@ public class QueryHandlerRestControllerIT {
     private QueryHandlerService queryHandlerService;
 
     @MockBean
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     @MockBean
     private RateLimitingInterceptor rateLimitingInterceptor;
@@ -129,9 +130,10 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testRunQueryEndpoint_SucceedsOnValidStructuredQueryWith201() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -149,11 +151,12 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnDownstreamServiceError() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         var dispatchError = new QueryDispatchException("something went wrong");
 
         doReturn(Mono.error(dispatchError)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -169,9 +172,10 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnSoftQuotaExceeded() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(Integer.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -187,30 +191,39 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.inclusionCriteria[0].[0].issues").isArray())
+            .andExpect(jsonPath("$.inclusionCriteria[0].[0].issues").isEmpty());
     }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
-    public void testValidateQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
-        var testQuery = StructuredQuery.builder().build();
+    public void testValidateQueryEndpoint_SucceedsDespiteInvalidCriteriaWith200() throws Exception {
+        StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(true);
+
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + "/validate")).with(csrf())
                 .contentType(APPLICATION_JSON)
                 .content(jsonUtil.writeValueAsString(testQuery)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.inclusionCriteria[0].[0].issues").isArray())
+            .andExpect(jsonPath("$.inclusionCriteria[0].[0].issues").isNotEmpty());
     }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnBeingBlacklistedWith403() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
         UserBlacklist userBlacklistEntry = new UserBlacklist();
         userBlacklistEntry.setId(1L);
         userBlacklistEntry.setUserId("test");
@@ -218,7 +231,7 @@ public class QueryHandlerRestControllerIT {
         Optional<UserBlacklist> userBlacklistOptional = Optional.of(userBlacklistEntry);
         doReturn(userBlacklistOptional).when(userBlacklistRepository).findByUserId(any(String.class));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -234,10 +247,11 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnExceedingHardLimitWith403() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -253,12 +267,13 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER", "FEASIBILITY_TEST_POWER"}, username = "test")
     public void testRunQueryEndpoint_SucceedsOnExceedingHardlimitAsPowerUserWith201() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_POWER"));
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY)).with(csrf())
                 .contentType(APPLICATION_JSON)
@@ -274,14 +289,43 @@ public class QueryHandlerRestControllerIT {
 
     @Test
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
-    public void testGetQueryList_Succeeds() throws Exception {
+    public void testGetQueryList_SucceedsWithValidation() throws Exception {
         long queryId = 1;
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
-        doReturn(List.of(createValidQueryListEntry(queryId))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
+        doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(queryId))
+                .andExpect(jsonPath("$[0].isValid").exists())
+                .andExpect(jsonPath("$[0].isValid").value(true));
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetQueryList_SucceedsWithoutValidation() throws Exception {
+        long queryId = 1;
+        doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
+        doReturn(List.of(createValidQueryListEntry(queryId, true))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(queryId))
+            .andExpect(jsonPath("$[0].isValid").doesNotExist());
+    }
+
+    @Test
+    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    public void testGetQueryList_SucceedsWithoutDefiningSkipValidation() throws Exception {
+        long queryId = 1;
+        doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
+        doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(queryId));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(queryId))
+            .andExpect(jsonPath("$[0].isValid").exists())
+            .andExpect(jsonPath("$[0].isValid").value(true));
     }
 
     @Test
@@ -290,7 +334,7 @@ public class QueryHandlerRestControllerIT {
         long queryId = 1;
         String userId = "user1";
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
-        doReturn(List.of(createValidQueryListEntry(queryId))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
+        doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/by-user/" + userId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -302,7 +346,7 @@ public class QueryHandlerRestControllerIT {
     public void testGetQueryListForUser_ReturnsEmptyOnUnknownUser() throws Exception {
         String userId = "user1";
         doReturn(List.of()).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
-        doReturn(List.of()).when(queryHandlerService).convertQueriesToQueryListEntries(anyList());
+        doReturn(List.of()).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/by-user/" + userId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -313,9 +357,10 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     public void testGetQuery_succeeds() throws Exception {
         long queryId = 1;
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isOk())
@@ -326,9 +371,10 @@ public class QueryHandlerRestControllerIT {
     @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
     public void testGetQuery_failsOnWrongAuthorWith403() throws Exception {
         long queryId = 1;
+        var annotatedQuery = createValidAnnotatedStructuredQuery(false);
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidApiQuery(queryId)).when(queryHandlerService).getQuery(any(Long.class));
-        doReturn(List.of()).when(termCodeValidation).getInvalidTermCodes(any(StructuredQuery.class));
+        doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/" + queryId)).with(csrf()))
                 .andExpect(status().isForbidden());
@@ -627,6 +673,7 @@ public class QueryHandlerRestControllerIT {
         var inclusionCriterion = Criterion.builder()
                 .termCodes(List.of(termCode))
                 .attributeFilters(List.of())
+                .context(termCode)
                 .build();
         return StructuredQuery.builder()
                 .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
@@ -634,6 +681,27 @@ public class QueryHandlerRestControllerIT {
                 .exclusionCriteria(List.of())
                 .display("foo")
                 .build();
+    }
+
+    @NotNull
+    private static StructuredQuery createValidAnnotatedStructuredQuery(boolean withIssues) {
+        var termCode = TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
+        var inclusionCriterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .attributeFilters(List.of())
+            .context(termCode)
+            .validationIssues(withIssues ? List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID) : List.of())
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(inclusionCriterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .build();
     }
 
     @NotNull
@@ -656,12 +724,38 @@ public class QueryHandlerRestControllerIT {
     }
 
     @NotNull
-    private static QueryListEntry createValidQueryListEntry(long id) {
-        return QueryListEntry.builder()
+    private static QueryListEntry createValidQueryListEntry(long id, boolean skipValidation) {
+        if (skipValidation) {
+            return QueryListEntry.builder()
                 .id(id)
                 .label("abc")
                 .createdAt(new Timestamp(new java.util.Date().getTime()))
                 .build();
+        } else {
+            return QueryListEntry.builder()
+                .id(id)
+                .label("abc")
+                .createdAt(new Timestamp(new java.util.Date().getTime()))
+                .isValid(true)
+                .build();
+        }
+    }
+
+    @NotNull
+    private static TermCode createTermCode() {
+        return TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
+    }
+
+    @NotNull
+    private static Criterion createInvalidCriterion() {
+        return Criterion.builder()
+            .termCodes(List.of(createTermCode()))
+            .context(null)
+            .build();
     }
 
     @NotNull
@@ -671,7 +765,6 @@ public class QueryHandlerRestControllerIT {
                 .content(createValidStructuredQuery())
                 .label("test")
                 .comment("test")
-                .invalidTerms(List.of())
                 .build();
     }
 

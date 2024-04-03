@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.0.0-alpha.1] - 2024-04-03
+
+### Added
+- Added an endpoint to validate uploaded structured queries. ([#258](https://github.com/medizininformatik-initiative/feasibility-backend/issues/258))
+### Changed
+- Validation for structured queries has been reworked. ([#260](https://github.com/medizininformatik-initiative/feasibility-backend/issues/260)), ([#266](https://github.com/medizininformatik-initiative/feasibility-backend/issues/266))
+### Deprecated
+### Removed
+### Fixed
+### Security
+- Updated spring boot to 3.2.4 ([#262](https://github.com/medizininformatik-initiative/feasibility-backend/issues/262))
+
+The full changelog can be found [here](https://github.com/medizininformatik-initiative/feasibility-backend/milestone/9?closed=1).
+
 ## [4.3.0] - 2024-02-02
 
 ### Added

@@ -10,13 +10,12 @@ import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import de.numcodex.feasibility_gui_backend.terminology.UiProfileNotFoundException;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class TerminologyRestControllerIT {
     private ObjectMapper jsonUtil;
 
     @MockBean
-    private TermCodeValidation termCodeValidation;
+    private StructuredQueryValidation structuredQueryValidation;
 
     @MockBean
     private TerminologyService terminologyService;

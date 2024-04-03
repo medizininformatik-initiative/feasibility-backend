@@ -1,17 +1,11 @@
 package de.numcodex.feasibility_gui_backend.query.v3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
-import de.numcodex.feasibility_gui_backend.query.api.Query;
-import de.numcodex.feasibility_gui_backend.query.api.QueryListEntry;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResult;
-import de.numcodex.feasibility_gui_backend.query.api.QueryResultRateLimit;
-import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
-import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssues;
 import de.numcodex.feasibility_gui_backend.query.api.status.SavedQuerySlots;
@@ -20,7 +14,7 @@ import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistReposi
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.InvalidAuthenticationException;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingService;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Context;
@@ -54,7 +48,7 @@ public class QueryHandlerRestController {
 
   public static final String HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY = "X-Detailed-Obfuscated-Result-Was-Empty";
   private final QueryHandlerService queryHandlerService;
-  private final TermCodeValidation termCodeValidation;
+  private final StructuredQueryValidation structuredQueryValidation;
   private final RateLimitingService rateLimitingService;
   private final UserBlacklistRepository userBlacklistRepository;
   private final AuthenticationHelper authenticationHelper;
@@ -91,13 +85,13 @@ public class QueryHandlerRestController {
 
   public QueryHandlerRestController(QueryHandlerService queryHandlerService,
       RateLimitingService rateLimitingService,
-      TermCodeValidation termCodeValidation,
+      StructuredQueryValidation structuredQueryValidation,
       UserBlacklistRepository userBlacklistRepository,
       AuthenticationHelper authenticationHelper,
       @Value("${app.apiBaseUrl}") String apiBaseUrl) {
     this.queryHandlerService = queryHandlerService;
     this.rateLimitingService = rateLimitingService;
-    this.termCodeValidation = termCodeValidation;
+    this.structuredQueryValidation = structuredQueryValidation;
     this.userBlacklistRepository = userBlacklistRepository;
     this.authenticationHelper = authenticationHelper;
     this.apiBaseUrl = apiBaseUrl;
@@ -185,11 +179,12 @@ public class QueryHandlerRestController {
   @GetMapping("")
   public List<QueryListEntry> getQueryList(
       @RequestParam(name = "filter", required = false) String filter,
+      @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
       Principal principal) {
     var userId = principal.getName();
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList = queryHandlerService.getQueryListForAuthor(userId, savedOnly);
-    return queryHandlerService.convertQueriesToQueryListEntries(queryList);
+    return queryHandlerService.convertQueriesToQueryListEntries(queryList, skipValidation);
   }
 
   @PostMapping("/{id}/saved")
@@ -296,25 +291,24 @@ public class QueryHandlerRestController {
       @RequestParam(name = "filter", required = false) String filter) {
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
     var queryList =  queryHandlerService.getQueryListForAuthor(userId, savedOnly);
-    return queryHandlerService.convertQueriesToQueryListEntries(queryList);
+    return queryHandlerService.convertQueriesToQueryListEntries(queryList, true);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<Object> getQuery(@PathVariable("id") Long queryId,
+                                         @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
       Authentication authentication) throws JsonProcessingException {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
     var query = queryHandlerService.getQuery(queryId);
-    List<TermCode> invalidTermCodes = termCodeValidation.getInvalidTermCodes(query.content());
-    var queryWithInvalidTerms = Query.builder()
+    var annotatedQuery = Query.builder()
             .id(query.id())
-            .content(query.content())
+            .content(structuredQueryValidation.annotateStructuredQuery(query.content(), skipValidation))
             .label(query.label())
             .comment(query.comment())
-            .invalidTerms(invalidTermCodes)
             .build();
-    return new ResponseEntity<>(queryWithInvalidTerms, HttpStatus.OK);
+    return new ResponseEntity<>(annotatedQuery, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_DETAILED_RESULT)
@@ -403,9 +397,9 @@ public class QueryHandlerRestController {
   }
 
   @PostMapping("/validate")
-  public ResponseEntity<Object> validateStructuredQuery(
+  public ResponseEntity<StructuredQuery> validateStructuredQuery(
       @Valid @RequestBody StructuredQuery query) {
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(structuredQueryValidation.annotateStructuredQuery(query, false), HttpStatus.OK);
   }
 
   private boolean hasAccess(Long queryId, Authentication authentication) {

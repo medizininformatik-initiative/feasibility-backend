@@ -87,6 +87,13 @@ paths:
             type: string
             enum:
               - saved
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: successful operation
@@ -102,6 +109,35 @@ paths:
       security:
         - feasibility_auth:
             - user
+  /query/validate:
+    post:
+      tags:
+        - query
+        - validation
+      summary: Validates a submitted (structured) query to check for schema violations or invalid termCodes
+      operationId: validateQuery
+      requestBody:
+        description: Structured query to validate
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredQuery'
+        required: true
+      responses:
+        200:
+          description: Query adheres to json schema. If invalid termCodes are present, they will be in the response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StructuredQuery'
+        400:
+          description: Query does not adhere to json schema
+          content: { }
+        401:
+          description: Unauthorized - please login first
+          content: { }
   /query/by-user/{userId}:
     get:
       tags:
@@ -123,6 +159,13 @@ paths:
             type: string
             enum:
               - saved
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: successful operation
@@ -159,6 +202,13 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: OK
@@ -505,6 +555,14 @@ paths:
       summary: Read list of query templates
       description: Returns the list of all query templates of the current user
       operationId: getQueryTemplateList
+      parameters:
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: OK
@@ -612,27 +670,6 @@ paths:
       security:
         - feasibility_auth:
             - user
-  /query/template/validate:
-    get:
-      tags:
-        - templates
-      summary: Check all own query templates for invalid or outdated termcodes
-      description: Returns a list of query templates with the additional info if a query is valid
-      operationId: validateQueryTemplateList
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/QueryTemplate'
-        401:
-          description: Unauthorized - please login first
-          content: { }
-      security:
-        - feasibility_auth:
-            - read:query
   /terminology/categories:
     get:
       tags:
@@ -830,6 +867,8 @@ components:
           format: 'date-time'
         totalNumberOfPatients:
           type: integer
+        isValid:
+          type: boolean
     Query:
       type: object
       required:
@@ -845,10 +884,6 @@ components:
           type: string
         results:
           $ref: "#/components/schemas/QueryResult"
-        invalidTerms:
-          type: array
-          items:
-            $ref: "#/components/schemas/TermCode"
     QueryResultSummary:
       type: object
       properties:
@@ -930,6 +965,9 @@ components:
         createdBy:
           type: string
           description: Keycloak id of the user who created the query
+        isValid:
+          type: boolean
+          description: is the query valid?
     QueryTemplate:
       type: object
       required:
@@ -954,10 +992,6 @@ components:
         createdBy:
           type: string
           description: Keycloak id of the user who created the query
-        invalidTerms:
-          type: array
-          items:
-            $ref: "#/components/schemas/TermCode"
     StructuredQuery:
       type: object
       required:
@@ -1113,6 +1147,10 @@ components:
           $ref: "#/components/schemas/ValueFilter"
         timeRestriction:
           $ref: "#/components/schemas/TimeRestriction"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationIssue"
     CriterionList:
       type: array
       items:
@@ -1169,7 +1207,18 @@ components:
           $ref: "#/components/schemas/TermCode"
         context:
           $ref: "#/components/schemas/TermCode"
-
+    ValidationIssue:
+      type: object
+      required:
+        - code
+        - detail
+      properties:
+        code:
+          type: string
+          example: VAL-20001
+        detail:
+          type: string
+          example: The combination of context and termcode(s) is not found.
   securitySchemes:
     feasibility_auth:
       type: oauth2

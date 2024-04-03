@@ -19,7 +19,8 @@ import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryV
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.v3.QueryHandlerRestController;
-import de.numcodex.feasibility_gui_backend.terminology.validation.TermCodeValidation;
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
+
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -64,7 +65,7 @@ public class RateLimitingInterceptorIT {
   private QueryHandlerService queryHandlerService;
 
   @MockBean
-  private TermCodeValidation termCodeValidation;
+  private StructuredQueryValidation structuredQueryValidation;
 
   @MockBean
   AuthenticationHelper authenticationHelper;

@@ -15,27 +15,27 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
 
       - name: Cache Local Maven Repo
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: tests-maven-${{ hashFiles('pom.xml') }}
 
-      - uses: s4u/maven-settings-action@v2.8.0
+      - uses: s4u/maven-settings-action@v3.0.0
         with:
           servers: |
             [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: java
           queries: security-and-quality
@@ -44,31 +44,33 @@ jobs:
         run: mvn -Pdownload-ontology -B verify
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           fail_ci_if_error: true
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
       - name: Upload Feasibility Backend Jar
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-jar
           path: target/feasibilityBackend.jar
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and Export to Docker
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           tags: backend:latest
           outputs: type=docker,dest=/tmp/feasibilityBackend.tar
 
       - name: Upload Feasibility Backend Image
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-image
           path: /tmp/feasibilityBackend.tar
@@ -76,21 +78,21 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: 17
 
     - name: Cache Local Maven Repo
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.m2/repository
         key: security-scan-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2.8.0
+    - uses: s4u/maven-settings-action@v3.0.0
       with:
         servers: |
           [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
@@ -99,7 +101,7 @@ jobs:
       run: mvn -Pdownload-ontology -B -DskipTests package
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         context: .
         tags: security-scan-build:latest
@@ -115,7 +117,7 @@ jobs:
         timeout: '15m0s'
 
     - name: Upload Trivy Scan Results to GitHub Security Tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy-results.sarif
 
@@ -125,10 +127,10 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download Feasibility Backend Image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: backend-image
           path: /tmp
@@ -181,21 +183,21 @@ jobs:
       - security-scan
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: 17
 
     - name: Cache Local Maven Repo
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.m2/repository
         key: release-maven-${{ hashFiles('pom.xml') }}
 
-    - uses: s4u/maven-settings-action@v2.8.0
+    - uses: s4u/maven-settings-action@v3.0.0
       with:
         servers: |
           [{"id": "mii", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]
@@ -220,10 +222,10 @@ jobs:
       uses: docker/setup-qemu-action@v1
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v3
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         context: .
         platforms: linux/amd64,linux/arm64

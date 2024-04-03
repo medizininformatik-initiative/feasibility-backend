@@ -24,16 +24,17 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpri
 import java.net.URI;
 import java.util.List;
 
+import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -99,6 +100,9 @@ public class QueryHandlerServiceIT {
 
     @Autowired
     private QueryHashCalculator queryHashCalculator;
+
+    @MockBean
+    private StructuredQueryValidation structuredQueryValidation;
 
     @Autowired
     @Qualifier("translation")
