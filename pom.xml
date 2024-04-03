@@ -11,7 +11,7 @@
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>4.4.0-SNAPSHOT</version>
+  <version>5.0.0-SNAPSHOT</version>
 
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
