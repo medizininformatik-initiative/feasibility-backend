@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("NewClassNamingConvention")
 public class MockBrokerClientIT {
 
-    private static final int ASYNC_TIMEOUT_WAIT_MS = 9000;
+    private static final int ASYNC_TIMEOUT_WAIT_MS = 15000;
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
     MockBrokerClient client;

@@ -4,15 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.0.0-alpha.2] - 2024-04-30
+
+### Fixed
+- Increased timeout in MockBrockerClientIT to avoid occasional test failures ([#276](https://github.com/medizininformatik-initiative/feasibility-backend/issues/276))
+### Security
+- Updated spring boot to 3.2.5 ([#282](https://github.com/medizininformatik-initiative/feasibility-backend/issues/282))
+- Updated netty-codec-http to 4.1.108.Final to fix [CVE-2024-29025](https://avd.aquasec.com/nvd/cve-2024-29025) ([#279](https://github.com/medizininformatik-initiative/feasibility-backend/issues/279)
+- Updated nimbus-jose-jwt to 9.37.3 to fix [CVE-2023-52428](https://avd.aquasec.com/nvd/cve-2023-52428) ([#275](https://github.com/medizininformatik-initiative/feasibility-backend/issues/275))
+- Updated xnio to 3.8.14.Final to fix [CVE-2023-5685](https://avd.aquasec.com/nvd/cve-2023-5685) ([#274](https://github.com/medizininformatik-initiative/feasibility-backend/issues/274))
+
 ## [5.0.0-alpha.1] - 2024-04-03
 
 ### Added
 - Added an endpoint to validate uploaded structured queries. ([#258](https://github.com/medizininformatik-initiative/feasibility-backend/issues/258))
 ### Changed
 - Validation for structured queries has been reworked. ([#260](https://github.com/medizininformatik-initiative/feasibility-backend/issues/260)), ([#266](https://github.com/medizininformatik-initiative/feasibility-backend/issues/266))
-### Deprecated
-### Removed
-### Fixed
 ### Security
 - Updated spring boot to 3.2.4 ([#262](https://github.com/medizininformatik-initiative/feasibility-backend/issues/262))
 
