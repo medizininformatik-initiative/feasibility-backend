@@ -14,7 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Updated nimbus-jose-jwt to 9.37.3 to fix [CVE-2023-52428](https://avd.aquasec.com/nvd/cve-2023-52428) ([#275](https://github.com/medizininformatik-initiative/feasibility-backend/issues/275))
 - Updated xnio to 3.8.14.Final to fix [CVE-2023-5685](https://avd.aquasec.com/nvd/cve-2023-5685) ([#274](https://github.com/medizininformatik-initiative/feasibility-backend/issues/274))
 
-
 ## [5.0.0-alpha.1] - 2024-04-03
 
 ### Added
