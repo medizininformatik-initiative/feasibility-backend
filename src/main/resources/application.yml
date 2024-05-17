@@ -36,6 +36,9 @@ management:
   endpoint:
     health:
       enabled: true
+  health:
+    elasticsearch:
+      enabled: ${ELASTIC_SEARCH_ENABLED:true}
 
 app:
   # AKTIN or DSF or MOCK or DIRECT
@@ -52,6 +55,7 @@ app:
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FeasibilityAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
+  elasticSearchEnabled: ${ELASTIC_SEARCH_ENABLED:true}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
