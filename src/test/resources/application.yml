@@ -5,12 +5,17 @@ security:
   config:
     use-keycloak: false
 
+management:
+  health:
+    elasticsearch:
+      enabled: false
 app:
   queryResultExpiryMinutes: 1
   keycloakAllowedRole: "FEASIBILITY_TEST_USER"
   keycloakPowerRole: "FEASIBILITY_TEST_POWER"
   keycloakAdminRole: "FEASIBILITY_TEST_ADMIN"
   maxSavedQueriesPerUser: 2
+  elasticSearchEnabled: false
   broker:
     aktin:
       enabled: false
