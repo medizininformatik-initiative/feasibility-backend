@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.terminology.v3;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyItemDocument;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyListItemDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v3/terminology/search")
+@ConditionalOnExpression("${app.elasticSearchEnabled}")
 public class TerminologyEsController {
 
   private ElasticsearchOperations operations;
