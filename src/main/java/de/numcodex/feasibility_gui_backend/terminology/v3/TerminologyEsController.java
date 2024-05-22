@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v3/terminology/search")
-@ConditionalOnExpression("${app.elasticSearchEnabled}")
+@ConditionalOnExpression("${app.elastic.enabled}")
 public class TerminologyEsController {
 
   private ElasticsearchOperations operations;

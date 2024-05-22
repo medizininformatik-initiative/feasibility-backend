@@ -55,7 +55,6 @@ app:
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FeasibilityAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
-  elasticSearchEnabled: ${ELASTIC_SEARCH_ENABLED:true}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
@@ -97,6 +96,9 @@ app:
     connectTimeout: 2000
   cql:
     baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
+  elastic:
+    enabled: ${ELASTIC_SEARCH_ENABLED:true}
+    host: ${ELASTIC_SEARCH_HOST:localhost:9200}
   privacy:
     threshold:
       sites: ${PRIVACY_THRESHOLD_SITES:3}
