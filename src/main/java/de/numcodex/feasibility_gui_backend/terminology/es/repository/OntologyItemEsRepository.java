@@ -4,5 +4,5 @@ import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyItemDocu
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-@ConditionalOnExpression("${app.elasticSearchEnabled}")
+@ConditionalOnExpression("${app.elastic.enabled}")
 public interface OntologyItemEsRepository extends ElasticsearchRepository<OntologyItemDocument, String> {}

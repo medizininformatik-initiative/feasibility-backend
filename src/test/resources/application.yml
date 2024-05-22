@@ -15,10 +15,11 @@ app:
   keycloakPowerRole: "FEASIBILITY_TEST_POWER"
   keycloakAdminRole: "FEASIBILITY_TEST_ADMIN"
   maxSavedQueriesPerUser: 2
-  elasticSearchEnabled: false
   broker:
     aktin:
       enabled: false
+  elastic:
+    enabled: false
   privacy:
     threshold:
       sites: 3
