@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.terminology.v3;
 
 import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyItemDocument;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyListItemDocument;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologySearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -27,26 +28,16 @@ public class TerminologyEsController {
     this.operations = operations;
   }
 
-  @GetMapping("/legacy")
-  public List<OntologyListItemDocument> searchOntologyItems(@RequestParam("searchterm") String keyword) {
-    var query = NativeQuery.builder()
-        .withQuery(q -> q
-            .match(m -> m
-                .field("name")
-                .query(keyword)
-            )
-        )
-        .build();
-    SearchHits<OntologyListItemDocument> searchHits = operations.search(query, OntologyListItemDocument.class);
-    List<OntologyListItemDocument> uiProfiles = new ArrayList<>();
-    searchHits.forEach(searchHit -> {
-      uiProfiles.add(searchHit.getContent());
-    });
-    return uiProfiles;
-  }
+
 
   @GetMapping("")
-  public List<OntologyListItemDocument> searchOntologyItems2(@RequestParam("searchterm") String keyword) {
+  public OntologySearchResult searchOntologyItems(@RequestParam("searchterm") String keyword,
+                                                            @RequestParam(value = "context", required = false) String context,
+                                                            @RequestParam(value = "kdsModule", required = false) String kdsModule,
+                                                            @RequestParam(value = "terminology", required = false) String terminology,
+                                                            @RequestParam(value = "availability", required = false, defaultValue = "false") boolean availability,
+                                                            @RequestParam(value = "limit", required = false, defaultValue = "0") int limit,
+                                                            @RequestParam(value = "offset", required = false, defaultValue = "20") int offset) {
     var query = NativeQuery.builder()
         .withQuery(q -> q
             .queryString(qs -> qs
@@ -56,31 +47,53 @@ public class TerminologyEsController {
         )
         .build();
     SearchHits<OntologyListItemDocument> searchHits = operations.search(query, OntologyListItemDocument.class);
-    List<OntologyListItemDocument> uiProfiles = new ArrayList<>();
+    List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
     searchHits.forEach(searchHit -> {
-      uiProfiles.add(searchHit.getContent());
+      ontologyItems.add(searchHit.getContent());
     });
-    return uiProfiles;
+
+    return OntologySearchResult.builder()
+        .totalHits(searchHits.getTotalHits())
+        .results(ontologyItems)
+        .build();
   }
 
-  @GetMapping("/wcsearch")
-  public List<OntologyListItemDocument> searchOntologyItemsWildcard(@RequestParam("searchterm") String keyword) {
-    var query = NativeQuery.builder()
-        .withQuery(q -> q
-            .wildcard(w -> w
-                .field("name")
-                .wildcard("*" + keyword + "*")
-                .caseInsensitive(true)
-            )
-        )
-        .build();
-    SearchHits<OntologyListItemDocument> searchHits = operations.search(query, OntologyListItemDocument.class);
-    List<OntologyListItemDocument> uiProfiles = new ArrayList<>();
-    searchHits.forEach(searchHit -> {
-      uiProfiles.add(searchHit.getContent());
-    });
-    return uiProfiles;
-  }
+//  @GetMapping("/legacy")
+//  public List<OntologyListItemDocument> searchOntologyItems2(@RequestParam("searchterm") String keyword) {
+//    var query = NativeQuery.builder()
+//        .withQuery(q -> q
+//            .match(m -> m
+//                .field("name")
+//                .query(keyword)
+//            )
+//        )
+//        .build();
+//    SearchHits<OntologyListItemDocument> searchHits = operations.search(query, OntologyListItemDocument.class);
+//    List<OntologyListItemDocument> uiProfiles = new ArrayList<>();
+//    searchHits.forEach(searchHit -> {
+//      uiProfiles.add(searchHit.getContent());
+//    });
+//    return uiProfiles;
+//  }
+//
+//  @GetMapping("/wcsearch")
+//  public List<OntologyListItemDocument> searchOntologyItemsWildcard(@RequestParam("searchterm") String keyword) {
+//    var query = NativeQuery.builder()
+//        .withQuery(q -> q
+//            .wildcard(w -> w
+//                .field("name")
+//                .wildcard("*" + keyword + "*")
+//                .caseInsensitive(true)
+//            )
+//        )
+//        .build();
+//    SearchHits<OntologyListItemDocument> searchHits = operations.search(query, OntologyListItemDocument.class);
+//    List<OntologyListItemDocument> uiProfiles = new ArrayList<>();
+//    searchHits.forEach(searchHit -> {
+//      uiProfiles.add(searchHit.getContent());
+//    });
+//    return uiProfiles;
+//  }
 
   // TODO
   @GetMapping("/filter")
