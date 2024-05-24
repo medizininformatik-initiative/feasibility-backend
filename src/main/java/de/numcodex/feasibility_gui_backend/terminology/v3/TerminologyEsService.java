@@ -3,9 +3,14 @@ package de.numcodex.feasibility_gui_backend.terminology.v3;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
+import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemEsRepository;
+import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
+import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyListItemEsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -28,17 +33,19 @@ public class TerminologyEsService {
   @Value("${app.elastic.filter}")
   private String[] filterFields;
 
+  private OntologyItemEsRepository ontologyItemEsRepository;
+
+  private OntologyListItemEsRepository ontologyListItemEsRepository;
+
   @Autowired
-  public TerminologyEsService(ElasticsearchOperations operations) {
+  public TerminologyEsService(ElasticsearchOperations operations, OntologyItemEsRepository ontologyItemEsRepository, OntologyListItemEsRepository ontologyListItemEsRepository) {
     this.operations = operations;
+    this.ontologyItemEsRepository = ontologyItemEsRepository;
+    this.ontologyListItemEsRepository = ontologyListItemEsRepository;
   }
 
   public OntologyItemDocument getOntologyItemByHash(String hash) {
-    var ontologyItem = operations.get(hash, OntologyItemDocument.class);
-    if (ontologyItem == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    }
-    return ontologyItem;
+    return ontologyItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
   }
 
   public List<TermFilter> getAvailableFilters() {
@@ -59,7 +66,7 @@ public class TerminologyEsService {
     return list;
   }
 
-  public OntologySearchResult performOntologySearch(String keyword,
+  public OntologySearchResult performOntologySearchWithRepo(String keyword,
                                                     @Nullable String context,
                                                     @Nullable String kdsModule,
                                                     @Nullable String terminology,
@@ -67,20 +74,57 @@ public class TerminologyEsService {
                                                     @Nullable int limit,
                                                     @Nullable int offset) {
 
-    //    var query = buildCriteriaQuery(keyword, context, kdsModule, terminology, availability, limit, offset);
-    var query = buildNativeQuery(keyword, context, kdsModule, terminology, availability, limit, offset);
+    var searchHits = ontologyListItemEsRepository.findByNameContainingIgnoreCaseOrTermcodeContainingIgnoreCase(keyword, keyword);
+    List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
+    searchHits.forEach(searchHit -> {
+      ontologyItems.add(searchHit.getContent());
+    });
+    return OntologySearchResult.builder()
+        .totalHits(searchHits.getTotalHits())
+        .results(ontologyItems)
+        .build();
+  }
+
+  public OntologySearchResult performOntologySearchWithRepoAndPaging(String keyword,
+                                                            @Nullable String context,
+                                                            @Nullable String kdsModule,
+                                                            @Nullable String terminology,
+                                                            @Nullable boolean availability,
+                                                            @Nullable int pageSize,
+                                                            @Nullable int page) {
+
+    var searchHitPage = ontologyListItemEsRepository.findByNameContainingIgnoreCaseOrTermcodeContainingIgnoreCase(keyword, keyword, PageRequest.of(page, pageSize));
+    List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
+
+    ontologyItems.addAll(searchHitPage.getContent());
+    return OntologySearchResult.builder()
+        .totalHits(searchHitPage.getTotalElements())
+        .results(ontologyItems)
+        .build();
+  }
+
+  public OntologySearchResult performOntologySearch(String keyword,
+                                                    @Nullable String context,
+                                                    @Nullable String kdsModule,
+                                                    @Nullable String terminology,
+                                                    @Nullable boolean availability,
+                                                    @Nullable int pageSize,
+                                                    @Nullable int page) {
+
+    //    var query = buildCriteriaQuery(keyword, context, kdsModule, terminology, availability, pageSize, page);
+    var query = buildNativeQuery(keyword, context, kdsModule, terminology, availability, pageSize, page);
     var searchHits = operations.search(query, OntologyListItemDocument.class);
     List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
     searchHits.forEach(searchHit -> {
       ontologyItems.add(searchHit.getContent());
     });
 
-    ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchHits.getAggregations();
-    List<StringTermsBucket> buckets = aggregations.aggregationsAsMap().get("context").aggregation().getAggregate().sterms().buckets().array();
-
-    buckets.forEach(b -> {
-      System.out.println(b.key()._toJsonString() + "(" + b.docCount() + ")");
-    });
+//    ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchHits.getAggregations();
+//    List<StringTermsBucket> buckets = aggregations.aggregationsAsMap().get("context").aggregation().getAggregate().sterms().buckets().array();
+//
+//    buckets.forEach(b -> {
+//      System.out.println(b.key()._toJsonString() + "(" + b.docCount() + ")");
+//    });
 
     return OntologySearchResult.builder()
         .totalHits(searchHits.getTotalHits())
@@ -117,9 +161,7 @@ public class TerminologyEsService {
                                           String context,
                                           String kdsModule,
                                           String terminology,
-                                          boolean availability,
-                                          int limit,
-                                          int offset) {
+                                          boolean availability) {
     var criteria = new Criteria("name")
         .expression(keyword)
         .or("termcode")
@@ -147,10 +189,12 @@ public class TerminologyEsService {
                                       String kdsModule,
                                       String terminology,
                                       boolean availability,
-                                      int limit,
-                                      int offset) {
+                                      int pageSize,
+                                      int page) {
 
-    var criteriaQuery = buildCriteriaQuery(keyword, context, kdsModule, terminology, availability, limit, offset);
+    var criteriaQuery = buildCriteriaQuery(keyword, context, kdsModule, terminology, availability);
+
+
 
 //    AggregationBuilders
 //        .terms()
@@ -159,8 +203,12 @@ public class TerminologyEsService {
 //        .field("terminology").name("terminology")
 //        .build();
 
+    Pageable pageable = Pageable.ofSize(pageSize);
+    criteriaQuery.setPageable(pageable);
+
     var query = NativeQuery.builder()
         .withQuery(criteriaQuery)
+        .withPageable(page > 0 ? pageable.withPage(page) : pageable.first())
         .withAggregation("context", Aggregation.of(a -> a
             .terms(ta -> ta.field("context"))))
         .withAggregation("kdsModule", Aggregation.of(a -> a
