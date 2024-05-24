@@ -26,11 +26,13 @@ public class TerminologyEsController {
                                                   @RequestParam(value = "kdsModule", required = false) String kdsModule,
                                                   @RequestParam(value = "terminology", required = false) String terminology,
                                                   @RequestParam(value = "availability", required = false, defaultValue = "false") boolean availability,
-                                                  @RequestParam(value = "limit", required = false, defaultValue = "0") int limit,
-                                                  @RequestParam(value = "offset", required = false, defaultValue = "20") int offset) {
+                                                  @RequestParam(value = "pageSize", required = false, defaultValue = "20") int pageSize,
+                                                  @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
 
+//    return terminologyEsService
+//        .performOntologySearch(keyword, context, kdsModule, terminology, availability, pageSize, page);
     return terminologyEsService
-        .performOntologySearch(keyword, context, kdsModule, terminology, availability, limit, offset);
+        .performOntologySearchWithRepoAndPaging(keyword, context, kdsModule, terminology, availability, pageSize, page);
   }
 
   @GetMapping("/filter")
