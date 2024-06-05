@@ -1,7 +1,9 @@
-package de.numcodex.feasibility_gui_backend.terminology.v3;
+package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
+import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
@@ -17,10 +19,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,19 +85,20 @@ public class TerminologyEsService {
         .build();
   }
 
-  public OntologySearchResult performOntologySearchWithRepoAndPaging(String keyword,
-                                                            @Nullable String context,
-                                                            @Nullable String kdsModule,
-                                                            @Nullable String terminology,
-                                                            @Nullable boolean availability,
-                                                            @Nullable int pageSize,
-                                                            @Nullable int page) {
+  public EsSearchResult performOntologySearchWithRepoAndPaging(String keyword,
+                                                               @Nullable List<String> context,
+                                                               @Nullable List<String> kdsModule,
+                                                               @Nullable List<String> terminology,
+                                                               @Nullable boolean availability,
+                                                               @Nullable int pageSize,
+                                                               @Nullable int page) {
 
-    var searchHitPage = ontologyListItemEsRepository.findByNameContainingIgnoreCaseOrTermcodeContainingIgnoreCase(keyword, keyword, PageRequest.of(page, pageSize));
-    List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
+//    var searchHitPage = ontologyListItemEsRepository.findByNameContainingIgnoreCaseOrTermcodeContainingIgnoreCase(keyword, keyword, PageRequest.of(page, pageSize));
+    var searchHitPage = ontologyListItemEsRepository.findByNameOrTermcodeMultiMatch(keyword, PageRequest.of(page, pageSize));
+    List<EsSearchResultEntry> ontologyItems = new ArrayList<>();
 
-    ontologyItems.addAll(searchHitPage.getContent());
-    return OntologySearchResult.builder()
+    searchHitPage.getContent().forEach(hit -> ontologyItems.add(EsSearchResultEntry.of(hit)));
+    return EsSearchResult.builder()
         .totalHits(searchHitPage.getTotalElements())
         .results(ontologyItems)
         .build();

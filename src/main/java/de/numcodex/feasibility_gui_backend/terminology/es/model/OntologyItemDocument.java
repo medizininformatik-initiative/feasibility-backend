@@ -20,7 +20,7 @@ public class OntologyItemDocument {
     private String context;
     private String terminology;
     private String termcode;
-    private String kdsModule;
+    @Field(name = "kds_module") private String kdsModule;
 
     @Field(type = FieldType.Nested, includeInParent = true, name = "translations")
     private Collection<Translation> translations;
@@ -28,6 +28,6 @@ public class OntologyItemDocument {
     private Collection<Relative> parents;
     @Field(type = FieldType.Nested, includeInParent = true, name = "children")
     private Collection<Relative> children;
-    @Field(type = FieldType.Nested, includeInParent = true, name = "relatedTerms")
+    @Field(type = FieldType.Nested, includeInParent = true, name = "related_terms")
     private Collection<Relative> relatedTerms;
 }
