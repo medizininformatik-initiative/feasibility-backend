@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.terminology;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
 import lombok.extern.slf4j.Slf4j;
@@ -201,5 +202,45 @@ public class TerminologyService {
 
   public List<String> getIntersection(String criteriaSetUrl, List<String> contextTermCodeHashList) {
     return contextualizedTermCodeRepository.filterByCriteriaSetUrl(criteriaSetUrl, contextTermCodeHashList);
+  }
+
+  public List<CriteriaProfileData> getCriteriaProfileData(List<String> criterionIds) {
+    List<CriteriaProfileData> results = new ArrayList<>();
+
+    for (String id : criterionIds) {
+      CriteriaProfileData cse = new CriteriaProfileData();
+      TermCode tc = termCodeRepository.findTermCodeByContextualizedTermcodeHash(id).orElse(null);
+      Context c = termCodeRepository.findContextByContextualizedTermcodeHash(id).orElse(null);
+      cse.setId(id);
+      try {
+        cse.setUiProfile(getUiProfile(id));
+      } catch (UiProfileNotFoundException e) {
+        cse.setUiProfile(null);
+      }
+      if (c != null) {
+        cse.setContext(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+            .code(c.getCode())
+            .display(c.getDisplay())
+            .system(c.getSystem())
+            .version(c.getVersion())
+            .build());
+      } else {
+        cse.setContext(null);
+      }
+      if (tc != null) {
+        cse.setTermCode(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+            .code(tc.getCode())
+            .display(tc.getDisplay())
+            .system(tc.getSystem())
+            .version(tc.getVersion())
+            .build());
+      } else {
+        cse.setTermCode(null);
+      }
+
+      results.add(cse);
+    }
+
+    return results;
   }
 }

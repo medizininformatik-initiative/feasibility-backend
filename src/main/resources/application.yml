@@ -105,7 +105,7 @@ app:
   elastic:
     enabled: ${ELASTIC_SEARCH_ENABLED:true}
     host: ${ELASTIC_SEARCH_HOST:localhost:9200}
-    filter: ${ELASTIC_SEARCH_FILTER:context,terminology,kdsModule}
+    filter: ${ELASTIC_SEARCH_FILTER:context,terminology,kds_module}
   privacy:
     threshold:
       sites: ${PRIVACY_THRESHOLD_SITES:3}

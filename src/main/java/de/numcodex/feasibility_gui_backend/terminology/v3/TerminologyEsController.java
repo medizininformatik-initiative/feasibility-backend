@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
+import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
+import de.numcodex.feasibility_gui_backend.terminology.es.TerminologyEsService;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -21,16 +23,14 @@ public class TerminologyEsController {
   }
 
   @GetMapping("")
-  public OntologySearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
-                                                  @RequestParam(value = "context", required = false) String context,
-                                                  @RequestParam(value = "kdsModule", required = false) String kdsModule,
-                                                  @RequestParam(value = "terminology", required = false) String terminology,
-                                                  @RequestParam(value = "availability", required = false, defaultValue = "false") boolean availability,
-                                                  @RequestParam(value = "pageSize", required = false, defaultValue = "20") int pageSize,
-                                                  @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
+  public EsSearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
+                                                         @RequestParam(value = "context", required = false) List<String> context,
+                                                         @RequestParam(value = "kdsModule", required = false) List<String> kdsModule,
+                                                         @RequestParam(value = "terminology", required = false) List<String> terminology,
+                                                         @RequestParam(value = "availability", required = false, defaultValue = "false") boolean availability,
+                                                         @RequestParam(value = "pageSize", required = false, defaultValue = "20") int pageSize,
+                                                         @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
 
-//    return terminologyEsService
-//        .performOntologySearch(keyword, context, kdsModule, terminology, availability, pageSize, page);
     return terminologyEsService
         .performOntologySearchWithRepoAndPaging(keyword, context, kdsModule, terminology, availability, pageSize, page);
   }
