@@ -20,4 +20,5 @@ public class OntologyListItemDocument {
     private String termcode;
     @Field(name = "kds_module")
     private String kdsModule;
+    private boolean selectable;
 }

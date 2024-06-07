@@ -14,6 +14,7 @@ public class EsSearchResultEntry {
   private String terminology;
   private String termcode;
   private String kdsModule;
+  private boolean selectable;
 
   public static EsSearchResultEntry of(OntologyListItemDocument ontologyListItemDocument) {
     return EsSearchResultEntry.builder()
@@ -24,6 +25,7 @@ public class EsSearchResultEntry {
         .terminology(ontologyListItemDocument.getTerminology())
         .termcode(ontologyListItemDocument.getTermcode())
         .kdsModule(ontologyListItemDocument.getKdsModule())
+        .selectable(ontologyListItemDocument.isSelectable())
         .build();
   }
 }

@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
+import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.TerminologyEsService;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v3/terminology/search")
+@RequestMapping("")
 @ConditionalOnExpression("${app.elastic.enabled}")
 @CrossOrigin
 public class TerminologyEsController {
@@ -22,7 +23,12 @@ public class TerminologyEsController {
     this.terminologyEsService = terminologyEsService;
   }
 
-  @GetMapping("")
+  @GetMapping("api/v3/terminology/search/filter")
+  public List<TermFilter> getAvailableFilters() {
+    return terminologyEsService.getAvailableFilters();
+  }
+
+  @GetMapping("api/v3/terminology/entry/search")
   public EsSearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
                                                          @RequestParam(value = "context", required = false) List<String> context,
                                                          @RequestParam(value = "kdsModule", required = false) List<String> kdsModule,
@@ -35,13 +41,13 @@ public class TerminologyEsController {
         .performOntologySearchWithRepoAndPaging(keyword, context, kdsModule, terminology, availability, pageSize, page);
   }
 
-  @GetMapping("/filter")
-  public List<TermFilter> getAvailableFilters() {
-    return terminologyEsService.getAvailableFilters();
+  @GetMapping("api/v3/terminology/entry/{hash}/relations")
+  public OntologyItemRelationsDocument getOntologyItemRelationsByHash(@PathVariable("hash") String hash) {
+    return terminologyEsService.getOntologyItemRelationsByHash(hash);
   }
 
-  @GetMapping("/{hash}")
-  public OntologyItemDocument getOntologyItemByHash(@PathVariable("hash") String hash) {
-    return terminologyEsService.getOntologyItemByHash(hash);
+  @GetMapping("api/v3/terminology/entry/{hash}")
+  public EsSearchResultEntry getOntologyItemByHash(@PathVariable("hash") String hash) {
+    return terminologyEsService.getSearchResultEntryByHash(hash);
   }
 }
