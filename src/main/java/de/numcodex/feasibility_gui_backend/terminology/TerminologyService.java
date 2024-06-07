@@ -1,11 +1,13 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ public class TerminologyService {
 
   private String uiProfilePath;
 
+  @NonNull
+  private ObjectMapper jsonUtil;
+
   @Value("${app.ontologyOrder}")
   private List<String> sortedCategories;
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
@@ -42,7 +47,8 @@ public class TerminologyService {
                             UiProfileRepository uiProfileRepository,
                             TermCodeRepository termCodeRepository,
                             ContextualizedTermCodeRepository contextualizedTermCodeRepository,
-                            MappingRepository mappingRepository) throws IOException {
+                            MappingRepository mappingRepository,
+                            ObjectMapper jsonUtil) throws IOException {
     this.uiProfilePath = uiProfilePath;
     readInTerminologyEntries();
     generateTerminologyEntriesWithoutDirectChildren();
@@ -51,6 +57,7 @@ public class TerminologyService {
     this.termCodeRepository = termCodeRepository;
     this.contextualizedTermCodeRepository = contextualizedTermCodeRepository;
     this.mappingRepository = mappingRepository;
+    this.jsonUtil = jsonUtil;
   }
 
   private void readInTerminologyEntries() throws IOException {
@@ -204,41 +211,41 @@ public class TerminologyService {
     return contextualizedTermCodeRepository.filterByCriteriaSetUrl(criteriaSetUrl, contextTermCodeHashList);
   }
 
-  public List<CriteriaProfileData> getCriteriaProfileData(List<String> criterionIds) {
+  public List<CriteriaProfileData> getCriteriaProfileData(List<String> criteriaIds) {
     List<CriteriaProfileData> results = new ArrayList<>();
 
-    for (String id : criterionIds) {
-      CriteriaProfileData cse = new CriteriaProfileData();
+    for (String id : criteriaIds) {
+      CriteriaProfileData criteriaProfileData = new CriteriaProfileData();
       TermCode tc = termCodeRepository.findTermCodeByContextualizedTermcodeHash(id).orElse(null);
       Context c = termCodeRepository.findContextByContextualizedTermcodeHash(id).orElse(null);
-      cse.setId(id);
+      criteriaProfileData.setId(id);
       try {
-        cse.setUiProfile(getUiProfile(id));
-      } catch (UiProfileNotFoundException e) {
-        cse.setUiProfile(null);
+        de.numcodex.feasibility_gui_backend.terminology.api.UiProfile uip = jsonUtil.readValue(getUiProfile(id), de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.class);
+        criteriaProfileData.setUiProfile(uip);
+      } catch (UiProfileNotFoundException | JsonProcessingException e) {
+        criteriaProfileData.setUiProfile(null);
       }
       if (c != null) {
-        cse.setContext(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+        criteriaProfileData.setContext(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
             .code(c.getCode())
             .display(c.getDisplay())
             .system(c.getSystem())
             .version(c.getVersion())
             .build());
       } else {
-        cse.setContext(null);
+        criteriaProfileData.setContext(null);
       }
       if (tc != null) {
-        cse.setTermCode(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+        criteriaProfileData.setTermCode(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
             .code(tc.getCode())
             .display(tc.getDisplay())
             .system(tc.getSystem())
             .version(tc.getVersion())
             .build());
       } else {
-        cse.setTermCode(null);
+        criteriaProfileData.setTermCode(null);
       }
-
-      results.add(cse);
+      results.add(criteriaProfileData);
     }
 
     return results;

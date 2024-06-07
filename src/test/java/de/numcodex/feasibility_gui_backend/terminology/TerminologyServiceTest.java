@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,8 +51,11 @@ class TerminologyServiceTest {
     @Mock
     private MappingRepository mappingRepository;
 
+    @Mock
+    private ObjectMapper jsonUtil;
+
     private TerminologyService createTerminologyService(String uiProfilePath) throws IOException {
-        return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository);
+        return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
     }
 
     @BeforeEach

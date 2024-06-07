@@ -19,5 +19,5 @@ public class CriteriaProfileData {
     @EqualsAndHashCode.Include
     private TermCode termCode ;
     @JsonProperty("uiProfile")
-    private String uiProfile;
+    private UiProfile uiProfile;
 }
