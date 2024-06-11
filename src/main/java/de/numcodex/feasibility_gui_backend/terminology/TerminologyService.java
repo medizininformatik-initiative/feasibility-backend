@@ -236,14 +236,16 @@ public class TerminologyService {
         criteriaProfileData.setContext(null);
       }
       if (tc != null) {
-        criteriaProfileData.setTermCode(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+        criteriaProfileData.setTermCodes(List.of(
+            de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
             .code(tc.getCode())
             .display(tc.getDisplay())
             .system(tc.getSystem())
             .version(tc.getVersion())
-            .build());
+            .build())
+        );
       } else {
-        criteriaProfileData.setTermCode(null);
+        criteriaProfileData.setTermCodes(List.of());
       }
       results.add(criteriaProfileData);
     }
