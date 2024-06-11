@@ -10,6 +10,6 @@ import java.util.List;
 public class UiProfile {
   private String name;
   private boolean timeRestrictionAllowed;
-  private String valueDefinition;
+  private AttributeDefinition valueDefinition;
   private List<AttributeDefinition> attributeDefinitions;
 }
