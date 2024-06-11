@@ -26,11 +26,13 @@ public class AttributeDefinition {
     @JsonProperty("optional")
     private Boolean optional;
     @JsonProperty("allowedUnits")
-    private List<Unit> allowedUnits = new ArrayList<>();
+    private List<TermCode> allowedUnits = new ArrayList<>();
     @JsonProperty(value = "precision", required = true, defaultValue = "0")
     private double precision;
     @JsonProperty(value = "min")
     private Double min;
     @JsonProperty(value = "max")
     private Double max;
+    @JsonProperty("referenceCriteriaSet")
+    private CriteriaSet referenceCriteriaSet;
 }
