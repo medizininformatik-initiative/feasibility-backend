@@ -7,6 +7,8 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @Data
 @JsonInclude(Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -15,9 +17,9 @@ public class CriteriaProfileData {
     private String id;
     @JsonProperty("context")
     private TermCode context;
-    @JsonProperty("termCode")
+    @JsonProperty("termCodes")
     @EqualsAndHashCode.Include
-    private TermCode termCode ;
+    private List<TermCode> termCodes;
     @JsonProperty("uiProfile")
     private UiProfile uiProfile;
 }
