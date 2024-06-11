@@ -195,8 +195,8 @@ public class TerminologyService {
     return terminologyEntry.getDisplay().toLowerCase().startsWith(query.toLowerCase()) ||
         Arrays.stream(terminologyEntry.getDisplay().toLowerCase().split(" "))
             .anyMatch(var -> var.startsWith(query.toLowerCase())) ||
-        (terminologyEntry.getTermCodes().stream().anyMatch(termCode -> termCode.code()
-            .startsWith(query)));
+        (terminologyEntry.getTermCodes().stream().anyMatch(termCode -> termCode.code().toLowerCase()
+            .startsWith(query.toLowerCase())));
   }
 
   public List<String> getIntersection(String criteriaSetUrl, List<String> contextTermCodeHashList) {
