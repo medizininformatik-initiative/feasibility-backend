@@ -42,7 +42,7 @@ class DirectBrokerClientCqlIT {
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
     private final GenericContainer<?> blaze = new GenericContainer<>(
-        DockerImageName.parse("samply/blaze:0.25"))
+        DockerImageName.parse("samply/blaze:0.27"))
         .withImagePullPolicy(PullPolicy.alwaysPull())
         .withExposedPorts(8080)
         .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500))
