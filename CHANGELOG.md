@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.0.0-alpha.3] - 2024-06-14
+
+### Changed
+- Updated sq2cql to version v0.3.0-rc.1 ([#294](https://github.com/medizininformatik-initiative/feasibility-backend/issues/294))
+- Updated ontology to version v2.2.0-RC2 ([#293](https://github.com/medizininformatik-initiative/feasibility-backend/issues/293))
+### Fixed
+- OPS codes with lowercase letters are now correctly found ([#292](https://github.com/medizininformatik-initiative/feasibility-backend/issues/292))
+### Security
+- Updated spring boot to 3.3.0 ([#290](https://github.com/medizininformatik-initiative/feasibility-backend/issues/290))
+
 ## [5.0.0-alpha.2] - 2024-04-30
 
 ### Fixed
