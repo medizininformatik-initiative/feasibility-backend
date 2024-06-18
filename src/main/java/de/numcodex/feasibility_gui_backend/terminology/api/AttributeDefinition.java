@@ -34,5 +34,5 @@ public class AttributeDefinition {
     @JsonProperty(value = "max")
     private Double max;
     @JsonProperty("referenceCriteriaSet")
-    private CriteriaSet referenceCriteriaSet;
+    private String referenceCriteriaSet;
 }
