@@ -41,7 +41,7 @@ class DirectSpringConfigTest {
 
   @Test
   void directWebClientFlare_withCredentials() {
-      directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, "username", "password", null, null,
+    directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, "username", "password", null, null,
               null);
 
     WebClient webClient = directSpringConfig.directWebClientFlare();
@@ -52,7 +52,7 @@ class DirectSpringConfigTest {
 
   @Test
   void directWebClientFlare_withoutCredentials() {
-      directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, null, null, null, null, null);
 
     WebClient webClient = directSpringConfig.directWebClientFlare();
 
@@ -62,7 +62,7 @@ class DirectSpringConfigTest {
 
   @Test
   void getFhirClient_withCredentials() {
-      directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", "username", "password", null, null,
+    directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", "username", "password", null, null,
               null);
 
     IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
@@ -74,7 +74,7 @@ class DirectSpringConfigTest {
 
   @Test
   void getFhirClient_withoutCredentials() {
-      directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, null, null, null);
 
     IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
 
@@ -85,19 +85,19 @@ class DirectSpringConfigTest {
 
   @Test
   void directBrokerClient_withOAuthCredentials() {
-      directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, "http://my.oauth.url",
-              "foo", "bar");
+    directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, "http://my.oauth.url",
+            "foo", "bar");
 
-      IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
+    IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
 
-      assertNotNull(fhirClient);
-      Assertions.assertThat(fhirClient.getInterceptorService().getAllRegisteredInterceptors())
-              .anySatisfy(interceptor -> Assertions.assertThat(interceptor).isInstanceOf(OAuthInterceptor.class));
+    assertNotNull(fhirClient);
+    Assertions.assertThat(fhirClient.getInterceptorService().getAllRegisteredInterceptors())
+            .anySatisfy(interceptor -> Assertions.assertThat(interceptor).isInstanceOf(OAuthInterceptor.class));
   }
 
   @Test
   void directBrokerClient_useCql() {
-      directSpringConfig = new DirectSpringConfig(true, null, null, null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(true, null, null, null, null, null, null, null);
 
     BrokerClient brokerClient = directSpringConfig.directBrokerClient(webClient, false, fhirConnector, fhirHelper);
 
@@ -106,7 +106,7 @@ class DirectSpringConfigTest {
 
   @Test
   void directBrokerClient_useFlare() {
-      directSpringConfig = new DirectSpringConfig(false, null, null, null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(false, null, null, null, null, null, null, null);
 
     BrokerClient brokerClient = directSpringConfig.directBrokerClient(webClient, false, fhirConnector, fhirHelper);
 
