@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.0.0] - 2024-06-26
+
+### Added
+- Added an endpoint to validate uploaded structured queries. ([#258](https://github.com/medizininformatik-initiative/feasibility-backend/issues/258))
+- OpenID Connect authentication for direct broker ([#302](https://github.com/medizininformatik-initiative/feasibility-backend/issues/302))
+### Changed
+- Validation for structured queries has been reworked. ([#260](https://github.com/medizininformatik-initiative/feasibility-backend/issues/260)), ([#266](https://github.com/medizininformatik-initiative/feasibility-backend/issues/266))
+- Updated sq2cql to v0.3.0
+- Updated ontology to version v2.2.0 ([#299](https://github.com/medizininformatik-initiative/feasibility-backend/issues/299))
+### Fixed
+- Increased timeout in MockBrockerClientIT to avoid occasional test failures ([#276](https://github.com/medizininformatik-initiative/feasibility-backend/issues/276))
+- OPS codes with lowercase letters are now correctly found ([#292](https://github.com/medizininformatik-initiative/feasibility-backend/issues/292))
+### Security
+- updated spring boot to 3.3.1
+- updated undertow to 2.3.14.Final to fix [CVE-2024-6162](https://avd.aquasec.com/nvd/2024/cve-2024-6162/) ([#304](https://github.com/medizininformatik-initiative/feasibility-backend/issues/304))
+- Updated netty-codec-http to 4.1.108.Final to fix [CVE-2024-29025](https://avd.aquasec.com/nvd/cve-2024-29025) ([#279](https://github.com/medizininformatik-initiative/feasibility-backend/issues/279))
+- Updated nimbus-jose-jwt to 9.37.3 to fix [CVE-2023-52428](https://avd.aquasec.com/nvd/cve-2023-52428) ([#275](https://github.com/medizininformatik-initiative/feasibility-backend/issues/275))
+- Updated xnio to 3.8.14.Final to fix [CVE-2023-5685](https://avd.aquasec.com/nvd/cve-2023-5685) ([#274](https://github.com/medizininformatik-initiative/feasibility-backend/issues/274))
+
 ## [5.0.0-rc.1] - 2024-06-17
 
 ### Changed

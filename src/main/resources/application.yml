@@ -60,6 +60,12 @@ app:
         basic:
           username: ${BROKER_CLIENT_DIRECT_AUTH_BASIC_USERNAME:}
           password: ${BROKER_CLIENT_DIRECT_AUTH_BASIC_PASSWORD:}
+        oauth:
+          issuer:
+            url:  ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_ISSUER_URL:}
+          client:
+            id: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_ID:}
+            secret: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_SECRET:}
       enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
       useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
       obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
