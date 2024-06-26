@@ -1,0 +1,1 @@
+{"kind": "instance", "fhirVersion": "4.0.1", "status": "active", "resourceType": "CapabilityStatement", "date": "1111-01-01", "format": ["application/fhir+json"]}
