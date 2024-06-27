@@ -1,17 +1,11 @@
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre@sha256:171e90d2ca55e6958d8b56b58670fe42e9986c540225ce9f61a67b477017c217
 
-RUN apt update -yqq && apt upgrade -yqq && \
+RUN apt-get update -yqq && apt-get upgrade -yqq && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/
 
 WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology
-
-RUN addgroup --system feasibility && adduser --system feasibility --ingroup feasibility
-RUN mkdir logging
-RUN chown -R feasibility:feasibility /opt/codex-feasibility-backend
-
-USER feasibility:feasibility
 
 ARG VERSION=2.1.0
 ENV APP_VERSION=${VERSION}
@@ -23,22 +17,13 @@ ENV CERTIFICATE_PATH=/opt/codex-feasibility-backend/certs
 ENV TRUSTSTORE_PATH=/opt/codex-feasibility-backend/truststore
 ENV TRUSTSTORE_FILE=self-signed-truststore.jks
 
-RUN mkdir -p $CERTIFICATE_PATH $TRUSTSTORE_PATH
-RUN chown feasibility:feasibility $CERTIFICATE_PATH $TRUSTSTORE_PATH
+RUN mkdir logging && \
+    mkdir -p $CERTIFICATE_PATH $TRUSTSTORE_PATH && \
+    chown -R 10001:10001 /opt/codex-feasibility-backend && \
+    chown 10001:10001 $CERTIFICATE_PATH $TRUSTSTORE_PATH
+USER 10001
 
 HEALTHCHECK --interval=5s --start-period=10s CMD curl -s -f http://localhost:8090/actuator/health || exit 1
 
 COPY ./docker-entrypoint.sh /
 ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
-
-ARG GIT_REF=""
-ARG BUILD_TIME=""
-LABEL maintainer="medizininformatik-initiative" \
-    org.opencontainers.image.created=${BUILD_TIME} \
-    org.opencontainers.image.authors="medizininformatik-initiative" \
-    org.opencontainers.image.source="https://github.com/medizininformatik-initiative/feasibility-backend" \
-    org.opencontainers.image.version=${VERSION} \
-    org.opencontainers.image.revision=${GIT_REF} \
-    org.opencontainers.image.vendor="medizininformatik-initiative" \
-    org.opencontainers.image.title="feasibility backend" \
-    org.opencontainers.image.description="Provides backend functions for feasibility UI including query execution"
