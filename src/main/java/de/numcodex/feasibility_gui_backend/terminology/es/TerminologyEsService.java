@@ -70,25 +70,6 @@ public class TerminologyEsService {
     return list;
   }
 
-  public OntologySearchResult performOntologySearchWithRepo(String keyword,
-                                                    @Nullable String context,
-                                                    @Nullable String kdsModule,
-                                                    @Nullable String terminology,
-                                                    @Nullable boolean availability,
-                                                    @Nullable int limit,
-                                                    @Nullable int offset) {
-
-    var searchHits = ontologyListItemEsRepository.findByNameContainingIgnoreCaseOrTermcodeContainingIgnoreCase(keyword, keyword);
-    List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
-    searchHits.forEach(searchHit -> {
-      ontologyItems.add(searchHit.getContent());
-    });
-    return OntologySearchResult.builder()
-        .totalHits(searchHits.getTotalHits())
-        .results(ontologyItems)
-        .build();
-  }
-
   /*
   I know this is kinda stupid, but it works for now (availability has to be included though).
    */
@@ -116,43 +97,72 @@ public class TerminologyEsService {
 
     switch (filterList.size()) {
       case 0 -> {
-        searchHitPage = ontologyListItemEsRepository
-            .findByNameOrTermcodeMultiMatch0Filters(keyword,
-                PageRequest.of(page, pageSize));
+        if (availability) {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch0FiltersAvailableOnly(keyword,
+                  PageRequest.of(page, pageSize));
+        } else {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch0Filters(keyword,
+                  PageRequest.of(page, pageSize));
+        }
       }
-      case 1 -> {searchHitPage = ontologyListItemEsRepository
-          .findByNameOrTermcodeMultiMatch1Filter(keyword,
-              filterList.get(0).getFirst(),
-              filterList.get(0).getSecond(),
-              PageRequest.of(page, pageSize));
+      case 1 -> {
+        if (availability) {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch1FilterAvailableOnly(keyword,
+                  filterList.get(0).getFirst(),
+                  filterList.get(0).getSecond(),
+                  PageRequest.of(page, pageSize));
+        } else {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch1Filter(keyword,
+                  filterList.get(0).getFirst(),
+                  filterList.get(0).getSecond(),
+                  PageRequest.of(page, pageSize));
+        }
       }
-      case 2 -> {searchHitPage = ontologyListItemEsRepository
-          .findByNameOrTermcodeMultiMatch2Filters(keyword,
-              filterList.get(0).getFirst(),
-              filterList.get(0).getSecond(),
-              filterList.get(1).getFirst(),
-              filterList.get(1).getSecond(),
-              PageRequest.of(page, pageSize));
+      case 2 -> {
+        if (availability) {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch2FiltersAvailableOnly(keyword,
+                  filterList.get(0).getFirst(),
+                  filterList.get(0).getSecond(),
+                  filterList.get(1).getFirst(),
+                  filterList.get(1).getSecond(),
+                  PageRequest.of(page, pageSize));
+        } else {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch2Filters(keyword,
+                  filterList.get(0).getFirst(),
+                  filterList.get(0).getSecond(),
+                  filterList.get(1).getFirst(),
+                  filterList.get(1).getSecond(),
+                  PageRequest.of(page, pageSize));
+        }
       }
-      case 3 -> {searchHitPage = ontologyListItemEsRepository
-          .findByNameOrTermcodeMultiMatch3Filters(keyword,
-              filterList.get(0).getFirst(),
-              filterList.get(0).getSecond(),
-              filterList.get(1).getFirst(),
-              filterList.get(1).getSecond(),
-              filterList.get(2).getFirst(),
-              filterList.get(2).getSecond(),
-              PageRequest.of(page, pageSize));
-      }
-      default -> {searchHitPage = ontologyListItemEsRepository
-          .findByNameOrTermcodeMultiMatch3Filters(keyword,
-              filterList.get(0).getFirst(),
-              filterList.get(0).getSecond(),
-              filterList.get(1).getFirst(),
-              filterList.get(1).getSecond(),
-              filterList.get(2).getFirst(),
-              filterList.get(2).getSecond(),
-              PageRequest.of(page, pageSize));
+      default -> {
+        if (availability) {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch3FiltersAvailableOnly(keyword,
+                  filterList.get(0).getFirst(),
+                  filterList.get(0).getSecond(),
+                  filterList.get(1).getFirst(),
+                  filterList.get(1).getSecond(),
+                  filterList.get(2).getFirst(),
+                  filterList.get(2).getSecond(),
+                  PageRequest.of(page, pageSize));
+        } else {
+          searchHitPage = ontologyListItemEsRepository
+              .findByNameOrTermcodeMultiMatch3Filters(keyword,
+                  filterList.get(0).getFirst(),
+                  filterList.get(0).getSecond(),
+                  filterList.get(1).getFirst(),
+                  filterList.get(1).getSecond(),
+                  filterList.get(2).getFirst(),
+                  filterList.get(2).getSecond(),
+                  PageRequest.of(page, pageSize));
+        }
       }
     }
     List<EsSearchResultEntry> ontologyItems = new ArrayList<>();
@@ -164,34 +174,6 @@ public class TerminologyEsService {
         .build();
   }
 
-  public OntologySearchResult performOntologySearch(String keyword,
-                                                    @Nullable String context,
-                                                    @Nullable String kdsModule,
-                                                    @Nullable String terminology,
-                                                    @Nullable boolean availability,
-                                                    @Nullable int pageSize,
-                                                    @Nullable int page) {
-
-    //    var query = buildCriteriaQuery(keyword, context, kdsModule, terminology, availability, pageSize, page);
-    var query = buildNativeQuery(keyword, context, kdsModule, terminology, availability, pageSize, page);
-    var searchHits = operations.search(query, OntologyListItemDocument.class);
-    List<OntologyListItemDocument> ontologyItems = new ArrayList<>();
-    searchHits.forEach(searchHit -> {
-      ontologyItems.add(searchHit.getContent());
-    });
-
-//    ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchHits.getAggregations();
-//    List<StringTermsBucket> buckets = aggregations.aggregationsAsMap().get("context").aggregation().getAggregate().sterms().buckets().array();
-//
-//    buckets.forEach(b -> {
-//      System.out.println(b.key()._toJsonString() + "(" + b.docCount() + ")");
-//    });
-
-    return OntologySearchResult.builder()
-        .totalHits(searchHits.getTotalHits())
-        .results(ontologyItems)
-        .build();
-  }
 
   private TermFilter getFilter(String term) {
     var aggQuery = NativeQuery.builder()
@@ -216,68 +198,6 @@ public class TerminologyEsService {
         .type("selectable-concept")
         .values(termFilterValues)
         .build();
-  }
-
-  private CriteriaQuery buildCriteriaQuery(String keyword,
-                                          String context,
-                                          String kdsModule,
-                                          String terminology,
-                                          boolean availability) {
-    var criteria = new Criteria("name")
-        .expression(keyword)
-        .or("termcode")
-        .expression(keyword);
-
-    if (context != null && !context.isEmpty()) {
-      criteria = criteria.and("context").is(context);
-    }
-    if (kdsModule != null && !kdsModule.isEmpty()) {
-      criteria = criteria.and("kdsModule").is(kdsModule);
-    }
-    if (terminology != null && !terminology.isEmpty()) {
-      criteria = criteria.and("terminology").is(terminology);
-    }
-    if (availability) {
-      // TODO maybe add a configurable threshold here?
-      criteria = criteria.and("availability").greaterThan(0);
-    }
-
-    return new CriteriaQuery(criteria);
-  }
-
-  private NativeQuery buildNativeQuery(String keyword,
-                                      String context,
-                                      String kdsModule,
-                                      String terminology,
-                                      boolean availability,
-                                      int pageSize,
-                                      int page) {
-
-    var criteriaQuery = buildCriteriaQuery(keyword, context, kdsModule, terminology, availability);
-
-
-
-//    AggregationBuilders
-//        .terms()
-//        .field("context").name("context")
-//        .field("kdsModule").name("kdsModule")
-//        .field("terminology").name("terminology")
-//        .build();
-
-    Pageable pageable = Pageable.ofSize(pageSize);
-    criteriaQuery.setPageable(pageable);
-
-    var query = NativeQuery.builder()
-        .withQuery(criteriaQuery)
-        .withPageable(page > 0 ? pageable.withPage(page) : pageable.first())
-        .withAggregation("context", Aggregation.of(a -> a
-            .terms(ta -> ta.field("context"))))
-        .withAggregation("kdsModule", Aggregation.of(a -> a
-            .terms(ta -> ta.field("kdsModule"))))
-        .withAggregation("terminology", Aggregation.of(a -> a
-            .terms(ta -> ta.field("terminology"))))
-        .build();
-    return query;
   }
 
   public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {
