@@ -12,7 +12,7 @@
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>5.0.0</version>
+  <version>5.0.1</version>
 
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
