@@ -39,7 +39,7 @@ public class DirectSpringConfig {
             @Value("${app.broker.direct.auth.basic.username}") String username,
             @Value("${app.broker.direct.auth.basic.password}") String password,
             @Value("${app.broker.direct.auth.oauth.issuer.url}") String issuer,
-            @Value("${app.broker.direct.auth.oauth.client.id") String clientId,
+            @Value("${app.broker.direct.auth.oauth.client.id}") String clientId,
             @Value("${app.broker.direct.auth.oauth.client.secret}") String clientSecret) {
         this.useCql = useCql;
         this.flareBaseUrl = flareBaseUrl;
