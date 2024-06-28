@@ -39,7 +39,7 @@ public class DirectSpringConfig {
             @Value("${app.broker.direct.auth.basic.username}") String username,
             @Value("${app.broker.direct.auth.basic.password}") String password,
             @Value("${app.broker.direct.auth.oauth.issuer.url}") String issuer,
-            @Value("${app.broker.direct.auth.oauth.client.id") String clientId,
+            @Value("${app.broker.direct.auth.oauth.client.id}") String clientId,
             @Value("${app.broker.direct.auth.oauth.client.secret}") String clientSecret) {
         this.useCql = useCql;
         this.flareBaseUrl = flareBaseUrl;
@@ -57,8 +57,10 @@ public class DirectSpringConfig {
                                            @Value("${app.broker.direct.obfuscateResultCount:false}") boolean obfuscateResultCount,
                                            FhirConnector fhirConnector, FhirHelper fhirHelper) {
         if (useCql) {
+            log.info("Enable direct broker (type: cql)");
             return new DirectBrokerClientCql(fhirConnector, obfuscateResultCount, fhirHelper);
         } else {
+            log.info("Enable direct broker (type: flare)");
             return new DirectBrokerClientFlare(directWebClientFlare, obfuscateResultCount);
         }
     }
@@ -67,15 +69,17 @@ public class DirectSpringConfig {
     public IGenericClient getFhirClient(FhirContext fhirContext) {
         IGenericClient iGenericClient = fhirContext.newRestfulGenericClient(cqlBaseUrl);
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
-            log.info("Enable direct broker with basic authentication (type: cql, url: {}, username: {})", cqlBaseUrl,
+            log.info("Configure direct broker instance with basic authentication (type: cql, url: {}, username: {})",
+                    cqlBaseUrl,
                     username);
             iGenericClient.registerInterceptor(new BasicAuthInterceptor(username, password));
         } else if (!isNullOrEmpty(issuer) && !isNullOrEmpty(clientId) && !isNullOrEmpty(clientSecret)) {
-            log.info("Enable direct broker with oauth authentication (type: cql, url: {}, issuer: {}, client-id: {})",
+            log.info("Configure direct broker instance with oauth authentication"
+                    + " (type: cql, url: {}, issuer: {}, client-id: {})",
                     cqlBaseUrl, issuer, clientId);
             iGenericClient.registerInterceptor(new OAuthInterceptor(issuer, clientId, clientSecret));
         } else {
-            log.info("Enable direct broker (type: cql, url: {})", cqlBaseUrl);
+            log.info("Configure direct broker instance (type: cql, url: {})", cqlBaseUrl);
         }
         return iGenericClient;
     }
@@ -83,14 +87,14 @@ public class DirectSpringConfig {
     @Bean
     public WebClient directWebClientFlare() {
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
-            log.info("Enable direct broker with basic authentication (type: flare, url: {}, username: {})",
+            log.info("Configure direct broker instance with basic authentication (type: flare, url: {}, username: {})",
                     flareBaseUrl, username);
             return WebClient.builder()
                     .filter(basicAuthentication(username, password))
                     .baseUrl(flareBaseUrl)
                     .build();
         } else {
-            log.info("Enable direct broker (type: flare, url: {})", flareBaseUrl);
+            log.info("Configure direct broker instance (type: flare, url: {})", flareBaseUrl);
             return WebClient.create(flareBaseUrl);
         }
     }
