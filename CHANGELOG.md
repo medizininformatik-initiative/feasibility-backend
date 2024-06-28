@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.0.A] - 2024-06-29
+
+### Fixed
+- Injection of environment variable value for OAuth client id was broken ([#308](https://github.com/medizininformatik-initiative/feasibility-backend/issues/308))
+
 ## [5.0.0] - 2024-06-26
 
 ### Added
