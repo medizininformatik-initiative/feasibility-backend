@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.terminology.v3;
 
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,6 +28,11 @@ public class TerminologyRestController {
     @Autowired
     public TerminologyRestController(TerminologyService terminologyService) {
         this.terminologyService = terminologyService;
+    }
+
+    @GetMapping("criteria-profile-data")
+    public List<CriteriaProfileData> getCriteriaProfileData(@RequestParam List<String> id) {
+        return terminologyService.getCriteriaProfileData(id);
     }
 
     @GetMapping("entries/{nodeId}")

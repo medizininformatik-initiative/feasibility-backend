@@ -9,5 +9,7 @@ public enum ValueDefinitonType {
     @JsonProperty("concept")
     CONCEPT,
     @JsonProperty("quantity")
-    QUANTITY
+    QUANTITY,
+    @JsonProperty("reference")
+    REFERENCE
 }
