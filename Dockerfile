@@ -3,24 +3,24 @@ FROM eclipse-temurin:17-jre
 RUN apt update -yqq && apt upgrade -yqq && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/
 
-WORKDIR /opt/codex-feasibility-backend
+WORKDIR /opt/mii-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology
 
 RUN groupadd --system feasibility && useradd --system feasibility -g feasibility
 RUN mkdir logging
-RUN chown -R feasibility:feasibility /opt/codex-feasibility-backend
+RUN chown -R feasibility:feasibility /opt/mii-feasibility-backend
 
 USER feasibility:feasibility
 
-ARG VERSION=2.1.0
+ARG VERSION=5.0.1
 ENV APP_VERSION=${VERSION}
 ENV FEASIBILITY_DATABASE_HOST="feasibility-network"
 ENV FEASIBILITY_DATABASE_PORT=5432
 ENV FEASIBILITY_DATABASE_USER=postgres
 ENV FEASIBILITY_DATABASE_PASSWORD=password
-ENV CERTIFICATE_PATH=/opt/codex-feasibility-backend/certs
-ENV TRUSTSTORE_PATH=/opt/codex-feasibility-backend/truststore
+ENV CERTIFICATE_PATH=/opt/mii-feasibility-backend/certs
+ENV TRUSTSTORE_PATH=/opt/mii-feasibility-backend/truststore
 ENV TRUSTSTORE_FILE=self-signed-truststore.jks
 
 RUN mkdir -p $CERTIFICATE_PATH $TRUSTSTORE_PATH

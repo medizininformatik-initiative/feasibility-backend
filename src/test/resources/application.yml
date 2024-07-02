@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: "jdbc:tc:postgresql:15.1-alpine:///codex_ui_test"
+    url: "jdbc:tc:postgresql:15.1-alpine:///feasibility_ui_test"
 security:
   config:
     use-keycloak: false

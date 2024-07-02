@@ -42,8 +42,8 @@ services:
       AKTIN_BROKER_API_KEY: "xxxApiKeyAdmin123"
       # ---- DSF  broker
       BROKER_CLIENT_DSF_ENABLED: "false"
-      DSF_SECURITY_CACERT: "/opt/codex-feasibility-security/ca.pem"
-      DSF_SECURITY_KEYSTORE_P12FILE: "/opt/codex-feasibility-security/test-user.p12"
+      DSF_SECURITY_CACERT: "/opt/mii-feasibility-security/ca.pem"
+      DSF_SECURITY_KEYSTORE_P12FILE: "/opt/mii-feasibility-security/test-user.p12"
       DSF_SECURITY_KEYSTORE_PASSWORD: "password"
       DSF_WEBSERVICE_BASE_URL: "https://dsf-zars-fhir-proxy/fhir"
       DSF_WEBSOCKET_URL: "wss://dsf-zars-fhir-proxy:443/fhir/ws"
@@ -79,7 +79,7 @@ services:
     environment:
       POSTGRES_USER: "guidbuser"
       POSTGRES_PASSWORD: "guidbpw"
-      POSTGRES_DB: "codex_ui"
+      POSTGRES_DB: "feasibility_ui"
 
   blaze:
     image: "samply/blaze:0.27"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TRUSTSTORE_FILE="/opt/codex-feasibility-backend/truststore/self-signed-truststore.jks"
+TRUSTSTORE_FILE="/opt/mii-feasibility-backend/truststore/self-signed-truststore.jks"
 TRUSTSTORE_PASS=${TRUSTSTORE_PASS:-changeit}
 KEY_PASS=${KEY_PASS:-changeit}
 
@@ -30,6 +30,6 @@ if [ ! "${#ca_files[@]}" -eq 0 ]; then
 
     java $JAVA_OPTS -Djavax.net.ssl.trustStore="$TRUSTSTORE_FILE" -Djavax.net.ssl.trustStorePassword="$TRUSTSTORE_PASS" -jar feasibility-gui-backend.jar
 else
-    echo "# No CA *.pem cert files found in /opt/codex-feasibility-backend/certs -> starting feasibility backend without own CAs"
+    echo "# No CA *.pem cert files found in /opt/mii-feasibility-backend/certs -> starting feasibility backend without own CAs"
     java $JAVA_OPTS -jar feasibility-gui-backend.jar
 fi
