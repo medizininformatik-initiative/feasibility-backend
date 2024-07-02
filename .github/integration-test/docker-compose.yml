@@ -41,8 +41,8 @@ services:
       AKTIN_BROKER_API_KEY: "xxxApiKeyAdmin123"
       # ---- DSF  broker
       BROKER_CLIENT_DSF_ENABLED: "false"
-      DSF_SECURITY_CACERT: "/opt/codex-feasibility-security/ca.pem"
-      DSF_SECURITY_KEYSTORE_P12FILE: "/opt/codex-feasibility-security/test-user.p12"
+      DSF_SECURITY_CACERT: "/opt/mii-feasibility-security/ca.pem"
+      DSF_SECURITY_KEYSTORE_P12FILE: "/opt/mii-feasibility-security/test-user.p12"
       DSF_SECURITY_KEYSTORE_PASSWORD: "password"
       DSF_WEBSERVICE_BASE_URL: "https://dsf-zars-fhir-proxy/fhir"
       DSF_WEBSOCKET_URL: "wss://dsf-zars-fhir-proxy:443/fhir/ws"
@@ -63,11 +63,11 @@ services:
       LOG_LEVEL: "warn"
     restart: unless-stopped
     volumes:
-      - ./ontology/ui_profiles:/opt/codex-feasibility-backend/ontology/ui_profiles
-      - ./ontology/codex-code-tree.json:/opt/codex-feasibility-backend/ontology/codex-code-tree.json
-      - ./ontology/codex-term-code-mapping.json:/opt/codex-feasibility-backend/ontology/codex-term-code-mapping.json
-      - ./ontology/migration/R__Load_latest_ui_profile.sql:/opt/codex-feasibility-backend/ontology/migration/R__Load_latest_ui_profile.sql
-      - ./secrets:/opt/codex-feasibility-security
+      - ./ontology/ui_profiles:/opt/mii-feasibility-backend/ontology/ui_profiles
+      - ./ontology/mii-code-tree.json:/opt/mii-feasibility-backend/ontology/mii-code-tree.json
+      - ./ontology/mii-term-code-mapping.json:/opt/mii-feasibility-backend/ontology/mii-term-code-mapping.json
+      - ./ontology/migration/R__Load_latest_ui_profile.sql:/opt/mii-feasibility-backend/ontology/migration/R__Load_latest_ui_profile.sql
+      - ./secrets:/opt/mii-feasibility-security
   feasibility-gui-backend-db:
     image: 'postgres:15-alpine'
     container_name: feasibility-gui-backend-db
@@ -76,7 +76,7 @@ services:
     environment:
       POSTGRES_USER: "guidbuser"
       POSTGRES_PASSWORD: "guidbpw"
-      POSTGRES_DB: "codex_ui"
+      POSTGRES_DB: "feasibility_ui"
 
   blaze:
     image: "samply/blaze:0.27"
