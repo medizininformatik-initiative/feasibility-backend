@@ -14,12 +14,12 @@ import java.util.List;
 @RequestMapping("")
 @ConditionalOnExpression("${app.elastic.enabled}")
 @CrossOrigin
-public class TerminologyEsController {
+public class TerminologyEsRestController {
 
   private TerminologyEsService terminologyEsService;
 
   @Autowired
-  public TerminologyEsController(TerminologyEsService terminologyEsService) {
+  public TerminologyEsRestController(TerminologyEsService terminologyEsService) {
     this.terminologyEsService = terminologyEsService;
   }
 
@@ -36,6 +36,7 @@ public class TerminologyEsController {
                                                          @RequestParam(value = "availability", required = false, defaultValue = "false") boolean availability,
                                                          @RequestParam(value = "pageSize", required = false, defaultValue = "20") int pageSize,
                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
+
 
     return terminologyEsService
         .performOntologySearchWithRepoAndPaging(keyword, context, kdsModule, terminology, availability, pageSize, page);

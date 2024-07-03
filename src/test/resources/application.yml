@@ -19,7 +19,7 @@ app:
     aktin:
       enabled: false
   elastic:
-    enabled: false
+    enabled: true
   privacy:
     threshold:
       sites: 3
