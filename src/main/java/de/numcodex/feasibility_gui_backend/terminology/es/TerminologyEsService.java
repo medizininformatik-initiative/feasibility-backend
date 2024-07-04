@@ -33,7 +33,6 @@ import java.util.*;
 public class TerminologyEsService {
   private ElasticsearchOperations operations;
 
-  @Value("${app.elastic.filter}")
   private String[] filterFields;
 
   private OntologyItemEsRepository ontologyItemEsRepository;
@@ -41,7 +40,8 @@ public class TerminologyEsService {
   private OntologyListItemEsRepository ontologyListItemEsRepository;
 
   @Autowired
-  public TerminologyEsService(ElasticsearchOperations operations, OntologyItemEsRepository ontologyItemEsRepository, OntologyListItemEsRepository ontologyListItemEsRepository) {
+  public TerminologyEsService(@Value("${app.elastic.filter}") String[] filterFields, ElasticsearchOperations operations, OntologyItemEsRepository ontologyItemEsRepository, OntologyListItemEsRepository ontologyListItemEsRepository) {
+    this.filterFields = filterFields;
     this.operations = operations;
     this.ontologyItemEsRepository = ontologyItemEsRepository;
     this.ontologyListItemEsRepository = ontologyListItemEsRepository;
@@ -174,6 +174,16 @@ public class TerminologyEsService {
         .build();
   }
 
+  public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {
+    var ontologyItem = ontologyItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
+    return OntologyItemRelationsDocument.builder()
+        .translations(ontologyItem.getTranslations())
+        .parents(ontologyItem.getParents())
+        .children(ontologyItem.getChildren())
+        .relatedTerms(ontologyItem.getRelatedTerms())
+        .build();
+  }
+
 
   private TermFilter getFilter(String term) {
     var aggQuery = NativeQuery.builder()
@@ -197,16 +207,6 @@ public class TerminologyEsService {
         .name(term)
         .type("selectable-concept")
         .values(termFilterValues)
-        .build();
-  }
-
-  public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {
-    var ontologyItem = ontologyItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
-    return OntologyItemRelationsDocument.builder()
-        .translations(ontologyItem.getTranslations())
-        .parents(ontologyItem.getParents())
-        .children(ontologyItem.getChildren())
-        .relatedTerms(ontologyItem.getRelatedTerms())
         .build();
   }
 }

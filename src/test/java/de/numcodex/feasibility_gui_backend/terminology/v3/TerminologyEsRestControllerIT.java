@@ -5,33 +5,21 @@ import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServic
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.TerminologyEsService;
-import de.numcodex.feasibility_gui_backend.terminology.es.config.Config;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyItemRelationsDocument;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.Relative;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.Translation;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.images.PullPolicy;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,16 +29,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @Tag("terminology")
+@Tag("elasticsearch")
 @ExtendWith(SpringExtension.class)
 @Import(RateLimitingServiceSpringConfig.class)
 @WebMvcTest(
     controllers = TerminologyEsRestController.class
 )
-@Testcontainers
-//@ContextConfiguration(classes = Config.class)
 class TerminologyEsRestControllerIT {
 
   @Autowired
@@ -61,40 +47,6 @@ class TerminologyEsRestControllerIT {
 
   @MockBean
   private RateLimitingInterceptor rateLimitingInterceptor;
-
-//  @Container
-//  public static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.14.1")
-//      .withEnv("discovery.type", "single-node")
-//      .withEnv("xpack.security.enabled", "false")
-//      .withExposedPorts(9200)
-//      .withStartupAttempts(3)
-//      .withImagePullPolicy(PullPolicy.alwaysPull())
-//      .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
-//
-//  @BeforeAll
-//  static void setUp() throws IOException {
-//    elastic.start();
-//    System.out.println(elastic.getHttpHostAddress());
-//    WebClient webClient = WebClient.builder().baseUrl("http://" + elastic.getHttpHostAddress()).build();
-//    webClient.put()
-//        .uri("/ontology")
-//        .body(BodyInserters.fromResource(new ClassPathResource("ontology.json", TerminologyEsRestControllerIT.class)))
-//        .retrieve()
-//        .toBodilessEntity()
-//        .block();
-//
-//    webClient.post()
-//        .uri("/ontology/_bulk")
-//        .body(BodyInserters.fromResource(new ClassPathResource("testData.json", TerminologyEsRestControllerIT.class)))
-//        .retrieve()
-//        .toBodilessEntity()
-//        .block();
-//  }
-//
-//  @AfterAll
-//  static void tearDown() {
-//    elastic.stop();
-//  }
 
   @Test
   @WithMockUser(roles = "FEASIBILITY_TEST_USER")
