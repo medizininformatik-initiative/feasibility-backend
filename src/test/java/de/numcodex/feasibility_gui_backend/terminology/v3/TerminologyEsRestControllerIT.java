@@ -1,16 +1,17 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.TerminologyEsService;
-import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyItemRelationsDocument;
-import de.numcodex.feasibility_gui_backend.terminology.es.model.Relative;
-import de.numcodex.feasibility_gui_backend.terminology.es.model.Translation;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,9 +21,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 class TerminologyEsRestControllerIT {
 
+  private static final Logger log = LoggerFactory.getLogger(TerminologyEsRestControllerIT.class);
   @Autowired
   private MockMvc mockMvc;
 
@@ -48,24 +50,23 @@ class TerminologyEsRestControllerIT {
   @MockBean
   private RateLimitingInterceptor rateLimitingInterceptor;
 
+  @Autowired
+  private ObjectMapper jsonUtil;
+
   @Test
   @WithMockUser(roles = "FEASIBILITY_TEST_USER")
   public void testGetFilters_succeeds() throws Exception {
     List<String> filterList = List.of("context", "kdsModule", "terminology");
-    doReturn(filterList).when(terminologyEsService).getAvailableFilters();
+    List<TermFilter> termFilterList = createTermFilterList(filterList.toArray(new String[0]));
+    doReturn(termFilterList).when(terminologyEsService).getAvailableFilters();
 
     mockMvc.perform(get(URI.create("/api/v3/terminology/search/filter")).with(csrf()))
         .andExpect(status().isOk())
-        .andExpect(content().string(filterList.stream()
-            .map(s -> "\"" + s + "\"")
-            .collect(Collectors.joining(",", "[", "]"))));
+        .andExpect(content().json(jsonUtil.writeValueAsString(termFilterList)));
   }
 
   @Test
   public void testGetFilters_failsOnUnauthorized() throws Exception {
-    List<String> filterList = List.of("context", "kdsModule", "terminology");
-    doReturn(filterList).when(terminologyEsService).getAvailableFilters();
-
     mockMvc.perform(get(URI.create("/api/v3/terminology/search/filter")).with(csrf()))
         .andExpect(status().isUnauthorized());
   }
@@ -79,14 +80,14 @@ class TerminologyEsRestControllerIT {
 
     mockMvc.perform(get(URI.create("/api/v3/terminology/entry/search")).param("searchterm", "some-context").with(csrf()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.totalHits").value(dummyEsSearchResult.getTotalHits()))
-        .andExpect(jsonPath("$.results[0].id").value(dummyEsSearchResult.getResults().get(0).getId()))
-        .andExpect(jsonPath("$.results[0].name").value(dummyEsSearchResult.getResults().get(0).getName()))
-        .andExpect(jsonPath("$.results[0].terminology").value(dummyEsSearchResult.getResults().get(0).getTerminology()))
-        .andExpect(jsonPath("$.results[0].selectable").value(dummyEsSearchResult.getResults().get(0).isSelectable()))
-        .andExpect(jsonPath("$.results[0].kdsModule").value(dummyEsSearchResult.getResults().get(0).getKdsModule()))
-        .andExpect(jsonPath("$.results[0].availability").value(dummyEsSearchResult.getResults().get(0).getAvailability()))
-        .andExpect(jsonPath("$.results[0].context").value(dummyEsSearchResult.getResults().get(0).getContext()));
+        .andExpect(jsonPath("$.totalHits").value(dummyEsSearchResult.totalHits()))
+        .andExpect(jsonPath("$.results[0].id").value(dummyEsSearchResult.results().get(0).id()))
+        .andExpect(jsonPath("$.results[0].name").value(dummyEsSearchResult.results().get(0).name()))
+        .andExpect(jsonPath("$.results[0].terminology").value(dummyEsSearchResult.results().get(0).terminology()))
+        .andExpect(jsonPath("$.results[0].selectable").value(dummyEsSearchResult.results().get(0).selectable()))
+        .andExpect(jsonPath("$.results[0].kdsModule").value(dummyEsSearchResult.results().get(0).kdsModule()))
+        .andExpect(jsonPath("$.results[0].availability").value(dummyEsSearchResult.results().get(0).availability()))
+        .andExpect(jsonPath("$.results[0].context").value(dummyEsSearchResult.results().get(0).context()));
 
   }
 
@@ -106,14 +107,14 @@ class TerminologyEsRestControllerIT {
 
     mockMvc.perform(get(URI.create("/api/v3/terminology/entry/abc/relations")).with(csrf()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.translations[0].lang").value(dummyOntologyItemRelations.getTranslations().stream().toList().get(0).getLang()))
-        .andExpect(jsonPath("$.translations[0].value").value(dummyOntologyItemRelations.getTranslations().stream().toList().get(0).getValue()))
-        .andExpect(jsonPath("$.children[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.getChildren().stream().toList().get(0).getContextualizedTermcodeHash()))
-        .andExpect(jsonPath("$.children[0].name").value(dummyOntologyItemRelations.getChildren().stream().toList().get(0).getName()))
-        .andExpect(jsonPath("$.parents[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.getParents().stream().toList().get(0).getContextualizedTermcodeHash()))
-        .andExpect(jsonPath("$.parents[0].name").value(dummyOntologyItemRelations.getParents().stream().toList().get(0).getName()))
-        .andExpect(jsonPath("$.relatedTerms[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.getRelatedTerms().stream().toList().get(0).getContextualizedTermcodeHash()))
-        .andExpect(jsonPath("$.relatedTerms[0].name").value(dummyOntologyItemRelations.getRelatedTerms().stream().toList().get(0).getName()));
+        .andExpect(jsonPath("$.translations[0].lang").value(dummyOntologyItemRelations.translations().stream().toList().get(0).lang()))
+        .andExpect(jsonPath("$.translations[0].value").value(dummyOntologyItemRelations.translations().stream().toList().get(0).value()))
+        .andExpect(jsonPath("$.children[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.children().stream().toList().get(0).contextualizedTermcodeHash()))
+        .andExpect(jsonPath("$.children[0].name").value(dummyOntologyItemRelations.children().stream().toList().get(0).name()))
+        .andExpect(jsonPath("$.parents[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.parents().stream().toList().get(0).contextualizedTermcodeHash()))
+        .andExpect(jsonPath("$.parents[0].name").value(dummyOntologyItemRelations.parents().stream().toList().get(0).name()))
+        .andExpect(jsonPath("$.relatedTerms[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.relatedTerms().stream().toList().get(0).contextualizedTermcodeHash()))
+        .andExpect(jsonPath("$.relatedTerms[0].name").value(dummyOntologyItemRelations.relatedTerms().stream().toList().get(0).name()));
   }
 
   @Test
@@ -133,14 +134,14 @@ class TerminologyEsRestControllerIT {
 
     mockMvc.perform(get(URI.create("/api/v3/terminology/entry/abc")).with(csrf()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(dummySearchResultEntry.getId()))
-        .andExpect(jsonPath("$.name").value(dummySearchResultEntry.getName()))
-        .andExpect(jsonPath("$.availability").value(dummySearchResultEntry.getAvailability()))
-        .andExpect(jsonPath("$.context").value(dummySearchResultEntry.getContext()))
-        .andExpect(jsonPath("$.terminology").value(dummySearchResultEntry.getTerminology()))
-        .andExpect(jsonPath("$.termcode").value(dummySearchResultEntry.getTermcode()))
-        .andExpect(jsonPath("$.kdsModule").value(dummySearchResultEntry.getKdsModule()))
-        .andExpect(jsonPath("$.selectable").value(dummySearchResultEntry.isSelectable()));
+        .andExpect(jsonPath("$.id").value(dummySearchResultEntry.id()))
+        .andExpect(jsonPath("$.name").value(dummySearchResultEntry.name()))
+        .andExpect(jsonPath("$.availability").value(dummySearchResultEntry.availability()))
+        .andExpect(jsonPath("$.context").value(dummySearchResultEntry.context()))
+        .andExpect(jsonPath("$.terminology").value(dummySearchResultEntry.terminology()))
+        .andExpect(jsonPath("$.termcode").value(dummySearchResultEntry.termcode()))
+        .andExpect(jsonPath("$.kdsModule").value(dummySearchResultEntry.kdsModule()))
+        .andExpect(jsonPath("$.selectable").value(dummySearchResultEntry.selectable()));
   }
 
   @Test
@@ -192,5 +193,24 @@ class TerminologyEsRestControllerIT {
         .contextualizedTermcodeHash(UUID.randomUUID().toString())
         .name("some-random-name")
         .build();
+  }
+
+  private List<TermFilter> createTermFilterList(String[] values) {
+    var termFilters = new ArrayList<TermFilter>();
+    for (String term : values) {
+      termFilters.add(
+          TermFilter.builder()
+              .name(term)
+              .type("selectable-concept")
+              .values(List.of(TermFilterValue.builder().label("baz").count(values.length).build()))
+              .build()
+      );
+    }
+    termFilters.add(TermFilter.builder()
+        .type("boolean")
+        .name("availability")
+        .values(List.of())
+        .build());
+    return termFilters;
   }
 }

@@ -177,10 +177,10 @@ public class TerminologyEsService {
   public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {
     var ontologyItem = ontologyItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
     return OntologyItemRelationsDocument.builder()
-        .translations(ontologyItem.getTranslations())
-        .parents(ontologyItem.getParents())
-        .children(ontologyItem.getChildren())
-        .relatedTerms(ontologyItem.getRelatedTerms())
+        .translations(ontologyItem.translations())
+        .parents(ontologyItem.parents())
+        .children(ontologyItem.children())
+        .relatedTerms(ontologyItem.relatedTerms())
         .build();
   }
 

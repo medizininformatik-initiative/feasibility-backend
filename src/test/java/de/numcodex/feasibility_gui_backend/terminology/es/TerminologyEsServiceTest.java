@@ -79,13 +79,13 @@ public class TerminologyEsServiceTest {
     var searchResultEntry = assertDoesNotThrow(() -> terminologyEsService.getSearchResultEntryByHash(id));
 
     assertThat(searchResultEntry).isNotNull();
-    assertThat(searchResultEntry.getId()).isEqualTo(id);
-    assertThat(searchResultEntry.getTerminology()).isEqualTo(dummyOntologyListItem.getTerminology());
-    assertThat(searchResultEntry.getName()).isEqualTo(dummyOntologyListItem.getName());
-    assertThat(searchResultEntry.getKdsModule()).isEqualTo(dummyOntologyListItem.getKdsModule());
-    assertThat(searchResultEntry.getAvailability()).isEqualTo(dummyOntologyListItem.getAvailability());
-    assertThat(searchResultEntry.getContext()).isEqualTo(dummyOntologyListItem.getContext().code());
-    assertThat(searchResultEntry.getTermcode()).isEqualTo(dummyOntologyListItem.getTermcode());
+    assertThat(searchResultEntry.id()).isEqualTo(id);
+    assertThat(searchResultEntry.terminology()).isEqualTo(dummyOntologyListItem.terminology());
+    assertThat(searchResultEntry.name()).isEqualTo(dummyOntologyListItem.name());
+    assertThat(searchResultEntry.kdsModule()).isEqualTo(dummyOntologyListItem.kdsModule());
+    assertThat(searchResultEntry.availability()).isEqualTo(dummyOntologyListItem.availability());
+    assertThat(searchResultEntry.context()).isEqualTo(dummyOntologyListItem.context().code());
+    assertThat(searchResultEntry.termcode()).isEqualTo(dummyOntologyListItem.termcode());
   }
 
   @Test
@@ -112,17 +112,21 @@ public class TerminologyEsServiceTest {
   }
 
   private static Stream<Arguments> generateArgumentsForTestPerformOntologySearchWithRepoAndPaging() {
-    return Stream.of(
-        Arguments.of(null, null, null, false, 20, 0),
-        Arguments.of(List.of(), List.of(), List.of(), true, 20, 0),
-        Arguments.of(List.of(), List.of(), List.of(), false, 20, 0),
-        Arguments.of(List.of("foo"), List.of(), List.of(), false, 20, 0),
-        Arguments.of(List.of(), List.of("bar"), List.of(), false, 20, 0),
-        Arguments.of(List.of(), List.of(), List.of("baz"), false, 20, 0),
-        Arguments.of(List.of("foo"), List.of("bar"), List.of(), false, 20, 0),
-        Arguments.of(List.of("foo"), List.of(), List.of("baz"), false, 20, 0),
-        Arguments.of(List.of(), List.of("bar"), List.of("baz"), false, 20, 0)
-    );
+    var booleanList = List.of(true, false);
+    var list = new ArrayList<Arguments>();
+
+    for (boolean availability : booleanList) {
+      list.add(Arguments.of(null, null, null, availability, 20, 0));
+      list.add(Arguments.of(List.of("foo"), null, null, availability, 20, 0));
+      list.add(Arguments.of(null, List.of("bar"), null, availability, 20, 0));
+      list.add(Arguments.of(null, null, List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(List.of("foo"), List.of("bar"), null, availability, 20, 0));
+      list.add(Arguments.of(List.of("foo"), null, List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(null, List.of("bar"), List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(List.of("foo"), List.of("bar"), List.of("baz"), availability, 20, 0));
+    }
+
+    return list.stream();
   }
 
   @ParameterizedTest
@@ -144,9 +148,9 @@ public class TerminologyEsServiceTest {
             "foobar", context, kdsModule, terminology, availability, pageSize, page)
     );
 
-    assertThat(searchResult.getTotalHits()).isEqualTo(totalHits);
-    assertThat(searchResult.getResults().size()).isEqualTo(dummyResultPage.getTotalElements());
-    assertThat(searchResult.getResults()).containsExactlyInAnyOrderElementsOf(dummyResultPage.stream().map(EsSearchResultEntry::of).toList());
+    assertThat(searchResult.totalHits()).isEqualTo(totalHits);
+    assertThat(searchResult.results().size()).isEqualTo(dummyResultPage.getTotalElements());
+    assertThat(searchResult.results()).containsExactlyInAnyOrderElementsOf(dummyResultPage.stream().map(EsSearchResultEntry::of).toList());
   }
 
   @Test
@@ -164,10 +168,10 @@ public class TerminologyEsServiceTest {
 
     var ontologyItemRelationsDocument = assertDoesNotThrow(() -> terminologyEsService.getOntologyItemRelationsByHash(id));
     assertThat(ontologyItemRelationsDocument).isNotNull();
-    assertThat(ontologyItemRelationsDocument.getRelatedTerms()).isEqualTo(dummyOntologyItem.getRelatedTerms());
-    assertThat(ontologyItemRelationsDocument.getChildren()).isEqualTo(dummyOntologyItem.getChildren());
-    assertThat(ontologyItemRelationsDocument.getParents()).isEqualTo(dummyOntologyItem.getParents());
-    assertThat(ontologyItemRelationsDocument.getTranslations()).isEqualTo(dummyOntologyItem.getTranslations());
+    assertThat(ontologyItemRelationsDocument.relatedTerms()).isEqualTo(dummyOntologyItem.relatedTerms());
+    assertThat(ontologyItemRelationsDocument.children()).isEqualTo(dummyOntologyItem.children());
+    assertThat(ontologyItemRelationsDocument.parents()).isEqualTo(dummyOntologyItem.parents());
+    assertThat(ontologyItemRelationsDocument.translations()).isEqualTo(dummyOntologyItem.translations());
   }
 
   @Test

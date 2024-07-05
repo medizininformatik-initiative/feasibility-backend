@@ -3,32 +3,30 @@ package de.numcodex.feasibility_gui_backend.terminology.es.model;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import jakarta.persistence.Id;
 import lombok.Builder;
-import lombok.Data;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.Collection;
 
-@Data
 @Builder
 @Document(indexName = "ontology")
-public class OntologyItemDocument {
-
-    private @Id String id;
-    private String name;
-    private int availability;
-    private TermCode context;
-    private String terminology;
-    private String termcode;
-    @Field(name = "kds_module") private String kdsModule;
+public record OntologyItemDocument(
+    @Id String id,
+    String name,
+    int availability,
+    TermCode context,
+    String terminology,
+    String termcode,
+    @Field(name = "kds_module") String kdsModule,
 
     @Field(type = FieldType.Nested, includeInParent = true, name = "translations")
-    private Collection<Translation> translations;
+    Collection<Translation> translations,
     @Field(type = FieldType.Nested, includeInParent = true, name = "parents")
-    private Collection<Relative> parents;
+    Collection<Relative> parents,
     @Field(type = FieldType.Nested, includeInParent = true, name = "children")
-    private Collection<Relative> children;
+    Collection<Relative> children,
     @Field(type = FieldType.Nested, includeInParent = true, name = "related_terms")
-    private Collection<Relative> relatedTerms;
+    Collection<Relative> relatedTerms
+) {
 }
