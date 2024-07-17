@@ -26,6 +26,8 @@ tags:
     description: operations to work with query templates
   - name: terminology
     description: operations to work with the ontology
+  - name: codeable concepts
+    description: NOT IMPLEMENTED YET
   - name: intrinsics
     description: Offers intrinsic information about this application.
 paths:
@@ -832,7 +834,6 @@ paths:
     get:
       tags:
         - terminology
-        - search
       summary: "Get the list of available filters"
       operationId: "getFilters"
       responses:
@@ -844,68 +845,88 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/Filter"
-  /terminology/search:
+  /terminology/entry/search:
     get:
       tags:
         - terminology
-        - search
       summary: "Parametrized search in the configured elastic search service."
-      operationId: "elasticSearch"
+      operationId: "searchEntry"
       parameters:
         - name: searchterm
           in: query
-          description: The term to search for
+          description: The term to search for. In case of an empty searchterm, return the first page of the whole index, sorted alphabetically
           schema:
             type: "string"
           example: Diabetes Mellitus
-        - name: context
+        - name: contexts
           in: query
-          description: Limit the search to a given context (or contexts?)
+          description: Limit the search to any of the given contexts
           schema:
-            type: "string"
-          example: Diagnosis
-        - name: terminology
+            type: array
+            items:
+              type: string
+              example: Diagnosis
+          style: form
+          explode: false
+        - name: terminologies
           in: query
-          description: Limit the search to a given terminology (or terminologies?)
+          description: Limit the search to a any of the given terminologies
           schema:
-            type: "string"
-          example: ICD10
-        - name: kds
+            type: array
+            items:
+              type: string
+              example: ICD10
+          style: form
+          explode: false
+        - name: kds-modules
           in: query
-          description: Limit the search to a given KDS module (or modules?)
+          description: Limit the search to any of the given KDS modules
           schema:
-            type: "string"
-          example: Condition
+            type: array
+            items:
+              type: string
+              example: Condition
+          style: form
+          explode: false
+        - name: criteria-sets
+          in: query
+          description: Limit the search to certain criteria sets (specified via url)
+          schema:
+            type: array
+            items:
+              type: string
+              example: http://fhir.de/CodeSystem/bfarm/icd-10-gm
+          style: form
+          explode: false
         - name: availability
           in: query
           description: Limit the search to available items? (Maybe better invert this one to make this the default?)
           schema:
             type: boolean
           example: true
-        - name: limit
+        - name: page-size
           in: query
-          description: How many results shall be returned
+          description: How many results shall be returned per page
           schema:
             type: integer
           example: 10
-        - name: offset
+        - name: page
           in: query
-          description: What should be the index of the first item to be displayed
+          description: Which page shall be returned
           schema:
             type: integer
-          example: 100
+          example: 42
       responses:
         200:
-          description: Ok, return the list of results (maybe limited/offset - to be decided) for the search
+          description: Ok, return the list of results for the search
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ElasticSearchResult"
-  /terminology/search/{id}:
+  /terminology/entry/{id}/relations:
     get:
       tags:
         - terminology
-        - search
       summary: "Get the detailed entry for a criterion, containing children and translations"
       operationId: "getEntryById"
       parameters:
@@ -923,6 +944,137 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ElasticSearchResultEntryWithRelations'
+        401:
+          description: Unauthorized - please login first
+        403:
+          description: Forbidden - insufficient access rights
+        404:
+          description: Entry not found
+  /terminology/entry/{id}:
+    get:
+      tags:
+        - terminology
+      summary: "Get the detailed entry for a criterion, containing children and translations"
+      description: "This should be in the getEntryById call, but for better distinction between the return values it is listed seperately here"
+      operationId: "getEntriesById"
+      parameters:
+        - name: id
+          in: path
+          description: The ids (contextualized termcode hash) of the entries that shall be retrieved
+          required: true
+          schema:
+            type: string
+            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
+      responses:
+        200:
+          description: Entry found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ElasticSearchResultEntry'
+        401:
+          description: Unauthorized - please login first
+        403:
+          description: Forbidden - insufficient access rights
+        404:
+          description: Entry not found
+  /terminology/criteria-profile-data:
+    get:
+      tags:
+        - terminology
+      summary: "Get the profile data for criteria, containing uiProfile context and termCodes"
+      description: "This should return all the information needed to build criteria in the frontend."
+      operationId: "getEntriesByIdsWithDetail"
+      parameters:
+        - name: ids
+          in: query
+          style: form
+          explode: false
+          description: "A comma-separated list of IDs (contextualized termcode hashes) of the entries that shall be retrieved."
+          required: true
+          schema:
+            type: string
+            example: "203e04cd-4f0a-321b-b1ad-9ec6d211e0a8,203e04cd-4f0a-321b-b1ad-9ec6d211e0a9"
+      responses:
+        200:
+          description: "Entries found. May contain empty entries if some were not found."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CriteriaProfileData'
+        401:
+          description: "Unauthorized - please login first."
+        403:
+          description: "Forbidden - insufficient access rights."
+  /codeable-concept/entry/search:
+    get:
+      tags:
+        - codeable concepts
+      summary: Search for codeable concepts by code or display. Optionally filter by value sets
+      operationId: searchCodeableConcepts
+      parameters:
+        - name: searchterm
+          in: query
+          description: The term to search for. In case of an empty searchterm, return the first page of the whole index, sorted alphabetically
+          schema:
+            type: "string"
+          example: Diabetes Mellitus
+        - name: value-sets
+          in: query
+          description: Limit the search to certain value sets (specified via url)
+          schema:
+            type: array
+            items:
+              type: string
+              example: http://fhir.de/CodeSystem/bfarm/icd-10-gm
+          style: form
+          explode: false
+        - name: page-size
+          in: query
+          description: How many results shall be returned per page
+          schema:
+            type: integer
+          example: 10
+        - name: page
+          in: query
+          description: Which page shall be returned
+          schema:
+            type: integer
+          example: 42
+      responses:
+        200:
+          description: Ok, return the page of results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodeableConceptSearchResult"
+        401:
+          description: Unauthorized - please login first
+        403:
+          description: Forbidden - insufficient access rights
+  /codeable-concept/entry/{id}:
+    get:
+      tags:
+        - codeable concepts
+      summary: Search for codeable concepts by code or display. Optionally filter by value sets
+      operationId: getCodeableConceptByCode
+      parameters:
+        - name: id
+          in: path
+          description: The id (contextualized termcode hash) of the entry that shall be retrieved
+          required: true
+          schema:
+            type: string
+            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
+      responses:
+        200:
+          description: Ok, return the codeable concept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TermCode"
         401:
           description: Unauthorized - please login first
         403:
@@ -1431,7 +1583,77 @@ components:
     FilterValue:
       type: string
       example: "icd10"
-
+    CodeableConceptSearchResult:
+      type: object
+      properties:
+        totalHits:
+          type: integer
+          example: 42
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+    CriteriaProfileData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        uiprofile:
+          type: array
+          items:
+            $ref: "#/components/schemas/UiProfileEntry"
+        termCodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TermCode"
+        context:
+          $ref: "#/components/schemas/TermCode"
+    UiProfileEntry:
+      type: object
+      properties:
+        attributeDefinitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeDefinition"
+        name:
+          type: string
+          example: "Diagnose"
+        timeRestrictionAllowed:
+          type: boolean
+          example: false
+        valueDefinition:
+          type: string
+    AttributeDefinition:
+      type: object
+      properties:
+        allowedUnits:
+          type: array
+          items:
+            $ref: "#/components/schemas/Unit"
+        attributeCode:
+          $ref: "#/components/schemas/TermCode"
+        max:
+          type: number
+          example: null
+        min:
+          type: number
+          example: null
+        optional:
+          type: boolean
+          example: true
+        precision:
+          type: number
+          example: 1
+        referencedCriteriaSet:
+          type: string
+          example: "http://fdpg.mii.cds/CriteriaSet/Diagnose/icd-10-gm"
+        referencedValueSet:
+          type: string
+          example: "http://hl7.org/fhir/sid/icd-o-3"
+        type:
+          type: string
+          example: "reference"
   securitySchemes:
     feasibility_auth:
       type: oauth2

@@ -30,16 +30,16 @@ public class TerminologyEsRestController {
 
   @GetMapping("api/v3/terminology/entry/search")
   public EsSearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
-                                                         @RequestParam(value = "context", required = false) List<String> context,
-                                                         @RequestParam(value = "kdsModule", required = false) List<String> kdsModule,
-                                                         @RequestParam(value = "terminology", required = false) List<String> terminology,
+                                                         @RequestParam(value = "contexts", required = false) List<String> contexts,
+                                                         @RequestParam(value = "kds-modules", required = false) List<String> kdsModules,
+                                                         @RequestParam(value = "terminologies", required = false) List<String> terminologies,
                                                          @RequestParam(value = "availability", required = false, defaultValue = "false") boolean availability,
-                                                         @RequestParam(value = "pageSize", required = false, defaultValue = "20") int pageSize,
+                                                         @RequestParam(value = "page-size", required = false, defaultValue = "20") int pageSize,
                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
 
 
     return terminologyEsService
-        .performOntologySearchWithRepoAndPaging(keyword, context, kdsModule, terminology, availability, pageSize, page);
+        .performOntologySearchWithRepoAndPaging(keyword, contexts, kdsModules, terminologies, availability, pageSize, page);
   }
 
   @GetMapping("api/v3/terminology/entry/{hash}/relations")
