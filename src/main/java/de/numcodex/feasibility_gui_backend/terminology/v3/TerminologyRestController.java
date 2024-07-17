@@ -31,8 +31,8 @@ public class TerminologyRestController {
     }
 
     @GetMapping("criteria-profile-data")
-    public List<CriteriaProfileData> getCriteriaProfileData(@RequestParam List<String> id) {
-        return terminologyService.getCriteriaProfileData(id);
+    public List<CriteriaProfileData> getCriteriaProfileData(@RequestParam List<String> ids) {
+        return terminologyService.getCriteriaProfileData(ids);
     }
 
     @GetMapping("entries/{nodeId}")

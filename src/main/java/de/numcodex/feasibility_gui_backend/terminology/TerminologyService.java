@@ -215,39 +215,44 @@ public class TerminologyService {
     List<CriteriaProfileData> results = new ArrayList<>();
 
     for (String id : criteriaIds) {
-      CriteriaProfileData criteriaProfileData = new CriteriaProfileData();
       TermCode tc = termCodeRepository.findTermCodeByContextualizedTermcodeHash(id).orElse(null);
       Context c = termCodeRepository.findContextByContextualizedTermcodeHash(id).orElse(null);
-      criteriaProfileData.setId(id);
+      de.numcodex.feasibility_gui_backend.terminology.api.UiProfile uiProfile;
+      de.numcodex.feasibility_gui_backend.common.api.TermCode context;
+      List<de.numcodex.feasibility_gui_backend.common.api.TermCode> termCodes = new ArrayList<>();
       try {
-        de.numcodex.feasibility_gui_backend.terminology.api.UiProfile uip = jsonUtil.readValue(getUiProfile(id), de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.class);
-        criteriaProfileData.setUiProfile(uip);
+        uiProfile = jsonUtil.readValue(getUiProfile(id), de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.class);
       } catch (UiProfileNotFoundException | JsonProcessingException e) {
-        criteriaProfileData.setUiProfile(null);
+        uiProfile = null;
       }
       if (c != null) {
-        criteriaProfileData.setContext(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+        context = de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
             .code(c.getCode())
             .display(c.getDisplay())
             .system(c.getSystem())
             .version(c.getVersion())
-            .build());
+            .build();
       } else {
-        criteriaProfileData.setContext(null);
+        context = null;
       }
       if (tc != null) {
-        criteriaProfileData.setTermCodes(List.of(
+        termCodes.add(
             de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
             .code(tc.getCode())
             .display(tc.getDisplay())
             .system(tc.getSystem())
             .version(tc.getVersion())
-            .build())
+            .build()
         );
-      } else {
-        criteriaProfileData.setTermCodes(List.of());
       }
-      results.add(criteriaProfileData);
+      results.add(
+          CriteriaProfileData.builder()
+              .id(id)
+              .uiProfile(uiProfile)
+              .context(context)
+              .termCodes(termCodes)
+              .build()
+      );
     }
 
     return results;
