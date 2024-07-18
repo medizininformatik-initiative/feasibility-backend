@@ -1,7 +1,10 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.json.JsonData;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
@@ -12,15 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.Criteria;
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -70,10 +70,7 @@ public class TerminologyEsService {
     return list;
   }
 
-  /*
-  I know this is kinda stupid, but it works for now (availability has to be included though).
-   */
-  public EsSearchResult performOntologySearchWithRepoAndPaging(String keyword,
+  public EsSearchResult performOntologySearchWithPaging(String keyword,
                                                                @Nullable List<String> context,
                                                                @Nullable List<String> kdsModule,
                                                                @Nullable List<String> terminology,
@@ -93,85 +90,67 @@ public class TerminologyEsService {
       filterList.add(Pair.of("terminology", terminology));
     }
 
-    Page<OntologyListItemDocument> searchHitPage;
+    SearchHits<OntologyListItemDocument> searchHitPage = findByNameOrTermcode(
+        keyword,
+        filterList,
+        availability,
+        PageRequest.of(page, pageSize)
+    );
 
-    switch (filterList.size()) {
-      case 0 -> {
-        if (availability) {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch0FiltersAvailableOnly(keyword,
-                  PageRequest.of(page, pageSize));
-        } else {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch0Filters(keyword,
-                  PageRequest.of(page, pageSize));
-        }
-      }
-      case 1 -> {
-        if (availability) {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch1FilterAvailableOnly(keyword,
-                  filterList.get(0).getFirst(),
-                  filterList.get(0).getSecond(),
-                  PageRequest.of(page, pageSize));
-        } else {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch1Filter(keyword,
-                  filterList.get(0).getFirst(),
-                  filterList.get(0).getSecond(),
-                  PageRequest.of(page, pageSize));
-        }
-      }
-      case 2 -> {
-        if (availability) {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch2FiltersAvailableOnly(keyword,
-                  filterList.get(0).getFirst(),
-                  filterList.get(0).getSecond(),
-                  filterList.get(1).getFirst(),
-                  filterList.get(1).getSecond(),
-                  PageRequest.of(page, pageSize));
-        } else {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch2Filters(keyword,
-                  filterList.get(0).getFirst(),
-                  filterList.get(0).getSecond(),
-                  filterList.get(1).getFirst(),
-                  filterList.get(1).getSecond(),
-                  PageRequest.of(page, pageSize));
-        }
-      }
-      default -> {
-        if (availability) {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch3FiltersAvailableOnly(keyword,
-                  filterList.get(0).getFirst(),
-                  filterList.get(0).getSecond(),
-                  filterList.get(1).getFirst(),
-                  filterList.get(1).getSecond(),
-                  filterList.get(2).getFirst(),
-                  filterList.get(2).getSecond(),
-                  PageRequest.of(page, pageSize));
-        } else {
-          searchHitPage = ontologyListItemEsRepository
-              .findByNameOrTermcodeMultiMatch3Filters(keyword,
-                  filterList.get(0).getFirst(),
-                  filterList.get(0).getSecond(),
-                  filterList.get(1).getFirst(),
-                  filterList.get(1).getSecond(),
-                  filterList.get(2).getFirst(),
-                  filterList.get(2).getSecond(),
-                  PageRequest.of(page, pageSize));
-        }
-      }
-    }
     List<EsSearchResultEntry> ontologyItems = new ArrayList<>();
 
-    searchHitPage.getContent().forEach(hit -> ontologyItems.add(EsSearchResultEntry.of(hit)));
+    searchHitPage.getSearchHits().forEach(hit -> ontologyItems.add(EsSearchResultEntry.of(hit.getContent())));
     return EsSearchResult.builder()
-        .totalHits(searchHitPage.getTotalElements())
+        .totalHits(searchHitPage.getTotalHits())
         .results(ontologyItems)
         .build();
+  }
+
+  private SearchHits<OntologyListItemDocument> findByNameOrTermcode(String keyword,
+                                                                    List<Pair<String,List<String>>> filterList,
+                                                                    boolean availability,
+                                                                    PageRequest pageRequest) {
+
+    List<Query> filterTerms = new ArrayList<>();
+
+    if (availability) {
+      var availabilityFilter = new RangeQuery.Builder()
+          .field("availability")
+          .gt(JsonData.of("0"))
+          .build();
+      filterTerms.add(availabilityFilter._toQuery());
+    }
+
+    if (!filterList.isEmpty()) {
+      var fieldValues = new ArrayList<FieldValue>();
+      filterList.forEach(f -> {
+        f.getSecond().forEach(s -> {
+          fieldValues.add(new FieldValue.Builder().stringValue(s).build());
+        });
+        filterTerms.add(new TermsQuery.Builder()
+                .field(f.getFirst())
+                .terms(new TermsQueryField.Builder().value(fieldValues).build())
+            .build()._toQuery());
+      });
+    }
+
+    var mmQuery = new MultiMatchQuery.Builder()
+        .query(keyword)
+        .fields(List.of("name", "termcode^2"))
+        .build();
+
+    var boolQuery = new BoolQuery.Builder()
+        .must(List.of(mmQuery._toQuery()))
+        .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+        .build();
+
+    var query = new NativeQueryBuilder()
+        .withQuery(boolQuery._toQuery())
+        .withPageable(pageRequest)
+        .build();
+
+    return operations.search(query, OntologyListItemDocument.class);
+
   }
 
   public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {

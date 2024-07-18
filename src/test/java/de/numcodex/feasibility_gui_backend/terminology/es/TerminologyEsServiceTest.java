@@ -19,13 +19,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -111,7 +107,7 @@ public class TerminologyEsServiceTest {
     assertThat(filters).containsAll(expectedTermFiltersList);
   }
 
-  private static Stream<Arguments> generateArgumentsForTestPerformOntologySearchWithRepoAndPaging() {
+  private static Stream<Arguments> generateArgumentsForTestPerformOntologySearchWithPaging() {
     var booleanList = List.of(true, false);
     var list = new ArrayList<Arguments>();
 
@@ -130,32 +126,25 @@ public class TerminologyEsServiceTest {
   }
 
   @ParameterizedTest
-  @MethodSource("generateArgumentsForTestPerformOntologySearchWithRepoAndPaging")
-  void testPerformOntologySearchWithRepoAndPaging(List<String> context, List<String> kdsModule, List<String> terminology, Boolean availability, Integer pageSize, Integer page) {
+  @MethodSource("generateArgumentsForTestPerformOntologySearchWithPaging")
+  void testPerformOntologySearchWithPaging(List<String> context, List<String> kdsModule, List<String> terminology, Boolean availability, Integer pageSize, Integer page) {
     int totalHits = new Random().nextInt(100);
-    Page<OntologyListItemDocument> dummyResultPage = createDummyResultPage(totalHits);
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch0Filters(any(String.class), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch0FiltersAvailableOnly(any(String.class), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch1Filter(any(String.class), any(String.class), anyList(), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch1FilterAvailableOnly(any(String.class), any(String.class), anyList(), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch2Filters(any(String.class), any(String.class), anyList(), any(String.class), anyList(), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch2FiltersAvailableOnly(any(String.class), any(String.class), anyList(), any(String.class), anyList(), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch3Filters(any(String.class), any(String.class), anyList(), any(String.class), anyList(), any(String.class), anyList(), any(Pageable.class));
-    doReturn(dummyResultPage).when(ontologyListItemEsRepository).findByNameOrTermcodeMultiMatch3FiltersAvailableOnly(any(String.class), any(String.class), anyList(), any(String.class), anyList(), any(String.class), anyList(), any(Pageable.class));
+    SearchHits<OntologyListItemDocument> dummySearchHitsPage = createDummySearchHitsPage(totalHits);
+    doReturn(dummySearchHitsPage).when(operations).search(any(NativeQuery.class), any(Class.class));
 
     var searchResult = assertDoesNotThrow(
-        () -> terminologyEsService.performOntologySearchWithRepoAndPaging(
+        () -> terminologyEsService.performOntologySearchWithPaging(
             "foobar", context, kdsModule, terminology, availability, pageSize, page)
     );
 
     assertThat(searchResult.totalHits()).isEqualTo(totalHits);
-    assertThat(searchResult.results().size()).isEqualTo(dummyResultPage.getTotalElements());
-    assertThat(searchResult.results()).containsExactlyInAnyOrderElementsOf(dummyResultPage.stream().map(EsSearchResultEntry::of).toList());
+    assertThat(searchResult.results().size()).isEqualTo(dummySearchHitsPage.getTotalHits());
+    assertThat(searchResult.results()).containsExactlyInAnyOrderElementsOf(dummySearchHitsPage.getSearchHits().stream().map(sh -> EsSearchResultEntry.of(sh.getContent())).toList());
   }
 
   @Test
   void testPerformOntologySearchWithRepoAndPaging_throwsOnInvalidPageSize() {
-    assertThrows(IllegalArgumentException.class, () -> terminologyEsService.performOntologySearchWithRepoAndPaging(
+    assertThrows(IllegalArgumentException.class, () -> terminologyEsService.performOntologySearchWithPaging(
             "foobar", null, null, null, false, 0, 0)
     );
   }
@@ -269,11 +258,27 @@ public class TerminologyEsServiceTest {
     return termFilters;
   }
 
-  private Page<OntologyListItemDocument> createDummyResultPage(int totalHits) {
+  private SearchHits<OntologyListItemDocument> createDummySearchHitsPage(int totalHits) {
     var dummyItemList = new ArrayList<OntologyListItemDocument>();
+    var searchHitsList = new ArrayList<SearchHit<OntologyListItemDocument>>();
+
     for (int i = 0; i < totalHits; ++i) {
-      dummyItemList.add(createDummyOntologyListItem(UUID.randomUUID().toString()));
+      searchHitsList.add(
+          new SearchHit<>(
+              null,
+              null,
+              null,
+              10.0F,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              createDummyOntologyListItem(UUID.randomUUID().toString())
+          )
+      );
     }
-    return new PageImpl<>(dummyItemList);
+    return new SearchHitsImpl<>(totalHits, TotalHitsRelation.OFF, 10.0F, null, null, searchHitsList, null, null, null);
   }
 }

@@ -105,15 +105,15 @@ public class TerminologyEsServiceIT {
   }
 
   @Test
-  void testPerformOntologySearchWithRepoAndPaging_zeroResults() {
-    var page = terminologyEsService.performOntologySearchWithRepoAndPaging("random searchterm that is not found", null, null, null, false, 20, 0);
+  void testPerformOntologySearchWithPaging_zeroResults() {
+    var page = terminologyEsService.performOntologySearchWithPaging("random searchterm that is not found", null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isZero();
   }
 
   @Test
-  void testPerformOntologySearchWithRepoAndPaging_oneResult() {
-    var page = terminologyEsService.performOntologySearchWithRepoAndPaging("Hauttransplan", null, null, null, false, 20, 0);
+  void testPerformOntologySearchWithPaging_oneResult() {
+    var page = terminologyEsService.performOntologySearchWithPaging("Hauttransplan", null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isOne();
     assertThat(page.results().get(0).terminology()).isEqualTo("http://fhir.de/CodeSystem/bfarm/ops");
@@ -121,8 +121,8 @@ public class TerminologyEsServiceIT {
   }
 
   @Test
-  void testPerformOntologySearchWithRepoAndPaging_multipleResults() {
-    var page = terminologyEsService.performOntologySearchWithRepoAndPaging("Blutdr", null, null, null, false, 20, 0);
+  void testPerformOntologySearchWithPaging_multipleResults() {
+    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isEqualTo(3);
     assertThat(page.results().size()).isEqualTo(3);
@@ -131,8 +131,8 @@ public class TerminologyEsServiceIT {
   }
 
   @Test
-  void testPerformOntologySearchWithRepoAndPaging_multipleResultsMultiplePagesPage0() {
-    var page = terminologyEsService.performOntologySearchWithRepoAndPaging("Blutdr", null, null, null, false, 2, 0);
+  void testPerformOntologySearchWithPaging_multipleResultsMultiplePagesPage0() {
+    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, false, 2, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isEqualTo(3);
     assertThat(page.results().size()).isEqualTo(2);
@@ -141,8 +141,8 @@ public class TerminologyEsServiceIT {
   }
 
   @Test
-  void testPerformOntologySearchWithRepoAndPaging_multipleResultsMultiplePagesPage1() {
-    var page = terminologyEsService.performOntologySearchWithRepoAndPaging("Blutdr", null, null, null, false, 2, 1);
+  void testPerformOntologySearchWithPaging_multipleResultsMultiplePagesPage1() {
+    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, false, 2, 1);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isEqualTo(3);
     assertThat(page.results().size()).isEqualTo(1);

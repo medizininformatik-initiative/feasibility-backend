@@ -29,7 +29,7 @@ public class TerminologyEsRestController {
   }
 
   @GetMapping("api/v3/terminology/entry/search")
-  public EsSearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
+  public EsSearchResult searchOntologyItemsCriteriaQuery2(@RequestParam("searchterm") String keyword,
                                                          @RequestParam(value = "contexts", required = false) List<String> contexts,
                                                          @RequestParam(value = "kds-modules", required = false) List<String> kdsModules,
                                                          @RequestParam(value = "terminologies", required = false) List<String> terminologies,
@@ -39,7 +39,7 @@ public class TerminologyEsRestController {
 
 
     return terminologyEsService
-        .performOntologySearchWithRepoAndPaging(keyword, contexts, kdsModules, terminologies, availability, pageSize, page);
+        .performOntologySearchWithPaging(keyword, contexts, kdsModules, terminologies, availability, pageSize, page);
   }
 
   @GetMapping("api/v3/terminology/entry/{hash}/relations")
