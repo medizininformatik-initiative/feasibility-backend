@@ -7,7 +7,7 @@ WORKDIR /opt/codex-feasibility-backend
 COPY ./target/*.jar ./feasibility-gui-backend.jar
 COPY ontology ontology
 
-RUN addgroup --system feasibility && adduser --system feasibility --ingroup feasibility
+RUN groupadd --system feasibility && useradd --system feasibility -g feasibility
 RUN mkdir logging
 RUN chown -R feasibility:feasibility /opt/codex-feasibility-backend
 
