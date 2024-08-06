@@ -1,0 +1,7 @@
+{
+  "url": "name",
+  "http://loinc.org": "loinc",
+  "http://fhir.de/CodeSystem/bfarm/icd-10-gm": "ICD-10",
+  "http://fhir.de/CodeSystem/bfarm/ops": "OPS",
+  "TBD": "obviously this is just an example"
+}

@@ -10,11 +10,13 @@ import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,6 +44,9 @@ public class TerminologyService {
   private List<CategoryEntry> categoryEntries = new ArrayList<>();
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
+
+  @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-mapping.json")
+  private Resource terminologyMappingResource;
 
   public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath,
                             UiProfileRepository uiProfileRepository,
@@ -257,5 +262,13 @@ public class TerminologyService {
     }
 
     return results;
+  }
+
+  public String getTerminologyMapping() {
+    try {
+      return terminologyMappingResource.getContentAsString(StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new MappingNotFoundException();
+    }
   }
 }
