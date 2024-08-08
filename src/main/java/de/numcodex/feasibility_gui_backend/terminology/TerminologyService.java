@@ -39,8 +39,8 @@ public class TerminologyService {
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
-  @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-mapping.json")
-  private Resource terminologyMappingResource;
+  @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-systems.json")
+  private Resource terminologySystemsResource;
 
   public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath,
                             UiProfileRepository uiProfileRepository,
@@ -208,9 +208,9 @@ public class TerminologyService {
     return contextualizedTermCodeRepository.filterByCriteriaSetUrl(criteriaSetUrl, contextTermCodeHashList);
   }
 
-  public String getTerminologyMapping() {
+  public String getTerminologySystems() {
     try {
-      return terminologyMappingResource.getContentAsString(StandardCharsets.UTF_8);
+      return terminologySystemsResource.getContentAsString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new MappingNotFoundException();
     }
