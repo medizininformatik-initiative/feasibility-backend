@@ -70,8 +70,8 @@ public class TerminologyRestController {
         return terminologyService.getIntersection(criteriaSetUrl, contextTermCodeHashList);
     }
 
-    @GetMapping(value = "terminology-mapping", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getTerminologyMapping() {
-        return terminologyService.getTerminologyMapping();
+    @GetMapping(value = "systems", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getTerminologySystems() {
+        return terminologyService.getTerminologySystems();
     }
 }

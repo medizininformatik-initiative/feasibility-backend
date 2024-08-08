@@ -45,8 +45,8 @@ public class TerminologyService {
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
-  @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-mapping.json")
-  private Resource terminologyMappingResource;
+  @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-systems.json")
+  private Resource terminologySystemsResource;
 
   public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath,
                             UiProfileRepository uiProfileRepository,
@@ -244,11 +244,11 @@ public class TerminologyService {
       if (tc != null) {
         termCodes.add(
             de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
-            .code(tc.getCode())
-            .display(tc.getDisplay())
-            .system(tc.getSystem())
-            .version(tc.getVersion())
-            .build()
+                .code(tc.getCode())
+                .display(tc.getDisplay())
+                .system(tc.getSystem())
+                .version(tc.getVersion())
+                .build()
         );
       }
       results.add(
@@ -264,9 +264,9 @@ public class TerminologyService {
     return results;
   }
 
-  public String getTerminologyMapping() {
+  public String getTerminologySystems() {
     try {
-      return terminologyMappingResource.getContentAsString(StandardCharsets.UTF_8);
+      return terminologySystemsResource.getContentAsString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new MappingNotFoundException();
     }
