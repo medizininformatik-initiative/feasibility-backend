@@ -223,6 +223,7 @@ public class TerminologyService {
       try {
         uiProfile = jsonUtil.readValue(getUiProfile(id), de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.class);
       } catch (UiProfileNotFoundException | JsonProcessingException e) {
+        log.debug("Error trying to read ui profile", e);
         uiProfile = null;
       }
       if (c != null) {
