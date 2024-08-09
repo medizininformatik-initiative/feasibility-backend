@@ -126,6 +126,21 @@ If the number of total results is below threshold, no result will be provided.
 | PRIVACY_THRESHOLD_SITES                                       | If the number of responding sites (above PRIVACY_THRESHOLD_SITES_RESULT) is below this number, only respond with a total amount of patients                   |         | 20      |
 | PRIVACY_THRESHOLD_SITES_RESULT                                | Any site that reports a number below this threshold is considered as non-responding (or zero) in regard to PRIVACY_THRESHOLD_SITES                            |         | 20      |
 
+### Elastic Search Connection
+
+Searching the ontology/ontologies will move away from the local files towards an external (still provided by us) elastic
+search service. For now, the configuration of that service has to be done manually. So additional steps are necessary to
+use it. (NOT YET DOCUMENTED)
+
+In order to configure the location of the external service, use the following parameters.
+
+
+| EnvVar                        | Description                                     | Example            | Default                          |
+|-------------------------------|-------------------------------------------------|--------------------|----------------------------------|
+| ELASTIC_SEARCH_ENABLED        | Toggle elastic search connection                | `false`            | `true`                           |
+| ELASTIC_SEARCH_HOST           | Host and port of the elastic search endpoint    | `192.168.1.1:9200` | `localhost:9200`                 |
+| ELASTIC_SEARCH_FILTER         | Which parameters can be used to filter results  | `foo,bar,baz`      | `context,terminology,kds_module` |  
+
 ## Support for self-signed certificates
 
 The feasibility backend supports the use of self-signed certificates from your own CAs.

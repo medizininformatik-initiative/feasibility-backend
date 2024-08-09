@@ -1,10 +1,13 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
 import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,9 @@ public class TerminologyService {
 
   private String uiProfilePath;
 
+  @NonNull
+  private ObjectMapper jsonUtil;
+
   @Value("${app.ontologyOrder}")
   private List<String> sortedCategories;
   private Map<UUID, TerminologyEntry> terminologyEntries = new HashMap<>();
@@ -41,7 +47,8 @@ public class TerminologyService {
                             UiProfileRepository uiProfileRepository,
                             TermCodeRepository termCodeRepository,
                             ContextualizedTermCodeRepository contextualizedTermCodeRepository,
-                            MappingRepository mappingRepository) throws IOException {
+                            MappingRepository mappingRepository,
+                            ObjectMapper jsonUtil) throws IOException {
     this.uiProfilePath = uiProfilePath;
     readInTerminologyEntries();
     generateTerminologyEntriesWithoutDirectChildren();
@@ -50,6 +57,7 @@ public class TerminologyService {
     this.termCodeRepository = termCodeRepository;
     this.contextualizedTermCodeRepository = contextualizedTermCodeRepository;
     this.mappingRepository = mappingRepository;
+    this.jsonUtil = jsonUtil;
   }
 
   private void readInTerminologyEntries() throws IOException {
@@ -201,5 +209,53 @@ public class TerminologyService {
 
   public List<String> getIntersection(String criteriaSetUrl, List<String> contextTermCodeHashList) {
     return contextualizedTermCodeRepository.filterByCriteriaSetUrl(criteriaSetUrl, contextTermCodeHashList);
+  }
+
+  public List<CriteriaProfileData> getCriteriaProfileData(List<String> criteriaIds) {
+    List<CriteriaProfileData> results = new ArrayList<>();
+
+    for (String id : criteriaIds) {
+      TermCode tc = termCodeRepository.findTermCodeByContextualizedTermcodeHash(id).orElse(null);
+      Context c = termCodeRepository.findContextByContextualizedTermcodeHash(id).orElse(null);
+      de.numcodex.feasibility_gui_backend.terminology.api.UiProfile uiProfile;
+      de.numcodex.feasibility_gui_backend.common.api.TermCode context;
+      List<de.numcodex.feasibility_gui_backend.common.api.TermCode> termCodes = new ArrayList<>();
+      try {
+        uiProfile = jsonUtil.readValue(getUiProfile(id), de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.class);
+      } catch (UiProfileNotFoundException | JsonProcessingException e) {
+        log.debug("Error trying to read ui profile", e);
+        uiProfile = null;
+      }
+      if (c != null) {
+        context = de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+            .code(c.getCode())
+            .display(c.getDisplay())
+            .system(c.getSystem())
+            .version(c.getVersion())
+            .build();
+      } else {
+        context = null;
+      }
+      if (tc != null) {
+        termCodes.add(
+            de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+            .code(tc.getCode())
+            .display(tc.getDisplay())
+            .system(tc.getSystem())
+            .version(tc.getVersion())
+            .build()
+        );
+      }
+      results.add(
+          CriteriaProfileData.builder()
+              .id(id)
+              .uiProfile(uiProfile)
+              .context(context)
+              .termCodes(termCodes)
+              .build()
+      );
+    }
+
+    return results;
   }
 }

@@ -1,0 +1,147 @@
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 20,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      },
+      "analyzer": {
+        "edge_ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "edge_ngram_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "lowercase_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "availability": {
+        "type": "long",
+        "index": false
+      },
+      "children": {
+        "properties": {
+          "contextualized_termcode_hash": {
+            "type": "text",
+            "index": false
+          },
+          "name": {
+            "type": "text",
+            "index": false
+          }
+        }
+      },
+      "context": {
+        "properties": {
+          "code": {
+            "type": "keyword"
+          },
+          "display": {
+            "type": "keyword"
+          },
+          "system": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        }
+      },
+      "criteria_sets": {
+        "type": "keyword"
+      },
+      "kds_module": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "edge_ngram_analyzer",
+        "search_analyzer": "lowercase_analyzer"
+      },
+      "parents": {
+        "properties": {
+          "contextualized_termcode_hash": {
+            "type": "text",
+            "index": false
+          },
+          "name": {
+            "type": "text",
+            "index": false
+          }
+        }
+      },
+      "related_terms": {
+        "properties": {
+          "contextualized_termcode_hash": {
+            "type": "text",
+            "index": false
+          },
+          "name": {
+            "type": "text",
+            "index": false
+          }
+        }
+      },
+      "selectable": {
+        "type": "boolean"
+      },
+      "termcode": {
+        "type": "text",
+        "analyzer": "edge_ngram_analyzer",
+        "search_analyzer": "lowercase_analyzer"
+      },
+      "termcodes": {
+        "properties": {
+          "code": {
+            "type": "text",
+            "index": false
+          },
+          "display": {
+            "type": "text",
+            "index": false
+          },
+          "system": {
+            "type": "text",
+            "index": false
+          },
+          "version": {
+            "type": "text",
+            "index": false
+          }
+        }
+      },
+      "terminology": {
+        "type": "keyword"
+      },
+      "translations": {
+        "properties": {
+          "lang": {
+            "type": "text",
+            "index": false
+          },
+          "value": {
+            "type": "text",
+            "index": false
+          }
+        }
+      }
+    }
+  }
+}

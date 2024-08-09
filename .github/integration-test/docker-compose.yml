@@ -16,6 +16,7 @@ services:
       API_BASE_URL: "http://localhost:8091/api/"
       ALLOWED_ORIGINS: "https://localhost"
       QUERYRESULT_EXPIRY_MINUTES: 5
+      ELASTIC_SEARCH_ENABLED: "false"
       # ---- db config
       FEASIBILITY_DATABASE_HOST: "feasibility-gui-backend-db"
       FEASIBILITY_DATABASE_PORT: 5432
