@@ -1,7 +1,18 @@
-{
-  "url": "name",
-  "http://loinc.org": "loinc",
-  "http://fhir.de/CodeSystem/bfarm/icd-10-gm": "ICD-10",
-  "http://fhir.de/CodeSystem/bfarm/ops": "OPS",
-  "TBD": "obviously this is just an example"
-}
+[
+  {
+    "url": "http://loinc.org",
+    "name": "loinc"
+  },
+  {
+    "url": "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+    "name": "ICD-10"
+  },
+  {
+    "url": "http://fhir.de/CodeSystem/bfarm/ops",
+    "name": "OPS"
+  },
+  {
+    "url": "TBD",
+    "name": "obviously this is just an example"
+  }
+]
