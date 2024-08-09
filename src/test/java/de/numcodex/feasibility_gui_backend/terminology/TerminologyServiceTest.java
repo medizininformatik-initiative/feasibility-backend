@@ -16,9 +16,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +40,7 @@ import static org.mockito.Mockito.doThrow;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class TerminologyServiceTest {
 
+    public static final String MOCK_SYSTEMS_CONTENT = "[{\"url\": \"http://foo.bar\", \"name\": \"Foobar\" }]";
     private static UUID CATEGORY_1_ID = UUID.fromString("2ec77ac6-2547-2aff-031b-337d9ff80cff");
     private static UUID CATEGORY_2_ID = UUID.fromString("457b3f3b-bf4e-45da-b676-dc63d31942dd");
     private static UUID CATEGORY_A_ID = UUID.fromString("30a20f30-77db-11ee-b962-0242ac120002");
@@ -59,6 +64,9 @@ class TerminologyServiceTest {
 
     @Mock
     private ObjectMapper jsonUtil;
+
+    @Mock
+    private Resource terminologySystemsResource;
 
     private TerminologyService createTerminologyService(String uiProfilePath) throws IOException {
         return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
@@ -303,6 +311,32 @@ class TerminologyServiceTest {
             assertThat(cpd.getTermCodes().isEmpty()).isEqualTo(excludeTermcodes);
             assertThat(cpd.getUiProfile() == null).isEqualTo(excludeUiProfile);
         }
+    }
+
+    @Test
+    void getTerminologySystems_succeeds() throws IOException, NoSuchFieldException, IllegalAccessException {
+        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        Mockito.when(terminologySystemsResource.getContentAsString(any(Charset.class))).thenReturn(MOCK_SYSTEMS_CONTENT);
+        Field field = TerminologyService.class.getDeclaredField("terminologySystemsResource");
+        field.setAccessible(true);
+        field.set(terminologyService, terminologySystemsResource);
+
+        var terminologySystems = terminologyService.getTerminologySystems();
+
+        assertFalse(terminologySystems.isEmpty());
+        assertTrue(terminologySystems.equals(MOCK_SYSTEMS_CONTENT));
+    }
+
+    @Test
+    void getTerminologySystems_throwsIfNotFound() throws IOException, NoSuchFieldException, IllegalAccessException {
+        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        doThrow(IOException.class).when(terminologySystemsResource).getContentAsString(any(Charset.class));
+        Field field = TerminologyService.class.getDeclaredField("terminologySystemsResource");
+        field.setAccessible(true);
+        field.set(terminologyService, terminologySystemsResource);
+
+
+        assertThrows(MappingNotFoundException.class, terminologyService::getTerminologySystems);
     }
 
     private UiProfile createUiProfile() {
