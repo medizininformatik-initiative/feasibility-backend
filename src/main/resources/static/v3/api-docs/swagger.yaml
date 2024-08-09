@@ -28,6 +28,8 @@ tags:
     description: operations to work with the ontology
   - name: codeable concepts
     description: NOT IMPLEMENTED YET
+  - name: dse
+    description: Data Selection and Extraction
   - name: intrinsics
     description: Offers intrinsic information about this application.
 paths:
@@ -845,6 +847,19 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/Filter"
+  /terminology/systems:
+    get:
+      tags:
+        - terminology
+      summary: Get the mapping of system urls to display names
+      operationId: "getTerminologySystems"
+      responses:
+        200:
+          description: System mapping file found and readable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TerminologySystems"
   /terminology/entry/search:
     get:
       tags:
@@ -1081,6 +1096,34 @@ paths:
           description: Forbidden - insufficient access rights
         404:
           description: Entry not found
+  /dse/profile-tree:
+    get:
+      tags:
+        - dse
+      summary: Get the complete DSE profile tree
+      description: This can not be filtered or paginated or anything since for now it is rather small. All filtering will be done in the frontend for now. Might change if problems with that approach occur.
+      operationId: "getProfileTree"
+      responses:
+        200:
+          description: Profile tree file found and readable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileTreeNode"
+  /dse/profile-data:
+    get:
+      tags:
+        - dse
+      summary: Get the profile data for the submitted ids
+      description: Get profile data for all submitted ids. If a profile is not found, an error message will be supplied.
+      operationId: "getProfileData"
+      responses:
+        200:
+          description: Success, returning profiles - may contain profiles with error messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileDataList"
   /actuator/health:
     get:
       summary: Offers health information about this application.
@@ -1654,6 +1697,109 @@ components:
         type:
           type: string
           example: "reference"
+    TerminologySystems:
+      type: object
+      required:
+        - url
+        - name
+      properties:
+        url:
+          type: string
+          format: uri
+          example: http://fhir.de/CodeSystem/bfarm/ops
+        name:
+          type: string
+          example: OPS
+    ProfileTreeNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aee6afe1-3b96-4449-85cd-be8046ccbb84
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileTreeNode"
+        name:
+          type: string
+          example: ProfileObservationLaboruntersuchung
+        display:
+          type: string
+          example: Profile - Observation - Laboruntersuchung
+        module:
+          type: string
+          example: modul-labor
+        url:
+          type: string
+          format: uri
+          example: https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab
+        leaf:
+          type: boolean
+          example: true
+        selectable:
+          type: boolean
+          example: false
+    ProfileDataField:
+      type: object
+      properties:
+        id:
+          type: string
+          example: Observation.value[x]:valueQuantity.id
+        display:
+          type: string
+          example: Unique id for inter-element referencing
+        name:
+          type: string
+          example: id
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileDataField"
+    ProfileDataFilter:
+      type: object
+      properties:
+        type:
+          type: string
+          example: token
+        name:
+          type: string
+          example: code
+        ui_type:
+          type: string
+          example: code
+        referencedCriteriaSet:
+          type: string
+          format: uri
+          example: http://fdpg.mii.cds/CriteriaSet/Diagnose/icd-10-gm
+    ProfileDataEntry:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab
+        display:
+          type: string
+          example: Profile - Observation - Laboruntersuchung
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileDataField"
+        filters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileDataFilter"
+        errorCode:
+          type: string
+          example: "TBD-000"
+        errorCause:
+          type: string
+          example: Profile entry not found
+    ProfileDataList:
+      type: array
+      items:
+        $ref: "#/components/schemas/ProfileDataEntry"
   securitySchemes:
     feasibility_auth:
       type: oauth2
