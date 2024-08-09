@@ -63,4 +63,9 @@ public class TerminologyRestController {
             @RequestBody List<String> contextTermCodeHashList) {
         return terminologyService.getIntersection(criteriaSetUrl, contextTermCodeHashList);
     }
+
+    @GetMapping(value = "systems", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getTerminologySystems() {
+        return terminologyService.getTerminologySystems();
+    }
 }
