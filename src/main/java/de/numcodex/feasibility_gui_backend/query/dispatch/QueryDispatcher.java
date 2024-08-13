@@ -143,8 +143,8 @@ public class QueryDispatcher {
                         brokerQueryId, broker.getBrokerType()));
                 return true;
             } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException e) {
-                log.error("failed to dispatch query '%s' with broker type '%s'"
-                        .formatted(dispatchable.query.getId(), broker.getBrokerType()));
+                log.error("failed to dispatch query '%s' with broker type '%s': %s"
+                        .formatted(dispatchable.query.getId(), broker.getBrokerType(), e.getMessage()));
                 return false;
             }
         });
