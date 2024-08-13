@@ -71,15 +71,19 @@ public class TerminologyEsService {
   }
 
   public EsSearchResult performOntologySearchWithPaging(String keyword,
-                                                               @Nullable List<String> context,
-                                                               @Nullable List<String> kdsModule,
-                                                               @Nullable List<String> terminology,
-                                                               @Nullable boolean availability,
-                                                               @Nullable int pageSize,
-                                                               @Nullable int page) {
+                                                        @Nullable List<String> criteriaSets,
+                                                        @Nullable List<String> context,
+                                                        @Nullable List<String> kdsModule,
+                                                        @Nullable List<String> terminology,
+                                                        @Nullable boolean availability,
+                                                        @Nullable int pageSize,
+                                                        @Nullable int page) {
 
 
     List<Pair<String, List<String>>> filterList = new ArrayList<>();
+    if (criteriaSets != null) {
+      filterList.add(Pair.of("criteria_sets", criteriaSets));
+    }
     if (context != null) {
       filterList.add(Pair.of("context.code", context));
     }
