@@ -87,13 +87,6 @@ class QueryHandlerServiceTest {
         queryHandlerService = createQueryHandlerService();
     }
 
-    @BeforeEach
-    public void resetMocks() {
-        Mockito.reset(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
-                resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
-    }
-
-
     @Test
     public void testRunQuery_failsWithMonoErrorOnQueryDispatchException() throws QueryDispatchException {
         var testStructuredQuery = StructuredQuery.builder()

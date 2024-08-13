@@ -1,16 +1,21 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -24,9 +29,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @Tag("terminology")
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class TerminologyServiceTest {
 
     private static UUID CATEGORY_1_ID = UUID.fromString("2ec77ac6-2547-2aff-031b-337d9ff80cff");
@@ -50,8 +57,11 @@ class TerminologyServiceTest {
     @Mock
     private MappingRepository mappingRepository;
 
+    @Mock
+    private ObjectMapper jsonUtil;
+
     private TerminologyService createTerminologyService(String uiProfilePath) throws IOException {
-        return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository);
+        return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
     }
 
     @BeforeEach
@@ -239,6 +249,62 @@ class TerminologyServiceTest {
         assertTrue(intersection.isEmpty());
     }
 
+    @Test
+    void getCriteriaProfileData_emptyIdsResultInEmptyList() throws IOException {
+        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+
+        var result = assertDoesNotThrow(() -> terminologyService.getCriteriaProfileData(List.of()));
+        assertTrue(result.isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, true",
+        "true, true, false",
+        "true, false, true",
+        "true, false, false",
+        "false, true, true",
+        "false, true, false",
+        "false, false, true",
+        "false, false, false"
+    })
+    void getCriteriaProfileData(String noUiProfile, String noContext, String noTermcodes) throws IOException {
+        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        List<String> ids = List.of("123", "456", "789");
+        boolean excludeUiProfile = Boolean.parseBoolean(noUiProfile);
+        boolean excludeContext = Boolean.parseBoolean(noContext);
+        boolean excludeTermcodes = Boolean.parseBoolean(noTermcodes);
+
+        if (excludeUiProfile) {
+            doReturn(Optional.empty()).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
+        } else {
+            doReturn(Optional.of(createUiProfile())).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
+            doReturn(createUiProfileApi()).when(jsonUtil).readValue(any(String.class), any(Class.class));
+        }
+        if (excludeContext) {
+            doReturn(Optional.empty()).when(termCodeRepository).findContextByContextualizedTermcodeHash(any(String.class));
+        } else {
+            doReturn(Optional.of(createContext())).when(termCodeRepository).findContextByContextualizedTermcodeHash(any(String.class));
+        }
+        if (excludeTermcodes) {
+            doReturn(Optional.empty()).when(termCodeRepository).findTermCodeByContextualizedTermcodeHash(any(String.class));
+        } else {
+            doReturn(Optional.of(createTermCode())).when(termCodeRepository).findTermCodeByContextualizedTermcodeHash(any(String.class));
+        }
+
+        var result = assertDoesNotThrow(() -> terminologyService.getCriteriaProfileData(ids));
+
+        assertThat(result.size()).isEqualTo(ids.size());
+
+        for (int i = 0; i < result.size(); i++) {
+            CriteriaProfileData cpd = result.get(i);
+            assertThat(cpd.getId()).isEqualTo(ids.get(i));
+            assertThat(cpd.getContext() == null).isEqualTo(excludeContext);
+            assertThat(cpd.getTermCodes().isEmpty()).isEqualTo(excludeTermcodes);
+            assertThat(cpd.getUiProfile() == null).isEqualTo(excludeUiProfile);
+        }
+    }
+
     private UiProfile createUiProfile() {
         var uiProfile = new UiProfile();
         uiProfile.setId(1);
@@ -250,6 +316,13 @@ class TerminologyServiceTest {
                 }
                 """);
         return uiProfile;
+    }
+
+    private de.numcodex.feasibility_gui_backend.terminology.api.UiProfile createUiProfileApi() {
+        return de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder()
+            .name("ExampleProfile")
+            .timeRestrictionAllowed(true)
+            .build();
     }
 
     private Mapping createMapping() {
@@ -266,5 +339,25 @@ class TerminologyServiceTest {
         );
 
         return mapping;
+    }
+
+    private TermCode createTermCode() {
+        TermCode termCode = new TermCode();
+        termCode.setId(1);
+        termCode.setCode("LL2191-6");
+        termCode.setSystem("http://loinc.org");
+        termCode.setVersion("1.0.0");
+        termCode.setDisplay("Geschlecht");
+        return termCode;
+    }
+
+    private Context createContext() {
+        Context context = new Context();
+        context.setId(1);
+        context.setCode("LL2191-6");
+        context.setSystem("http://loinc.org");
+        context.setVersion("1.0.0");
+        context.setDisplay("Geschlecht");
+        return context;
     }
 }
