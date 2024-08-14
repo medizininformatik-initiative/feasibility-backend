@@ -18,10 +18,11 @@ services:
       QUERYRESULT_EXPIRY_MINUTES: 5
       ELASTIC_SEARCH_ENABLED: "false"
       # ---- db config
-      FEASIBILITY_DATABASE_HOST: "feasibility-gui-backend-db"
-      FEASIBILITY_DATABASE_PORT: 5432
-      FEASIBILITY_DATABASE_USER: "guidbuser"
-      FEASIBILITY_DATABASE_PASSWORD: "guidbpw"
+      DATABASE_HOST: "feasibility-gui-backend-db"
+      DATABASE_PORT: 5432
+      DATABASE_USER: "guidbuser"
+      DATABASE_PASSWORD: "guidbpw"
+      DATABASE_DBNAME: "feasibility_ui"
       # ---- auth
       KEYCLOAK_ENABLED: "true"
       KEYCLOAK_ALLOWED_ROLE: "FeasibilityUser"
