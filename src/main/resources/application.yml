@@ -4,9 +4,9 @@ spring:
   application:
     name: mii-feasibility-gui-backend
   datasource:
-    url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/${FEASIBILITY_DATABASE_DBNAME:codex_ui}
-    username: ${FEASIBILITY_DATABASE_USER:codex-postgres}
-    password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
+    url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/${FEASIBILITY_DATABASE_DBNAME:feasibility_ui}
+    username: ${FEASIBILITY_DATABASE_USER:guidbuser}
+    password: ${FEASIBILITY_DATABASE_PASSWORD:guidbpw}
     driverClassName: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
