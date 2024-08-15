@@ -10,12 +10,12 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.List;
 
 @Builder
-@Document(indexName = "codable_concept")
-public record CodableConceptDocument(
+@Document(indexName = "codeable_concept")
+public record CodeableConceptDocument(
     @Id String id,
     @Field(type = FieldType.Nested, includeInParent = true, name = "termcode")
     TermCode termCode,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "valuesets")
+    @Field(type = FieldType.Nested, includeInParent = true, name = "value_sets")
     List<String> valueSets
 ) {
 }

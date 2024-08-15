@@ -1,6 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology.es.repository;
 
-import de.numcodex.feasibility_gui_backend.terminology.es.model.CodableConceptDocument;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import java.util.List;
 
 @ConditionalOnExpression("${app.elastic.enabled}")
-public interface CodableConceptEsRepository extends ElasticsearchRepository<CodableConceptDocument, String> {
+public interface CodeableConceptEsRepository extends ElasticsearchRepository<CodeableConceptDocument, String> {
   @Query("""
       {
         "bool": {
@@ -29,8 +29,8 @@ public interface CodableConceptEsRepository extends ElasticsearchRepository<Coda
       }
       """
   )
-  Page<CodableConceptDocument> findByNameOrTermcodeMultiMatch0Filters(String searchterm,
-                                                                        Pageable pageable);
+  Page<CodeableConceptDocument> findByNameOrTermcodeMultiMatch0Filters(String searchterm,
+                                                                       Pageable pageable);
 
   @Query("""
       {
@@ -57,8 +57,8 @@ public interface CodableConceptEsRepository extends ElasticsearchRepository<Coda
       }
       """
   )
-  Page<CodableConceptDocument> findByNameOrTermcodeMultiMatch1Filter(String searchterm,
-                                                                       String filterKey,
-                                                                       List<String> filterValues,
-                                                                       Pageable pageable);
+  Page<CodeableConceptDocument> findByNameOrTermcodeMultiMatch1Filter(String searchterm,
+                                                                      String filterKey,
+                                                                      List<String> filterValues,
+                                                                      Pageable pageable);
 }

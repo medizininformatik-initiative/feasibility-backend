@@ -24,8 +24,8 @@ public class CodeableConceptEsRestController {
 
   @GetMapping("/search")
   public CcSearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
-                                                         @RequestParam(value = "valueSets", required = false) List<String> valueSets,
-                                                         @RequestParam(value = "pageSize", required = false, defaultValue = "20") int pageSize,
+                                                         @RequestParam(value = "value-sets", required = false) List<String> valueSets,
+                                                         @RequestParam(value = "page-size", required = false, defaultValue = "20") int pageSize,
                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
 
     return codeableConceptEsService

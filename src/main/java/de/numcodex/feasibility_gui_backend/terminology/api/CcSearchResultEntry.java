@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.api;
 
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
-import de.numcodex.feasibility_gui_backend.terminology.es.model.CodableConceptDocument;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,10 +13,10 @@ public class CcSearchResultEntry {
   private List<String> valueSets;
   private TermCode termCode;
 
-  public static CcSearchResultEntry of(CodableConceptDocument codableConceptDocument) {
+  public static CcSearchResultEntry of(CodeableConceptDocument codeableConceptDocument) {
     return CcSearchResultEntry.builder()
-        .valueSets(codableConceptDocument.valueSets())
-        .termCode(codableConceptDocument.termCode())
+        .valueSets(codeableConceptDocument.valueSets())
+        .termCode(codeableConceptDocument.termCode())
         .build();
   }
 }

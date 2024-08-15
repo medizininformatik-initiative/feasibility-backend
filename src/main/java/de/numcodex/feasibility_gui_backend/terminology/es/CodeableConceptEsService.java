@@ -2,8 +2,8 @@ package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResultEntry;
-import de.numcodex.feasibility_gui_backend.terminology.es.model.CodableConceptDocument;
-import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodableConceptEsRepository;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
+import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +23,10 @@ import java.util.List;
 public class CodeableConceptEsService {
   private ElasticsearchOperations operations;
 
-  private CodableConceptEsRepository repo;
+  private CodeableConceptEsRepository repo;
 
   @Autowired
-  public CodeableConceptEsService(ElasticsearchOperations operations, CodableConceptEsRepository repo) {
+  public CodeableConceptEsService(ElasticsearchOperations operations, CodeableConceptEsRepository repo) {
     this.operations = operations;
     this.repo = repo;
   }
@@ -35,7 +35,7 @@ public class CodeableConceptEsService {
                                                                @Nullable List<String> valueSets,
                                                                @Nullable int pageSize,
                                                                @Nullable int page) {
-    Page<CodableConceptDocument> searchHitPage;
+    Page<CodeableConceptDocument> searchHitPage;
 
     if (valueSets != null && !valueSets.isEmpty()) {
       searchHitPage = repo

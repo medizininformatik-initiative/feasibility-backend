@@ -30,7 +30,7 @@ public class TerminologyEsRestController {
 
   @GetMapping("api/v3/terminology/entry/search")
   public EsSearchResult searchOntologyItemsCriteriaQuery2(@RequestParam("searchterm") String keyword,
-                                                         @RequestParam(value = "criteriaSets", required = false) List<String> criteriaSets,
+                                                         @RequestParam(value = "criteria-sets", required = false) List<String> criteriaSets,
                                                          @RequestParam(value = "contexts", required = false) List<String> contexts,
                                                          @RequestParam(value = "kds-modules", required = false) List<String> kdsModules,
                                                          @RequestParam(value = "terminologies", required = false) List<String> terminologies,
