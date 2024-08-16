@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
@@ -16,13 +17,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,14 +31,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 
 @Tag("terminology")
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class TerminologyServiceTest {
-
-    public static final String MOCK_SYSTEMS_CONTENT = "[{\"url\": \"http://foo.bar\", \"name\": \"Foobar\" }]";
     private static UUID CATEGORY_1_ID = UUID.fromString("2ec77ac6-2547-2aff-031b-337d9ff80cff");
     private static UUID CATEGORY_2_ID = UUID.fromString("457b3f3b-bf4e-45da-b676-dc63d31942dd");
     private static UUID CATEGORY_A_ID = UUID.fromString("30a20f30-77db-11ee-b962-0242ac120002");
@@ -62,14 +57,13 @@ class TerminologyServiceTest {
     @Mock
     private MappingRepository mappingRepository;
 
-    @Mock
-    private ObjectMapper jsonUtil;
+    private final ObjectMapper jsonUtil = new ObjectMapper();
 
     @Mock
     private Resource terminologySystemsResource;
 
     private TerminologyService createTerminologyService(String uiProfilePath) throws IOException {
-        return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
+        return new TerminologyService(uiProfilePath,"src/test/resources/ontology/terminology_systems.json", uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
     }
 
     @BeforeEach
@@ -287,7 +281,6 @@ class TerminologyServiceTest {
             doReturn(Optional.empty()).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
         } else {
             doReturn(Optional.of(createUiProfile())).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
-            doReturn(createUiProfileApi()).when(jsonUtil).readValue(any(String.class), any(Class.class));
         }
         if (excludeContext) {
             doReturn(Optional.empty()).when(termCodeRepository).findContextByContextualizedTermcodeHash(any(String.class));
@@ -316,47 +309,26 @@ class TerminologyServiceTest {
     @Test
     void getTerminologySystems_succeeds() throws IOException, NoSuchFieldException, IllegalAccessException {
         var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        Mockito.when(terminologySystemsResource.getContentAsString(any(Charset.class))).thenReturn(MOCK_SYSTEMS_CONTENT);
-        Field field = TerminologyService.class.getDeclaredField("terminologySystemsResource");
-        field.setAccessible(true);
-        field.set(terminologyService, terminologySystemsResource);
 
-        var terminologySystems = terminologyService.getTerminologySystems();
+        var terminologySystems = assertDoesNotThrow(terminologyService::getTerminologySystems);
 
         assertFalse(terminologySystems.isEmpty());
-        assertTrue(terminologySystems.equals(MOCK_SYSTEMS_CONTENT));
+        assertThat(terminologySystems.size()).isEqualTo(4);
+        assertThat(terminologySystems.get(0).name()).isEqualTo("loinc");
+        assertThat(terminologySystems.get(2).url()).isEqualTo("http://fhir.de/CodeSystem/bfarm/ops");
     }
 
-    @Test
-    void getTerminologySystems_throwsIfNotFound() throws IOException, NoSuchFieldException, IllegalAccessException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doThrow(IOException.class).when(terminologySystemsResource).getContentAsString(any(Charset.class));
-        Field field = TerminologyService.class.getDeclaredField("terminologySystemsResource");
-        field.setAccessible(true);
-        field.set(terminologyService, terminologySystemsResource);
-
-
-        assertThrows(MappingNotFoundException.class, terminologyService::getTerminologySystems);
-    }
-
-    private UiProfile createUiProfile() {
+    private UiProfile createUiProfile() throws JsonProcessingException {
         var uiProfile = new UiProfile();
         uiProfile.setId(1);
         uiProfile.setName("example");
-        uiProfile.setUiProfile("""
-                {
-                	"name": "ExampleProfile",
-                	"time_restriction_allowed": true
-                }
-                """);
+        uiProfile.setUiProfile(jsonUtil.writeValueAsString(
+            de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder()
+                .name("ExampleProfile")
+                .timeRestrictionAllowed(true)
+                .build())
+        );
         return uiProfile;
-    }
-
-    private de.numcodex.feasibility_gui_backend.terminology.api.UiProfile createUiProfileApi() {
-        return de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder()
-            .name("ExampleProfile")
-            .timeRestrictionAllowed(true)
-            .build();
     }
 
     private Mapping createMapping() {

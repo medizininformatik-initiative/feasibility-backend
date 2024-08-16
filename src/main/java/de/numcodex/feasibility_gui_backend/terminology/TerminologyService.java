@@ -1,22 +1,21 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
-import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
-import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.*;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
+import de.numcodex.feasibility_gui_backend.terminology.persistence.UiProfile;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,7 +32,10 @@ public class TerminologyService {
 
   private final MappingRepository mappingRepository;
 
-  private String uiProfilePath;
+  private final String uiProfilePath;
+
+  @Getter
+  private final List<TerminologySystemEntry> terminologySystems;
 
   @NonNull
   private ObjectMapper jsonUtil;
@@ -45,10 +47,8 @@ public class TerminologyService {
   private Map<UUID, TerminologyEntry> terminologyEntriesWithOnlyDirectChildren = new HashMap<>();
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
-  @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-systems.json")
-  private Resource terminologySystemsResource;
-
   public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath,
+                            @Value("${app.terminologySystemsFile}") String terminologySystemsFilename,
                             UiProfileRepository uiProfileRepository,
                             TermCodeRepository termCodeRepository,
                             ContextualizedTermCodeRepository contextualizedTermCodeRepository,
@@ -63,6 +63,7 @@ public class TerminologyService {
     this.contextualizedTermCodeRepository = contextualizedTermCodeRepository;
     this.mappingRepository = mappingRepository;
     this.jsonUtil = jsonUtil;
+    this.terminologySystems = jsonUtil.readValue(new URL("file:" + terminologySystemsFilename), new TypeReference<>() {});
   }
 
   private void readInTerminologyEntries() throws IOException {
@@ -262,13 +263,5 @@ public class TerminologyService {
     }
 
     return results;
-  }
-
-  public String getTerminologySystems() {
-    try {
-      return terminologySystemsResource.getContentAsString(StandardCharsets.UTF_8);
-    } catch (IOException e) {
-      throw new MappingNotFoundException();
-    }
   }
 }

@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
@@ -71,9 +72,6 @@ public class TerminologyRestControllerIT {
 
     @MockBean
     private RateLimitingInterceptor rateLimitingInterceptor;
-
-    @Value("classpath:de/numcodex/feasibility_gui_backend/terminology/terminology-systems.json")
-    Resource terminologySystemsResource;
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
@@ -275,7 +273,7 @@ public class TerminologyRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testGetTerminologySystems_succeedsWith200() throws Exception {
         MockHttpServletRequestBuilder requestBuilder;
-        doReturn(terminologySystemsResource.getContentAsString(StandardCharsets.UTF_8)).when(terminologyService).getTerminologySystems();
+        doReturn(List.of(TerminologySystemEntry.builder().url("http://foo.bar").name("Foobar").build())).when(terminologyService).getTerminologySystems();
 
         requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/systems"))
             .with(csrf());
@@ -316,13 +314,12 @@ public class TerminologyRestControllerIT {
                 .build();
     }
 
-    private String createUiProfileString() {
-        return """
-                {
-                    "name": "Diagnose",
-                    "time_restriction_allowed": true
-                }
-                """;
+    private String createUiProfileString() throws JsonProcessingException {
+        var uiProfile = UiProfile.builder()
+            .name("Diagnose")
+            .timeRestrictionAllowed(true)
+            .build();
+        return jsonUtil.writeValueAsString(uiProfile);
     }
 
     private UiProfile createUiProfile() {
