@@ -1,39 +1,40 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
-import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResultEntry;
-import de.numcodex.feasibility_gui_backend.terminology.es.CodeableConceptEsService;
+import de.numcodex.feasibility_gui_backend.terminology.es.CodeableConceptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v3/codeable_concept/entry")
+@RequestMapping("api/v3/codeable-concept")
 @ConditionalOnExpression("${app.elastic.enabled}")
 @CrossOrigin
 public class CodeableConceptEsRestController {
 
-  private CodeableConceptEsService codeableConceptEsService;
+  private CodeableConceptService codeableConceptService;
 
   @Autowired
-  public CodeableConceptEsRestController(CodeableConceptEsService codeableConceptEsService) {
-    this.codeableConceptEsService = codeableConceptEsService;
+  public CodeableConceptEsRestController(CodeableConceptService codeableConceptService) {
+    this.codeableConceptService = codeableConceptService;
   }
 
-  @GetMapping("/search")
+  @GetMapping(value = "/entry/search", produces = MediaType.APPLICATION_JSON_VALUE)
   public CcSearchResult searchOntologyItemsCriteriaQuery(@RequestParam("searchterm") String keyword,
                                                          @RequestParam(value = "value-sets", required = false) List<String> valueSets,
                                                          @RequestParam(value = "page-size", required = false, defaultValue = "20") int pageSize,
                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
 
-    return codeableConceptEsService
+    return codeableConceptService
         .performCodeableConceptSearchWithRepoAndPaging(keyword, valueSets, pageSize, page);
   }
 
-  @GetMapping("/{code}")
-  public CcSearchResultEntry getCodeableConceptByCode(@PathVariable("code") String code) {
-    return codeableConceptEsService.getSearchResultEntryByCode(code);
+  @GetMapping(value = "/entry/{code}",  produces = MediaType.APPLICATION_JSON_VALUE)
+  public TermCode getCodeableConceptByCode(@PathVariable("code") String code) {
+    return codeableConceptService.getSearchResultEntryByCode(code);
   }
 }

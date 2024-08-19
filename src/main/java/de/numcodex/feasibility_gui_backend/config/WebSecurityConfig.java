@@ -49,6 +49,7 @@ public class WebSecurityConfig {
   public static final String PATH_TERMINOLOGY = "/terminology";
   public static final String PATH_TEMPLATE = "/template";
   public static final String PATH_DSE = "/dse";
+  public static final String PATH_CODEABLE_CONCEPT = "/codeable-concept";
   public static final String PATH_SWAGGER_UI = "/swagger-ui/**";
   public static final String PATH_SWAGGER_CONFIG = "/v3/api-docs/**";
   @Value("${app.keycloakAllowedRole}")

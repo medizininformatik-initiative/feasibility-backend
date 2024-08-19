@@ -40,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 class TerminologyEsRestControllerIT {
 
-  private static final Logger log = LoggerFactory.getLogger(TerminologyEsRestControllerIT.class);
   @Autowired
   private MockMvc mockMvc;
 

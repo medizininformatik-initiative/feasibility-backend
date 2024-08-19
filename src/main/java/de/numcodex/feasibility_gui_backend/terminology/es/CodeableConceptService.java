@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
-import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
@@ -20,13 +20,13 @@ import java.util.List;
 @Service
 @Slf4j
 @ConditionalOnExpression("${app.elastic.enabled}")
-public class CodeableConceptEsService {
+public class CodeableConceptService {
   private ElasticsearchOperations operations;
 
   private CodeableConceptEsRepository repo;
 
   @Autowired
-  public CodeableConceptEsService(ElasticsearchOperations operations, CodeableConceptEsRepository repo) {
+  public CodeableConceptService(ElasticsearchOperations operations, CodeableConceptEsRepository repo) {
     this.operations = operations;
     this.repo = repo;
   }
@@ -48,17 +48,16 @@ public class CodeableConceptEsService {
           .findByNameOrTermcodeMultiMatch0Filters(keyword,
               PageRequest.of(page, pageSize));
     }
-    List<CcSearchResultEntry> codeableConceptEntries = new ArrayList<>();
+    List<TermCode> codeableConceptEntries = new ArrayList<>();
 
-    searchHitPage.getContent().forEach(hit -> codeableConceptEntries.add(CcSearchResultEntry.of(hit)));
+    searchHitPage.getContent().forEach(hit -> codeableConceptEntries.add(hit.termCode()));
     return CcSearchResult.builder()
         .totalHits(searchHitPage.getTotalElements())
         .results(codeableConceptEntries)
         .build();
   }
 
-  public CcSearchResultEntry getSearchResultEntryByCode(String code) {
-    var ccItem = repo.findById(code).orElseThrow(OntologyItemNotFoundException::new);
-    return CcSearchResultEntry.of(ccItem);
+  public TermCode getSearchResultEntryByCode(String code) {
+    return repo.findById(code).orElseThrow(OntologyItemNotFoundException::new).termCode();
   }
 }
