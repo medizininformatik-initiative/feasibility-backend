@@ -54,6 +54,7 @@ public class TerminologyEsServiceIT {
   public static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.15.0")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
+      .withReuse(false)
       .withExposedPorts(9200)
       .withStartupAttempts(3)
       .withImagePullPolicy(PullPolicy.alwaysPull())
