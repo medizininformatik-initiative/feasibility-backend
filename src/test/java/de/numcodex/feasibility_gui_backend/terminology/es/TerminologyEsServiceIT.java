@@ -51,7 +51,7 @@ public class TerminologyEsServiceIT {
   private TerminologyEsService terminologyEsService;
 
   @Container
-  public static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.14.1")
+  public static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.15.0")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
       .withExposedPorts(9200)

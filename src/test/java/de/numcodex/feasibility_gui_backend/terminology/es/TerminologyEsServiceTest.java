@@ -267,7 +267,6 @@ public class TerminologyEsServiceTest {
   }
 
   private SearchHits<OntologyListItemDocument> createDummySearchHitsPage(int totalHits) {
-    var dummyItemList = new ArrayList<OntologyListItemDocument>();
     var searchHitsList = new ArrayList<SearchHit<OntologyListItemDocument>>();
 
     for (int i = 0; i < totalHits; ++i) {
