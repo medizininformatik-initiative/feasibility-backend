@@ -78,7 +78,7 @@ public class TerminologyEsServiceIT {
 
     webClient.post()
         .uri("/ontology/_bulk")
-        .body(BodyInserters.fromResource(new ClassPathResource("testData.json", TerminologyEsServiceIT.class)))
+        .body(BodyInserters.fromResource(new ClassPathResource("ontology_testdata.json", TerminologyEsServiceIT.class)))
         .retrieve()
         .toBodilessEntity()
         .block();

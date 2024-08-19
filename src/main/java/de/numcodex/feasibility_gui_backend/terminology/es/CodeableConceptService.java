@@ -40,7 +40,7 @@ public class CodeableConceptService {
     if (valueSets != null && !valueSets.isEmpty()) {
       searchHitPage = repo
           .findByNameOrTermcodeMultiMatch1Filter(keyword,
-              "valuesets",
+              "value_sets",
               valueSets,
               PageRequest.of(page, pageSize));
     } else {
