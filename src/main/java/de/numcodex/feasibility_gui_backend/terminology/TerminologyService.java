@@ -1,12 +1,13 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
-import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
-import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.*;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
+import de.numcodex.feasibility_gui_backend.terminology.persistence.UiProfile;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +32,10 @@ public class TerminologyService {
 
   private final MappingRepository mappingRepository;
 
-  private String uiProfilePath;
+  private final String uiProfilePath;
+
+  @Getter
+  private final List<TerminologySystemEntry> terminologySystems;
 
   @NonNull
   private ObjectMapper jsonUtil;
@@ -44,6 +48,7 @@ public class TerminologyService {
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
   public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath,
+                            @Value("${app.terminologySystemsFile}") String terminologySystemsFilename,
                             UiProfileRepository uiProfileRepository,
                             TermCodeRepository termCodeRepository,
                             ContextualizedTermCodeRepository contextualizedTermCodeRepository,
@@ -58,6 +63,7 @@ public class TerminologyService {
     this.contextualizedTermCodeRepository = contextualizedTermCodeRepository;
     this.mappingRepository = mappingRepository;
     this.jsonUtil = jsonUtil;
+    this.terminologySystems = jsonUtil.readValue(new URL("file:" + terminologySystemsFilename), new TypeReference<>() {});
   }
 
   private void readInTerminologyEntries() throws IOException {
@@ -239,11 +245,11 @@ public class TerminologyService {
       if (tc != null) {
         termCodes.add(
             de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
-            .code(tc.getCode())
-            .display(tc.getDisplay())
-            .system(tc.getSystem())
-            .version(tc.getVersion())
-            .build()
+                .code(tc.getCode())
+                .display(tc.getDisplay())
+                .system(tc.getSystem())
+                .version(tc.getVersion())
+                .build()
         );
       }
       results.add(

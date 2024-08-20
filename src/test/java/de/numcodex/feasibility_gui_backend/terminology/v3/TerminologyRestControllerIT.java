@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
@@ -19,9 +20,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -30,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -265,6 +269,21 @@ public class TerminologyRestControllerIT {
                 .andExpect(content().json(jsonUtil.writeValueAsString(randomUuidListMinusOne)));
     }
 
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetTerminologySystems_succeedsWith200() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder;
+        doReturn(List.of(TerminologySystemEntry.builder().url("http://foo.bar").name("Foobar").build())).when(terminologyService).getTerminologySystems();
+
+        requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/systems"))
+            .with(csrf());
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].url").value("http://foo.bar"))
+            .andExpect(jsonPath("$[0].name").value("Foobar"));
+    }
+
     private List<CategoryEntry> createCategoryEntries() {
         return List.of(new CategoryEntry(UUID.randomUUID(), "category-1"),
                 new CategoryEntry(UUID.randomUUID(), "category-2"),
@@ -295,13 +314,12 @@ public class TerminologyRestControllerIT {
                 .build();
     }
 
-    private String createUiProfileString() {
-        return """
-                {
-                    "name": "Diagnose",
-                    "time_restriction_allowed": true
-                }
-                """;
+    private String createUiProfileString() throws JsonProcessingException {
+        var uiProfile = UiProfile.builder()
+            .name("Diagnose")
+            .timeRestrictionAllowed(true)
+            .build();
+        return jsonUtil.writeValueAsString(uiProfile);
     }
 
     private UiProfile createUiProfile() {

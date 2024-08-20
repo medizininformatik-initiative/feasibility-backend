@@ -1,5 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
@@ -16,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.core.io.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -29,13 +31,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 
 @Tag("terminology")
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class TerminologyServiceTest {
-
     private static UUID CATEGORY_1_ID = UUID.fromString("2ec77ac6-2547-2aff-031b-337d9ff80cff");
     private static UUID CATEGORY_2_ID = UUID.fromString("457b3f3b-bf4e-45da-b676-dc63d31942dd");
     private static UUID CATEGORY_A_ID = UUID.fromString("30a20f30-77db-11ee-b962-0242ac120002");
@@ -57,11 +57,13 @@ class TerminologyServiceTest {
     @Mock
     private MappingRepository mappingRepository;
 
+    private final ObjectMapper jsonUtil = new ObjectMapper();
+
     @Mock
-    private ObjectMapper jsonUtil;
+    private Resource terminologySystemsResource;
 
     private TerminologyService createTerminologyService(String uiProfilePath) throws IOException {
-        return new TerminologyService(uiProfilePath, uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
+        return new TerminologyService(uiProfilePath,"src/test/resources/ontology/terminology_systems.json", uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
     }
 
     @BeforeEach
@@ -279,7 +281,6 @@ class TerminologyServiceTest {
             doReturn(Optional.empty()).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
         } else {
             doReturn(Optional.of(createUiProfile())).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
-            doReturn(createUiProfileApi()).when(jsonUtil).readValue(any(String.class), any(Class.class));
         }
         if (excludeContext) {
             doReturn(Optional.empty()).when(termCodeRepository).findContextByContextualizedTermcodeHash(any(String.class));
@@ -305,24 +306,29 @@ class TerminologyServiceTest {
         }
     }
 
-    private UiProfile createUiProfile() {
+    @Test
+    void getTerminologySystems_succeeds() throws IOException, NoSuchFieldException, IllegalAccessException {
+        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+
+        var terminologySystems = assertDoesNotThrow(terminologyService::getTerminologySystems);
+
+        assertFalse(terminologySystems.isEmpty());
+        assertThat(terminologySystems.size()).isEqualTo(4);
+        assertThat(terminologySystems.get(0).name()).isEqualTo("loinc");
+        assertThat(terminologySystems.get(2).url()).isEqualTo("http://fhir.de/CodeSystem/bfarm/ops");
+    }
+
+    private UiProfile createUiProfile() throws JsonProcessingException {
         var uiProfile = new UiProfile();
         uiProfile.setId(1);
         uiProfile.setName("example");
-        uiProfile.setUiProfile("""
-                {
-                	"name": "ExampleProfile",
-                	"time_restriction_allowed": true
-                }
-                """);
+        uiProfile.setUiProfile(jsonUtil.writeValueAsString(
+            de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder()
+                .name("ExampleProfile")
+                .timeRestrictionAllowed(true)
+                .build())
+        );
         return uiProfile;
-    }
-
-    private de.numcodex.feasibility_gui_backend.terminology.api.UiProfile createUiProfileApi() {
-        return de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder()
-            .name("ExampleProfile")
-            .timeRestrictionAllowed(true)
-            .build();
     }
 
     private Mapping createMapping() {
