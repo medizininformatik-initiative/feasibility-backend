@@ -110,6 +110,7 @@ public class WebSecurityConfig {
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*")).hasAuthority(keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_DSE + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_HEALTH)).anonymous()
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_UI)).anonymous()
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_CONFIG)).anonymous()
