@@ -40,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 class TerminologyEsRestControllerIT {
 
-  private static final Logger log = LoggerFactory.getLogger(TerminologyEsRestControllerIT.class);
   @Autowired
   private MockMvc mockMvc;
 
@@ -76,7 +75,7 @@ class TerminologyEsRestControllerIT {
   public void testSearchOntologyItemsCriteriaQuery_succeeds() throws Exception {
     var totalHits = 1;
     var dummyEsSearchResult = createDummyEsSearchResult(totalHits);
-    doReturn(dummyEsSearchResult).when(terminologyEsService).performOntologySearchWithPaging(any(String.class), isNull(), isNull(), isNull(), anyBoolean(), anyInt(), anyInt());
+    doReturn(dummyEsSearchResult).when(terminologyEsService).performOntologySearchWithPaging(any(String.class), isNull(), isNull(), isNull(), isNull(), anyBoolean(), anyInt(), anyInt());
 
     mockMvc.perform(get(URI.create("/api/v3/terminology/entry/search")).param("searchterm", "some-context").with(csrf()))
         .andExpect(status().isOk())
@@ -93,7 +92,7 @@ class TerminologyEsRestControllerIT {
 
   @Test
   public void testSearchOntologyItemsCriteriaQuery_failsOnUnauthorized() throws Exception {
-    doReturn(createDummyEsSearchResult(1)).when(terminologyEsService).performOntologySearchWithPaging(any(String.class), anyList(), anyList(), anyList(), any(Boolean.class), any(Integer.class), any(Integer.class));
+    doReturn(createDummyEsSearchResult(1)).when(terminologyEsService).performOntologySearchWithPaging(any(String.class), anyList(), anyList(), anyList(), anyList(), any(Boolean.class), any(Integer.class), any(Integer.class));
 
     mockMvc.perform(get(URI.create("/api/v3/terminology/entry/search")).param("searchterm", "some-context").with(csrf()))
         .andExpect(status().isUnauthorized());

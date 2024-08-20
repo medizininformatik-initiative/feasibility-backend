@@ -112,14 +112,22 @@ public class TerminologyEsServiceTest {
     var list = new ArrayList<Arguments>();
 
     for (boolean availability : booleanList) {
-      list.add(Arguments.of(null, null, null, availability, 20, 0));
-      list.add(Arguments.of(List.of("foo"), null, null, availability, 20, 0));
-      list.add(Arguments.of(null, List.of("bar"), null, availability, 20, 0));
-      list.add(Arguments.of(null, null, List.of("baz"), availability, 20, 0));
-      list.add(Arguments.of(List.of("foo"), List.of("bar"), null, availability, 20, 0));
-      list.add(Arguments.of(List.of("foo"), null, List.of("baz"), availability, 20, 0));
-      list.add(Arguments.of(null, List.of("bar"), List.of("baz"), availability, 20, 0));
-      list.add(Arguments.of(List.of("foo"), List.of("bar"), List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(null, null, null, null, availability, 20, 0));
+      list.add(Arguments.of(null, List.of("foo"), null, null, availability, 20, 0));
+      list.add(Arguments.of(null, null, List.of("bar"), null, availability, 20, 0));
+      list.add(Arguments.of(null, null, null, List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(null, List.of("foo"), List.of("bar"), null, availability, 20, 0));
+      list.add(Arguments.of(null, List.of("foo"), null, List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(null, null, List.of("bar"), List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(null, List.of("foo"), List.of("bar"), List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), null, null, null, availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), List.of("foo"), null, null, availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), null, List.of("bar"), null, availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), null, null, List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), List.of("foo"), List.of("bar"), null, availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), List.of("foo"), null, List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), null, List.of("bar"), List.of("baz"), availability, 20, 0));
+      list.add(Arguments.of(List.of("foobar"), List.of("foo"), List.of("bar"), List.of("baz"), availability, 20, 0));
     }
 
     return list.stream();
@@ -127,14 +135,14 @@ public class TerminologyEsServiceTest {
 
   @ParameterizedTest
   @MethodSource("generateArgumentsForTestPerformOntologySearchWithPaging")
-  void testPerformOntologySearchWithPaging(List<String> context, List<String> kdsModule, List<String> terminology, Boolean availability, Integer pageSize, Integer page) {
+  void testPerformOntologySearchWithPaging(List<String> criteriaSets, List<String> context, List<String> kdsModule, List<String> terminology, Boolean availability, Integer pageSize, Integer page) {
     int totalHits = new Random().nextInt(100);
     SearchHits<OntologyListItemDocument> dummySearchHitsPage = createDummySearchHitsPage(totalHits);
     doReturn(dummySearchHitsPage).when(operations).search(any(NativeQuery.class), any(Class.class));
 
     var searchResult = assertDoesNotThrow(
         () -> terminologyEsService.performOntologySearchWithPaging(
-            "foobar", context, kdsModule, terminology, availability, pageSize, page)
+            "foobar", criteriaSets, context, kdsModule, terminology, availability, pageSize, page)
     );
 
     assertThat(searchResult.totalHits()).isEqualTo(totalHits);
@@ -145,7 +153,7 @@ public class TerminologyEsServiceTest {
   @Test
   void testPerformOntologySearchWithRepoAndPaging_throwsOnInvalidPageSize() {
     assertThrows(IllegalArgumentException.class, () -> terminologyEsService.performOntologySearchWithPaging(
-            "foobar", null, null, null, false, 0, 0)
+            "foobar", null, null, null, null, false, 0, 0)
     );
   }
 
@@ -259,7 +267,6 @@ public class TerminologyEsServiceTest {
   }
 
   private SearchHits<OntologyListItemDocument> createDummySearchHitsPage(int totalHits) {
-    var dummyItemList = new ArrayList<OntologyListItemDocument>();
     var searchHitsList = new ArrayList<SearchHit<OntologyListItemDocument>>();
 
     for (int i = 0; i < totalHits; ++i) {

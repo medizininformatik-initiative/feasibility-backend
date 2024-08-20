@@ -12,10 +12,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.elasticsearch.DataElasticsearchTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -51,24 +50,21 @@ public class TerminologyEsServiceIT {
   private TerminologyEsService terminologyEsService;
 
   @Container
-  public static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.14.1")
+  @ServiceConnection
+  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.15.0")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
+      .withReuse(false)
       .withExposedPorts(9200)
       .withStartupAttempts(3)
       .withImagePullPolicy(PullPolicy.alwaysPull())
       .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
 
-  @DynamicPropertySource
-  static void esProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.elasticsearch.uris", elastic::getHttpHostAddress);
-  }
-
   @BeforeAll
   static void setUp() throws IOException {
-    elastic.start();
-    System.out.println(elastic.getHttpHostAddress());
-    WebClient webClient = WebClient.builder().baseUrl("http://" + elastic.getHttpHostAddress()).build();
+    ELASTICSEARCH_CONTAINER.start();
+    System.out.println(ELASTICSEARCH_CONTAINER.getHttpHostAddress());
+    WebClient webClient = WebClient.builder().baseUrl("http://" + ELASTICSEARCH_CONTAINER.getHttpHostAddress()).build();
     webClient.put()
         .uri("/ontology")
         .body(BodyInserters.fromResource(new ClassPathResource("ontology.json", TerminologyEsServiceIT.class)))
@@ -78,7 +74,7 @@ public class TerminologyEsServiceIT {
 
     webClient.post()
         .uri("/ontology/_bulk")
-        .body(BodyInserters.fromResource(new ClassPathResource("testData.json", TerminologyEsServiceIT.class)))
+        .body(BodyInserters.fromResource(new ClassPathResource("ontology_testdata.json", TerminologyEsServiceIT.class)))
         .retrieve()
         .toBodilessEntity()
         .block();
@@ -86,7 +82,7 @@ public class TerminologyEsServiceIT {
 
   @AfterAll
   static void tearDown() {
-    elastic.stop();
+    ELASTICSEARCH_CONTAINER.stop();
   }
 
   @Test
@@ -106,14 +102,14 @@ public class TerminologyEsServiceIT {
 
   @Test
   void testPerformOntologySearchWithPaging_zeroResults() {
-    var page = terminologyEsService.performOntologySearchWithPaging("random searchterm that is not found", null, null, null, false, 20, 0);
+    var page = terminologyEsService.performOntologySearchWithPaging("random searchterm that is not found", null,null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isZero();
   }
 
   @Test
   void testPerformOntologySearchWithPaging_oneResult() {
-    var page = terminologyEsService.performOntologySearchWithPaging("Hauttransplan", null, null, null, false, 20, 0);
+    var page = terminologyEsService.performOntologySearchWithPaging("Hauttransplan", null, null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isOne();
     assertThat(page.results().get(0).terminology()).isEqualTo("http://fhir.de/CodeSystem/bfarm/ops");
@@ -122,7 +118,7 @@ public class TerminologyEsServiceIT {
 
   @Test
   void testPerformOntologySearchWithPaging_multipleResults() {
-    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, false, 20, 0);
+    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isEqualTo(3);
     assertThat(page.results().size()).isEqualTo(3);
@@ -132,7 +128,7 @@ public class TerminologyEsServiceIT {
 
   @Test
   void testPerformOntologySearchWithPaging_multipleResultsMultiplePagesPage0() {
-    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, false, 2, 0);
+    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, null, false, 2, 0);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isEqualTo(3);
     assertThat(page.results().size()).isEqualTo(2);
@@ -142,7 +138,7 @@ public class TerminologyEsServiceIT {
 
   @Test
   void testPerformOntologySearchWithPaging_multipleResultsMultiplePagesPage1() {
-    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, false, 2, 1);
+    var page = terminologyEsService.performOntologySearchWithPaging("Blutdr", null, null, null, null, false, 2, 1);
     assertThat(page).isNotNull();
     assertThat(page.totalHits()).isEqualTo(3);
     assertThat(page.results().size()).isEqualTo(1);
