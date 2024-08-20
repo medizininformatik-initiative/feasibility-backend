@@ -60,6 +60,18 @@ class CodeableConceptServiceTest {
   }
 
   @Test
+  void testPerformCodeableConceptSearchWithRepoAndPaging_succeedsWithNullValueSetFilter() {
+    SearchHits<CodeableConceptDocument> dummySearchHitsPage = createDummySearchHitsPage(5);
+    doReturn(dummySearchHitsPage).when(operations).search(any(NativeQuery.class), any(Class.class));
+
+    var result = assertDoesNotThrow(() -> codeableConceptService.performCodeableConceptSearchWithRepoAndPaging("foo", null, 20, 0));
+
+    assertNotNull(result);
+    assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+  }
+
+  @Test
   void testPerformCodeableConceptSearchWithRepoAndPaging_succeedsWithValueSetFilter() {
     SearchHits<CodeableConceptDocument> dummySearchHitsPage = createDummySearchHitsPage(5);
     doReturn(dummySearchHitsPage).when(operations).search(any(NativeQuery.class), any(Class.class));
