@@ -24,6 +24,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -81,16 +82,16 @@ public class TerminologyEsService {
 
 
     List<Pair<String, List<String>>> filterList = new ArrayList<>();
-    if (criteriaSets != null) {
+    if (!CollectionUtils.isEmpty(criteriaSets)) {
       filterList.add(Pair.of("criteria_sets", criteriaSets));
     }
-    if (context != null) {
+    if (!CollectionUtils.isEmpty(context)) {
       filterList.add(Pair.of("context.code", context));
     }
-    if (kdsModule != null) {
+    if (!CollectionUtils.isEmpty(kdsModule)) {
       filterList.add(Pair.of("kds_module", kdsModule));
     }
-    if (terminology != null) {
+    if (!CollectionUtils.isEmpty(terminology)) {
       filterList.add(Pair.of("terminology", terminology));
     }
 
