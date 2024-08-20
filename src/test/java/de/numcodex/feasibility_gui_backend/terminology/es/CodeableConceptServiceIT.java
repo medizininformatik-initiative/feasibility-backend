@@ -5,11 +5,10 @@ import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyIte
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.elasticsearch.DataElasticsearchTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -45,7 +44,8 @@ public class CodeableConceptServiceIT {
   private CodeableConceptService codeableConceptService;
 
   @Container
-  public static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.15.0")
+  @ServiceConnection
+  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.15.0")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
       .withReuse(false)
@@ -54,16 +54,10 @@ public class CodeableConceptServiceIT {
       .withImagePullPolicy(PullPolicy.alwaysPull())
       .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
 
-  @DynamicPropertySource
-  static void esProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.elasticsearch.uris", elastic::getHttpHostAddress);
-  }
-
   @BeforeAll
   static void setUp() throws IOException {
-    elastic.start();
-    System.out.println(elastic.getHttpHostAddress());
-    WebClient webClient = WebClient.builder().baseUrl("http://" + elastic.getHttpHostAddress()).build();
+    ELASTICSEARCH_CONTAINER.start();
+    WebClient webClient = WebClient.builder().baseUrl("http://" + ELASTICSEARCH_CONTAINER.getHttpHostAddress()).build();
     webClient.put()
         .uri("/codeable_concept")
         .body(BodyInserters.fromResource(new ClassPathResource("codeable_concept.json", CodeableConceptServiceIT.class)))
@@ -81,7 +75,7 @@ public class CodeableConceptServiceIT {
 
   @AfterAll
   static void tearDown() {
-    elastic.stop();
+    ELASTICSEARCH_CONTAINER.stop();
   }
 
   @Test
