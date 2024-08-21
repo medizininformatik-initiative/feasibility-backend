@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -83,7 +84,7 @@ class QueryTemplateHandlerTest {
         var queryTemplateHandler = createQueryTemplateHandler();
         var convertedQueryTemplate = queryTemplateHandler.convertApiToPersistence(apiQueryTemplate, 1L);
 
-        assertEquals(convertedQueryTemplate.getId(), null);
+        assertNull(convertedQueryTemplate.getId());
         assertEquals(convertedQueryTemplate.getLabel(), persistenceQueryTemplate.getLabel());
         assertEquals(convertedQueryTemplate.getComment(), persistenceQueryTemplate.getComment());
         assertEquals(convertedQueryTemplate.getLastModified(), persistenceQueryTemplate.getLastModified());

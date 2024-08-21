@@ -163,9 +163,8 @@ class QueryHandlerServiceTest {
 
     private QueryContent createQueryContent() throws JsonProcessingException {
         var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
-        var queryContentHash = QUERY_CONTENT_HASH;
         var queryContent = new QueryContent(queryContentString);
-        queryContent.setHash(queryContentHash);
+        queryContent.setHash(QUERY_CONTENT_HASH);
         return queryContent;
     }
 

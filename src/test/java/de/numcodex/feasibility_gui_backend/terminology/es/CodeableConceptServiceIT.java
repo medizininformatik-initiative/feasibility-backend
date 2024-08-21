@@ -56,7 +56,7 @@ public class CodeableConceptServiceIT {
       .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
 
   @BeforeAll
-  static void setUp() throws IOException {
+  static void setUp() {
     ELASTICSEARCH_CONTAINER.start();
     WebClient webClient = WebClient.builder().baseUrl("http://" + ELASTICSEARCH_CONTAINER.getHttpHostAddress()).build();
     webClient.put()

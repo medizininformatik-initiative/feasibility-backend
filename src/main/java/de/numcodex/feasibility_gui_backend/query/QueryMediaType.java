@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * Defines different kinds of media types regarding different query types supported by this application.
  */
+@Getter
 @RequiredArgsConstructor
 public enum QueryMediaType {
     /**
@@ -23,7 +24,6 @@ public enum QueryMediaType {
 
     JSON("application/json");
 
-    @Getter
     private final String representation;
 
     /**

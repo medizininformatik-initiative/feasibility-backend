@@ -1,5 +1,8 @@
 package de.numcodex.feasibility_gui_backend.query.persistence;
 
+import lombok.Getter;
+
+@Getter
 public enum ResultType {
     SUCCESS("S"),
     ERROR("E");
@@ -10,11 +13,7 @@ public enum ResultType {
         this.shortcode = shortcode;
     }
 
-    public String getShortcode() {
-        return shortcode;
-    }
-
-    public static ResultType fromShortcode(String shortcode) {
+  public static ResultType fromShortcode(String shortcode) {
         return switch (shortcode) {
             case "S" -> ResultType.SUCCESS;
             case "E" -> ResultType.ERROR;

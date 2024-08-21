@@ -278,11 +278,10 @@ public class QueryHandlerRestController {
   private SavedQuerySlots getSavedQuerySlotsJson(Principal principal) {
     Long amountOfSavedQueriesByUser = queryHandlerService.getAmountOfSavedQueriesByUser(principal.getName());
 
-    var savedQuerySlots = SavedQuerySlots.builder()
+    return SavedQuerySlots.builder()
             .used(amountOfSavedQueriesByUser)
             .total(maxSavedQueriesPerUser)
             .build();
-    return savedQuerySlots;
   }
 
   @GetMapping("/by-user/{id}")

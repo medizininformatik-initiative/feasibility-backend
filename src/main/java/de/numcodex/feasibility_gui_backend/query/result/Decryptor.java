@@ -37,7 +37,7 @@ public final class Decryptor {
   }
 
   /**
-   * Decrypts the {@code encryptedLog} that consists of a encrypted symmetric key, followed by an
+   * Decrypts the {@code encryptedLog} that consists of an encrypted symmetric key, followed by an
    * encrypted message.
    */
   public synchronized String decrypt(String encryptedLog) {

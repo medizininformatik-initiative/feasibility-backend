@@ -23,7 +23,7 @@ public class DseRestController {
   }
 
   @GetMapping(value = "profile-tree", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DseProfileTreeNode getProfileTree() throws FileNotFoundException {
+  public DseProfileTreeNode getProfileTree() {
     DseProfileTreeNode profileTree = dseService.getProfileTree();
     if (profileTree == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "DSE profile tree not found");
