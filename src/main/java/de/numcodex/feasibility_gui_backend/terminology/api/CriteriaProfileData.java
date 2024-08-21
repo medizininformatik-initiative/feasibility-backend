@@ -7,7 +7,6 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 

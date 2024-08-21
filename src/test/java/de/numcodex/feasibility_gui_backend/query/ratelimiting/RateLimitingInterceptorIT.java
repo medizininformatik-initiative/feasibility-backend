@@ -93,12 +93,8 @@ public class RateLimitingInterceptorIT {
     boolean isAdmin = false;
 
     switch (resultDetail) {
-      case SUMMARY -> {
-        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
-      }
-      case DETAILED_OBFUSCATED -> {
-        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-      }
+      case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      case DETAILED_OBFUSCATED -> requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       case DETAILED -> {
         requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_RESULT;
         isAdmin = true;
@@ -125,12 +121,8 @@ public class RateLimitingInterceptorIT {
     var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
-      case SUMMARY -> {
-        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
-      }
-      case DETAILED_OBFUSCATED -> {
-        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-      }
+      case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      case DETAILED_OBFUSCATED -> requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       case DETAILED -> {
         // This endpoint is only available for admin users, which are not affected by rate limiting
         return;
@@ -163,12 +155,8 @@ public class RateLimitingInterceptorIT {
     var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
-      case SUMMARY -> {
-        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
-      }
-      case DETAILED_OBFUSCATED -> {
-        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-      }
+      case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      case DETAILED_OBFUSCATED -> requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       case DETAILED -> {
         // This endpoint is only available for admin users, which are not affected by rate limiting
         return;
@@ -205,15 +193,9 @@ public class RateLimitingInterceptorIT {
     var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
-      case SUMMARY -> {
-        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
-      }
-      case DETAILED_OBFUSCATED -> {
-        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-      }
-      case DETAILED -> {
-        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_RESULT;
-      }
+      case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      case DETAILED_OBFUSCATED -> requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+      case DETAILED -> requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_RESULT;
     }
 
     doReturn(true).when(authenticationHelper)
@@ -238,12 +220,8 @@ public class RateLimitingInterceptorIT {
     var requestUri = PATH_API + "/query/1";
 
     switch (resultDetail) {
-      case SUMMARY -> {
-        requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
-      }
-      case DETAILED_OBFUSCATED -> {
-        requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-      }
+      case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+      case DETAILED_OBFUSCATED -> requestUri = requestUri +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
       case DETAILED -> {
         // This endpoint is only available for admin users, which are not affected by rate limiting
         return;

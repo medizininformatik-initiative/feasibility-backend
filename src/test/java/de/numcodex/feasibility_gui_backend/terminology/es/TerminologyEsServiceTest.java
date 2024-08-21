@@ -97,7 +97,7 @@ public class TerminologyEsServiceTest {
 
     doReturn(searchHits).when(operations).search(any(NativeQuery.class), any());
     doReturn(elasticsearchAggregations).when(searchHits).getAggregations();
-    // This fails when written as doReturn()...when(), but works in this order...so..
+    // This fails when written as doReturn()...when(), but works in this order...so...
     when(elasticsearchAggregations.aggregationsAsMap().get(any(String.class)).aggregation().getAggregate().sterms()
         .buckets().array()).thenReturn(List.of(createStringTermsBucket()));
 

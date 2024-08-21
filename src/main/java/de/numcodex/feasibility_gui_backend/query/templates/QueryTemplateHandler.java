@@ -64,7 +64,7 @@ public class QueryTemplateHandler {
         });
 
     var queryId = persistQuery(queryBody, userId);
-    log.info("enqueued query '%s'".formatted(queryId));
+    log.info("enqueued query '{}'", queryId);
     return queryId;
   }
 

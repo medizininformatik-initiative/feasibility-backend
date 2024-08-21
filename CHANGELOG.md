@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [5.0.A] - 2024-06-29
+## [UNRELEASED] -yyyy-mm-dd
+
+### Added
+- Terminology search implemented via external elastic search service ([#307](https://github.com/medizininformatik-initiative/feasibility-backend/issues/307))
+- Endpoints to query profile data for data selection and extraction (ES) ([#321](https://github.com/medizininformatik-initiative/feasibility-backend/issues/321))
+- Endpoints to search for codeable concepts (ES) ([#324](https://github.com/medizininformatik-initiative/feasibility-backend/issues/324))
+### Changed
+- **breaking** Consistent naming for endpoints and filenames (kebab-case for rest endpoints, camelCase for json parameters, snake_case for elastic search variables)
+### Deprecated
+### Removed
+### Fixed
+### Security
+- Updated Spring Boot to 3.3.2 ([#317](https://github.com/medizininformatik-initiative/feasibility-backend/issues/317))
+
+## [5.0.1] - 2024-06-29
 
 ### Fixed
 - Injection of environment variable value for OAuth client id was broken ([#308](https://github.com/medizininformatik-initiative/feasibility-backend/issues/308))
@@ -19,7 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Updated sq2cql to v0.3.0
 - Updated ontology to version v2.2.0 ([#299](https://github.com/medizininformatik-initiative/feasibility-backend/issues/299))
 ### Fixed
-- Increased timeout in MockBrockerClientIT to avoid occasional test failures ([#276](https://github.com/medizininformatik-initiative/feasibility-backend/issues/276))
+- Increased timeout in MockBrokerClientIT to avoid occasional test failures ([#276](https://github.com/medizininformatik-initiative/feasibility-backend/issues/276))
 - OPS codes with lowercase letters are now correctly found ([#292](https://github.com/medizininformatik-initiative/feasibility-backend/issues/292))
 ### Security
 - updated spring boot to 3.3.1

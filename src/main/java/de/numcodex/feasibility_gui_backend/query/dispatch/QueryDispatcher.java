@@ -78,7 +78,7 @@ public class QueryDispatcher {
                 });
 
         var queryId = persistEnqueuedQuery(queryBody, userId);
-        log.info("enqueued query '%s'".formatted(queryId));
+        log.info("enqueued query '{}'", queryId);
         return queryId;
     }
 
@@ -139,12 +139,12 @@ public class QueryDispatcher {
                 }
                 broker.publishQuery(brokerQueryId);
                 persistDispatchedQuery(dispatchable.query, brokerQueryId, broker.getBrokerType());
-                log.info("dispatched query '%s' as '%s' with broker type '%s'".formatted(dispatchable.query.getId(),
-                        brokerQueryId, broker.getBrokerType()));
+                log.info("dispatched query '{}' as '{}' with broker type '{}'", dispatchable.query.getId(),
+                    brokerQueryId, broker.getBrokerType());
                 return true;
             } catch (UnsupportedMediaTypeException | QueryNotFoundException | IOException e) {
-                log.error("failed to dispatch query '%s' with broker type '%s': %s"
-                        .formatted(dispatchable.query.getId(), broker.getBrokerType(), e.getMessage()));
+                log.error("failed to dispatch query '{}' with broker type '{}': {}",
+                    dispatchable.query.getId(), broker.getBrokerType(), e.getMessage());
                 return false;
             }
         });

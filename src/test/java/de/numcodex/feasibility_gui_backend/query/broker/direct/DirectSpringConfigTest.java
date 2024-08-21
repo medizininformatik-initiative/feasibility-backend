@@ -47,7 +47,7 @@ class DirectSpringConfigTest {
     WebClient webClient = directSpringConfig.directWebClientFlare();
 
     assertNotNull(webClient);
-    // Since there is no way to check whether the webclient has a auth filter set, see DirectSpringConfigIT.java for a check for that
+    // Since there is no way to check whether the webclient has an auth filter set, see DirectSpringConfigIT.java for a check for that
   }
 
   @Test
@@ -57,7 +57,7 @@ class DirectSpringConfigTest {
     WebClient webClient = directSpringConfig.directWebClientFlare();
 
     assertNotNull(webClient);
-    // Since there is no way to check whether the webclient has a auth filter set, see DirectSpringConfigIT.java for a check for that
+    // Since there is no way to check whether the webclient has an auth filter set, see DirectSpringConfigIT.java for a check for that
   }
 
   @Test
