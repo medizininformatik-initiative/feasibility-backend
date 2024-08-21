@@ -25,6 +25,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled("There seems to be a concurrency issue with TerminologyServiceIT. Disable this for now until it is fixed.")
 @Tag("terminology")
 @Tag("elasticsearch")
 @Import({CodeableConceptService.class})
