@@ -378,6 +378,17 @@ paths:
         - feasibility_auth:
             - admin
             - user
+  /query/detailed-obfuscated-result-rate-limit:
+    get:
+      summary: "GET api/v3/query/detailed-obfuscated-result-rate-limit"
+      operationId: "getDetailedObfuscatedResultRateLimit"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/QueryResultRateLimit"
   /query/{queryId}/saved:
     post:
       tags:
@@ -596,6 +607,13 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: skipValidation
+          in: query
+          description: If true, do not validate the query and do not include a list of invalid terms
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: OK
@@ -1237,6 +1255,15 @@ components:
           description: obfuscated site name
         numberOfPatients:
           type: integer
+          format: int64
+    QueryResultRateLimit:
+      type: object
+      properties:
+        limit:
+          type: number
+          format: int64
+        remaining:
+          type: number
           format: int64
     QueryTemplateListItem:
       type: object
