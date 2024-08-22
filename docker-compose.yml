@@ -110,10 +110,10 @@ services:
     image: curlimages/curl:8.8.0
     environment:
       ELASTIC_HOST: http://feasibility-es:9200
-      ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/develop/example/fdpg-ontology/
+      ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/v3.0.0-test/example/fdpg-ontology/
       ELASTIC_FILENAME: elastic.zip
       # if set to false, existing indices are not overridden.
-      OVERRIDE_EXISTING: false
+      OVERRIDE_EXISTING: true
     entrypoint: [ "sh", "-c", "/tmp/init.sh" ]
     volumes:
       - type: bind
