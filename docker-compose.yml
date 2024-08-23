@@ -127,7 +127,7 @@ services:
       ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/TAGPLACEHOLDER/example/fdpg-ontology/
       ELASTIC_FILENAME: elastic.zip
       # if set to false, existing indices are not overridden.
-      OVERRIDE_EXISTING: false
+      OVERRIDE_EXISTING: true
     entrypoint: [ "sh", "-c", "/tmp/init.sh" ]
     volumes:
       - type: bind

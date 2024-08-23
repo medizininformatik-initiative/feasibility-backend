@@ -12,6 +12,7 @@ public record Field(
     @JsonProperty String id,
     @JsonProperty String display,
     @JsonProperty String name,
+    @JsonProperty String type,
     @JsonProperty List<Field> children
 ) {
 }
