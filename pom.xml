@@ -554,7 +554,7 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/terminology-systems.json</argument>
+                    <argument>ontology/ui_trees/terminology_systems.json</argument>
                     <argument>ontology/</argument>
                   </arguments>
                 </configuration>
