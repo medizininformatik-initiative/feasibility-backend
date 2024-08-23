@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v2.2.0</ontology-tag>
+    <ontology-tag>v3.0.0-test</ontology-tag>
   </properties>
 
   <dependencies>
@@ -477,6 +477,7 @@
                   <arguments>
                     <argument>ontology/migration</argument>
                     <argument>ontology/ui_trees</argument>
+                    <argument>ontology/dse</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -491,7 +492,7 @@
                   <executable>curl</executable>
                   <arguments>
                     <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/backend.zip</argument>
+                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology/backend.zip</argument>
                     <argument>-o</argument>
                     <argument>ontology/backend.zip</argument>
                   </arguments>
@@ -530,6 +531,51 @@
               </execution>
 
               <execution>
+                <id>move-dse-script</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_trees/R__load_latest_dse_profiles.sql</argument>
+                    <argument>ontology/migration/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>move-terminology-systems</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_trees/terminology_systems.json</argument>
+                    <argument>ontology/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>move-profile-tree</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_trees/profile_tree.json</argument>
+                    <argument>ontology/dse</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
                 <id>download-ontology-mapping</id>
                 <phase>generate-resources</phase>
                 <goals>
@@ -539,7 +585,7 @@
                   <executable>curl</executable>
                   <arguments>
                     <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/mapping.zip</argument>
+                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology/mapping.zip</argument>
                     <argument>-o</argument>
                     <argument>ontology/mapping.zip</argument>
                   </arguments>

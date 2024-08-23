@@ -50,7 +50,8 @@ googleCodeStyle.xml
 /ontology/mapping_cql.json
 /ontology/mapping_fhir.json
 /ontology/mapping_tree.json
-
+/ontology/dse
+/ontology/terminology-systems.json
 /logging/
 
 result.log

@@ -6,7 +6,12 @@ services:
     ports:
     - ${CODEX_FEASIBILITY_BACKEND_PORT:-127.0.0.1:8091}:8090
     depends_on:
-      - feasibility-db
+      feasibility-db:
+        condition: service_started
+      feasibility-es:
+        condition: service_healthy
+      init-elasticsearch:
+        condition: service_completed_successfully
     environment:
       SPRING_DATASOURCE_URL: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_URL:-jdbc:postgresql://feasibility-db:5432/codex_ui?currentSchema=codex}
       SPRING_DATASOURCE_USERNAME: ${CODEX_FEASIBILITY_BACKEND_DATASOURCE_USERNAME:-codex-postgres}
@@ -90,7 +95,47 @@ services:
       - type: volume
         source: feas-backend-db-data
         target: /var/lib/postgresql/data
+  feasibility-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: feasibility-es
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xmx512m -Xms512m
+      node.name: es01
+      cluster.name: elasticsearch
+      xpack.security.enabled: false
+    volumes:
+      - type: volume
+        source: feas-backend-es-data
+        target: /usr/share/elasticsearch/data
+  init-elasticsearch:
+    image: curlimages/curl:8.8.0
+    depends_on:
+      feasibility-es:
+        condition: service_healthy
+    environment:
+      ELASTIC_HOST: http://feasibility-es:9200
+      ELASTIC_GIT_TAG: v3.0.0-test
+      ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/TAGPLACEHOLDER/example/fdpg-ontology/
+      ELASTIC_FILENAME: elastic.zip
+      # if set to false, existing indices are not overridden.
+      OVERRIDE_EXISTING: true
+    entrypoint: [ "sh", "-c", "/tmp/init.sh" ]
+    volumes:
+      - type: bind
+        source: ./elastic-init.sh
+        target: /tmp/init.sh
 
 volumes:
   feas-backend-db-data:
     name: "feas-backend-db-data"
+  feas-backend-es-data:
+    name: "feas-backend-es-data"
