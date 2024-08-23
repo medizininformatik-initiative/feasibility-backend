@@ -38,6 +38,8 @@ public class AttributeDefinition {
     private Double min;
     @JsonProperty(value = "max")
     private Double max;
-    @JsonProperty("referenceCriteriaSet")
-    private String referenceCriteriaSet;
+    @JsonProperty("referencedCriteriaSet")
+    private String referencedCriteriaSet;
+    @JsonProperty("referencedValueSet")
+    private String referencedValueSet;
 }
