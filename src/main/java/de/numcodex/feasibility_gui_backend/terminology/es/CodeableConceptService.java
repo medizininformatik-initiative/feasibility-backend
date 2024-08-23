@@ -17,6 +17,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class CodeableConceptService {
                                                                @Nullable int page) {
 
     List<Pair<String, List<String>>> filterList = new ArrayList<>();
-    if (valueSets != null && !valueSets.isEmpty()) {
+    if (!CollectionUtils.isEmpty(valueSets)) {
       filterList.add(Pair.of("value_sets", valueSets));
     }
 
