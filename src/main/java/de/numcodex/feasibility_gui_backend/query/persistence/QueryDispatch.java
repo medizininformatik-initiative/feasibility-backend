@@ -1,20 +1,19 @@
 package de.numcodex.feasibility_gui_backend.query.persistence;
 
-import static jakarta.persistence.FetchType.LAZY;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import lombok.Data;
+import java.util.Objects;
 
-@Data
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity
 public class QueryDispatch {
 
@@ -24,6 +23,7 @@ public class QueryDispatch {
     @MapsId("queryId")
     @JoinColumn(referencedColumnName = "id", name = "query_id", nullable = false)
     @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
     private Query query;
 
     @Column(name = "dispatched_at", insertable = false, updatable = false)
@@ -41,5 +41,21 @@ public class QueryDispatch {
         @Convert(converter = BrokerTypeConverter.class)
         @Column(name = "broker_type")
         private BrokerClientType brokerType;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        QueryDispatch that = (QueryDispatch) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(id);
     }
 }
