@@ -1,16 +1,18 @@
 package de.numcodex.feasibility_gui_backend.terminology.persistence;
 
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
+
 import java.io.Serializable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
-import jakarta.persistence.Table;
-import lombok.Data;
+import java.util.Objects;
 
 @Entity(name = "UI_PROFILE")
 @Table(name = "UI_PROFILE_TABLE")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @IdClass(Coding.class)
 public class UiProfileContent implements Serializable {
   @Id
@@ -27,4 +29,22 @@ public class UiProfileContent implements Serializable {
 
   @Column(name = "UI_Profile", nullable = false)
   private String uiProfile;
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) return false;
+    UiProfileContent that = (UiProfileContent) o;
+    return getSystem() != null && Objects.equals(getSystem(), that.getSystem())
+        && getCode() != null && Objects.equals(getCode(), that.getCode())
+        && getVersion() != null && Objects.equals(getVersion(), that.getVersion());
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(system, code, version);
+  }
 }
