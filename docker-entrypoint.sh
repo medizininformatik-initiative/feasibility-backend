@@ -28,8 +28,8 @@ if [ ! "${#ca_files[@]}" -eq 0 ]; then
 
     done
 
-    java -Djavax.net.ssl.trustStore="$TRUSTSTORE_FILE" -Djavax.net.ssl.trustStorePassword="$TRUSTSTORE_PASS" -jar feasibility-gui-backend.jar
+    java $JAVA_OPTS -Djavax.net.ssl.trustStore="$TRUSTSTORE_FILE" -Djavax.net.ssl.trustStorePassword="$TRUSTSTORE_PASS" -jar feasibility-gui-backend.jar
 else
     echo "# No CA *.pem cert files found in /opt/codex-feasibility-backend/certs -> starting feasibility backend without own CAs"
-    java -jar feasibility-gui-backend.jar
+    java $JAVA_OPTS -jar feasibility-gui-backend.jar
 fi
