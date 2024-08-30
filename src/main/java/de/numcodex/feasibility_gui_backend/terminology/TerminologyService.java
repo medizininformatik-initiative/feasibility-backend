@@ -68,8 +68,7 @@ public class TerminologyService {
 
   private void readInTerminologyEntries() throws IOException {
     var files = getFilePathsUiProfiles();
-
-    for (var filename : files) {
+    /*for (var filename : files) {
       if (!filename.toLowerCase().endsWith(".json")) {
         log.trace("Skipping non-json file: {}", filename);
         continue;
@@ -86,7 +85,7 @@ public class TerminologyService {
       } catch (IOException e) {
         throw new IOException("Could not read terminology files", e);
       }
-    }
+    }*/
   }
 
   private void generateTerminologyEntriesWithoutDirectChildren() {
