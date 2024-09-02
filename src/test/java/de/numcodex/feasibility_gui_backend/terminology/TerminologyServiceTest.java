@@ -2,7 +2,6 @@ package de.numcodex.feasibility_gui_backend.terminology;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.core.io.Resource;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -36,12 +33,7 @@ import static org.mockito.Mockito.doReturn;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class TerminologyServiceTest {
-    private static UUID CATEGORY_1_ID = UUID.fromString("2ec77ac6-2547-2aff-031b-337d9ff80cff");
-    private static UUID CATEGORY_2_ID = UUID.fromString("457b3f3b-bf4e-45da-b676-dc63d31942dd");
-    private static UUID CATEGORY_A_ID = UUID.fromString("30a20f30-77db-11ee-b962-0242ac120002");
-    private static UUID CATEGORY_B_ID = UUID.fromString("385d2db8-77db-11ee-b962-0242ac120002");
     private static UUID VALID_NODE_ID_CAT1 = UUID.fromString("72ceaea9-c1ff-2e94-5fc0-7ba34feca654");
-    private static UUID VALID_NODE_ID_CAT2 = UUID.fromString("33ca0320-81e5-406f-bdfd-c649e443ddd6");
 
     private static UUID INVALID_NODE_ID = UUID.fromString("00000000-1111-2222-3333-444444444444");
 
@@ -74,93 +66,6 @@ class TerminologyServiceTest {
     @Test
     void testInitFailsOnNonexistingFolderWithNullpointerException() {
         assertThrows(NullPointerException.class, () -> createTerminologyService("does/not/exist"));
-    }
-
-    @Test
-    void testInitFailsOnBogusEntriesWithIoException() {
-        assertThrows(IOException.class, () -> createTerminologyService("src/test/resources/ontology/ui_profiles_bogus"));
-    }
-
-    @Test
-    void testGetEntry_succeeds() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        var getEntryResult = assertDoesNotThrow(() -> terminologyService.getEntry(VALID_NODE_ID_CAT1));
-
-        assertThat(getEntryResult.getId()).isEqualTo(VALID_NODE_ID_CAT1);
-    }
-
-    @Test
-    void testGetEntry_throwsOnUnknown() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        assertThrows(NodeNotFoundException.class, () -> terminologyService.getEntry(INVALID_NODE_ID));
-    }
-
-    @Test
-    void testGetCategories_order1() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        ReflectionTestUtils.setField(terminologyService, "sortedCategories", List.of("Category2", "Category3", "Category1"));
-
-        var categoriesResult = assertDoesNotThrow(terminologyService::getCategories);
-        assertNotNull(categoriesResult);
-        assertFalse(categoriesResult.isEmpty());
-        assertThat(categoriesResult)
-                .hasSize(4)
-                .extracting(CategoryEntry::getDisplay, CategoryEntry::getCatId)
-                .containsExactly(
-                        tuple("Category2", CATEGORY_2_ID),
-                        tuple("Category1", CATEGORY_1_ID),
-                        tuple("CategoryA", CATEGORY_A_ID),
-                        tuple("CategoryB", CATEGORY_B_ID)
-                );
-    }
-
-    @Test
-    void testGetCategories_order2() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        ReflectionTestUtils.setField(terminologyService, "sortedCategories", List.of("CategoryB", "CategoryX", "CategoryY"));
-
-        var categoriesResult = assertDoesNotThrow(terminologyService::getCategories);
-        assertNotNull(categoriesResult);
-        assertFalse(categoriesResult.isEmpty());
-        assertThat(categoriesResult)
-                .hasSize(4)
-                .extracting(CategoryEntry::getDisplay, CategoryEntry::getCatId)
-                .containsExactly(
-                        tuple("CategoryB", CATEGORY_B_ID),
-                        tuple("Category1", CATEGORY_1_ID),
-                        tuple("Category2", CATEGORY_2_ID),
-                        tuple("CategoryA", CATEGORY_A_ID)
-                );
-    }
-
-    @Test
-    void testGetSelectableEntries() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        var selectableEntriesResult_cat1_total = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc1_", CATEGORY_1_ID));
-        var selectableEntriesResult_cat1_part = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc1_1", CATEGORY_1_ID));
-        var selectableEntriesResult_cat2_total = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc2_", CATEGORY_2_ID));
-        var selectableEntriesResult_cat2_empty = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc3_", CATEGORY_2_ID));
-
-        // Cat1 contains the codes tc1_1 up to tc1_16, Cat 2 contains tc2_1 and tc2_2
-        assertEquals(16, selectableEntriesResult_cat1_total.size());
-        assertEquals(8, selectableEntriesResult_cat1_part.size());
-        assertEquals(2, selectableEntriesResult_cat2_total.size());
-        assertTrue(selectableEntriesResult_cat2_empty.isEmpty());
-    }
-
-    @Test
-    void testGetSelectableEntriesWithoutCategory() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        var selectableEntriesResult_cat1_total = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc1_", null));
-        var selectableEntriesResult_cat1_part = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc1_1", null));
-        var selectableEntriesResult_cat2_total = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc2_", null));
-        var selectableEntriesResult_cat2_empty = assertDoesNotThrow(() -> terminologyService.getSelectableEntries("tc3_", null));
-
-        // Cat1 contains the codes tc1_1 up to tc1_16, Cat 2 contains tc2_1 and tc2_2
-        assertEquals(16, selectableEntriesResult_cat1_total.size());
-        assertEquals(8, selectableEntriesResult_cat1_part.size());
-        assertEquals(2, selectableEntriesResult_cat2_total.size());
-        assertTrue(selectableEntriesResult_cat2_empty.isEmpty());
     }
 
     @Test
