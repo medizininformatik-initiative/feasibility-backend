@@ -5,6 +5,10 @@ security:
   config:
     use-keycloak: false
 
+management:
+  health:
+    elasticsearch:
+      enabled: false
 app:
   queryResultExpiryMinutes: 1
   keycloakAllowedRole: "FEASIBILITY_TEST_USER"
@@ -14,6 +18,8 @@ app:
   broker:
     aktin:
       enabled: false
+  elastic:
+    enabled: true
   privacy:
     threshold:
       sites: 3

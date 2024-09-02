@@ -4,7 +4,7 @@ spring:
   application:
     name: codex-feasibility-gui-backend
   datasource:
-    url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/codex_ui
+    url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/${FEASIBILITY_DATABASE_DBNAME:codex_ui}
     username: ${FEASIBILITY_DATABASE_USER:codex-postgres}
     password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
     driverClassName: org.postgresql.Driver
@@ -36,9 +36,13 @@ management:
   endpoint:
     health:
       enabled: true
+  health:
+    elasticsearch:
+      enabled: ${ELASTIC_SEARCH_ENABLED:true}
 
 app:
-  # AKTIN or DSF or MOCK or DIRECT
+  dseProfileTreeFile: ${DSE_PROFILE_TREE_FILE:ontology/dse/profile_tree.json}
+  terminologySystemsFile: ${TERMINOLOGY_SYSTEMS_FILE:ontology/terminology_systems.json}
   ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_trees}
   ontologyOrder: ${ONTOLOGY_ORDER:Diagnose, Prozedur, Person, Laboruntersuchung, Medikamentenverabreichung, Bioprobe, Einwilligung}
   mappingsFile: ${MAPPINGS_FILE:ontology/mapping_cql.json}
@@ -99,6 +103,10 @@ app:
     connectTimeout: 2000
   cql:
     baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
+  elastic:
+    enabled: ${ELASTIC_SEARCH_ENABLED:true}
+    host: ${ELASTIC_SEARCH_HOST:localhost:9200}
+    filter: ${ELASTIC_SEARCH_FILTER:context,terminology,kds_module}
   privacy:
     threshold:
       sites: ${PRIVACY_THRESHOLD_SITES:3}

@@ -27,17 +27,17 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 
 	@Override
 	public void onRequestCreated(int requestId) {
-		; // NOP
+    // NOP
 	}
 
 	@Override
 	public void onRequestPublished(int requestId) {
-		; // NOP
+    // NOP
 	}
 
 	@Override
 	public void onRequestClosed(int requestId) {
-		; // NOP
+    // NOP
 	}
 
 	@Override
@@ -71,17 +71,17 @@ public class WrappedNotificationListener implements AdminNotificationListener{
 
 	@Override
 	public void onRequestResultUpdate(int requestId, int nodeId, String mediaType) {
-		; // NOP
+    // NOP
 	}
 
 	@Override
 	public void onResourceUpdate(int nodeId, String resourceId) {
-		; // NOP
+    // NOP
 	}
 
 	@Override
 	public void onWebsocketClosed(int statusCode) {
-		; // NOP
+    // NOP
 	}
 
 }

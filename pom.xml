@@ -6,13 +6,13 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>5.0.1</version>
+  <version>6.0.0-alpha.1</version>
 
   <name>FeasibilityGuiBackend</name>
   <description>Backend of the Feasibility GUI</description>
@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v2.2.0</ontology-tag>
+    <ontology-tag>v3.0.0-test.1</ontology-tag>
   </properties>
 
   <dependencies>
@@ -46,33 +46,20 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-undertow</artifactId>
     </dependency>
-
-<!--    Remove those when they are updated in the undertow dependency-->
-    <dependency>
-      <groupId>org.jboss.xnio</groupId>
-      <artifactId>xnio-api</artifactId>
-      <version>3.8.14.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.xnio</groupId>
-      <artifactId>xnio-nio</artifactId>
-      <version>3.8.14.Final</version>
-      <scope>runtime</scope>
-    </dependency>
     <dependency>
       <groupId>io.undertow</groupId>
       <artifactId>undertow-core</artifactId>
-      <version>2.3.14.Final</version>
+      <version>2.3.16.Final</version>
     </dependency>
     <dependency>
       <groupId>io.undertow</groupId>
       <artifactId>undertow-servlet</artifactId>
-      <version>2.3.14.Final</version>
+      <version>2.3.16.Final</version>
     </dependency>
     <dependency>
       <groupId>io.undertow</groupId>
       <artifactId>undertow-websockets-jsr</artifactId>
-      <version>2.3.14.Final</version>
+      <version>2.3.16.Final</version>
     </dependency>
 
     <dependency>
@@ -101,6 +88,11 @@
     </dependency>
 
     <!-- Fix CVE-2023-52428. Remove exclusion and manual inclusion when update is included in spring-boot-starter-oauth2-resource-server -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -281,9 +273,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <version>1.19.8</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-testcontainers</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -305,14 +296,18 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>1.19.8</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
-      <version>1.19.8</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>elasticsearch</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -482,6 +477,7 @@
                   <arguments>
                     <argument>ontology/migration</argument>
                     <argument>ontology/ui_trees</argument>
+                    <argument>ontology/dse</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -496,7 +492,7 @@
                   <executable>curl</executable>
                   <arguments>
                     <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/backend.zip</argument>
+                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology/backend.zip</argument>
                     <argument>-o</argument>
                     <argument>ontology/backend.zip</argument>
                   </arguments>
@@ -535,6 +531,51 @@
               </execution>
 
               <execution>
+                <id>move-dse-script</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_trees/R__load_latest_dse_profiles.sql</argument>
+                    <argument>ontology/migration/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>move-terminology-systems</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_trees/terminology_systems.json</argument>
+                    <argument>ontology/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>move-profile-tree</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>mv</executable>
+                  <arguments>
+                    <argument>ontology/ui_trees/profile_tree.json</argument>
+                    <argument>ontology/dse</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
                 <id>download-ontology-mapping</id>
                 <phase>generate-resources</phase>
                 <goals>
@@ -544,7 +585,7 @@
                   <executable>curl</executable>
                   <arguments>
                     <argument>-L</argument>
-                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/mii_core_data_set/ontology/mapping.zip</argument>
+                    <argument>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology/mapping.zip</argument>
                     <argument>-o</argument>
                     <argument>ontology/mapping.zip</argument>
                   </arguments>

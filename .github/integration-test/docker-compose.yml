@@ -16,6 +16,7 @@ services:
       API_BASE_URL: "http://localhost:8091/api/"
       ALLOWED_ORIGINS: "https://localhost"
       QUERYRESULT_EXPIRY_MINUTES: 5
+      ELASTIC_SEARCH_ENABLED: "false"
       # ---- db config
       FEASIBILITY_DATABASE_HOST: "feasibility-gui-backend-db"
       FEASIBILITY_DATABASE_PORT: 5432
@@ -66,6 +67,8 @@ services:
       - ./ontology/ui_profiles:/opt/codex-feasibility-backend/ontology/ui_profiles
       - ./ontology/codex-code-tree.json:/opt/codex-feasibility-backend/ontology/codex-code-tree.json
       - ./ontology/codex-term-code-mapping.json:/opt/codex-feasibility-backend/ontology/codex-term-code-mapping.json
+      - ./ontology/terminology_systems.json:/opt/codex-feasibility-backend/ontology/terminology_systems.json
+      - ./ontology/dse/profile_tree.json:/opt/codex-feasibility-backend/ontology/dse/profile_tree.json
       - ./ontology/migration/R__Load_latest_ui_profile.sql:/opt/codex-feasibility-backend/ontology/migration/R__Load_latest_ui_profile.sql
       - ./secrets:/opt/codex-feasibility-security
   feasibility-gui-backend-db:

@@ -3,6 +3,8 @@ package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import lombok.Getter;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +23,7 @@ public class RateLimitingService {
   private final Duration intervalPollingSummary;
   private final Duration intervalPollingDetailed;
   private final Duration intervalDetailedObfuscated;
+  @Getter
   private final int amountDetailedObfuscated;
 
   /**
@@ -67,10 +70,6 @@ public class RateLimitingService {
     return Bucket.builder()
         .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalPollingDetailed)))
         .build();
-  }
-
-  public int getAmountDetailedObfuscated(){
-    return this.amountDetailedObfuscated;
   }
 
   private Bucket newViewDetailedObfuscatedResultBucket(String userId) {

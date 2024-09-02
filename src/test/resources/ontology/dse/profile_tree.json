@@ -1,0 +1,63 @@
+{
+    "name": "Root",
+    "module": "no-module",
+    "url": "no-url",
+    "children": [
+        {
+            "id": "de5c2903-00aa-4d64-92e5-2161d56e3daf",
+            "children": [
+                {
+                    "id": "69f4718f-1767-4517-90f8-6c079f627eed",
+                    "name": "MII_PR_Medikation_MedicationStatement",
+                    "display": "MII PR Medikation MedicationStatement",
+                    "module": "modul-medikation",
+                    "url": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+                    "leaf": true,
+                    "selectable": true
+                },
+                {
+                    "id": "83b4d6be-b3e1-451a-adf2-c307477e7b97",
+                    "name": "MII_PR_Medikation_Medikationsliste",
+                    "display": "MII PR Medikation Medikationsliste",
+                    "module": "modul-medikation",
+                    "url": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/medikationsliste",
+                    "leaf": true,
+                    "selectable": true
+                },
+                {
+                    "id": "fd375ed9-b3cd-414f-8a56-c70e10bb9609",
+                    "name": "MII_PR_Medikation_MedicationRequest",
+                    "display": "MII PR Medikation MedicationRequest",
+                    "module": "modul-medikation",
+                    "url": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationRequest",
+                    "leaf": true,
+                    "selectable": true
+                },
+                {
+                    "id": "323a3ad1-1c10-45f5-848a-2dc5fb100c47",
+                    "name": "MII_PR_Medikation_Medication",
+                    "display": "MII PR Medikation Medication",
+                    "module": "modul-medikation",
+                    "url": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/Medication",
+                    "leaf": true,
+                    "selectable": true
+                },
+                {
+                    "id": "81ed0f03-1d77-49c9-8391-d4c25702652c",
+                    "name": "MII_PR_Medikation_MedicationAdministration",
+                    "display": "MII PR Medikation MedicationAdministration",
+                    "module": "modul-medikation",
+                    "url": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationAdministration",
+                    "leaf": true,
+                    "selectable": true
+                }
+            ],
+            "name": "modul-medikation",
+            "display": "Medikation",
+            "url": "https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement",
+            "module": "modul-medikation",
+            "selectable": true,
+            "leaf": false
+        }
+    ]
+}

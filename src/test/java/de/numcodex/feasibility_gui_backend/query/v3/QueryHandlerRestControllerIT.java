@@ -563,38 +563,26 @@ public class QueryHandlerRestControllerIT {
         doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));
 
         switch (resultDetail) {
-            case SUMMARY -> {
-                requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
-            }
-            case DETAILED_OBFUSCATED -> {
-                requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-            }
-            case DETAILED -> {
-                requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_RESULT;
-            }
+            case SUMMARY ->  requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
+            case DETAILED_OBFUSCATED -> requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+            case DETAILED -> requestUri = requestUri + WebSecurityConfig.PATH_DETAILED_RESULT;
         }
 
         switch (resultDetail) {
-            case SUMMARY -> {
-                mockMvc.perform(get(requestUri).with(csrf()))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.totalNumberOfPatients").exists())
-                        .andExpect(jsonPath("$.resultLines", empty()));
-            }
-            case DETAILED_OBFUSCATED -> {
-                mockMvc.perform(get(requestUri).with(csrf()))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.totalNumberOfPatients").exists())
-                        .andExpect(jsonPath("$.resultLines").exists())
-                        .andExpect(jsonPath("$.resultLines[0].siteName", startsWith("foobar")));
-            }
-            case DETAILED -> {
-                mockMvc.perform(get(requestUri).with(csrf()))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.totalNumberOfPatients").exists())
-                        .andExpect(jsonPath("$.resultLines").exists())
-                        .andExpect(jsonPath("$.resultLines[0].siteName", not(startsWith("foobar"))));
-            }
+            case SUMMARY -> mockMvc.perform(get(requestUri).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalNumberOfPatients").exists())
+                    .andExpect(jsonPath("$.resultLines", empty()));
+            case DETAILED_OBFUSCATED -> mockMvc.perform(get(requestUri).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalNumberOfPatients").exists())
+                    .andExpect(jsonPath("$.resultLines").exists())
+                    .andExpect(jsonPath("$.resultLines[0].siteName", startsWith("foobar")));
+            case DETAILED -> mockMvc.perform(get(requestUri).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalNumberOfPatients").exists())
+                    .andExpect(jsonPath("$.resultLines").exists())
+                    .andExpect(jsonPath("$.resultLines[0].siteName", not(startsWith("foobar"))));
         }
     }
 

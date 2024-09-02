@@ -31,6 +31,6 @@ public class Query {
     @JoinColumn(referencedColumnName = "id", name = "query_content_id")
     private QueryContent queryContent;
 
-    @OneToOne(mappedBy = "query", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "query", cascade = CascadeType.ALL)
     private SavedQuery savedQuery;
 }

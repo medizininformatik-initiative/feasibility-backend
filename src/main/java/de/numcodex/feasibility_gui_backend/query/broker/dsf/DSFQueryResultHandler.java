@@ -60,7 +60,7 @@ class DSFQueryResultHandler {
             String siteId = task.getRequester().getIdentifier().getValue();
             IdType measureReportUrl = extractMeasureReportId(task);
 
-            log.info("Received query result of query with ID '" + queryId + "' for site with ID '" + siteId + "'");
+          log.info("Received query result of query with ID '{}' for site with ID '{}'", queryId, siteId);
 
             try {
                 MeasureReport report = fetchMeasureReport(measureReportUrl.getIdPart());
@@ -68,9 +68,7 @@ class DSFQueryResultHandler {
                 int measureCount = extractMeasureCount(report);
                 return Optional.of(new DSFQueryResult(queryId, siteId, measureCount));
             } catch (Exception e) {
-                log.error("Could not fetch measure report with ID '" + measureReportUrl.getIdPart()
-                        + "' to get the measure count of query with ID '" + queryId + "' for site with ID '"
-                        + siteId + "': " + e.getMessage(), e);
+              log.error("Could not fetch measure report with ID '{}' to get the measure count of query with ID '{}' for site with ID '{}': {}", measureReportUrl.getIdPart(), queryId, siteId, e.getMessage(), e);
                 return Optional.empty();
             }
         } else {

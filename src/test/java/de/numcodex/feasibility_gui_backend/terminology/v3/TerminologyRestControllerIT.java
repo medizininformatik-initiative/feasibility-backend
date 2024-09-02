@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.terminology.v3;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.common.api.Comparator;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
@@ -8,8 +10,7 @@ import de.numcodex.feasibility_gui_backend.terminology.MappingNotFoundException;
 import de.numcodex.feasibility_gui_backend.terminology.NodeNotFoundException;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import de.numcodex.feasibility_gui_backend.terminology.UiProfileNotFoundException;
-import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
-import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.*;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
@@ -30,11 +31,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_TERMINOLOGY;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -66,6 +69,31 @@ public class TerminologyRestControllerIT {
 
     @MockBean
     private RateLimitingInterceptor rateLimitingInterceptor;
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetCriteriaProfileData_succeedsWith200() throws Exception {
+        var id = UUID.randomUUID();
+        var criteriaProfileDataList = createCriteriaProfileDataList(List.of(id));
+        doReturn(criteriaProfileDataList).when(terminologyService).getCriteriaProfileData(anyList());
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/criteria-profile-data")).param("ids", id.toString()).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.*", hasSize(1)))
+            .andExpect(jsonPath("$.[0].id").value(id.toString()));
+    }
+
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetCriteriaProfileData_succeedsWith200OnEmptyList() throws Exception {
+        doReturn(List.of()).when(terminologyService).getCriteriaProfileData(anyList());
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/criteria-profile-data")).param("ids", "123").with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.*", hasSize(0)));
+    }
 
     @Test
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
@@ -169,14 +197,14 @@ public class TerminologyRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testGetUiProfile_succeedsWith200() throws Exception {
         MockHttpServletRequestBuilder requestBuilder;
-        doReturn(createUiProfile()).when(terminologyService).getUiProfile(any(String.class));
+        doReturn(createUiProfileString()).when(terminologyService).getUiProfile(any(String.class));
 
         requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/5e6679ac-2b20-48ad-8459-f102c8944a06/ui_profile"))
                 .with(csrf());
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk())
-                .andExpect(content().string(createUiProfile()));
+                .andExpect(content().string(createUiProfileString()));
     }
 
     @Test
@@ -196,14 +224,14 @@ public class TerminologyRestControllerIT {
     @WithMockUser(roles = "FEASIBILITY_TEST_USER")
     public void testGetMapping_succeedsWith200() throws Exception {
         MockHttpServletRequestBuilder requestBuilder;
-        doReturn(createUiProfile()).when(terminologyService).getMapping(any(String.class));
+        doReturn(createUiProfileString()).when(terminologyService).getMapping(any(String.class));
 
         requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/5e6679ac-2b20-48ad-8459-f102c8944a06/mapping"))
                 .with(csrf());
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk())
-                .andExpect(content().string(createUiProfile()));
+                .andExpect(content().string(createUiProfileString()));
     }
 
     @Test
@@ -238,6 +266,21 @@ public class TerminologyRestControllerIT {
                 .andExpect(content().json(jsonUtil.writeValueAsString(randomUuidListMinusOne)));
     }
 
+    @Test
+    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    public void testGetTerminologySystems_succeedsWith200() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder;
+        doReturn(List.of(TerminologySystemEntry.builder().url("http://foo.bar").name("Foobar").build())).when(terminologyService).getTerminologySystems();
+
+        requestBuilder = get(URI.create(PATH_API + PATH_TERMINOLOGY + "/systems"))
+            .with(csrf());
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].url").value("http://foo.bar"))
+            .andExpect(jsonPath("$[0].name").value("Foobar"));
+    }
+
     private List<CategoryEntry> createCategoryEntries() {
         return List.of(new CategoryEntry(UUID.randomUUID(), "category-1"),
                 new CategoryEntry(UUID.randomUUID(), "category-2"),
@@ -268,12 +311,51 @@ public class TerminologyRestControllerIT {
                 .build();
     }
 
-    private String createUiProfile() {
-        return """
-                {
-                    "name": "Diagnose",
-                    "time_restriction_allowed": true
-                }
-                """;
+    private String createUiProfileString() throws JsonProcessingException {
+        var uiProfile = UiProfile.builder()
+            .name("Diagnose")
+            .timeRestrictionAllowed(true)
+            .build();
+        return jsonUtil.writeValueAsString(uiProfile);
+    }
+
+    private UiProfile createUiProfile() {
+        return UiProfile.builder()
+            .name("test-ui-profile")
+            .attributeDefinitions(List.of(createAttributeDefinition()))
+            .valueDefinition(createAttributeDefinition())
+            .timeRestrictionAllowed(true)
+            .build();
+    }
+
+    private AttributeDefinition createAttributeDefinition() {
+        return AttributeDefinition.builder()
+            .min(1.0)
+            .max(99.9)
+            .allowedUnits(List.of(createTermCode()))
+            .attributeCode(createTermCode())
+            .type(ValueDefinitonType.CONCEPT)
+            .optional(false)
+            .referencedCriteriaSet("http://my.reference.criteria/set")
+            .referencedValueSet("http://my.reference.value/set")
+            .comparator(Comparator.EQUAL)
+            .precision(1.0)
+            .selectableConcepts(List.of(createTermCode()))
+            .build();
+    }
+
+    private List<CriteriaProfileData> createCriteriaProfileDataList(List<UUID> ids) {
+        List<CriteriaProfileData> criteriaProfileDataList = new ArrayList<>();
+        for (UUID uuid: ids) {
+            criteriaProfileDataList.add(
+                CriteriaProfileData.builder()
+                    .id(uuid.toString())
+                    .context(createTermCode())
+                    .termCodes(List.of(createTermCode()))
+                    .uiProfile(createUiProfile())
+                    .build()
+            );
+        }
+        return criteriaProfileDataList;
     }
 }

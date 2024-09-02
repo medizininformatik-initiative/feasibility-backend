@@ -19,6 +19,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+
+import lombok.Setter;
 import org.bouncycastle.util.Arrays;
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.encrypt.BytesEncryptor;
@@ -45,11 +47,8 @@ public class EncryptingEncoder extends PatternLayoutEncoder {
   private Encryptor encryptor;
   private int counter;
 
+  @Setter
   private String publicKey;
-
-  public void setPublicKey(String publicKey) {
-    this.publicKey = publicKey;
-  }
 
   @Override
   public void start() {

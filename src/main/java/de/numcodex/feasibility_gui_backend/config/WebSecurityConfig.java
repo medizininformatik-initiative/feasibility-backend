@@ -48,6 +48,8 @@ public class WebSecurityConfig {
   public static final String PATH_DETAILED_RESULT = "/detailed-result";
   public static final String PATH_TERMINOLOGY = "/terminology";
   public static final String PATH_TEMPLATE = "/template";
+  public static final String PATH_DSE = "/dse";
+  public static final String PATH_CODEABLE_CONCEPT = "/codeable-concept";
   public static final String PATH_SWAGGER_UI = "/swagger-ui/**";
   public static final String PATH_SWAGGER_CONFIG = "/v3/api-docs/**";
   @Value("${app.keycloakAllowedRole}")
@@ -107,6 +109,8 @@ public class WebSecurityConfig {
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE)).hasAuthority(keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*")).hasAuthority(keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_DSE + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_HEALTH)).anonymous()
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_UI)).anonymous()
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_CONFIG)).anonymous()

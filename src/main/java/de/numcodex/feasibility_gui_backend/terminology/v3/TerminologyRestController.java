@@ -2,8 +2,7 @@ package de.numcodex.feasibility_gui_backend.terminology.v3;
 
 
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
-import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
-import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +26,11 @@ public class TerminologyRestController {
     @Autowired
     public TerminologyRestController(TerminologyService terminologyService) {
         this.terminologyService = terminologyService;
+    }
+
+    @GetMapping("criteria-profile-data")
+    public List<CriteriaProfileData> getCriteriaProfileData(@RequestParam List<String> ids) {
+        return terminologyService.getCriteriaProfileData(ids);
     }
 
     @GetMapping("entries/{nodeId}")
@@ -62,5 +66,10 @@ public class TerminologyRestController {
             @RequestParam("criteriaSetUrl") String criteriaSetUrl,
             @RequestBody List<String> contextTermCodeHashList) {
         return terminologyService.getIntersection(criteriaSetUrl, contextTermCodeHashList);
+    }
+
+    @GetMapping(value = "systems", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<TerminologySystemEntry> getTerminologySystems() {
+        return terminologyService.getTerminologySystems();
     }
 }

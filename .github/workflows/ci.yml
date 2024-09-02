@@ -145,7 +145,7 @@ jobs:
         run: .github/scripts/download-and-unpack-ontology.sh
 
       - name: Run Feasibility Backend with Database, Keycloak and Blaze
-        run: docker-compose -f .github/integration-test/docker-compose.yml up -d
+        run: docker compose -f .github/integration-test/docker-compose.yml up -d
 
       - name: Wait for Feasibility Backend
         run: .github/scripts/wait-for-url.sh  http://localhost:8091/actuator/health

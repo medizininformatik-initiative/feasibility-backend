@@ -87,13 +87,6 @@ class QueryHandlerServiceTest {
         queryHandlerService = createQueryHandlerService();
     }
 
-    @BeforeEach
-    public void resetMocks() {
-        Mockito.reset(queryDispatcher, queryTemplateHandler, queryRepository, queryContentRepository,
-                resultService, queryTemplateRepository, savedQueryRepository, jsonUtil);
-    }
-
-
     @Test
     public void testRunQuery_failsWithMonoErrorOnQueryDispatchException() throws QueryDispatchException {
         var testStructuredQuery = StructuredQuery.builder()
@@ -170,9 +163,8 @@ class QueryHandlerServiceTest {
 
     private QueryContent createQueryContent() throws JsonProcessingException {
         var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
-        var queryContentHash = QUERY_CONTENT_HASH;
         var queryContent = new QueryContent(queryContentString);
-        queryContent.setHash(queryContentHash);
+        queryContent.setHash(QUERY_CONTENT_HASH);
         return queryContent;
     }
 

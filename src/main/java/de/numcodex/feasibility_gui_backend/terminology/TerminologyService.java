@@ -1,10 +1,14 @@
 package de.numcodex.feasibility_gui_backend.terminology;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.terminology.api.CategoryEntry;
-import de.numcodex.feasibility_gui_backend.terminology.api.TerminologyEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.*;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
+import de.numcodex.feasibility_gui_backend.terminology.persistence.UiProfile;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,7 +32,13 @@ public class TerminologyService {
 
   private final MappingRepository mappingRepository;
 
-  private String uiProfilePath;
+  private final String uiProfilePath;
+
+  @Getter
+  private final List<TerminologySystemEntry> terminologySystems;
+
+  @NonNull
+  private ObjectMapper jsonUtil;
 
   @Value("${app.ontologyOrder}")
   private List<String> sortedCategories;
@@ -38,10 +48,12 @@ public class TerminologyService {
   private Map<UUID, Set<TerminologyEntry>> selectableEntriesByCategory = new HashMap<>();
 
   public TerminologyService(@Value("${app.ontologyFolder}") String uiProfilePath,
+                            @Value("${app.terminologySystemsFile}") String terminologySystemsFilename,
                             UiProfileRepository uiProfileRepository,
                             TermCodeRepository termCodeRepository,
                             ContextualizedTermCodeRepository contextualizedTermCodeRepository,
-                            MappingRepository mappingRepository) throws IOException {
+                            MappingRepository mappingRepository,
+                            ObjectMapper jsonUtil) throws IOException {
     this.uiProfilePath = uiProfilePath;
     readInTerminologyEntries();
     generateTerminologyEntriesWithoutDirectChildren();
@@ -50,12 +62,13 @@ public class TerminologyService {
     this.termCodeRepository = termCodeRepository;
     this.contextualizedTermCodeRepository = contextualizedTermCodeRepository;
     this.mappingRepository = mappingRepository;
+    this.jsonUtil = jsonUtil;
+    this.terminologySystems = jsonUtil.readValue(new URL("file:" + terminologySystemsFilename), new TypeReference<>() {});
   }
 
   private void readInTerminologyEntries() throws IOException {
     var files = getFilePathsUiProfiles();
-
-    for (var filename : files) {
+    /*for (var filename : files) {
       if (!filename.toLowerCase().endsWith(".json")) {
         log.trace("Skipping non-json file: {}", filename);
         continue;
@@ -72,7 +85,7 @@ public class TerminologyService {
       } catch (IOException e) {
         throw new IOException("Could not read terminology files", e);
       }
-    }
+    }*/
   }
 
   private void generateTerminologyEntriesWithoutDirectChildren() {
@@ -201,5 +214,53 @@ public class TerminologyService {
 
   public List<String> getIntersection(String criteriaSetUrl, List<String> contextTermCodeHashList) {
     return contextualizedTermCodeRepository.filterByCriteriaSetUrl(criteriaSetUrl, contextTermCodeHashList);
+  }
+
+  public List<CriteriaProfileData> getCriteriaProfileData(List<String> criteriaIds) {
+    List<CriteriaProfileData> results = new ArrayList<>();
+
+    for (String id : criteriaIds) {
+      TermCode tc = termCodeRepository.findTermCodeByContextualizedTermcodeHash(id).orElse(null);
+      Context c = termCodeRepository.findContextByContextualizedTermcodeHash(id).orElse(null);
+      de.numcodex.feasibility_gui_backend.terminology.api.UiProfile uiProfile;
+      de.numcodex.feasibility_gui_backend.common.api.TermCode context;
+      List<de.numcodex.feasibility_gui_backend.common.api.TermCode> termCodes = new ArrayList<>();
+      try {
+        uiProfile = jsonUtil.readValue(getUiProfile(id), de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.class);
+      } catch (UiProfileNotFoundException | JsonProcessingException e) {
+        log.debug("Error trying to read ui profile", e);
+        uiProfile = null;
+      }
+      if (c != null) {
+        context = de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+            .code(c.getCode())
+            .display(c.getDisplay())
+            .system(c.getSystem())
+            .version(c.getVersion())
+            .build();
+      } else {
+        context = null;
+      }
+      if (tc != null) {
+        termCodes.add(
+            de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+                .code(tc.getCode())
+                .display(tc.getDisplay())
+                .system(tc.getSystem())
+                .version(tc.getVersion())
+                .build()
+        );
+      }
+      results.add(
+          CriteriaProfileData.builder()
+              .id(id)
+              .uiProfile(uiProfile)
+              .context(context)
+              .termCodes(termCodes)
+              .build()
+      );
+    }
+
+    return results;
   }
 }

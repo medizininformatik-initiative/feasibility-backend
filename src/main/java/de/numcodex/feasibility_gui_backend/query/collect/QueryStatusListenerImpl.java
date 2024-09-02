@@ -56,9 +56,8 @@ public class QueryStatusListenerImpl implements QueryStatusListener {
 
     private void logQueryStatusChange(String externalQueryId, String siteId, BrokerClientType brokerClientType,
                                       QueryStatus status) {
-        log.info("query '%s' of broker client with type '%s' to site '%s' changed its status to '%s'".formatted(
-                externalQueryId, brokerClientType.toString(), siteId, status.toString()
-        ));
+        log.info("query '{}' of broker client with type '{}' to site '{}' changed its status to '{}'",
+            externalQueryId, brokerClientType.toString(), siteId, status.toString());
     }
 
     private int resolveMatchesInPopulation(String externalQueryId, String externalSiteId, BrokerClient client)

@@ -38,7 +38,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
