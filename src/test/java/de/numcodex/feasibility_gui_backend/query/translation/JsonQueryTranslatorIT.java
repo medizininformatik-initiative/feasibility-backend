@@ -32,13 +32,15 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @SpringBootTest(
         classes = QueryTranslatorSpringConfig.class,
         properties = {
-                "app.cqlTranslationEnabled=true",
+                "app.cqlTranslationEnabled=false",
                 "app.fhirTranslationEnabled=false",
                 "app.mappingsFile=./ontology/mapping_cql.json",
                 "app.conceptTreeFile=./ontology/mapping_tree.json"
         }
 )
 @SuppressWarnings("NewClassNamingConvention")
+// app.cqlTranslationEnabled should be set back to true once sq2cql is updated to new ontology input
+
 public class JsonQueryTranslatorIT {
 
     @Autowired
