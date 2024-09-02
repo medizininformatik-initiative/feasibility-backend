@@ -169,16 +169,17 @@ public class TerminologyEsService {
   }
 
 
-  private TermFilter getFilter(String term) {
+  private TermFilter getFilter(String termApi) {
+    final var termElastic = termApi.equalsIgnoreCase("context") ? "context.code" : termApi;
     var aggQuery = NativeQuery.builder()
-        .withAggregation(term, Aggregation.of(a -> a
-            .terms(ta -> ta.field(term))))
+        .withAggregation(termElastic, Aggregation.of(a -> a
+            .terms(ta -> ta.field(termElastic))))
         .build();
 
     SearchHits<OntologyListItemDocument> searchHits = operations.search(aggQuery, OntologyListItemDocument.class);
     ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchHits.getAggregations();
     assert aggregations != null;
-    List<StringTermsBucket> buckets = aggregations.aggregationsAsMap().get(term).aggregation().getAggregate().sterms().buckets().array();
+    List<StringTermsBucket> buckets = aggregations.aggregationsAsMap().get(termElastic).aggregation().getAggregate().sterms().buckets().array();
     List<TermFilterValue> termFilterValues = new ArrayList<>();
 
     buckets.forEach(b -> {
@@ -188,7 +189,7 @@ public class TerminologyEsService {
     });
 
     return TermFilter.builder()
-        .name(term)
+        .name(termApi)
         .type("selectable-concept")
         .values(termFilterValues)
         .build();
