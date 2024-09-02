@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [UNRELEASED] -yyyy-mm-dd
+## [6.0.0-alpha.1] - 2024-09-02
 
 ### Added
 - Terminology search implemented via external elastic search service ([#307](https://github.com/medizininformatik-initiative/feasibility-backend/issues/307))
@@ -12,9 +12,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Endpoints to search for codeable concepts (ES) ([#324](https://github.com/medizininformatik-initiative/feasibility-backend/issues/324))
 ### Changed
 - **breaking** Consistent naming for endpoints and filenames (kebab-case for rest endpoints, camelCase for json parameters, snake_case for elastic search variables)
-### Deprecated
-### Removed
-### Fixed
 ### Security
 - Updated Spring Boot to 3.3.2 ([#317](https://github.com/medizininformatik-initiative/feasibility-backend/issues/317))
 
