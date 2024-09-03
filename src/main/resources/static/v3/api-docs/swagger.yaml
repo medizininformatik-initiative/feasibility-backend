@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: MII Feasibility Backend REST API
+  title: Dataportal Backend REST API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -63,7 +63,7 @@ paths:
         500:
           description: Dispatch error
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
       x-codegen-request-body-name: body
     get:
@@ -100,7 +100,7 @@ paths:
         401:
           description: Unauthorized - please login first
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /query/validate:
     post:
@@ -173,7 +173,7 @@ paths:
         404:
           description: User not found
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
   /query/{queryId}:
     get:
@@ -211,7 +211,7 @@ paths:
         404:
           description: Query not found
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
             - admin
   /query/{queryId}/content:
@@ -243,7 +243,7 @@ paths:
         404:
           description: Query not found
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
             - user
   /query/{queryId}/summary-result:
@@ -277,7 +277,7 @@ paths:
         429:
           description: Too many requests
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
             - user
   /query/{queryId}/detailed-result:
@@ -309,7 +309,7 @@ paths:
         404:
           description: Query not found
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
   /query/{queryId}/detailed-obfuscated-result:
     get:
@@ -342,7 +342,7 @@ paths:
         429:
           description: Too many requests
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
             - user
   /query/detailed-obfuscated-result-rate-limit:
@@ -411,7 +411,7 @@ paths:
         409:
           description: Query has already been saved
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     put:
       tags:
@@ -485,7 +485,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SavedQuerySlots"
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /query/template:
     post:
@@ -518,7 +518,7 @@ paths:
         409:
           description: Query with the same label exists for this user
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     get:
       tags:
@@ -545,7 +545,7 @@ paths:
         401:
           description: Unauthorized - please login first
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /query/template/{queryTemplateId}:
     get:
@@ -582,7 +582,7 @@ paths:
         404:
           description: Query not found (or user has no access)
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     put:
       tags:
@@ -613,7 +613,7 @@ paths:
         404:
           description: Query not found (or user has no access)
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     delete:
       tags:
@@ -637,7 +637,7 @@ paths:
         404:
           description: Query not found (or user has no access)
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /terminology/search/filter:
     get:
@@ -1647,11 +1647,11 @@ components:
       items:
         $ref: "#/components/schemas/ProfileDataEntry"
   securitySchemes:
-    feasibility_auth:
+    dataportal_auth:
       type: oauth2
       flows:
         implicit:
           authorizationUrl: http://to.be.defined/auth
           scopes:
-            user: Feasibility user role
-            admin: Feasibility admin role
+            user: Dataportal user role
+            admin: Dataportal admin role
