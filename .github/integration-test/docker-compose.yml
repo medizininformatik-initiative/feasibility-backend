@@ -1,7 +1,7 @@
 version: '3.7'
 services:
-  dataportal-gui-backend:
-    container_name: dataportal-gui-backend
+  dataportal-backend:
+    container_name: dataportal-backend
     image: backend:latest
     ports:
       - "8091:8090"
