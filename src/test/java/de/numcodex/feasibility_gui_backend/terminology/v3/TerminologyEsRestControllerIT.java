@@ -51,7 +51,7 @@ class TerminologyEsRestControllerIT {
   private ObjectMapper jsonUtil;
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   public void testGetFilters_succeeds() throws Exception {
     List<String> filterList = List.of("context", "kdsModule", "terminology");
     List<TermFilter> termFilterList = createTermFilterList(filterList.toArray(new String[0]));
@@ -69,7 +69,7 @@ class TerminologyEsRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   public void testSearchOntologyItemsCriteriaQuery_succeeds() throws Exception {
     var totalHits = 1;
     var dummyEsSearchResult = createDummyEsSearchResult(totalHits);
@@ -97,7 +97,7 @@ class TerminologyEsRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   public void testGetOntologyItemRelationsByHash_succeeds() throws Exception {
     var dummyOntologyItemRelations = createDummyOntologyItemRelations();
     doReturn(dummyOntologyItemRelations).when(terminologyEsService).getOntologyItemRelationsByHash(any(String.class));
@@ -124,7 +124,7 @@ class TerminologyEsRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   public void testGetOntologyItemByHash_succeeds() throws Exception {
     var dummySearchResultEntry = createDummyEsSearchResultEntry();
     doReturn(dummySearchResultEntry).when(terminologyEsService).getSearchResultEntryByHash(any(String.class));

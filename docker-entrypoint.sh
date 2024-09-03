@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TRUSTSTORE_FILE="/opt/codex-feasibility-backend/truststore/self-signed-truststore.jks"
+TRUSTSTORE_FILE="/opt/dataportal-backend/truststore/self-signed-truststore.jks"
 TRUSTSTORE_PASS=${TRUSTSTORE_PASS:-changeit}
 KEY_PASS=${KEY_PASS:-changeit}
 
@@ -10,7 +10,7 @@ ca_files=(certs/*.pem)
 
 if [ ! "${#ca_files[@]}" -eq 0 ]; then
 
-    echo "# At least one CA file with extension *.pem found in certs folder -> starting feasibility backend with own CAs"
+    echo "# At least one CA file with extension *.pem found in certs folder -> starting dataportal backend with own CAs"
 
     if [[ -f "$TRUSTSTORE_FILE" ]]; then
           echo "## Truststore already exists -> resetting truststore"
@@ -28,8 +28,8 @@ if [ ! "${#ca_files[@]}" -eq 0 ]; then
 
     done
 
-    java $JAVA_OPTS -Djavax.net.ssl.trustStore="$TRUSTSTORE_FILE" -Djavax.net.ssl.trustStorePassword="$TRUSTSTORE_PASS" -jar feasibility-gui-backend.jar
+    java $JAVA_OPTS -Djavax.net.ssl.trustStore="$TRUSTSTORE_FILE" -Djavax.net.ssl.trustStorePassword="$TRUSTSTORE_PASS" -jar dataportal-backend.jar
 else
-    echo "# No CA *.pem cert files found in /opt/codex-feasibility-backend/certs -> starting feasibility backend without own CAs"
-    java $JAVA_OPTS -jar feasibility-gui-backend.jar
+    echo "# No CA *.pem cert files found in /opt/dataportal-backend/certs -> starting dataportal backend without own CAs"
+    java $JAVA_OPTS -jar dataportal-backend.jar
 fi

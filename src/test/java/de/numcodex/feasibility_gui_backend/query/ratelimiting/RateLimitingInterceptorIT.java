@@ -76,7 +76,7 @@ public class RateLimitingInterceptorIT {
   @BeforeEach
   void setupMockBehaviour() throws InvalidAuthenticationException {
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_USER"));
     doReturn(createTestQueryResult(ResultDetail.SUMMARY)).when(queryHandlerService)
         .getQueryResult(any(Long.class), eq(ResultDetail.SUMMARY));
     doReturn(createTestQueryResult(ResultDetail.DETAILED)).when(queryHandlerService)
@@ -102,13 +102,13 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(isAdmin).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
         .perform(
             get(URI.create(requestUri)).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
   }
@@ -130,20 +130,20 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
         .perform(
             get(requestUri).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
 
     mockMvc
         .perform(
             get(URI.create(requestUri)).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isTooManyRequests());
   }
@@ -164,13 +164,13 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
         .perform(
             get(requestUri).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
 
@@ -179,7 +179,7 @@ public class RateLimitingInterceptorIT {
     mockMvc
         .perform(
             get(URI.create(PATH_API + "/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
   }
@@ -199,14 +199,14 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     for (int i = 0; i < 10; ++i) {
       mockMvc
           .perform(
               get(requestUri).with(csrf())
-                  .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_ADMIN"))
+                  .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_ADMIN"))
           )
           .andExpect(status().isOk());
     }
@@ -229,13 +229,13 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
         .perform(
             get(requestUri).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
 
@@ -245,7 +245,7 @@ public class RateLimitingInterceptorIT {
     mockMvc
         .perform(
             get(URI.create(PATH_API + "/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
   }
@@ -256,13 +256,13 @@ public class RateLimitingInterceptorIT {
     var requestUri = PATH_API + "/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
         .perform(
             get(requestUri).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
 
@@ -272,7 +272,7 @@ public class RateLimitingInterceptorIT {
     mockMvc
         .perform(
             get(URI.create(requestUri)).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isTooManyRequests());
 
@@ -281,7 +281,7 @@ public class RateLimitingInterceptorIT {
     mockMvc
         .perform(
             get(requestUri).with(csrf())
-                .with(user(authorName).password("pass").roles("FEASIBILITY_TEST_USER"))
+                .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
   }

@@ -1,42 +1,41 @@
-# MII Feasibility Backend
+# Dataportal Backend
 
 
 ## Configuration Base
 
-| EnvVar                                  | Description                                                                                                                                                            | Example          | Default                                          |
-|-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|--------------------------------------------------|
-| LOG_LEVEL                               | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                      |                  | `warn`                                           |
-| HIBERNATE_SHOW_SQL                      | Show the sql statements hibernate executes                                                                                                                             |                  | `false`                                          |
-| BROKER_CLIENT_MOCK_ENABLED              | Enables the mock client. Possible values are `true` and `false`.                                                                                                       |                  | `true`                                           |
-| BROKER_CLIENT_DIRECT_ENABLED            | Enables the direct client. Possible values are `true` and `false`.                                                                                                     |                  | `false`                                          |
-| BROKER_CLIENT_AKTIN_ENABLED             | Enables the aktin client. Possible values are `true` and `false`.                                                                                                      |                  | `false`                                          |
-| BROKER_CLIENT_DSF_ENABLED               | Enables the dsf client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                                          |
-| KEYCLOAK_BASE_URL                       | Base URL of the keycloak instance.                                                                                                                                     |                  | `http://localhost:8080`                          |
-| KEYCLOAK_BASE_URL_ISSUER                | Base URL the keycloak instance uses in the issuer claim                                                                                                                |                  | `http://localhost:8080`                          |
-| KEYCLOAK_BASE_URL_JWK                   | Base URL for the JWK Set URI of the keycloak instance                                                                                                                  |                  | `http://localhost:8080`                          |
-| KEYCLOAK_REALM                          | Realm to be used for checking bearer tokens.                                                                                                                           |                  | `feasibility`                                    |
-| KEYCLOAK_CLIENT_ID                      | Client ID to be used for checking bearer tokens.                                                                                                                       |                  | `feasibility-webapp`                             |
-| KEYCLOAK_ALLOWED_ROLE                   | Role that has to be part of the bearer token in order for the requester to be authorized.                                                                              |                  | `FeasibilityUser`                                |
-| KEYCLOAK_POWER_ROLE                     | Optional role that can be assigned to a user to free them from being subject to any hard limits (see _PRIVACY_QUOTA_HARD.*_ EnvVars).                                  |                  | `FeasibilityPowerUser`                           |
-| KEYCLOAK_ADMIN_ROLE                     | Role that gives admin rights to a user. Admins do not fall under any limits and can also see un-obfuscated site names.                                                 |                  | `FeasibilityAdmin`                               |
-| SPRING_DATASOURCE_URL                   | The JDBC URL of the Postgres feasibility database.                                                                                                                     |                  | `jdbc:postgresql://feasibility-db:5432/codex_ui` |
-| SPRING_DATASOURCE_USERNAME              | Username to connect to the Postgres feasibility database.                                                                                                              |                  | `guidbuser`                                      |
-| SPRING_DATASOURCE_PASSWORD              | Password to connect to the Postgres feasibility database.                                                                                                              |                  | `guidbpw`                                        |
-| ONTOLOGY_FILES_FOLDER_UI                |                                                                                                                                                                        |                  | ontology/ui_profiles                             |
-| ONTOLOGY_DB_MIGRATION_FOLDER            |                                                                                                                                                                        |                  | ontology/migration                               |
-| MAPPINGS_FILE                           |                                                                                                                                                                        |                  | ontology/termCodeMapping.json                    |
-| CONCEPT_TREE_FILE                       |                                                                                                                                                                        |                  | ontology/conceptTree.json                        |
-| CQL_TRANSLATE_ENABLED                   |                                                                                                                                                                        |                  | true                                             |
-| FHIR_TRANSLATE_ENABLED                  |                                                                                                                                                                        |                  | false                                            |
-| FLARE_WEBSERVICE_BASE_URL               | URL of the local FLARE webservice - needed for FHIR query translation and when running the DIRECT path                                                                 |                  | http://localhost:5000                            |
-| CQL_SERVER_BASE_URL                     | URL of the local FHIR server that handles CQL requests                                                                                                                 |                  | http://cql                                       |
-| API_BASE_URL                            | Sets the base URL of the webservice. This is necessary if the webservice is running behind a proxy server. If not filled, the API base URL is the request URL          | https://host/api |                                                  |
-| QUERY_VALIDATION_ENABLED                | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                             |
-| QUERYRESULT_EXPIRY_MINUTES              | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                |
+| EnvVar                                  | Description                                                                                                                                                            | Example          | Default                                           |
+|-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------------------|
+| LOG_LEVEL                               | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                      |                  | `warn`                                            |
+| HIBERNATE_SHOW_SQL                      | Show the sql statements hibernate executes                                                                                                                             |                  | `false`                                           |
+| BROKER_CLIENT_MOCK_ENABLED              | Enables the mock client. Possible values are `true` and `false`.                                                                                                       |                  | `true`                                            |
+| BROKER_CLIENT_DIRECT_ENABLED            | Enables the direct client. Possible values are `true` and `false`.                                                                                                     |                  | `false`                                           |
+| BROKER_CLIENT_AKTIN_ENABLED             | Enables the aktin client. Possible values are `true` and `false`.                                                                                                      |                  | `false`                                           |
+| BROKER_CLIENT_DSF_ENABLED               | Enables the dsf client. Possible values are `true` and `false`.                                                                                                        |                  | `false`                                           |
+| KEYCLOAK_BASE_URL                       | Base URL of the keycloak instance.                                                                                                                                     |                  | `http://localhost:8080`                           |
+| KEYCLOAK_BASE_URL_ISSUER                | Base URL the keycloak instance uses in the issuer claim                                                                                                                |                  | `http://localhost:8080`                           |
+| KEYCLOAK_BASE_URL_JWK                   | Base URL for the JWK Set URI of the keycloak instance                                                                                                                  |                  | `http://localhost:8080`                           |
+| KEYCLOAK_REALM                          | Realm to be used for checking bearer tokens.                                                                                                                           |                  | `dataportal`                                      |
+| KEYCLOAK_CLIENT_ID                      | Client ID to be used for checking bearer tokens.                                                                                                                       |                  | `dataportal-webapp`                               |
+| KEYCLOAK_ALLOWED_ROLE                   | Role that has to be part of the bearer token in order for the requester to be authorized.                                                                              |                  | `DataportalUser`                                  |
+| KEYCLOAK_POWER_ROLE                     | Optional role that can be assigned to a user to free them from being subject to any hard limits (see _PRIVACY_QUOTA_HARD.*_ EnvVars).                                  |                  | `DataportalPowerUser`                             |
+| KEYCLOAK_ADMIN_ROLE                     | Role that gives admin rights to a user. Admins do not fall under any limits and can also see un-obfuscated site names.                                                 |                  | `DataportalAdmin`                                 |
+| SPRING_DATASOURCE_URL                   | The JDBC URL of the Postgres dataportal database.                                                                                                                      |                  | `jdbc:postgresql://dataportal-db:5432/dataportal` |
+| SPRING_DATASOURCE_USERNAME              | Username to connect to the Postgres dataportal database.                                                                                                               |                  | `dataportaluser`                                  |
+| SPRING_DATASOURCE_PASSWORD              | Password to connect to the Postgres dataportal database.                                                                                                               |                  | `dataportalpw`                                    |
+| ONTOLOGY_DB_MIGRATION_FOLDER            |                                                                                                                                                                        |                  | ontology/migration                                |
+| MAPPINGS_FILE                           |                                                                                                                                                                        |                  | ontology/termCodeMapping.json                     |
+| CONCEPT_TREE_FILE                       |                                                                                                                                                                        |                  | ontology/conceptTree.json                         |
+| CQL_TRANSLATE_ENABLED                   |                                                                                                                                                                        |                  | true                                              |
+| FHIR_TRANSLATE_ENABLED                  |                                                                                                                                                                        |                  | false                                             |
+| FLARE_WEBSERVICE_BASE_URL               | URL of the local FLARE webservice - needed for FHIR query translation and when running the DIRECT path                                                                 |                  | http://localhost:5000                             |
+| CQL_SERVER_BASE_URL                     | URL of the local FHIR server that handles CQL requests                                                                                                                 |                  | http://cql                                        |
+| API_BASE_URL                            | Sets the base URL of the webservice. This is necessary if the webservice is running behind a proxy server. If not filled, the API base URL is the request URL          | https://host/api |                                                   |
+| QUERY_VALIDATION_ENABLED                | When enabled, any structured query submitted via the `run-query` endpoint is validated against the JSON schema located in `src/main/resources/query/query-schema.json` | true / false     | true                                              |
+| QUERYRESULT_EXPIRY_MINUTES              | How many minutes should query results be kept in memory?                                                                                                               |                  | 5                                                 |
 | QUERYRESULT_PUBLIC_KEY                  | The public key in Base64-encoded DER format without banners and line breaks. Mandatory if _QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION_ is _false_                         |
-| QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION | Disable encryption of the result log file.                                                                                                                             | true / false     |                                                  |
-| ALLOWED_ORIGINS                         | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                 |
-| MAX_SAVED_QUERIES_PER_USER              | How many slots does a user have to store saved queries.                                                                                                                |                  | 10                                               |
+| QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION | Disable encryption of the result log file.                                                                                                                             | true / false     |                                                   |
+| ALLOWED_ORIGINS                         | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                  | http://localhost                                  |
+| MAX_SAVED_QUERIES_PER_USER              | How many slots does a user have to store saved queries.                                                                                                                |                  | 10                                                |
 
 
 ### Running the DIRECT Path
@@ -47,7 +46,7 @@ handles obfuscation by adding or subtracting a random number <=5.
 
 | EnvVar                                        | Description                                                                                     | Example                             | Default |
 |-----------------------------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------|---------|
-| BROKER_CLIENT_DIRECT_AUTH_BASIC_USERNAME      | Username to use to connect to flare or directly to the FHIR server via CQL                      | feas-user                           |         |
+| BROKER_CLIENT_DIRECT_AUTH_BASIC_USERNAME      | Username to use to connect to flare or directly to the FHIR server via CQL                      | dataportal-user                     |         |
 | BROKER_CLIENT_DIRECT_AUTH_BASIC_PASSWORD      | Password for that user                                                                          | verysecurepassword                  |         |
 | BROKER_CLIENT_DIRECT_AUTH_OAUTH_ISSUER_URL    | Issuer URL of OpenID Connect provider for authenticating access to OAuth2 protected FHIR server | https://auth.example.com/realms/foo |         |
 | BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_ID     | Client ID to use when authenticating at OpenID Connect provider                                 | foo_client                          |         |
@@ -81,7 +80,6 @@ In order to run the backend using the AKTIN broker path, the following environme
 
 When using API-key authentication, please make sure that the broker server has a
 corresponding API-key entry with `OU=admin` contained in the DN-string.
-
 
 
 ### Running the DSF Path
@@ -143,8 +141,8 @@ In order to configure the location of the external service, use the following pa
 
 ## Support for self-signed certificates
 
-The feasibility backend supports the use of self-signed certificates from your own CAs.
-On each startup, the feasibility backend will search through the folder /app/certs inside the container, add all found
+The dataportal backend supports the use of self-signed certificates from your own CAs.
+On each startup, the dataportal backend will search through the folder /app/certs inside the container, add all found
 CA *.pem files to a java truststore and start the application with this truststore.
 
 Using docker-compose, mount a folder from your host (e.g.: ./certs) to the /app/certs folder,
@@ -216,7 +214,7 @@ One can then connect to the same database when starting the backend in an IDE.
 
 ## Working with the Backend
 
-This backend provides a rest webservice which connects the [MII feasibility gui](https://github.com/medizininformatik-initiative/feasibility-gui)
+This backend provides a rest webservice which connects the [Dataportal GUI](https://github.com/medizininformatik-initiative/feasibility-gui)
 and the corresponding middlewares.
 
 To send a query to the backend, use the following example query:
@@ -285,7 +283,7 @@ or at http://localhost:8090/swagger-ui/index.html when running)
 ### Creating the Docker Image
 ```
 mvn install
-docker build -t feasibility-gui-backend .
+docker build -t dataportal-backend .
 ```
 
 ### Starting the Backend and the Database
@@ -295,12 +293,12 @@ docker-compose up -d
 
 **Note:** _If you need the database to run using another port than 5432 then set the corresponding environment variable like:_
 ```
-FEASIBILITY_DATABASE_PORT=<your-desired-port> docker-compose up -d
+DATAPORTAL_DATABASE_PORT=<your-desired-port> docker-compose up -d
 ```
 
 ### Testing if the Container is Running Properly
 ```
-GET http://localhost:8090/api/v3/terminology/root-entries
+GET http://localhost:8090/actuator/health
 ```
 
 Should reply with status 200 and a JSON object

@@ -48,7 +48,7 @@ class DseRestControllerIT {
   private RateLimitingInterceptor rateLimitingInterceptor;
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   public void testGetProfileTree_succeedsWith200() throws Exception {
     doReturn(jsonUtil.readValue(new URL("file:src/test/resources/ontology/dse/profile_tree.json"), DseProfileTreeNode.class)).when(dseService).getProfileTree();
 
@@ -61,7 +61,7 @@ class DseRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   public void testGetProfileTree_failsOnFileNotFound() throws Exception {
     doReturn(null).when(dseService).getProfileTree();
 
@@ -70,7 +70,7 @@ class DseRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   void testGetProfileData_succeedsWith200OnFoundProfile() throws Exception {
     doReturn(List.of(createDummyDseProfileEntry())).when(dseService).getProfileData(anyList());
 
@@ -81,7 +81,7 @@ class DseRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   void testGetProfileData_succeedsWith200OnNoFoundProfile() throws Exception {
     doReturn(List.of()).when(dseService).getProfileData(anyList());
 
