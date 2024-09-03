@@ -162,7 +162,7 @@ In order to run this project the following steps need to be followed:
 
 ### Adding GitHub Package Repositories
 
-This project uses dependencies ([HiGHmed DSF](https://github.com/highmed/highmed-dsf) and [sq2cql](https://github.com/medizininformatik-initiative/sq2cql)) which are not hosted on maven central but on GitHub.
+This project uses dependencies ([sq2cql](https://github.com/medizininformatik-initiative/sq2cql)) which are not hosted on maven central but on GitHub.
 
 In order to download artifacts from GitHub package repositories, you need to add your GitHub login credentials to your central maven config file.
 
@@ -179,12 +179,7 @@ After that, add the following `<server>` configurations to the `<servers>` secti
                       http://maven.apache.org/xsd/settings-1.0.0.xsd">
   <servers>
     <server>
-      <id>codex</id>
-      <username>USERNAME</username>
-      <password>TOKEN</password>
-    </server>
-    <server>
-      <id>highmed</id>
+      <id>mii</id>
       <username>USERNAME</username>
       <password>TOKEN</password>
     </server>
