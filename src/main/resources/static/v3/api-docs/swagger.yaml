@@ -1,9 +1,6 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: MII Feasibility Backend REST API
-  description: todo
-  contact:
-    email: noreply@todo.de
+  title: Dataportal Backend REST API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -19,15 +16,12 @@ servers:
 tags:
   - name: query
     description: operations for queries
-    externalDocs:
-      description: More information
-      url: http://link.to.confluence
   - name: templates
     description: operations to work with query templates
   - name: terminology
     description: operations to work with the ontology
   - name: codeable concepts
-    description: NOT IMPLEMENTED YET
+    description: operations on codeable concepts
   - name: dse
     description: Data Selection and Extraction
   - name: intrinsics
@@ -45,7 +39,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StructuredQuery'
+              $ref: "#/components/schemas/StructuredQuery"
         required: true
       responses:
         201:
@@ -55,25 +49,21 @@ paths:
               description: Path to the result of your newly created query
               schema:
                 type: string
-                example: "https://to.be.defined/api/v3/query/42"
+                examples:
+                  - https://to.be.defined/api/v3/query/42
           content: {}
         401:
           description: Unauthorized - please login first
-          content: {}
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         422:
           description: Invalid input
-          content: {}
         429:
           description: Too many requests in a given amount of time (configurable)
-          content: {}
         500:
           description: Dispatch error
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
       x-codegen-request-body-name: body
     get:
@@ -106,12 +96,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/QueryListEntry'
+                  $ref: "#/components/schemas/QueryListEntry"
         401:
           description: Unauthorized - please login first
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /query/validate:
     post:
@@ -125,7 +114,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StructuredQuery'
+              $ref: "#/components/schemas/StructuredQuery"
         required: true
       responses:
         200:
@@ -135,13 +124,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/StructuredQuery'
+                  $ref: "#/components/schemas/StructuredQuery"
         400:
           description: Query does not adhere to json schema
-          content: { }
         401:
           description: Unauthorized - please login first
-          content: { }
   /query/by-user/{userId}:
     get:
       tags:
@@ -178,18 +165,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/QueryListEntry'
+                  $ref: "#/components/schemas/QueryListEntry"
         401:
           description: Unauthorized - please login first
-          content: {}
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: User not found
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
   /query/{queryId}:
     get:
@@ -219,18 +203,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Query'
+                $ref: "#/components/schemas/Query"
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: Query not found
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
             - admin
   /query/{queryId}/content:
@@ -254,18 +235,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StructuredQuery'
+                $ref: "#/components/schemas/StructuredQuery"
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: Query not found
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
             - user
   /query/{queryId}/summary-result:
@@ -289,21 +267,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResultSummary'
+                $ref: "#/components/schemas/QueryResultSummary"
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: Query not found
-          content: {}
         429:
           description: Too many requests
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
             - user
   /query/{queryId}/detailed-result:
@@ -327,18 +301,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResult'
+                $ref: "#/components/schemas/QueryResult"
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: Query not found
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
   /query/{queryId}/detailed-obfuscated-result:
     get:
@@ -361,32 +332,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResultObfuscated'
+                $ref: "#/components/schemas/QueryResultObfuscated"
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: Query not found
-          content: {}
         429:
           description: Too many requests
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - admin
             - user
   /query/detailed-obfuscated-result-rate-limit:
     get:
-      summary: "GET api/v3/query/detailed-obfuscated-result-rate-limit"
-      operationId: "getDetailedObfuscatedResultRateLimit"
+      summary: get the rate limit for detailed obfuscated results
+      operationId: getDetailedObfuscatedResultRateLimit
       responses:
-        "200":
-          description: "OK"
+        200:
+          description: OK
           content:
-            'application/json':
+            application/json:
               schema:
                 $ref: "#/components/schemas/QueryResultRateLimit"
   /query/{queryId}/saved:
@@ -408,18 +375,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SavedQuery'
+              $ref: "#/components/schemas/SavedQuery"
         required: true
       responses:
         200:
           description: Saved Query successfully stored
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/SavedQuerySlots"
         401:
           description: Unauthorized - please login first
-          content: {}
         403:
           description: Forbidden - insufficient access rights, or no free slots left
           content:
@@ -442,18 +408,16 @@ paths:
                           type: string
         404:
           description: The query for which the additional information should be stored could not be found
-          content: {}
         409:
           description: Query has already been saved
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     put:
       tags:
         - query
-      summary: "Update a saved query. Only label and comment can be changed"
-      operationId: "updateSavedQuery"
+      summary: Update a saved query. Only label and comment can be changed.
+      operationId: updateSavedQuery
       parameters:
         - name: queryId
           in: path
@@ -467,67 +431,61 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SavedQuery'
+              $ref: "#/components/schemas/SavedQuery"
         required: true
       responses:
         200:
           description: Saved Query successfully updated
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/SavedQuerySlots"
         401:
           description: Unauthorized - please login first
-          content: {}
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: The query to be updated could not be found
-          content: {}
     delete:
       tags:
         - query
-      summary: "Remove a saved query from a given query"
-      operationId: "deleteSavedQuery"
+      summary: Remove a saved query from a given query
+      operationId: deleteSavedQuery
       parameters:
-        - name: "queryId"
-          in: "path"
+        - name: queryId
+          in: path
           required: true
           schema:
             type: integer
             format: int64
       responses:
         200:
-          description: "OK"
+          description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/SavedQuerySlots"
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         404:
           description: The query for which the additional information should be stored could not be found
-          content: {}
   /query/saved-query-slots:
     get:
       tags:
         - query
-      summary: "Show how many saved query slots a user already used and how many he has left."
-      operationId: "getSavedQuerySlots"
+      summary: Show how many saved query slots a user already used and how many he has left.
+      operationId: getSavedQuerySlots
       responses:
-        "200":
-          description: "OK"
+        200:
+          description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/SavedQuerySlots"
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /query/template:
     post:
@@ -540,7 +498,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QueryTemplate'
+              $ref: "#/components/schemas/QueryTemplate"
         required: true
       responses:
         201:
@@ -550,19 +508,17 @@ paths:
               description: Path to the newly stored query template
               schema:
                 type: string
-                example: "https://to.be.defined/api/v3/query/template/42"
-          content: {}
+                format: uri
+                examples:
+                  - https://to.be.defined/api/v3/query/template/42
         401:
           description: Unauthorized - please login first
-          content: { }
         403:
           description: Forbidden - insufficient access rights
-          content: {}
         409:
           description: Query with the same label exists for this user
-          content: {}
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     get:
       tags:
@@ -585,12 +541,11 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/QueryTemplateListItem'
+                  $ref: "#/components/schemas/QueryTemplateListItem"
         401:
           description: Unauthorized - please login first
-          content: { }
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /query/template/{queryTemplateId}:
     get:
@@ -621,15 +576,13 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/QueryTemplate'
+                  $ref: "#/components/schemas/QueryTemplate"
         401:
           description: Unauthorized - please login first
-          content: { }
         404:
           description: Query not found (or user has no access)
-          content: { }
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     put:
       tags:
@@ -650,20 +603,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QueryTemplate'
+              $ref: "#/components/schemas/QueryTemplate"
         required: true
       responses:
         200:
           description: OK
-          content: {}
         401:
           description: Unauthorized - please login first
-          content: { }
         404:
           description: Query not found (or user has no access)
-          content: { }
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
     delete:
       tags:
@@ -682,29 +632,26 @@ paths:
       responses:
         200:
           description: OK
-          content: {}
         401:
           description: Unauthorized - please login first
-          content: { }
         404:
           description: Query not found (or user has no access)
-          content: { }
       security:
-        - feasibility_auth:
+        - dataportal_auth:
             - user
   /terminology/search/filter:
     get:
       tags:
         - terminology
-      summary: "Get the list of available filters"
-      operationId: "getFilters"
+      summary: Get the list of available filters
+      operationId: getFilters
       responses:
         200:
           description: Ok, return the list of available filters
           content:
             application/json:
               schema:
-                type: "array"
+                type: array
                 items:
                   $ref: "#/components/schemas/Filter"
   /terminology/systems:
@@ -712,7 +659,7 @@ paths:
       tags:
         - terminology
       summary: Get the mapping of system urls to display names
-      operationId: "getTerminologySystems"
+      operationId: getTerminologySystems
       responses:
         200:
           description: System mapping file found and readable
@@ -724,14 +671,14 @@ paths:
     get:
       tags:
         - terminology
-      summary: "Parametrized search in the configured elastic search service."
-      operationId: "searchEntry"
+      summary: Parametrized search in the configured elastic search service.
+      operationId: searchEntry
       parameters:
         - name: searchterm
           in: query
           description: The term to search for. In case of an empty searchterm, return the first page of the whole index, sorted alphabetically
           schema:
-            type: "string"
+            type: string
           example: Diabetes Mellitus
         - name: contexts
           in: query
@@ -802,8 +749,8 @@ paths:
     get:
       tags:
         - terminology
-      summary: "Get the detailed entry for a criterion, containing children and translations"
-      operationId: "getEntryById"
+      summary: Get the detailed entry for a criterion, containing children and translations
+      operationId: getEntryById
       parameters:
         - name: id
           in: path
@@ -818,7 +765,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElasticSearchResultEntryWithRelations'
+                $ref: "#/components/schemas/ElasticSearchResultEntryWithRelations"
         401:
           description: Unauthorized - please login first
         403:
@@ -829,9 +776,9 @@ paths:
     get:
       tags:
         - terminology
-      summary: "Get the detailed entry for a criterion, containing children and translations"
-      description: "This should be in the getEntryById call, but for better distinction between the return values it is listed seperately here"
-      operationId: "getEntriesById"
+      summary: Get the detailed entry for a criterion, containing children and translations
+      description: This should be in the getEntryById call, but for better distinction between the return values it is listed seperately here
+      operationId: getEntriesById
       parameters:
         - name: id
           in: path
@@ -846,7 +793,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElasticSearchResultEntry'
+                $ref: "#/components/schemas/ElasticSearchResultEntry"
         401:
           description: Unauthorized - please login first
         403:
@@ -857,32 +804,32 @@ paths:
     get:
       tags:
         - terminology
-      summary: "Get the profile data for criteria, containing uiProfile context and termCodes"
-      description: "This should return all the information needed to build criteria in the frontend."
-      operationId: "getEntriesByIdsWithDetail"
+      summary: Get the profile data for criteria, containing uiProfile context and termCodes
+      description: This should return all the information needed to build criteria in the frontend.
+      operationId: getEntriesByIdsWithDetail
       parameters:
         - name: ids
           in: query
           style: form
           explode: false
-          description: "A comma-separated list of IDs (contextualized termcode hashes) of the entries that shall be retrieved."
+          description: A comma-separated list of IDs (contextualized termcode hashes) of the entries that shall be retrieved.
           required: true
           schema:
             type: string
-            example: "203e04cd-4f0a-321b-b1ad-9ec6d211e0a8,203e04cd-4f0a-321b-b1ad-9ec6d211e0a9"
+            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8,203e04cd-4f0a-321b-b1ad-9ec6d211e0a9
       responses:
         200:
-          description: "Entries found. May contain empty entries if some were not found."
+          description: Entries found. May contain empty entries if some were not found.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CriteriaProfileData'
+                  $ref: "#/components/schemas/CriteriaProfileData"
         401:
-          description: "Unauthorized - please login first."
+          description: Unauthorized - please login first.
         403:
-          description: "Forbidden - insufficient access rights."
+          description: Forbidden - insufficient access rights.
   /codeable-concept/entry/search:
     get:
       tags:
@@ -894,7 +841,7 @@ paths:
           in: query
           description: The term to search for. In case of an empty searchterm, return the first page of the whole index, sorted alphabetically
           schema:
-            type: "string"
+            type: string
           example: Diabetes Mellitus
         - name: value-sets
           in: query
@@ -962,7 +909,7 @@ paths:
         - dse
       summary: Get the complete DSE profile tree
       description: This can not be filtered or paginated or anything since for now it is rather small. All filtering will be done in the frontend for now. Might change if problems with that approach occur.
-      operationId: "getProfileTree"
+      operationId: getProfileTree
       responses:
         200:
           description: Profile tree file found and readable
@@ -976,7 +923,7 @@ paths:
         - dse
       summary: Get the profile data for the submitted ids
       description: Get profile data for all submitted ids. If a profile is not found, an error message will be supplied.
-      operationId: "getProfileData"
+      operationId: getProfileData
       responses:
         200:
           description: Success, returning profiles - may contain profiles with error messages
@@ -1019,7 +966,7 @@ components:
           type: string
         createdAt:
           type: string
-          format: 'date-time'
+          format: date-time
         totalNumberOfPatients:
           type: integer
         isValid:
@@ -1118,11 +1065,13 @@ components:
         label:
           type: string
           description: The 'name' of the query. Is assigned by the user via GUI.
-          example: my-query-1
+          examples:
+            - my-query-1
         comment:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
-          example: I wanted to see how many patients I could find for my study XYZ
+          examples:
+            - I wanted to see how many patients I could find for my study XYZ
         lastModified:
           type: string
           format: date-time
@@ -1143,11 +1092,13 @@ components:
         label:
           type: string
           description: The 'name' of the query. Is assigned by the user via GUI.
-          example: my-query-1
+          examples:
+            - my-query-1
         comment:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
-          example: I wanted to see how many patients I could find for my study XYZ
+          examples:
+            - I wanted to see how many patients I could find for my study XYZ
         content:
           $ref: "#/components/schemas/StructuredQuery"
         lastModified:
@@ -1166,10 +1117,12 @@ components:
           type: string
           format: uri
           description: The json schema version
-          example: http://to_be_decided.com/draft-1/schema#
+          examples:
+            - http://to_be_decided.com/draft-1/schema#
         display:
           type: string
-          example: foobar
+          examples:
+            - foobar
         inclusionCriteria:
           type: array
           items:
@@ -1186,16 +1139,19 @@ components:
         label:
           type: string
           description: The 'name' of the query. Is assigned by the user via GUI.
-          example: my-query-1
+          examples:
+            - my-query-1
         comment:
           type: string
           description: A more detailed information about the query. Is also assigned by the user via GUI.
-          example: I wanted to see how many patients I could find for my study XYZ
+          examples:
+            - I wanted to see how many patients I could find for my study XYZ
         totalNumberOfPatients:
           type: integer
           format: int64
           description: The number of results that were found for this query.
-          example: 12345
+          examples:
+            - 12345
     SavedQuerySlots:
       type: object
       required:
@@ -1205,11 +1161,13 @@ components:
         used:
           type: integer
           description: The amount of used saved query slots for a user.
-          example: 2
+          examples:
+            - 2
         total:
           type: integer
           description: The total amount of saved query slots per user.
-          example: 10
+          examples:
+            - 10
     TermCode:
       description: The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.
       type: object
@@ -1220,16 +1178,20 @@ components:
       properties:
         code:
           type: string
-          example: 119373006
+          examples:
+            - 119373006
         system:
           type: string
-          example: http://snomed.info/sct
+          examples:
+            - http://snomed.info/sct
         version:
           type: string
-          example: http://snomed.info/sct/900000000000207008/version/20210731
+          examples:
+            - http://snomed.info/sct/900000000000207008/version/20210731
         display:
           type: string
-          example: Amniotic fluid specimen (specimen)
+          examples:
+            - Amniotic fluid specimen (specimen)
     beforeDate:
       type: string
       format: date-time
@@ -1341,16 +1303,19 @@ components:
       properties:
         code:
           type: string
-          example: VAL-20001
+          examples:
+            - VAL-20001
         detail:
           type: string
-          example: The combination of context and termcode(s) is not found.
+          examples:
+            - The combination of context and termcode(s) is not found.
     ElasticSearchResult:
       type: object
       properties:
         totalHits:
           type: integer
-          example: 42
+          examples:
+            - 42
         results:
           type: array
           items:
@@ -1360,29 +1325,36 @@ components:
       properties:
         name:
           type: string
-          example: Diabetes Mellitus
+          examples:
+            - Diabetes Mellitus
         contextualizedTermcodeHash:
           type: string
           format: uuid
-          example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
+          examples:
+            - 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
         availability:
           description: Not sure if we want this as numeric value, percentage or just boolean?
           type: integer
           minimum: 0
           maximum: 100
-          example: 94
+          examples:
+            - 94
         context:
           type: string
-          example: Diagnosis
+          examples:
+            - Diagnosis
         terminology:
           type: string
-          example: icd-10
+          examples:
+            - icd-10
         termcode:
           type: string
-          example: E10-E14
+          examples:
+            - E10-E14
         kdsModule:
           type: string
-          example: Condition
+          examples:
+            - Condition
         translations:
           type: array
           items:
@@ -1400,69 +1372,83 @@ components:
       properties:
         name:
           type: string
-          example: Diabetes Mellitus
+          examples:
+            - Diabetes Mellitus
         contextualizedTermcodeHash:
           type: string
           format: uuid
-          example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
+          examples:
+            - 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
         availability:
           description: Not sure if we want this as numeric value, percentage or just boolean?
           type: integer
           minimum: 0
-          example: 119578
+          examples:
+            - 119578
         context:
           type: string
-          example: Diagnosis
+          examples:
+            - Diagnosis
         terminology:
           type: string
-          example: icd-10
+          examples:
+            - icd-10
         termcode:
           type: string
-          example: E10-E14
+          examples:
+            - E10-E14
         kdsModule:
           type: string
-          example: Condition
+          examples:
+            - Condition
     ElasticSearchTranslationEntry:
       type: object
       properties:
         lang:
           type: string
-          example: en
+          examples:
+            - en
         value:
           type: string
-          example: Diabetes Mellitus
+          examples:
+            - Diabetes Mellitus
     ElasticSearchRelationEntry:
       type: object
       properties:
         name:
           type: string
-          example: Endokrine, Ernährungs- und Stoffwechselerkrankungen
+          examples:
+            - Endokrine, Ernährungs- und Stoffwechselerkrankungen
         contextualizedTermcodeHash:
           type: string
-          example: c55d0d62-6c47-30b0-94b2-afa383ce35f7
+          examples:
+            - c55d0d62-6c47-30b0-94b2-afa383ce35f7
     Filter:
       type: object
       properties:
         name:
           type: string
-          example: Terminology
+          examples:
+            - Terminology
         values:
           type: array
           items:
             $ref: "#/components/schemas/FilterValue"
-          example:
+          examples:
             - ICD10
             - SNOMED
             - LOINC
     FilterValue:
       type: string
-      example: "icd10"
+      examples:
+        - icd10
     CodeableConceptSearchResult:
       type: object
       properties:
         totalHits:
           type: integer
-          example: 42
+          examples:
+            - 42
         results:
           type: array
           items:
@@ -1492,10 +1478,12 @@ components:
             $ref: "#/components/schemas/AttributeDefinition"
         name:
           type: string
-          example: "Diagnose"
+          examples:
+            - Diagnose
         timeRestrictionAllowed:
           type: boolean
-          example: false
+          examples:
+            - false
         valueDefinition:
           type: string
     AttributeDefinition:
@@ -1509,25 +1497,32 @@ components:
           $ref: "#/components/schemas/TermCode"
         max:
           type: number
-          example: null
+          examples:
+            - null
         min:
           type: number
-          example: null
+          examples:
+            - null
         optional:
           type: boolean
-          example: true
+          examples:
+            - true
         precision:
           type: number
-          example: 1
+          examples:
+            - 1
         referencedCriteriaSet:
           type: string
-          example: "http://fdpg.mii.cds/CriteriaSet/Diagnose/icd-10-gm"
+          examples:
+            - http://fdpg.mii.cds/CriteriaSet/Diagnose/icd-10-gm
         referencedValueSet:
           type: string
-          example: "http://hl7.org/fhir/sid/icd-o-3"
+          examples:
+            - http://hl7.org/fhir/sid/icd-o-3
         type:
           type: string
-          example: "reference"
+          examples:
+            - reference
     TerminologySystems:
       type: object
       required:
@@ -1537,52 +1532,64 @@ components:
         url:
           type: string
           format: uri
-          example: http://fhir.de/CodeSystem/bfarm/ops
+          examples:
+            - http://fhir.de/CodeSystem/bfarm/ops
         name:
           type: string
-          example: OPS
+          examples:
+            - OPS
     ProfileTreeNode:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          example: aee6afe1-3b96-4449-85cd-be8046ccbb84
+          examples:
+            - aee6afe1-3b96-4449-85cd-be8046ccbb84
         children:
           type: array
           items:
             $ref: "#/components/schemas/ProfileTreeNode"
         name:
           type: string
-          example: ProfileObservationLaboruntersuchung
+          examples:
+            - ProfileObservationLaboruntersuchung
         display:
           type: string
-          example: Profile - Observation - Laboruntersuchung
+          examples:
+            - Profile - Observation - Laboruntersuchung
         module:
           type: string
-          example: modul-labor
+          examples:
+            - modul-labor
         url:
           type: string
           format: uri
-          example: https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab
+          examples:
+            - https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab
         leaf:
           type: boolean
-          example: true
+          examples:
+            - true
         selectable:
           type: boolean
-          example: false
+          examples:
+            - false
     ProfileDataField:
       type: object
       properties:
         id:
           type: string
-          example: Observation.value[x]:valueQuantity.id
+          examples:
+            - Observation.value[x]:valueQuantity.id
         display:
           type: string
-          example: Unique id for inter-element referencing
+          examples:
+            - Unique id for inter-element referencing
         name:
           type: string
-          example: id
+          examples:
+            - id
         children:
           type: array
           items:
@@ -1592,27 +1599,33 @@ components:
       properties:
         type:
           type: string
-          example: token
+          examples:
+            - token
         name:
           type: string
-          example: code
+          examples:
+            - code
         ui_type:
           type: string
-          example: code
+          examples:
+            - code
         referencedCriteriaSet:
           type: string
           format: uri
-          example: http://fdpg.mii.cds/CriteriaSet/Diagnose/icd-10-gm
+          examples:
+            - http://fdpg.mii.cds/CriteriaSet/Diagnose/icd-10-gm
     ProfileDataEntry:
       type: object
       properties:
         url:
           type: string
           format: uri
-          example: https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab
+          examples:
+            - https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab
         display:
           type: string
-          example: Profile - Observation - Laboruntersuchung
+          examples:
+            - Profile - Observation - Laboruntersuchung
         fields:
           type: array
           items:
@@ -1623,20 +1636,22 @@ components:
             $ref: "#/components/schemas/ProfileDataFilter"
         errorCode:
           type: string
-          example: "TBD-000"
+          examples:
+            - TBD-000
         errorCause:
           type: string
-          example: Profile entry not found
+          examples:
+            - Profile entry not found
     ProfileDataList:
       type: array
       items:
         $ref: "#/components/schemas/ProfileDataEntry"
   securitySchemes:
-    feasibility_auth:
+    dataportal_auth:
       type: oauth2
       flows:
         implicit:
           authorizationUrl: http://to.be.defined/auth
           scopes:
-            user: Feasibility user role
-            admin: Feasibility admin role
+            user: Dataportal user role
+            admin: Dataportal admin role
