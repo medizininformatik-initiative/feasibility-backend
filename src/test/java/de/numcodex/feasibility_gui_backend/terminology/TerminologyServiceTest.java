@@ -26,7 +26,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
 
 @Tag("terminology")
@@ -43,69 +42,24 @@ class TerminologyServiceTest {
     @Mock
     private TermCodeRepository termCodeRepository;
 
-    @Mock
-    private ContextualizedTermCodeRepository contextualizedTermCodeRepository;
-
-    @Mock
-    private MappingRepository mappingRepository;
-
     private final ObjectMapper jsonUtil = new ObjectMapper();
 
     @Mock
     private Resource terminologySystemsResource;
 
-    private TerminologyService createTerminologyService(String uiProfilePath) throws IOException {
-        return new TerminologyService(uiProfilePath,"src/test/resources/ontology/terminology_systems.json", uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository, jsonUtil);
+    private TerminologyService createTerminologyService() throws IOException {
+        return new TerminologyService("src/test/resources/ontology/terminology_systems.json", uiProfileRepository, termCodeRepository, jsonUtil);
     }
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(uiProfileRepository, termCodeRepository, contextualizedTermCodeRepository, mappingRepository);
-    }
-
-    @Test
-    void testInitFailsOnNonexistingFolderWithNullpointerException() {
-        assertThrows(NullPointerException.class, () -> createTerminologyService("does/not/exist"));
-    }
-
-    @Test
-    void getUiProfile_succeedsOnKnownHash() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doReturn(Optional.of(createUiProfile())).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
-
-        var uiProfileResult = assertDoesNotThrow(() -> terminologyService.getUiProfile(VALID_NODE_ID_CAT1.toString()));
-        assertFalse(uiProfileResult.isBlank());
-    }
-
-    @Test
-    void getUiProfile_throwsOnUnknownHash() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doReturn(Optional.empty()).when(uiProfileRepository).findByContextualizedTermcodeHash(any(String.class));
-
-        assertThrows(UiProfileNotFoundException.class, () -> terminologyService.getUiProfile(INVALID_NODE_ID.toString()));
-    }
-
-    @Test
-    void getMapping_succeedsOnKnownHash() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doReturn(Optional.of(createMapping())).when(mappingRepository).findByContextualizedTermcodeHash(any(String.class));
-
-        var mappingResult = assertDoesNotThrow(() -> terminologyService.getMapping(VALID_NODE_ID_CAT1.toString()));
-        assertFalse(mappingResult.isBlank());
-    }
-
-    @Test
-    void getMapping_throwsOnUnknownHash() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doReturn(Optional.empty()).when(mappingRepository).findByContextualizedTermcodeHash(any(String.class));
-
-        assertThrows(MappingNotFoundException.class, () -> terminologyService.getMapping(INVALID_NODE_ID.toString()));
+        Mockito.reset(uiProfileRepository, termCodeRepository);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"true", "false"})
     void isExistingTermCode(boolean doesExist) throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        var terminologyService = createTerminologyService();
         doReturn(doesExist).when(termCodeRepository).existsTermCode(any(String.class), any(String.class));
         doReturn(doesExist).when(termCodeRepository).existsTermCode(any(String.class), any(String.class), any(String.class));
 
@@ -137,28 +91,8 @@ class TerminologyServiceTest {
     }
 
     @Test
-    void getIntersection_succeeds() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doReturn(List.of()).when(contextualizedTermCodeRepository).filterByCriteriaSetUrl(any(String.class), anyList());
-
-        var intersection = terminologyService.getIntersection("http://foo.bar", List.of(UUID.randomUUID().toString()));
-
-        assertTrue(intersection.isEmpty());
-    }
-
-    @Test
-    void getIntersection_succeedsWithEmptyList() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
-        doReturn(List.of()).when(contextualizedTermCodeRepository).filterByCriteriaSetUrl(any(String.class), anyList());
-
-        var intersection = terminologyService.getIntersection("http://foo.bar", List.of());
-
-        assertTrue(intersection.isEmpty());
-    }
-
-    @Test
     void getCriteriaProfileData_emptyIdsResultInEmptyList() throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        var terminologyService = createTerminologyService();
 
         var result = assertDoesNotThrow(() -> terminologyService.getCriteriaProfileData(List.of()));
         assertTrue(result.isEmpty());
@@ -176,7 +110,7 @@ class TerminologyServiceTest {
         "false, false, false"
     })
     void getCriteriaProfileData(String noUiProfile, String noContext, String noTermcodes) throws IOException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        var terminologyService = createTerminologyService();
         List<String> ids = List.of("123", "456", "789");
         boolean excludeUiProfile = Boolean.parseBoolean(noUiProfile);
         boolean excludeContext = Boolean.parseBoolean(noContext);
@@ -213,7 +147,7 @@ class TerminologyServiceTest {
 
     @Test
     void getTerminologySystems_succeeds() throws IOException, NoSuchFieldException, IllegalAccessException {
-        var terminologyService = createTerminologyService("src/test/resources/ontology/ui_profiles");
+        var terminologyService = createTerminologyService();
 
         var terminologySystems = assertDoesNotThrow(terminologyService::getTerminologySystems);
 
@@ -234,22 +168,6 @@ class TerminologyServiceTest {
                 .build())
         );
         return uiProfile;
-    }
-
-    private Mapping createMapping() {
-        var mapping = new Mapping();
-        mapping.setId(1);
-        mapping.setName("example");
-        mapping.setType("mapping-type");
-        mapping.setContent("""
-                {
-                	"name": "ExampleMapping",
-                	"content": "tbd"
-                }
-                """
-        );
-
-        return mapping;
     }
 
     private TermCode createTermCode() {
