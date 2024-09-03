@@ -51,7 +51,7 @@ class CodeableConceptEsRestControllerIT {
   private RateLimitingInterceptor rateLimitingInterceptor;
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   void testSearchOntologyItemsCriteriaQuery_succeedsWith200() throws Exception {
     CcSearchResult dummyCcSearchResult = createDummyCcSearchResult();
     doReturn(dummyCcSearchResult).when(codeableConceptService).performCodeableConceptSearchWithRepoAndPaging(any(String.class), isNull(), anyInt(), anyInt());
@@ -70,7 +70,7 @@ class CodeableConceptEsRestControllerIT {
   }
 
   @Test
-  @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+  @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   void testGetCodeableConceptByCode_succeedsWith200() throws Exception {
     TermCode dummyTermcode = createDummyTermcode();
     doReturn(dummyTermcode).when(codeableConceptService).getSearchResultEntryByCode(any(String.class));

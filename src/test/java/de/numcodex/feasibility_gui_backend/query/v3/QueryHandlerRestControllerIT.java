@@ -116,7 +116,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testRunQueryEndpoint_FailsOnInvalidStructuredQueryWith400() throws Exception {
         var testQuery = StructuredQuery.builder().build();
 
@@ -127,7 +127,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER", username = "test")
     public void testRunQueryEndpoint_SucceedsOnValidStructuredQueryWith201() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -148,7 +148,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnDownstreamServiceError() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -169,7 +169,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnSoftQuotaExceeded() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -188,7 +188,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER", username = "test")
     public void testValidateQueryEndpoint_SucceedsOnValidQuery() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -204,7 +204,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testValidateQueryEndpoint_SucceedsDespiteInvalidCriteriaWith200() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(true);
@@ -220,7 +220,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnBeingBlacklistedWith403() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -244,7 +244,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER", username = "test")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER", username = "test")
     public void testRunQueryEndpoint_FailsOnExceedingHardLimitWith403() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -264,12 +264,12 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER", "FEASIBILITY_TEST_POWER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER", "DATAPORTAL_TEST_POWER"}, username = "test")
     public void testRunQueryEndpoint_SucceedsOnExceedingHardlimitAsPowerUserWith201() throws Exception {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_POWER"));
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_POWER"));
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
         doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateIntervalMinutes));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
@@ -288,7 +288,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQueryList_SucceedsWithValidation() throws Exception {
         long queryId = 1;
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
@@ -302,7 +302,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQueryList_SucceedsWithoutValidation() throws Exception {
         long queryId = 1;
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
@@ -315,7 +315,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQueryList_SucceedsWithoutDefiningSkipValidation() throws Exception {
         long queryId = 1;
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
@@ -329,7 +329,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_ADMIN"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_ADMIN"}, username = "test")
     public void testGetQueryListForUser_SucceedsOnValidUser() throws Exception {
         long queryId = 1;
         String userId = "user1";
@@ -342,7 +342,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_ADMIN"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_ADMIN"}, username = "test")
     public void testGetQueryListForUser_ReturnsEmptyOnUnknownUser() throws Exception {
         String userId = "user1";
         doReturn(List.of()).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
@@ -354,7 +354,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQuery_succeeds() throws Exception {
         long queryId = 1;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -368,7 +368,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQuery_failsOnWrongAuthorWith403() throws Exception {
         long queryId = 1;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -381,7 +381,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testSaveQuery_Succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         var savedQuery = SavedQuery.builder()
@@ -397,7 +397,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testSaveQuery_failsWith404OnAuthorForQueryNotFound() throws Exception {
         doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -414,7 +414,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testSaveQuery_failsWith403OnAuthorMismatch() throws Exception {
         doReturn("SomeOtherUser").when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -431,7 +431,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testSaveQuery_failsWith409OnExistingSavedQuery() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doThrow(DataIntegrityViolationException.class).when(queryHandlerService).saveQuery(any(Long.class), any(String.class), any(SavedQuery.class));
@@ -449,7 +449,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testSaveQuery_failsWith403OnNoFreeSlots() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(maxSavedQueriesPerUser).when(queryHandlerService).getAmountOfSavedQueriesByUser(any(String.class));
@@ -467,7 +467,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testUpdateSavedQuery_Succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         var savedQuery = SavedQuery.builder()
@@ -483,7 +483,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testUpdateSavedQuery_failsWith403OnAuthorMismatch() throws Exception {
         doReturn("SomeOtherUser").when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -500,7 +500,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testUpdateSavedQuery_failsWith404OnAuthorForQueryNotFound() throws Exception {
         doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -517,7 +517,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testDeleteSavedQuery_Succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -526,7 +526,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testDeleteSavedQuery_FailsWith403OnWrongAuthor() throws Exception {
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -535,7 +535,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testDeleteSavedQuery_FailsWith404IfQueryNotFound() throws Exception {
         doThrow(QueryNotFoundException.class).when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -544,7 +544,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     void testDeleteSavedQuery_FailsWith404IfSavedQueryNotFound() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doThrow(QueryNotFoundException.class).when(queryHandlerService).deleteSavedQuery(any(Long.class));
@@ -555,10 +555,10 @@ public class QueryHandlerRestControllerIT {
 
     @ParameterizedTest
     @EnumSource
-    @WithMockUser(roles = {"FEASIBILITY_TEST_ADMIN"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_ADMIN"}, username = "test")
     public void testGetQueryResult_succeeds(QueryHandlerService.ResultDetail resultDetail) throws Exception {
         var requestUri = PATH_API + PATH_QUERY + "/1";
-        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_ADMIN"));
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));
 
@@ -587,10 +587,10 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetDetailedObfuscatedQueryResult_returnsIssueWhenBelowThreshold() throws Exception {
         var requestUri = PATH_API + PATH_QUERY + "/1" +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("FEASIBILITY_TEST_USER"));
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_USER"));
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createTestDetailedObfuscatedQueryResultWithTooFewResults(thresholdSitesResult))
                 .when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));
@@ -605,7 +605,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetDetailedObfuscatedResult_failsOnWrongAuthorWith403() throws Exception {
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
 
@@ -615,7 +615,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQueryContent_succeeds() throws Exception {
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidStructuredQuery()).when(queryHandlerService).getQueryContent(any(Long.class));
@@ -627,7 +627,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQueryContent_failsOnWrongAuthorWith403() throws Exception {
         doReturn("not-test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createValidStructuredQuery()).when(queryHandlerService).getQueryContent(any(Long.class));
@@ -637,7 +637,7 @@ public class QueryHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = {"FEASIBILITY_TEST_USER"}, username = "test")
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetDetailedObfuscatedResultRateLimit_succeeds() throws Exception  {
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/detailed-obfuscated-result-rate-limit")).with(csrf()))
                 .andExpect(status().isOk())

@@ -59,7 +59,7 @@ public class TerminologyRestControllerIT {
     private RateLimitingInterceptor rateLimitingInterceptor;
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetCriteriaProfileData_succeedsWith200() throws Exception {
         var id = UUID.randomUUID();
         var criteriaProfileDataList = createCriteriaProfileDataList(List.of(id));
@@ -73,7 +73,7 @@ public class TerminologyRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetCriteriaProfileData_succeedsWith200OnEmptyList() throws Exception {
         doReturn(List.of()).when(terminologyService).getCriteriaProfileData(anyList());
 
@@ -84,7 +84,7 @@ public class TerminologyRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetTerminologySystems_succeedsWith200() throws Exception {
         MockHttpServletRequestBuilder requestBuilder;
         doReturn(List.of(TerminologySystemEntry.builder().url("http://foo.bar").name("Foobar").build())).when(terminologyService).getTerminologySystems();
