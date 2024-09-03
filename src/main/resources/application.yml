@@ -2,11 +2,11 @@ server:
   port: 8090
 spring:
   application:
-    name: mii-feasibility-gui-backend
+    name: dataportal-backend
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_DBNAME:feasibility_ui}
-    username: ${DATABASE_USER:guidbuser}
-    password: ${DATABASE_PASSWORD:guidbpw}
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_DBNAME:dataportal}
+    username: ${DATABASE_USER:dataportaluser}
+    password: ${DATABASE_PASSWORD:dataportalpw}
     driverClassName: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -23,8 +23,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080}/realms/${KEYCLOAK_REALM:feasibility}
-          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080}/realms/${KEYCLOAK_REALM:dataportal}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080}/realms/${KEYCLOAK_REALM:dataportal}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
@@ -49,9 +49,9 @@ app:
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
-  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FeasibilityUser}
-  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FeasibilityPowerUser}
-  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FeasibilityAdmin}
+  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:DataportalUser}
+  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:DataportalPowerUser}
+  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:DataportalAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
   broker:

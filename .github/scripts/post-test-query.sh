@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
 access_token="$(curl -s --request POST \
-  --url http://localhost:8083/auth/realms/feasibility/protocol/openid-connect/token \
+  --url http://localhost:8083/auth/realms/dataportal/protocol/openid-connect/token \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=password \
-  --data client_id=feasibility-webapp \
+  --data client_id=dataportal-webapp \
   --data username=testuser \
   --data password=testpassword \
   --data scope=openid | jq '.access_token' | tr -d '"')"

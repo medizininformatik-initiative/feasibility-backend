@@ -93,8 +93,8 @@ services:
       LOG_LEVEL_SQL: ${FEASIBILITY_BACKEND_LOG_LEVEL_SQL:-warn}
       LOG_LEVEL: ${FEASIBILITY_BACKEND_LOG_LEVEL:-warn}
     volumes:
-      - ${FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/mii-code-tree.json}:${FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/mii-feasibility-backend/ontology}/mii-code-tree.json
-      - ${FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/mii-term-code-mapping.json}:${FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/mii-feasibility-backend/ontology}/mii-term-code-mapping.json
+      - ${FEASIBILITY_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/dataportal-code-tree.json}:${FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/mii-feasibility-backend/ontology}/dataportal-code-tree.json
+      - ${FEASIBILITY_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/dataportal-term-code-mapping.json}:${FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/mii-feasibility-backend/ontology}/dataportal-term-code-mapping.json
       - ${FEASIBILITY_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/mii-feasibility-backend/dsf-security/
       - ${FEASIBILITY_BACKEND_ONTOLOGY_DB_MIGRATION_FOLDER:-../ontology/migration}:/opt/mii-feasibility-backend/ontology/migration
 
