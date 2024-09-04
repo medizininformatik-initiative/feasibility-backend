@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.query.v3;
+package de.numcodex.feasibility_gui_backend.query.v4;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -167,7 +167,7 @@ public class QueryTemplateHandlerRestControllerIT {
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
 
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE+ "?skipValidation=true")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE+ "?skip-validation=true")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(listSize))
                 .andExpect(jsonPath("$.[0].id").exists());

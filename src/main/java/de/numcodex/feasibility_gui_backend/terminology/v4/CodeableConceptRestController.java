@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.terminology.v3;
+package de.numcodex.feasibility_gui_backend.terminology.v4;
 
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v3/codeable-concept")
+@RequestMapping("api/v4/codeable-concept")
 @ConditionalOnExpression("${app.elastic.enabled}")
 @CrossOrigin
-public class CodeableConceptEsRestController {
+public class CodeableConceptRestController {
 
   private CodeableConceptService codeableConceptService;
 
   @Autowired
-  public CodeableConceptEsRestController(CodeableConceptService codeableConceptService) {
+  public CodeableConceptRestController(CodeableConceptService codeableConceptService) {
     this.codeableConceptService = codeableConceptService;
   }
 

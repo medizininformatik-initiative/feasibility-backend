@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.query.v3;
+package de.numcodex.feasibility_gui_backend.query.v4;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.api.*;
@@ -294,7 +294,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
         doReturn(List.of(createValidQueryListEntry(queryId, false))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "false"))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skip-validation", "false"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(queryId))
                 .andExpect(jsonPath("$[0].isValid").exists())
@@ -308,7 +308,7 @@ public class QueryHandlerRestControllerIT {
         doReturn(List.of(createValidQuery(queryId))).when(queryHandlerService).getQueryListForAuthor(any(String.class), any(Boolean.class));
         doReturn(List.of(createValidQueryListEntry(queryId, true))).when(queryHandlerService).convertQueriesToQueryListEntries(anyList(), any(Boolean.class));
 
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skipValidation", "true"))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY)).with(csrf()).param("skip-validation", "true"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(queryId))
             .andExpect(jsonPath("$[0].isValid").doesNotExist());
@@ -609,7 +609,7 @@ public class QueryHandlerRestControllerIT {
     public void testGetDetailedObfuscatedResult_failsOnWrongAuthorWith403() throws Exception {
         doReturn("some-other-user").when(queryHandlerService).getAuthorId(any(Long.class));
 
-        mockMvc.perform(get(URI.create("/api/v3/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT))
                         .with(csrf()))
                 .andExpect(status().isForbidden());
     }

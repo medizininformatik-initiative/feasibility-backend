@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.query.v3;
+package de.numcodex.feasibility_gui_backend.query.v4;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
@@ -22,11 +22,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
+
 /*
 Rest Interface for the UI to send and receive query templates from the backend.
 */
-@RequestMapping("api/v3/query/template")
-@RestController("QueryTemplateHandlerRestController-v3")
+@RequestMapping(PATH_API + PATH_QUERY + PATH_TEMPLATE)
+@RestController("QueryTemplateHandlerRestController-v4")
 @Slf4j
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
 public class QueryTemplateHandlerRestController {
@@ -61,7 +63,7 @@ public class QueryTemplateHandlerRestController {
         : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uriString = uriBuilder.replacePath("")
-        .pathSegment("api", "v3", "query", "template", String.valueOf(queryId))
+        .pathSegment("api", "v4", "query", "template", String.valueOf(queryId))
         .build()
         .toUriString();
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -71,7 +73,7 @@ public class QueryTemplateHandlerRestController {
 
   @GetMapping(path = "/{queryId}")
   public ResponseEntity<Object> getQueryTemplate(@PathVariable(value = "queryId") Long queryId,
-                                                 @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
+                                                 @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
       Principal principal) {
 
     try {
@@ -96,7 +98,7 @@ public class QueryTemplateHandlerRestController {
 
   @GetMapping(path = "")
   public ResponseEntity<Object> getQueryTemplates(
-      @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
+      @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
       Principal principal) {
 
     var queries = queryHandlerService.getQueryTemplatesForAuthor(principal.getName());

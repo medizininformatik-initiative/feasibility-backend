@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.dse.v3;
+package de.numcodex.feasibility_gui_backend.dse.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.dse.DseService;

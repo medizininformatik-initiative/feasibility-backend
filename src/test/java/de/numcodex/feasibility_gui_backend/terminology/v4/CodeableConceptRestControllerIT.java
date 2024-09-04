@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.terminology.v3;
+package de.numcodex.feasibility_gui_backend.terminology.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
@@ -34,9 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @Import(RateLimitingServiceSpringConfig.class)
 @WebMvcTest(
-    controllers = CodeableConceptEsRestController.class
+    controllers = CodeableConceptRestController.class
 )
-class CodeableConceptEsRestControllerIT {
+class CodeableConceptRestControllerIT {
 
   @Autowired
   private MockMvc mockMvc;

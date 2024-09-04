@@ -18,7 +18,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
-import de.numcodex.feasibility_gui_backend.query.v3.QueryHandlerRestController;
+import de.numcodex.feasibility_gui_backend.query.v4.QueryHandlerRestController;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 
 import java.net.URI;

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 ### Changed
+- moved rest api from v3 to v4
 ### Deprecated
 ### Removed
 - Unused endpoints from the /terminology path
