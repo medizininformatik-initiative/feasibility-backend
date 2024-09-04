@@ -2,11 +2,11 @@ server:
   port: 8090
 spring:
   application:
-    name: codex-feasibility-gui-backend
+    name: dataportal-backend
   datasource:
-    url: jdbc:postgresql://${FEASIBILITY_DATABASE_HOST:localhost}:${FEASIBILITY_DATABASE_PORT:5432}/${FEASIBILITY_DATABASE_DBNAME:codex_ui}
-    username: ${FEASIBILITY_DATABASE_USER:codex-postgres}
-    password: ${FEASIBILITY_DATABASE_PASSWORD:codex-password}
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_DBNAME:dataportal}
+    username: ${DATABASE_USER:dataportaluser}
+    password: ${DATABASE_PASSWORD:dataportalpw}
     driverClassName: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -23,12 +23,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080}/realms/${KEYCLOAK_REALM:feasibility}
-          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080}/realms/${KEYCLOAK_REALM:feasibility}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_BASE_URL_ISSUER:http://localhost:8080}/realms/${KEYCLOAK_REALM:dataportal}
+          jwk-set-uri: ${KEYCLOAK_BASE_URL_JWK:http://localhost:8080}/realms/${KEYCLOAK_REALM:dataportal}/protocol/openid-connect/certs
 
 springdoc:
   swagger-ui:
-    url: /v3/api-docs/swagger.yaml
+    url: /v4/api-docs/swagger.yaml
     tryItOutEnabled: false
 management:
   endpoints:
@@ -43,17 +43,15 @@ management:
 app:
   dseProfileTreeFile: ${DSE_PROFILE_TREE_FILE:ontology/dse/profile_tree.json}
   terminologySystemsFile: ${TERMINOLOGY_SYSTEMS_FILE:ontology/terminology_systems.json}
-  ontologyFolder: ${ONTOLOGY_FILES_FOLDER_UI:ontology/ui_trees}
-  ontologyOrder: ${ONTOLOGY_ORDER:Diagnose, Prozedur, Person, Laboruntersuchung, Medikamentenverabreichung, Bioprobe, Einwilligung}
   mappingsFile: ${MAPPINGS_FILE:ontology/mapping_cql.json}
   conceptTreeFile: ${CONCEPT_TREE_FILE:ontology/mapping_tree.json}
   fhirTranslationEnabled: ${FHIR_TRANSLATE_ENABLED:false}
   cqlTranslationEnabled: ${CQL_TRANSLATE_ENABLED:true}
   apiBaseUrl: ${API_BASE_URL:}
   enableQueryValidation: ${QUERY_VALIDATION_ENABLED:true}
-  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:FeasibilityUser}
-  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:FeasibilityPowerUser}
-  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:FeasibilityAdmin}
+  keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:DataportalUser}
+  keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:DataportalPowerUser}
+  keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:DataportalAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
   broker:

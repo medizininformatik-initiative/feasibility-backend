@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.query.v3;
+package de.numcodex.feasibility_gui_backend.query.v4;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,7 +73,7 @@ public class QueryTemplateHandlerRestControllerIT {
     private AuthenticationHelper authenticationHelper;
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testStoreQueryTemplate_succeedsWith201() throws Exception {
         long queryId = 1;
         doReturn(queryId).when(queryHandlerService).storeQueryTemplate(any(QueryTemplate.class), any(String.class));
@@ -87,7 +87,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testStoreQueryTemplate_failsOnInvalidQueryTemplate() throws Exception {
         mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE)).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -96,7 +96,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testStoreQueryTemplate_failsOnTemplateExceptionWith500() throws Exception {
         doThrow(QueryTemplateException.class).when(queryHandlerService).storeQueryTemplate(any(QueryTemplate.class), any(String.class));
 
@@ -107,7 +107,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testStoreQueryTemplate_failsOnDuplicateWith409() throws Exception {
         doThrow(DataIntegrityViolationException.class).when(queryHandlerService).storeQueryTemplate(any(QueryTemplate.class), any(String.class));
 
@@ -118,7 +118,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplate_succeeds() throws Exception {
         long queryTemplateId = 1;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -133,7 +133,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplate_failsOnNotFound() throws Exception {
         long queryTemplateId = 1;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -147,7 +147,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplate_failsOnJsonError() throws Exception {
         long queryTemplateId = 1;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
@@ -161,20 +161,20 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplateList_succeeds() throws Exception {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doReturn(createValidApiQueryTemplateToGet(ThreadLocalRandom.current().nextInt())).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
 
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE+ "?skipValidation=true")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE+ "?skip-validation=true")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(listSize))
                 .andExpect(jsonPath("$.[0].id").exists());
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplateList_emptyListOnJsonErrors() throws Exception {
         doReturn(createValidPersistenceQueryTemplateListToGet(5)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
         doThrow(JsonProcessingException.class).when(queryHandlerService).convertTemplatePersistenceToApi(any(de.numcodex.feasibility_gui_backend.query.persistence.QueryTemplate.class));
@@ -186,7 +186,7 @@ public class QueryTemplateHandlerRestControllerIT {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplateListWithValidation_succeeds(boolean isValid) throws Exception {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
@@ -202,7 +202,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetQueryTemplateListWithValidation_emptyListOnJsonErrors() throws Exception {
         int listSize = 5;
         doReturn(createValidPersistenceQueryTemplateListToGet(listSize)).when(queryHandlerService).getQueryTemplatesForAuthor(any(String.class));
@@ -215,7 +215,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testUpdateQueryTemplate_succeeds() throws Exception {
         doNothing().when(queryHandlerService).updateQueryTemplate(any(Long.class), any(QueryTemplate.class), any(String.class));
 
@@ -226,7 +226,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testUpdateQueryTemplate_failsOnInvalidQueryTemplate() throws Exception {
         mockMvc.perform(put(URI.create(PATH_API + PATH_QUERY + PATH_TEMPLATE + "/1")).with(csrf())
                         .contentType(APPLICATION_JSON)
@@ -235,7 +235,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testUpdateQueryTemplate_failsOnTemplateExceptionWith404() throws Exception {
         doThrow(QueryTemplateException.class).when(queryHandlerService).updateQueryTemplate(any(Long.class), any(QueryTemplate.class), any(String.class));
 
@@ -246,7 +246,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testDeleteQueryTemplate_succeeds() throws Exception {
         doNothing().when(queryHandlerService).deleteQueryTemplate(any(Long.class), any(String.class));
 
@@ -255,7 +255,7 @@ public class QueryTemplateHandlerRestControllerIT {
     }
 
     @Test
-    @WithMockUser(roles = "FEASIBILITY_TEST_USER")
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testDeleteQueryTemplate_failsWith404OnNotFound() throws Exception {
         doThrow(QueryTemplateException.class).when(queryHandlerService).deleteQueryTemplate(any(Long.class), any(String.class));
 

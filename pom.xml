@@ -11,11 +11,11 @@
   </parent>
 
   <groupId>de.medizininformatik-initiative</groupId>
-  <artifactId>FeasibilityGuiBackend</artifactId>
-  <version>6.0.0-alpha.1</version>
+  <artifactId>DataportalBackend</artifactId>
+  <version>6.0.0-alpha.2</version>
 
-  <name>FeasibilityGuiBackend</name>
-  <description>Backend of the Feasibility GUI</description>
+  <name>Dataportal Backend</name>
+  <description>Backend of the Dataportal</description>
 
   <scm>
     <connection>scm:git:${project.scm.url}</connection>
@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.10.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v3.0.0-test.1</ontology-tag>
+    <ontology-tag>v3.0.0-test.2</ontology-tag>
   </properties>
 
   <dependencies>
@@ -255,6 +255,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
+        </exclusion>
+      </exclusions>
       <scope>test</scope>
     </dependency>
 
@@ -358,7 +364,7 @@
 
 
   <build>
-    <finalName>feasibilityBackend</finalName>
+    <finalName>dataportalBackend</finalName>
 
     <plugins>
       <plugin>
@@ -476,7 +482,6 @@
                   <executable>mkdir</executable>
                   <arguments>
                     <argument>ontology/migration</argument>
-                    <argument>ontology/ui_trees</argument>
                     <argument>ontology/dse</argument>
                   </arguments>
                 </configuration>
@@ -509,7 +514,7 @@
                   <executable>unzip</executable>
                   <arguments>
                     <argument>-jod</argument>
-                    <argument>ontology/ui_trees/</argument>
+                    <argument>ontology/</argument>
                     <argument>ontology/backend.zip</argument>
                   </arguments>
                 </configuration>
@@ -524,7 +529,7 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/R__Load_latest_ui_profile.sql</argument>
+                    <argument>ontology/R__Load_latest_ui_profile.sql</argument>
                     <argument>ontology/migration/</argument>
                   </arguments>
                 </configuration>
@@ -539,23 +544,8 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/R__load_latest_dse_profiles.sql</argument>
+                    <argument>ontology/R__load_latest_dse_profiles.sql</argument>
                     <argument>ontology/migration/</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>move-terminology-systems</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mv</executable>
-                  <arguments>
-                    <argument>ontology/ui_trees/terminology_systems.json</argument>
-                    <argument>ontology/</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -569,7 +559,7 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/profile_tree.json</argument>
+                    <argument>ontology/profile_tree.json</argument>
                     <argument>ontology/dse</argument>
                   </arguments>
                 </configuration>

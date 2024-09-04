@@ -44,8 +44,8 @@ import static org.testcontainers.containers.BindMode.READ_ONLY;
         properties = {
                 "app.cqlTranslationEnabled=true",
                 "app.fhirTranslationEnabled=false",
-                "app.mappingsFile=./ontology/codex-term-code-mapping.json",
-                "app.conceptTreeFile=./ontology/codex-code-tree.json"
+                "app.mappingsFile=./ontology/dataportal-term-code-mapping.json",
+                "app.conceptTreeFile=./ontology/dataportal-code-tree.json"
         }
 )
 @Testcontainers
@@ -63,8 +63,8 @@ public class FhirQueryTranslatorIT {
     @Container
     private final GenericContainer<?> flare = new GenericContainer<>(DockerImageName.parse("ghcr.io/num-codex/codex-flare:0.0.8"))
             .withExposedPorts(5000)
-            .withFileSystemBind("ontology/codex-code-tree.json", "/opt/flare/src/query_parser/codex/codex-code-tree.json", READ_ONLY)
-            .withFileSystemBind("ontology/codex-term-code-mapping.json", "/opt/flare/src/query_parser/codex/codex-mapping.json", READ_ONLY)
+            .withFileSystemBind("ontology/dataportal-code-tree.json", "/opt/flare/src/query_parser/codex/codex-code-tree.json", READ_ONLY)
+            .withFileSystemBind("ontology/dataportal-term-code-mapping.json", "/opt/flare/src/query_parser/codex/codex-mapping.json", READ_ONLY)
             .waitingFor(Wait.forHttp("/")
                     .forStatusCodeMatching(c -> c >= 200 && c <= 500))
             .withStartupAttempts(5);

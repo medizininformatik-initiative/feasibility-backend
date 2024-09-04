@@ -1,6 +1,6 @@
 {
   "id": "2268ed68-686a-4c9e-8637-6c366a60d459",
-  "realm": "feasibility",
+  "realm": "dataportal",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -47,8 +47,8 @@
     "realm": [
       {
         "id": "51cb7b69-d269-4872-b832-2d326e2e8658",
-        "name": "FeasibilityUser",
-        "description": "Standard feasibility user, which is allowed to send feasibility queries but has no admin rights",
+        "name": "DataportalUser",
+        "description": "Standard dataportal user, which is allowed to send dataportal queries but has no admin rights",
         "composite": false,
         "clientRole": false,
         "containerId": "2268ed68-686a-4c9e-8637-6c366a60d459",
@@ -65,7 +65,7 @@
       },
       {
         "id": "79573cca-5524-4642-a46f-ce7b988690ae",
-        "name": "FeasibilityPowerUser",
+        "name": "DataportalPowerUser",
         "description": "Users in this role are not subject to the hard limit for creating queries.",
         "composite": false,
         "clientRole": false,
@@ -83,7 +83,7 @@
       },
       {
         "id": "e3102b96-039a-4b74-8b7b-1ee58bac24c4",
-        "name": "default-roles-feasibility",
+        "name": "default-roles-dataportal",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -104,7 +104,7 @@
       },
       {
         "id": "c9d91f7e-30f0-4fab-9c06-75edad9a7fb9",
-        "name": "FeasibilityAdmin",
+        "name": "DataportalAdmin",
         "description": "Admin user who may access endpoints a normal user must not access. Users in this role are not subject to any rate limiting",
         "composite": false,
         "clientRole": false,
@@ -113,7 +113,7 @@
       }
     ],
     "client": {
-      "feasibility-webapp": [],
+      "dataportal-webapp": [],
       "realm-management": [
         {
           "id": "9331cbb4-1e36-4777-9df2-e9f55541f23c",
@@ -433,7 +433,7 @@
   "groups": [],
   "defaultRole": {
     "id": "e3102b96-039a-4b74-8b7b-1ee58bac24c4",
-    "name": "default-roles-feasibility",
+    "name": "default-roles-dataportal",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
@@ -504,13 +504,13 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/feasibility/account/",
+      "baseUrl": "/realms/dataportal/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/feasibility/account/*"
+        "/realms/dataportal/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -548,13 +548,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/feasibility/account/",
+      "baseUrl": "/realms/dataportal/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/feasibility/account/*"
+        "/realms/dataportal/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -680,8 +680,8 @@
     },
     {
       "id": "2bb006d9-c6d1-4694-91bb-d20c72f97ab4",
-      "clientId": "feasibility-webapp",
-      "name": "feasibility-webapp",
+      "clientId": "dataportal-webapp",
+      "name": "dataportal-webapp",
       "description": "",
       "rootUrl": "http://localhost:8091",
       "adminUrl": "http://localhost:8091",
@@ -776,13 +776,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/feasibility/console/",
+      "baseUrl": "/admin/dataportal/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/admin/feasibility/console/*"
+        "/admin/dataportal/console/*"
       ],
       "webOrigins": [
         "+"
