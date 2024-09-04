@@ -33,7 +33,7 @@ services:
       ONTOLOGY_DB_MIGRATION_FOLDER: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_DB_MIGRATION_FOLDER:-/opt/codex-feasibility-backend/ontology/migration}
       MAPPINGS_FILE: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-term-code-mapping.json
       CONCEPT_TREE_FILE: ${CODEX_FEASIBILITY_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/codex-feasibility-backend/ontology}/codex-code-tree.json
-      CQL_TRANSLATE_ENABLED: ${CODEX_FEASIBILITY_BACKEND_CQL_TRANSLATE_ENABLED:-true}
+      CQL_TRANSLATE_ENABLED: ${CODEX_FEASIBILITY_BACKEND_CQL_TRANSLATE_ENABLED:-false}
       FHIR_TRANSLATE_ENABLED: ${CODEX_FEASIBILITY_BACKEND_FHIR_TRANSLATE_ENABLED:-false}
       FLARE_WEBSERVICE_BASE_URL: ${CODEX_FEASIBILITY_BACKEND_FLARE_WEBSERVICE_BASE_URL:-http://flare:5000}
       CQL_SERVER_BASE_URL: ${CODEX_FEASIBILITY_BACKEND_CQL_SERVER_BASE_URL:-http://cql}
@@ -111,7 +111,7 @@ services:
       ES_JAVA_OPTS: -Xmx512m -Xms512m
       node.name: es01
       cluster.name: elasticsearch
-      xpack.security.enabled: false
+      xpack.security.enabled: "false"
     volumes:
       - type: volume
         source: feas-backend-es-data
@@ -127,7 +127,7 @@ services:
       ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/TAGPLACEHOLDER/example/fdpg-ontology/
       ELASTIC_FILENAME: elastic.zip
       # if set to false, existing indices are not overridden.
-      OVERRIDE_EXISTING: true
+      OVERRIDE_EXISTING: "true"
     entrypoint: [ "sh", "-c", "/tmp/init.sh" ]
     volumes:
       - type: bind
