@@ -24,9 +24,6 @@ public class ContextualizedTermCode {
     @Column(name = "termcode_id", nullable = false)
     private int termCodeId;
     @Basic
-    @Column(name = "mapping_id", nullable = true)
-    private Integer mappingId;
-    @Basic
     @Column(name = "ui_profile_id", nullable = true)
     private Integer uiProfileId;
 
