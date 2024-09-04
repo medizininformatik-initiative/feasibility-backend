@@ -482,7 +482,6 @@
                   <executable>mkdir</executable>
                   <arguments>
                     <argument>ontology/migration</argument>
-                    <argument>ontology/ui_trees</argument>
                     <argument>ontology/dse</argument>
                   </arguments>
                 </configuration>
@@ -515,7 +514,7 @@
                   <executable>unzip</executable>
                   <arguments>
                     <argument>-jod</argument>
-                    <argument>ontology/ui_trees/</argument>
+                    <argument>ontology/</argument>
                     <argument>ontology/backend.zip</argument>
                   </arguments>
                 </configuration>
@@ -530,7 +529,7 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/R__Load_latest_ui_profile.sql</argument>
+                    <argument>ontology/R__Load_latest_ui_profile.sql</argument>
                     <argument>ontology/migration/</argument>
                   </arguments>
                 </configuration>
@@ -545,23 +544,8 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/R__load_latest_dse_profiles.sql</argument>
+                    <argument>ontology/R__load_latest_dse_profiles.sql</argument>
                     <argument>ontology/migration/</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>move-terminology-systems</id>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>mv</executable>
-                  <arguments>
-                    <argument>ontology/ui_trees/terminology_systems.json</argument>
-                    <argument>ontology/</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -575,7 +559,7 @@
                 <configuration>
                   <executable>mv</executable>
                   <arguments>
-                    <argument>ontology/ui_trees/profile_tree.json</argument>
+                    <argument>ontology/profile_tree.json</argument>
                     <argument>ontology/dse</argument>
                   </arguments>
                 </configuration>
