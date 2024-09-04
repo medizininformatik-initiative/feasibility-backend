@@ -28,7 +28,7 @@ spring:
 
 springdoc:
   swagger-ui:
-    url: /v3/api-docs/swagger.yaml
+    url: /v4/api-docs/swagger.yaml
     tryItOutEnabled: false
 management:
   endpoints:

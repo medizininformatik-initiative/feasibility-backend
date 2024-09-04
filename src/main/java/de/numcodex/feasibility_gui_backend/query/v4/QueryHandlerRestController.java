@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.query.v3;
+package de.numcodex.feasibility_gui_backend.query.v4;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
@@ -37,11 +37,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_QUERY;
+
 /*
 Rest Interface for the UI to send queries from the ui to the ui backend.
 */
-@RequestMapping("api/v3/query")
-@RestController("QueryHandlerRestController-v3")
+@RequestMapping(PATH_API + PATH_QUERY)
+@RestController("QueryHandlerRestController-v4")
 @Slf4j
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = {HttpHeaders.LOCATION, HttpHeaders.RETRY_AFTER})
 public class QueryHandlerRestController {
@@ -171,7 +174,7 @@ public class QueryHandlerRestController {
             : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     return uriBuilder.replacePath("")
-        .pathSegment("api", "v3", "query", String.valueOf(queryId))
+        .pathSegment("api", "v4", "query", String.valueOf(queryId))
         .build()
         .toUri();
   }
@@ -179,7 +182,7 @@ public class QueryHandlerRestController {
   @GetMapping("")
   public List<QueryListEntry> getQueryList(
       @RequestParam(name = "filter", required = false) String filter,
-      @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
+      @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
       Principal principal) {
     var userId = principal.getName();
     var savedOnly = (filter != null && filter.equalsIgnoreCase("saved"));
@@ -295,7 +298,7 @@ public class QueryHandlerRestController {
 
   @GetMapping("/{id}")
   public ResponseEntity<Object> getQuery(@PathVariable("id") Long queryId,
-                                         @RequestParam(value = "skipValidation", required = false, defaultValue = "false") boolean skipValidation,
+                                         @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
       Authentication authentication) throws JsonProcessingException {
     if (!hasAccess(queryId, authentication)) {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);

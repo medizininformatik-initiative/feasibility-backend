@@ -37,7 +37,7 @@ public class WebSecurityConfig {
   public static final String KEY_SPRING_ADDONS_CONFIDENTIAL = "spring-addons-confidential";
   public static final String KEY_SPRING_ADDONS_PUBLIC = "spring-addons-public";
   public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
-  public static final String PATH_API = "/api/v3";
+  public static final String PATH_API = "/api/v4";
   public static final String PATH_QUERY = "/query";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
@@ -51,7 +51,7 @@ public class WebSecurityConfig {
   public static final String PATH_DSE = "/dse";
   public static final String PATH_CODEABLE_CONCEPT = "/codeable-concept";
   public static final String PATH_SWAGGER_UI = "/swagger-ui/**";
-  public static final String PATH_SWAGGER_CONFIG = "/v3/api-docs/**";
+  public static final String PATH_SWAGGER_CONFIG = "/v4/api-docs/**";
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
 

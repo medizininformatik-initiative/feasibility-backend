@@ -4,7 +4,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 5.0.0
+  version: 6.0.0
 externalDocs:
   description: Check out the github repository
   url: https://github.com/medizininformatik-initiative/feasibility-backend
@@ -12,7 +12,7 @@ servers:
   - url: https://to.be.defined
     variables:
       basePath:
-        default: /api/v3
+        default: /api/v4
 tags:
   - name: query
     description: operations for queries
@@ -50,7 +50,7 @@ paths:
               schema:
                 type: string
                 examples:
-                  - https://to.be.defined/api/v3/query/42
+                  - https://to.be.defined/api/v4/query/42
           content: {}
         401:
           description: Unauthorized - please login first
@@ -81,7 +81,7 @@ paths:
             type: string
             enum:
               - saved
-        - name: skipValidation
+        - name: skip-validation
           in: query
           description: If true, do not validate the query and do not include a list of invalid terms
           required: false
@@ -150,13 +150,6 @@ paths:
             type: string
             enum:
               - saved
-        - name: skipValidation
-          in: query
-          description: If true, do not validate the query and do not include a list of invalid terms
-          required: false
-          schema:
-            type: boolean
-            default: false
       responses:
         200:
           description: successful operation
@@ -190,7 +183,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: skipValidation
+        - name: skip-validation
           in: query
           description: If true, do not validate the query and do not include a list of invalid terms
           required: false
@@ -510,7 +503,7 @@ paths:
                 type: string
                 format: uri
                 examples:
-                  - https://to.be.defined/api/v3/query/template/42
+                  - https://to.be.defined/api/v4/query/template/42
         401:
           description: Unauthorized - please login first
         403:
@@ -527,7 +520,7 @@ paths:
       description: Returns the list of all query templates of the current user
       operationId: getQueryTemplateList
       parameters:
-        - name: skipValidation
+        - name: skip-validation
           in: query
           description: If true, do not validate the query and do not include a list of invalid terms
           required: false
@@ -562,7 +555,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: skipValidation
+        - name: skip-validation
           in: query
           description: If true, do not validate the query and do not include a list of invalid terms
           required: false

@@ -1,4 +1,4 @@
-package de.numcodex.feasibility_gui_backend.dse.v3;
+package de.numcodex.feasibility_gui_backend.dse.v4;
 
 import de.numcodex.feasibility_gui_backend.dse.DseService;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfile;
@@ -8,10 +8,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.FileNotFoundException;
 import java.util.List;
 
-@RequestMapping("api/v3/dse")
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_DSE;
+
+@RequestMapping(PATH_API + PATH_DSE)
 @RestController
 @CrossOrigin
 public class DseRestController {
