@@ -8,12 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 ### Changed
-- moved rest api from v3 to v4
 ### Deprecated
 ### Removed
-- Unused endpoints from the /terminology path
 ### Fixed
 ### Security
+
+## [6.0.0-alpha.2] - 2024-09-04
+
+### Added
+- JVM options configurable in Dockerimage
+### Changed
+- moved rest api from v3 to v4
+- codex and or feasibility references are replaced by dataportal (not in package names though)
+- openapi documentation updated to 3.1.0
+### Removed
+- Unused endpoints from the /terminology path
 
 ## [6.0.0-alpha.1] - 2024-09-02
 
