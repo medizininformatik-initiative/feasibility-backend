@@ -39,7 +39,6 @@ management:
   health:
     elasticsearch:
       enabled: ${ELASTIC_SEARCH_ENABLED:true}
-
 app:
   dseProfileTreeFile: ${DSE_PROFILE_TREE_FILE:ontology/dse/profile_tree.json}
   terminologySystemsFile: ${TERMINOLOGY_SYSTEMS_FILE:ontology/terminology_systems.json}

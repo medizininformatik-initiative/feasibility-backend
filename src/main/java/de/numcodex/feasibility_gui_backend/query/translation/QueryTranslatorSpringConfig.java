@@ -5,7 +5,8 @@ import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.Mapping;
 import de.numcodex.sq2cql.model.MappingContext;
-import de.numcodex.sq2cql.model.TermCodeNode;
+import de.numcodex.sq2cql.model.MappingTreeBase;
+import de.numcodex.sq2cql.model.MappingTreeModuleRoot;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -78,11 +80,12 @@ public class QueryTranslatorSpringConfig {
     @Bean
     Translator createCqlTranslator(@Qualifier("translation") ObjectMapper jsonUtil) throws IOException {
         var mappings = jsonUtil.readValue(new File(mappingsFile), Mapping[].class);
-        var conceptTree = jsonUtil.readValue(new File(conceptTreeFile), TermCodeNode.class);
+        var mappingTreeBase = new MappingTreeBase(Arrays.stream(jsonUtil.readValue(new File(conceptTreeFile), MappingTreeModuleRoot[].class)).toList());
+
         return Translator.of(MappingContext.of(
                 Stream.of(mappings)
                         .collect(Collectors.toMap(Mapping::key, Function.identity(), (a, b) -> a)),
-                conceptTree,
+                mappingTreeBase,
             Map.ofEntries(entry("http://fhir.de/CodeSystem/bfarm/icd-10-gm", "icd10"),
                 entry("mii.abide", "abide"),
                 entry("http://fhir.de/CodeSystem/bfarm/ops", "ops"),

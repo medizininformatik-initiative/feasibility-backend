@@ -139,7 +139,7 @@ services:
         condition: service_healthy
     environment:
       ELASTIC_HOST: http://dataportal-elastic:9200
-      ELASTIC_GIT_TAG: v3.0.0-test.2
+      ELASTIC_GIT_TAG: v3.0.0-test.3
       ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/TAGPLACEHOLDER/example/fdpg-ontology/
       ELASTIC_FILENAME: elastic.zip
       # if set to false, existing indices are not overridden.
