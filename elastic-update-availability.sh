@@ -7,6 +7,11 @@ ES_INDEX=${ES_INDEX:-ontology}
 
 FILES=("$BASE_DIR"/update-availability/*)
 for availUpdateBundle in "${FILES[@]}"; do
-  echo "Sending Availability Update bundle $availUpdateBundle ..."
-  curl -X POST -H "Content-Type: application/json" --data-binary @"$availUpdateBundle" "$ES_BASE_URL/$ES_INDEX/_bulk"
+  if [[ $(basename "$availUpdateBundle") == *.json ]]; then
+    echo "Sending Availability Update bundle $availUpdateBundle ..."
+    response=$(curl --write-out "%{http_code}" -s --output /dev/null -XPOST -H 'Content-Type: application/json' --data-binary @"$availUpdateBundle" "$ES_BASE_URL/$ES_INDEX/_bulk")
+    echo "$response"
+  else
+    echo "Skipping $availUpdateBundle (not a .json file)"
+  fi
 done

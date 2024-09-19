@@ -4,6 +4,7 @@
 ## Example file structure for update .json files
 
 Note that elastic search accepts this file structure of newline delimited json input even though the document as a whole is not a valid json.
+The files must be terminated by a newline.
 
 ```
 {"update": {"_id": "3c94e2d6-2e27-35b2-aeb7-90a476efd099"}}
@@ -26,4 +27,5 @@ Note that elastic search accepts this file structure of newline delimited json i
 {"doc": {"availability": 100}}
 {"update": {"_id": "69b733e2-99eb-3a12-bcd1-8e7b16c750ae"}}
 {"doc": {"availability": 10000}}
+
 ```
