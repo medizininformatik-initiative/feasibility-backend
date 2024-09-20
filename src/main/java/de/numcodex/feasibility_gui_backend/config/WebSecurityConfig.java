@@ -51,7 +51,7 @@ public class WebSecurityConfig {
   public static final String PATH_DSE = "/dse";
   public static final String PATH_CODEABLE_CONCEPT = "/codeable-concept";
   public static final String PATH_SWAGGER_UI = "/swagger-ui/**";
-  public static final String PATH_SWAGGER_CONFIG = "/v4/api-docs/**";
+  public static final String PATH_SWAGGER_CONFIG = "/v3/api-docs/**";
   @Value("${app.keycloakAllowedRole}")
   private String keycloakAllowedRole;
 
