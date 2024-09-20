@@ -199,6 +199,12 @@
     </dependency>
 
     <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>org.hl7.fhir.utilities</artifactId>
+      <version>6.3.26</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.bucket4j</groupId>
       <artifactId>bucket4j-core</artifactId>
       <version>8.2.0</version>
