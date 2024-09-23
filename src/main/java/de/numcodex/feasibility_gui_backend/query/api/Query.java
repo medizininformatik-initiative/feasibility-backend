@@ -11,7 +11,8 @@ public record Query(
     @JsonProperty long id,
     @JsonProperty StructuredQuery content,
     @JsonProperty String label,
-    @JsonProperty String comment
+    @JsonProperty String comment,
+    @JsonProperty long totalNumberOfPatients
 ) {
 
 }

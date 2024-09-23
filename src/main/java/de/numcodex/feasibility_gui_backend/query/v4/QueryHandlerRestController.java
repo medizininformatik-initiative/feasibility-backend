@@ -309,6 +309,7 @@ public class QueryHandlerRestController {
             .content(structuredQueryValidation.annotateStructuredQuery(query.content(), skipValidation))
             .label(query.label())
             .comment(query.comment())
+            .totalNumberOfPatients(query.totalNumberOfPatients())
             .build();
     return new ResponseEntity<>(annotatedQuery, HttpStatus.OK);
   }

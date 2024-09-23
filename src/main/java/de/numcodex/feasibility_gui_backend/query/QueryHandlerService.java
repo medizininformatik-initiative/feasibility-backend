@@ -203,6 +203,7 @@ public class QueryHandlerService {
                     .content(jsonUtil.readValue(in.getQueryContent().getQueryContent(), StructuredQuery.class))
                     .label(savedQuery.get().getLabel())
                     .comment(savedQuery.get().getComment())
+                    .totalNumberOfPatients(savedQuery.get().getResultSize())
                     .build();
         } else {
             return Query.builder()
