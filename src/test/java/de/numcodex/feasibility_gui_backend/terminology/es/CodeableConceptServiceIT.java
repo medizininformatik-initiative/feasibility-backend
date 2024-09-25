@@ -97,6 +97,14 @@ public class CodeableConceptServiceIT {
   }
 
   @Test
+  void testPerformCodeableConceptSearchWithRepoAndPaging_findsAllWithNoKeyword() {
+    var page = assertDoesNotThrow (() -> codeableConceptService.performCodeableConceptSearchWithRepoAndPaging("", List.of(), 20, 0));
+
+    assertNotNull(page);
+    assertThat(page.getTotalHits()).isEqualTo(3L);
+  }
+
+  @Test
   void testPerformCodeableConceptSearchWithRepoAndPaging_findsTwoOrOneDependingOnFilter() {
     var pageNoFilter = assertDoesNotThrow (() -> codeableConceptService.performCodeableConceptSearchWithRepoAndPaging("ba", List.of(), 20, 0));
     var pageOneFilter = assertDoesNotThrow (() -> codeableConceptService.performCodeableConceptSearchWithRepoAndPaging("ba", List.of("some-value-set"), 20, 0));

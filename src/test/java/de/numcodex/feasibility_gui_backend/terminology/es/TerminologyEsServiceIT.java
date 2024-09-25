@@ -108,6 +108,13 @@ public class TerminologyEsServiceIT {
   }
 
   @Test
+  void testPerformOntologySearchWithPaging_findsAllWithNoKeyword() {
+    var page = terminologyEsService.performOntologySearchWithPaging("", null, null, null, null, false, 20, 0);
+    assertThat(page).isNotNull();
+    assertThat(page.totalHits()).isEqualTo(4L);
+  }
+
+  @Test
   void testPerformOntologySearchWithPaging_oneResult() {
     var page = terminologyEsService.performOntologySearchWithPaging("Hauttransplan", null, null, null, null, false, 20, 0);
     assertThat(page).isNotNull();
