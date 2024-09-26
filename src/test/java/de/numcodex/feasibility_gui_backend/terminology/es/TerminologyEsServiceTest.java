@@ -150,6 +150,23 @@ public class TerminologyEsServiceTest {
     assertThat(searchResult.results()).containsExactlyInAnyOrderElementsOf(dummySearchHitsPage.getSearchHits().stream().map(sh -> EsSearchResultEntry.of(sh.getContent())).toList());
   }
 
+  @ParameterizedTest
+  @MethodSource("generateArgumentsForTestPerformOntologySearchWithPaging")
+  void testPerformOntologySearchWithPagingEmptyKeyword(List<String> criteriaSets, List<String> context, List<String> kdsModule, List<String> terminology, Boolean availability, Integer pageSize, Integer page) {
+    int totalHits = new Random().nextInt(100);
+    SearchHits<OntologyListItemDocument> dummySearchHitsPage = createDummySearchHitsPage(totalHits);
+    doReturn(dummySearchHitsPage).when(operations).search(any(NativeQuery.class), any(Class.class));
+
+    var searchResult = assertDoesNotThrow(
+        () -> terminologyEsService.performOntologySearchWithPaging(
+            "", criteriaSets, context, kdsModule, terminology, availability, pageSize, page)
+    );
+
+    assertThat(searchResult.totalHits()).isEqualTo(totalHits);
+    assertThat(searchResult.results().size()).isEqualTo(dummySearchHitsPage.getTotalHits());
+    assertThat(searchResult.results()).containsExactlyInAnyOrderElementsOf(dummySearchHitsPage.getSearchHits().stream().map(sh -> EsSearchResultEntry.of(sh.getContent())).toList());
+  }
+
   @Test
   void testPerformOntologySearchWithRepoAndPaging_throwsOnInvalidPageSize() {
     assertThrows(IllegalArgumentException.class, () -> terminologyEsService.performOntologySearchWithPaging(

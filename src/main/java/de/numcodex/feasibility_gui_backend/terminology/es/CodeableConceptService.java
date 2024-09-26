@@ -78,15 +78,24 @@ public class CodeableConceptService {
       });
     }
 
-    var mmQuery = new MultiMatchQuery.Builder()
-        .query(keyword)
-        .fields(List.of("termcode.display", "termcode.code^2"))
-        .build();
+    BoolQuery boolQuery;
 
-    var boolQuery = new BoolQuery.Builder()
-        .must(List.of(mmQuery._toQuery()))
-        .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
-        .build();
+    if (keyword.isEmpty()) {
+      boolQuery = new BoolQuery.Builder()
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+
+    } else {
+      var mmQuery = new MultiMatchQuery.Builder()
+          .query(keyword)
+          .fields(List.of("termcode.display", "termcode.code^2"))
+          .build();
+
+      boolQuery = new BoolQuery.Builder()
+          .must(List.of(mmQuery._toQuery()))
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+    }
 
     var query = new NativeQueryBuilder()
         .withQuery(boolQuery._toQuery())

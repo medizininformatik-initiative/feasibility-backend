@@ -95,6 +95,17 @@ class CodeableConceptServiceTest {
   }
 
   @Test
+  void testPerformCodeableConceptSearchWithRepoAndPaging_succeedsWithEmptyKeyword() {
+    SearchHits<CodeableConceptDocument> dummySearchHitsPage = createDummySearchHitsPage(5);
+    doReturn(dummySearchHitsPage).when(operations).search(any(NativeQuery.class), any(Class.class));
+
+    var result = assertDoesNotThrow(() -> codeableConceptService.performCodeableConceptSearchWithRepoAndPaging("", List.of(), 20, 0));
+
+    assertNotNull(result);
+    assertThat(result.getTotalHits()).isNotZero();
+  }
+
+  @Test
   void testGetSearchResultEntryByCode_succeeds() {
     CodeableConceptDocument dummyCodeableConceptDocument = createDummyCodeableConceptDocument("1");
     doReturn(Optional.of(dummyCodeableConceptDocument)).when(repository).findById(any());

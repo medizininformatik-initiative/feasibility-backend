@@ -141,15 +141,23 @@ public class TerminologyEsService {
       });
     }
 
-    var mmQuery = new MultiMatchQuery.Builder()
-        .query(keyword)
-        .fields(List.of("name", "termcode^2"))
-        .build();
+    BoolQuery boolQuery;
 
-    var boolQuery = new BoolQuery.Builder()
-        .must(List.of(mmQuery._toQuery()))
-        .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
-        .build();
+    if (keyword.isEmpty()) {
+      boolQuery = new BoolQuery.Builder()
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+    } else {
+      var mmQuery = new MultiMatchQuery.Builder()
+          .query(keyword)
+          .fields(List.of("name", "termcode^2"))
+          .build();
+
+      boolQuery = new BoolQuery.Builder()
+          .must(List.of(mmQuery._toQuery()))
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+    }
 
     var innerQuery = new NativeQueryBuilder()
         .withQuery(boolQuery._toQuery())
@@ -157,7 +165,7 @@ public class TerminologyEsService {
         .build();
 
     var inlineScript = new InlineScript.Builder()
-        .source("doc['availability'].value == 0 ? _score : _score * 100")
+        .source("doc['availability'].value == 0 ? _score : _score + 100")
         .build();
 
     var availabilityScoreScript = new Script.Builder()
