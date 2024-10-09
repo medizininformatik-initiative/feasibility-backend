@@ -2,8 +2,10 @@ package de.numcodex.feasibility_gui_backend.dse.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.dse.DseService;
+import de.numcodex.feasibility_gui_backend.dse.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfile;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -77,7 +79,7 @@ class DseRestControllerIT {
     mockMvc.perform(get(URI.create(PATH_API + PATH_DSE + "/profile-data")).param("ids", "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab,foobar").with(csrf()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$[0].display").value("some-display"));
+        .andExpect(jsonPath("$[0].display.original").value("some-display"));
   }
 
   @Test
@@ -95,9 +97,23 @@ class DseRestControllerIT {
 
     return DseProfile.builder()
         .url("http://example.com")
-        .display("some-display")
+        .display(createDummyDisplayEntry())
         .fields(List.of())
         .filters(List.of())
+        .build();
+  }
+
+  private DisplayEntry createDummyDisplayEntry() {
+    return DisplayEntry.builder()
+        .original("some-display")
+        .translations(List.of(createDummyTranslation()))
+        .build();
+  }
+
+  private LocalizedValue createDummyTranslation() {
+    return LocalizedValue.builder()
+        .language("en")
+        .value("display value")
         .build();
   }
 }

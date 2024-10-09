@@ -12,7 +12,7 @@ public record DseProfileTreeNode(
     @JsonProperty String id,
     @JsonProperty List<DseProfileTreeNode> children,
     @JsonProperty String name,
-    @JsonProperty String display,
+    @JsonProperty DisplayEntry display,
     @JsonProperty String module,
     @JsonProperty String url,
     @JsonProperty boolean leaf,
