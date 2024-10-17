@@ -3,7 +3,9 @@ package de.numcodex.feasibility_gui_backend.dse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import de.numcodex.feasibility_gui_backend.dse.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfile;
 import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,9 +131,23 @@ class DseServiceTest {
 
     return de.numcodex.feasibility_gui_backend.dse.api.DseProfile.builder()
         .url("http://example.com")
-        .display("some-display")
+        .display(createDummyDisplayEntry())
         .fields(List.of())
         .filters(List.of())
+        .build();
+  }
+
+  private DisplayEntry createDummyDisplayEntry() {
+    return DisplayEntry.builder()
+        .original("some-display")
+        .translations(List.of(createDummyTranslation()))
+        .build();
+  }
+
+  private LocalizedValue createDummyTranslation() {
+    return LocalizedValue.builder()
+        .language("en")
+        .value("display value")
         .build();
   }
 }
