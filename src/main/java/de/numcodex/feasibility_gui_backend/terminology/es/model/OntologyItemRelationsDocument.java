@@ -10,13 +10,13 @@ import java.util.Collection;
 @Builder
 @Document(indexName = "ontology")
 public record OntologyItemRelationsDocument(
-    @Field(type = FieldType.Nested, includeInParent = true, name = "translations")
-    Collection<Translation> translations,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "parents")
+    @Field(name = "display")
+    Display display,
+    @Field(name = "parents")
     Collection<Relative> parents,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "children")
+    @Field(name = "children")
     Collection<Relative> children,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "related_terms")
+    @Field(name = "related_terms")
     Collection<Relative> relatedTerms
 ) {
 }

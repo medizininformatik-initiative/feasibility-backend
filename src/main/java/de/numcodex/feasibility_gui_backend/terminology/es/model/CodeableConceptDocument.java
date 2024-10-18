@@ -13,9 +13,11 @@ import java.util.List;
 @Document(indexName = "codeable_concept")
 public record CodeableConceptDocument(
     @Id String id,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "termcode")
+    @Field(name = "termcode")
     TermCode termCode,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "value_sets")
-    List<String> valueSets
+    @Field(name = "value_sets")
+    List<String> valueSets,
+    @Field(name = "display")
+    Display display
 ) {
 }

@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.dse.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.dse.DseService;
-import de.numcodex.feasibility_gui_backend.dse.api.DisplayEntry;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfile;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
 import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
