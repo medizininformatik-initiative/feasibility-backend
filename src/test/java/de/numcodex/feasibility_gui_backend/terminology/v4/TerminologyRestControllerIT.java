@@ -2,7 +2,9 @@ package de.numcodex.feasibility_gui_backend.terminology.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
@@ -132,7 +134,7 @@ public class TerminologyRestControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalHits").value(dummyEsSearchResult.totalHits()))
             .andExpect(jsonPath("$.results[0].id").value(dummyEsSearchResult.results().get(0).id()))
-            .andExpect(jsonPath("$.results[0].name").value(dummyEsSearchResult.results().get(0).name()))
+            .andExpect(jsonPath("$.results[0].display.original").value(dummyEsSearchResult.results().get(0).display().original()))
             .andExpect(jsonPath("$.results[0].terminology").value(dummyEsSearchResult.results().get(0).terminology()))
             .andExpect(jsonPath("$.results[0].selectable").value(dummyEsSearchResult.results().get(0).selectable()))
             .andExpect(jsonPath("$.results[0].kdsModule").value(dummyEsSearchResult.results().get(0).kdsModule()))
@@ -157,8 +159,6 @@ public class TerminologyRestControllerIT {
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc/relations")).with(csrf()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.translations[0].lang").value(dummyOntologyItemRelations.translations().stream().toList().get(0).lang()))
-            .andExpect(jsonPath("$.translations[0].value").value(dummyOntologyItemRelations.translations().stream().toList().get(0).value()))
             .andExpect(jsonPath("$.children[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.children().stream().toList().get(0).contextualizedTermcodeHash()))
             .andExpect(jsonPath("$.children[0].name").value(dummyOntologyItemRelations.children().stream().toList().get(0).name()))
             .andExpect(jsonPath("$.parents[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.parents().stream().toList().get(0).contextualizedTermcodeHash()))
@@ -185,7 +185,7 @@ public class TerminologyRestControllerIT {
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc")).with(csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(dummySearchResultEntry.id()))
-            .andExpect(jsonPath("$.name").value(dummySearchResultEntry.name()))
+            .andExpect(jsonPath("$.display.original").value(dummySearchResultEntry.display().original()))
             .andExpect(jsonPath("$.availability").value(dummySearchResultEntry.availability()))
             .andExpect(jsonPath("$.context").value(dummySearchResultEntry.context()))
             .andExpect(jsonPath("$.terminology").value(dummySearchResultEntry.terminology()))
@@ -266,24 +266,30 @@ public class TerminologyRestControllerIT {
             .context("some-context")
             .id("abc-123")
             .kdsModule("some-module")
-            .name("some-name")
+            .display(createDummyDisplayEntry())
             .selectable(true)
+            .build();
+    }
+
+    private DisplayEntry createDummyDisplayEntry() {
+        return DisplayEntry.builder()
+            .original("some-name")
+            .translations(List.of(createDummyLocalizedValue()))
+            .build();
+    }
+
+    private LocalizedValue createDummyLocalizedValue() {
+        return LocalizedValue.builder()
+            .language("de-DE")
+            .value("some-name")
             .build();
     }
 
     private OntologyItemRelationsDocument createDummyOntologyItemRelations() {
         return OntologyItemRelationsDocument.builder()
             .relatedTerms(List.of(createDummyRelative()))
-            .translations(List.of(createDummyTranslation()))
             .parents(List.of(createDummyRelative()))
             .children(List.of(createDummyRelative()))
-            .build();
-    }
-
-    private Translation createDummyTranslation() {
-        return Translation.builder()
-            .lang("de")
-            .value("Lorem Ipsum")
             .build();
     }
 

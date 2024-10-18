@@ -3,7 +3,7 @@ package de.numcodex.feasibility_gui_backend.dse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import de.numcodex.feasibility_gui_backend.dse.api.DisplayEntry;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
 import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfile;

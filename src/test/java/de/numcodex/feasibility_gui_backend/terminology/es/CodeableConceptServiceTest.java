@@ -2,7 +2,9 @@ package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.Display;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +58,20 @@ class CodeableConceptServiceTest {
 
     assertNotNull(result);
     assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
-    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0).termCode());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().display().original(), result.getResults().get(0).display().original());
+    assertTrue(result.getResults().get(0).display().translations().containsAll(
+            List.of(
+                LocalizedValue.builder()
+                    .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().deDe())
+                    .language("de-DE")
+                    .build(),
+                LocalizedValue.builder()
+                    .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().enUs())
+                    .language("en-US")
+                    .build())
+        )
+    );
   }
 
   @Test
@@ -68,7 +83,20 @@ class CodeableConceptServiceTest {
 
     assertNotNull(result);
     assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
-    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0).termCode());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().display().original(), result.getResults().get(0).display().original());
+    assertTrue(result.getResults().get(0).display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().enUs())
+                .language("en-US")
+                .build())
+        )
+    );
   }
 
   @Test
@@ -80,7 +108,20 @@ class CodeableConceptServiceTest {
 
     assertNotNull(result);
     assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
-    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0).termCode());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().display().original(), result.getResults().get(0).display().original());
+    assertTrue(result.getResults().get(0).display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().enUs())
+                .language("en-US")
+                .build())
+        )
+    );
   }
 
   @Test
@@ -113,7 +154,20 @@ class CodeableConceptServiceTest {
     var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByCode("1"));
 
     assertNotNull(result);
-    assertEquals(dummyCodeableConceptDocument.termCode(), result);
+    assertEquals(dummyCodeableConceptDocument.termCode(), result.termCode());
+    assertEquals(dummyCodeableConceptDocument.display().original(), result.display().original());
+    assertTrue(result.display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummyCodeableConceptDocument.display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummyCodeableConceptDocument.display().enUs())
+                .language("en-US")
+                .build()
+        )
+    ));
   }
 
   @Test
@@ -150,7 +204,16 @@ class CodeableConceptServiceTest {
     return CodeableConceptDocument.builder()
         .id(id)
         .termCode(createDummyTermcode())
+        .display(createDummyDisplay())
         .valueSets(List.of())
+        .build();
+  }
+
+  private Display createDummyDisplay() {
+    return Display.builder()
+        .original("code-1")
+        .deDe("Code 1")
+        .enUs("Code One")
         .build();
   }
 
