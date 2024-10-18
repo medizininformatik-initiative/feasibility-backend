@@ -16,6 +16,8 @@ public record CodeableConceptDocument(
     @Field(name = "termcode")
     TermCode termCode,
     @Field(name = "value_sets")
-    List<String> valueSets
+    List<String> valueSets,
+    @Field(name = "display")
+    Display display
 ) {
 }

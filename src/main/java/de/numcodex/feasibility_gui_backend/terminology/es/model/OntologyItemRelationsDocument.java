@@ -10,8 +10,8 @@ import java.util.Collection;
 @Builder
 @Document(indexName = "ontology")
 public record OntologyItemRelationsDocument(
-    @Field(name = "translations")
-    Collection<Translation> translations,
+    @Field(name = "display")
+    Display display,
     @Field(name = "parents")
     Collection<Relative> parents,
     @Field(name = "children")

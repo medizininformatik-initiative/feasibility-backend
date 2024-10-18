@@ -13,15 +13,14 @@ import java.util.Collection;
 @Document(indexName = "ontology")
 public record OntologyItemDocument(
     @Id String id,
-    String name,
     int availability,
     TermCode context,
     String terminology,
     String termcode,
-    @Field(name = "kds_module") String kdsModule,
-
-    @Field(name = "translations")
-    Collection<Translation> translations,
+    @Field(name = "display")
+    Display display,
+    @Field(name = "kds_module")
+    String kdsModule,
     @Field(name = "parents")
     Collection<Relative> parents,
     @Field(name = "children")
