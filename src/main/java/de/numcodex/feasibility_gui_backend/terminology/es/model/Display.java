@@ -6,9 +6,9 @@ import org.springframework.data.elasticsearch.annotations.Field;
 @Builder
 public record Display(
     String original,
-    @Field(name = "de-De")
+    @Field(name = "de-DE")
     String deDe,
-    @Field(name = "en-Us")
+    @Field(name = "en-US")
     String enUs
 ) {
 }
