@@ -2,7 +2,9 @@ package de.numcodex.feasibility_gui_backend.terminology.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
@@ -69,6 +71,8 @@ public class TerminologyRestControllerIT {
         var id = UUID.randomUUID();
         var criteriaProfileDataList = createCriteriaProfileDataList(List.of(id));
         doReturn(criteriaProfileDataList).when(terminologyService).getCriteriaProfileData(anyList());
+        doReturn(List.of(createDummyEsSearchResultEntry(id.toString()))).when(terminologyEsService).getSearchResultEntriesByHash(anyList());
+        doReturn(criteriaProfileDataList).when(terminologyService).addDisplayDataToCriteriaProfileData(anyList(), anyList());
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/criteria-profile-data")).param("ids", id.toString()).with(csrf()))
             .andExpect(status().isOk())
@@ -132,7 +136,7 @@ public class TerminologyRestControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalHits").value(dummyEsSearchResult.totalHits()))
             .andExpect(jsonPath("$.results[0].id").value(dummyEsSearchResult.results().get(0).id()))
-            .andExpect(jsonPath("$.results[0].name").value(dummyEsSearchResult.results().get(0).name()))
+            .andExpect(jsonPath("$.results[0].display.original").value(dummyEsSearchResult.results().get(0).display().original()))
             .andExpect(jsonPath("$.results[0].terminology").value(dummyEsSearchResult.results().get(0).terminology()))
             .andExpect(jsonPath("$.results[0].selectable").value(dummyEsSearchResult.results().get(0).selectable()))
             .andExpect(jsonPath("$.results[0].kdsModule").value(dummyEsSearchResult.results().get(0).kdsModule()))
@@ -152,25 +156,23 @@ public class TerminologyRestControllerIT {
     @Test
     @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetOntologyItemRelationsByHash_succeeds() throws Exception {
-        var dummyOntologyItemRelations = createDummyOntologyItemRelations();
-        doReturn(dummyOntologyItemRelations).when(terminologyEsService).getOntologyItemRelationsByHash(any(String.class));
+        var dummyRelationEntry = createDummyRelationEntry();
+        doReturn(dummyRelationEntry).when(terminologyEsService).getRelationEntryByHash(any(String.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc/relations")).with(csrf()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.translations[0].lang").value(dummyOntologyItemRelations.translations().stream().toList().get(0).lang()))
-            .andExpect(jsonPath("$.translations[0].value").value(dummyOntologyItemRelations.translations().stream().toList().get(0).value()))
-            .andExpect(jsonPath("$.children[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.children().stream().toList().get(0).contextualizedTermcodeHash()))
-            .andExpect(jsonPath("$.children[0].name").value(dummyOntologyItemRelations.children().stream().toList().get(0).name()))
-            .andExpect(jsonPath("$.parents[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.parents().stream().toList().get(0).contextualizedTermcodeHash()))
-            .andExpect(jsonPath("$.parents[0].name").value(dummyOntologyItemRelations.parents().stream().toList().get(0).name()))
-            .andExpect(jsonPath("$.relatedTerms[0].contextualizedTermcodeHash").value(dummyOntologyItemRelations.relatedTerms().stream().toList().get(0).contextualizedTermcodeHash()))
-            .andExpect(jsonPath("$.relatedTerms[0].name").value(dummyOntologyItemRelations.relatedTerms().stream().toList().get(0).name()));
+            .andExpect(jsonPath("$.children[0].contextualizedTermcodeHash").value(dummyRelationEntry.children().stream().toList().get(0).contextualizedTermcodeHash()))
+            .andExpect(jsonPath("$.children[0].name").value(dummyRelationEntry.children().stream().toList().get(0).name()))
+            .andExpect(jsonPath("$.parents[0].contextualizedTermcodeHash").value(dummyRelationEntry.parents().stream().toList().get(0).contextualizedTermcodeHash()))
+            .andExpect(jsonPath("$.parents[0].name").value(dummyRelationEntry.parents().stream().toList().get(0).name()))
+            .andExpect(jsonPath("$.relatedTerms[0].contextualizedTermcodeHash").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).contextualizedTermcodeHash()))
+            .andExpect(jsonPath("$.relatedTerms[0].name").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).name()));
     }
 
     @Test
     public void testGetOntologyItemRelationsByHash_failsOnUnauthorized() throws Exception {
-        var dummyOntologyItemRelations = createDummyOntologyItemRelations();
-        doReturn(dummyOntologyItemRelations).when(terminologyEsService).getOntologyItemRelationsByHash(any(String.class));
+        var dummyRelationEntry = createDummyRelationEntry();
+        doReturn(dummyRelationEntry).when(terminologyEsService).getRelationEntryByHash(any(String.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc/relations")).with(csrf()))
             .andExpect(status().isUnauthorized());
@@ -179,13 +181,13 @@ public class TerminologyRestControllerIT {
     @Test
     @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetOntologyItemByHash_succeeds() throws Exception {
-        var dummySearchResultEntry = createDummyEsSearchResultEntry();
+        var dummySearchResultEntry = createDummyEsSearchResultEntry("abc-123");
         doReturn(dummySearchResultEntry).when(terminologyEsService).getSearchResultEntryByHash(any(String.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc")).with(csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(dummySearchResultEntry.id()))
-            .andExpect(jsonPath("$.name").value(dummySearchResultEntry.name()))
+            .andExpect(jsonPath("$.display.original").value(dummySearchResultEntry.display().original()))
             .andExpect(jsonPath("$.availability").value(dummySearchResultEntry.availability()))
             .andExpect(jsonPath("$.context").value(dummySearchResultEntry.context()))
             .andExpect(jsonPath("$.terminology").value(dummySearchResultEntry.terminology()))
@@ -196,7 +198,7 @@ public class TerminologyRestControllerIT {
 
     @Test
     public void testGetOntologyItemByHash_failsOnUnauthorized() throws Exception {
-        var dummySearchResultEntry = createDummyEsSearchResultEntry();
+        var dummySearchResultEntry = createDummyEsSearchResultEntry("abc-123");
         doReturn(dummySearchResultEntry).when(terminologyEsService).getSearchResultEntryByHash(any(String.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc")).with(csrf()))
@@ -255,35 +257,54 @@ public class TerminologyRestControllerIT {
     private EsSearchResult createDummyEsSearchResult(int totalHits) {
         return EsSearchResult.builder()
             .totalHits(totalHits)
-            .results(List.of(createDummyEsSearchResultEntry()))
+            .results(List.of(createDummyEsSearchResultEntry("abc-123")))
             .build();
     }
 
-    private EsSearchResultEntry createDummyEsSearchResultEntry() {
+    private EsSearchResultEntry createDummyEsSearchResultEntry(String id) {
         return EsSearchResultEntry.builder()
             .terminology("some-terminology")
             .availability(100)
             .context("some-context")
-            .id("abc-123")
+            .id(id)
             .kdsModule("some-module")
-            .name("some-name")
+            .display(createDummyDisplayEntry())
             .selectable(true)
             .build();
+    }
+
+    private Display createDummyDisplay() {
+        return Display.builder()
+            .original("some-name")
+            .deDe("Some German Name")
+            .enUs("Some English Name")
+            .build();
+    }
+
+    private DisplayEntry createDummyDisplayEntry() {
+        return DisplayEntry.builder()
+            .original("some-name")
+            .translations(List.of(createDummyLocalizedValue()))
+            .build();
+    }
+
+    private LocalizedValue createDummyLocalizedValue() {
+        return LocalizedValue.builder()
+            .language("de-DE")
+            .value("some-name")
+            .build();
+    }
+
+    private RelationEntry createDummyRelationEntry() {
+        return RelationEntry.of(createDummyOntologyItemRelations());
     }
 
     private OntologyItemRelationsDocument createDummyOntologyItemRelations() {
         return OntologyItemRelationsDocument.builder()
             .relatedTerms(List.of(createDummyRelative()))
-            .translations(List.of(createDummyTranslation()))
             .parents(List.of(createDummyRelative()))
             .children(List.of(createDummyRelative()))
-            .build();
-    }
-
-    private Translation createDummyTranslation() {
-        return Translation.builder()
-            .lang("de")
-            .value("Lorem Ipsum")
+            .display(createDummyDisplay())
             .build();
     }
 

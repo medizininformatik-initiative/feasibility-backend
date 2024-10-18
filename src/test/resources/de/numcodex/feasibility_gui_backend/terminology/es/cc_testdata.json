@@ -1,6 +1,6 @@
 {"index": {"_index": "codeable_concept", "_id": "A1.0"}}
-{"termcode": {"code": "A1.0", "display": "foo", "system": "some-system", "version": 2010}, "value_sets": []}
+{"termcode": {"code": "A1.0", "display": "foo", "system": "some-system", "version": 2010}, "display":  {"original":  "foo", "en": "foo", "de": "föö"}, "value_sets": []}
 {"index": {"_index": "codeable_concept", "_id": "A1.1"}}
-{"termcode": {"code": "A1.1", "display": "bar", "system": "another-system", "version": 2012}, "value_sets": ["some-value-set"]}
+{"termcode": {"code": "A1.1", "display": "bar", "system": "another-system", "version": 2012}, "display":  {"original":  "bar", "en": "bar", "de": "bär"} ,"value_sets": ["some-value-set"]}
 {"index": {"_index": "codeable_concept", "_id": "A2.0"}}
-{"termcode": {"code": "A2.0", "display": "baz", "system": "some-system", "version": 2023}, "value_sets": []}
+{"termcode": {"code": "A2.0", "display": "baz", "system": "some-system", "version": 2023}, "display":  {"original":  "baz", "en": "baz", "de": "bäz"},"value_sets": []}
