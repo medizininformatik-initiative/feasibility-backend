@@ -20,13 +20,13 @@ public record OntologyItemDocument(
     String termcode,
     @Field(name = "kds_module") String kdsModule,
 
-    @Field(type = FieldType.Nested, includeInParent = true, name = "translations")
+    @Field(name = "translations")
     Collection<Translation> translations,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "parents")
+    @Field(name = "parents")
     Collection<Relative> parents,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "children")
+    @Field(name = "children")
     Collection<Relative> children,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "related_terms")
+    @Field(name = "related_terms")
     Collection<Relative> relatedTerms
 ) {
 }
