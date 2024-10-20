@@ -56,4 +56,6 @@ googleCodeStyle.xml
 
 result.log
 ontology
+update-availability/*
+!update-availability/README.md
 

@@ -28,8 +28,10 @@ spring:
 
 springdoc:
   swagger-ui:
-    url: /v4/api-docs/swagger.yaml
+    disable-swagger-default-url: true
     tryItOutEnabled: false
+    path: /swagger-ui
+    url: /v3/api-docs/swagger.yaml
 management:
   endpoints:
     enabled-by-default: false
@@ -39,7 +41,6 @@ management:
   health:
     elasticsearch:
       enabled: ${ELASTIC_SEARCH_ENABLED:true}
-
 app:
   dseProfileTreeFile: ${DSE_PROFILE_TREE_FILE:ontology/dse/profile_tree.json}
   terminologySystemsFile: ${TERMINOLOGY_SYSTEMS_FILE:ontology/terminology_systems.json}

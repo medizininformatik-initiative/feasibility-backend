@@ -1,6 +1,8 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.InlineScript;
+import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
@@ -139,22 +141,55 @@ public class TerminologyEsService {
       });
     }
 
-    var mmQuery = new MultiMatchQuery.Builder()
-        .query(keyword)
-        .fields(List.of("name", "termcode^2"))
-        .build();
+    BoolQuery boolQuery;
 
-    var boolQuery = new BoolQuery.Builder()
-        .must(List.of(mmQuery._toQuery()))
-        .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
-        .build();
+    if (keyword.isEmpty()) {
+      boolQuery = new BoolQuery.Builder()
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+    } else {
+      var mmQuery = new MultiMatchQuery.Builder()
+          .query(keyword)
+          .fields(List.of("name", "termcode^2"))
+          .build();
 
-    var query = new NativeQueryBuilder()
+      boolQuery = new BoolQuery.Builder()
+          .must(List.of(mmQuery._toQuery()))
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+    }
+
+    var innerQuery = new NativeQueryBuilder()
         .withQuery(boolQuery._toQuery())
         .withPageable(pageRequest)
         .build();
 
-    return operations.search(query, OntologyListItemDocument.class);
+    var inlineScript = new InlineScript.Builder()
+        .source("doc['availability'].value == 0 ? _score : _score + 100")
+        .build();
+
+    var availabilityScoreScript = new Script.Builder()
+        .inline(inlineScript)
+        .build();
+
+    var function = FunctionScoreBuilders.scriptScore()
+        .script(availabilityScoreScript)
+        .build();
+
+    var functionList = List.of(function._toFunctionScore());
+
+    var functionScoreQuery = new FunctionScoreQuery.Builder()
+        .query(innerQuery.getQuery())
+        .functions(functionList)
+        .boostMode(FunctionBoostMode.Replace)
+        .build();
+
+    var finalQuery = new NativeQueryBuilder()
+        .withQuery(functionScoreQuery._toQuery())
+        .withPageable(pageRequest)
+        .build();
+
+    return operations.search(finalQuery, OntologyListItemDocument.class);
 
   }
 
