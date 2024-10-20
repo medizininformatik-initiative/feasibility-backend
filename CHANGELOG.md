@@ -13,6 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 ### Security
 
+## [6.0.0-alpha.3] - 2024-10-21
+
+### Changed
+- Allow empty search
+- Change structure of dse profile and details for new translation structure
+
 ## [6.0.0-alpha.2] - 2024-09-04
 
 ### Added
