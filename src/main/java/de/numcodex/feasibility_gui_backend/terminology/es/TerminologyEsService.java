@@ -150,7 +150,7 @@ public class TerminologyEsService {
     } else {
       var mmQuery = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("name", "termcode^2"))
+          .fields(List.of("display.de-DE", "display.en-US", "termcode^2"))
           .build();
 
       boolQuery = new BoolQuery.Builder()
@@ -196,7 +196,7 @@ public class TerminologyEsService {
   public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {
     var ontologyItem = ontologyItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
     return OntologyItemRelationsDocument.builder()
-        .translations(ontologyItem.translations())
+        .display(ontologyItem.display())
         .parents(ontologyItem.parents())
         .children(ontologyItem.children())
         .relatedTerms(ontologyItem.relatedTerms())

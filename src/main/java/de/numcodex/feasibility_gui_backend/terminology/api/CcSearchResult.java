@@ -10,5 +10,5 @@ import java.util.List;
 @Builder
 public class CcSearchResult {
   private long totalHits;
-  private List<TermCode> results;
+  private List<CodeableConceptEntry> results;
 }

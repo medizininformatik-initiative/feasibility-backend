@@ -1,12 +1,13 @@
 package de.numcodex.feasibility_gui_backend.terminology.api;
 
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.OntologyListItemDocument;
 import lombok.Builder;
 
 @Builder
 public record EsSearchResultEntry(
     String id,
-    String name,
+    DisplayEntry display,
     int availability,
     String context,
     String terminology,
@@ -17,7 +18,7 @@ public record EsSearchResultEntry(
   public static EsSearchResultEntry of(OntologyListItemDocument ontologyListItemDocument) {
     return EsSearchResultEntry.builder()
         .id(ontologyListItemDocument.id())
-        .name(ontologyListItemDocument.name())
+        .display(DisplayEntry.of(ontologyListItemDocument.display()))
         .availability(ontologyListItemDocument.availability())
         .context(ontologyListItemDocument.context().code())
         .terminology(ontologyListItemDocument.terminology())

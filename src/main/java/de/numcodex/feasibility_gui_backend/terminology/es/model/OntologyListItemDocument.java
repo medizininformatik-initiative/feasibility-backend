@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 @Document(indexName = "ontology")
 public record OntologyListItemDocument(
     @Id String id,
-    String name,
+    Display display,
     int availability,
     TermCode context,
     String terminology,

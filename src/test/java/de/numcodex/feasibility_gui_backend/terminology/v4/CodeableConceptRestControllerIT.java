@@ -1,10 +1,13 @@
 package de.numcodex.feasibility_gui_backend.terminology.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
+import de.numcodex.feasibility_gui_backend.terminology.api.CodeableConceptEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.CodeableConceptService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -63,31 +66,54 @@ class CodeableConceptRestControllerIT {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.totalHits").value(dummyCcSearchResult.getTotalHits()))
         .andExpect(jsonPath("$.results.length()").value(dummyCcSearchResult.getResults().size()))
-        .andExpect(jsonPath("$.results[0].code").value(dummyCcSearchResult.getResults().get(0).code()))
-        .andExpect(jsonPath("$.results[0].system").value(dummyCcSearchResult.getResults().get(0).system()))
-        .andExpect(jsonPath("$.results[0].version").value(dummyCcSearchResult.getResults().get(0).version()))
-        .andExpect(jsonPath("$.results[0].display").value(dummyCcSearchResult.getResults().get(0).display()));
+        .andExpect(jsonPath("$.results[0].termCode.code").value(dummyCcSearchResult.getResults().get(0).termCode().code()))
+        .andExpect(jsonPath("$.results[0].termCode.system").value(dummyCcSearchResult.getResults().get(0).termCode().system()))
+        .andExpect(jsonPath("$.results[0].termCode.version").value(dummyCcSearchResult.getResults().get(0).termCode().version()))
+        .andExpect(jsonPath("$.results[0].termCode.display").value(dummyCcSearchResult.getResults().get(0).termCode().display()));
   }
 
   @Test
   @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   void testGetCodeableConceptByCode_succeedsWith200() throws Exception {
-    TermCode dummyTermcode = createDummyTermcode();
-    doReturn(dummyTermcode).when(codeableConceptService).getSearchResultEntryByCode(any(String.class));
+    CodeableConceptEntry dummyCodeableConceptEntry = createDummyCodeableConceptEntry();
+    doReturn(dummyCodeableConceptEntry).when(codeableConceptService).getSearchResultEntryByCode(any(String.class));
 
     mockMvc.perform(get(URI.create(PATH_API + PATH_CODEABLE_CONCEPT + "/entry/1")).with(csrf()))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.code").value(dummyTermcode.code()))
-        .andExpect(jsonPath("$.system").value(dummyTermcode.system()))
-        .andExpect(jsonPath("$.version").value(dummyTermcode.version()))
-        .andExpect(jsonPath("$.display").value(dummyTermcode.display()));
+        .andExpect(jsonPath("$.termCode.code").value(dummyCodeableConceptEntry.termCode().code()))
+        .andExpect(jsonPath("$.termCode.system").value(dummyCodeableConceptEntry.termCode().system()))
+        .andExpect(jsonPath("$.termCode.version").value(dummyCodeableConceptEntry.termCode().version()))
+        .andExpect(jsonPath("$.termCode.display").value(dummyCodeableConceptEntry.termCode().display()));
   }
 
   private CcSearchResult createDummyCcSearchResult() {
     return CcSearchResult.builder()
         .totalHits(1)
-        .results(List.of(createDummyTermcode()))
+        .results(List.of(createDummyCodeableConceptEntry()))
+        .build();
+  }
+
+  private CodeableConceptEntry createDummyCodeableConceptEntry() {
+    return CodeableConceptEntry.builder()
+        .termCode(createDummyTermcode())
+        .display(createDummyDisplayEntry())
+        .build();
+  }
+
+  private DisplayEntry createDummyDisplayEntry() {
+    return DisplayEntry.builder()
+        .original("Code 1")
+        .translations(List.of(
+            LocalizedValue.builder()
+                .value("code 1")
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value("code 1")
+                .language("en-US")
+                .build()
+        ))
         .build();
   }
 
