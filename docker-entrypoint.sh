@@ -28,8 +28,11 @@ if [ ! "${#ca_files[@]}" -eq 0 ]; then
 
     done
 
+    echo "### JAVA_OPTS is set to $JAVA_OPTS"
+
     java $JAVA_OPTS -Djavax.net.ssl.trustStore="$TRUSTSTORE_FILE" -Djavax.net.ssl.trustStorePassword="$TRUSTSTORE_PASS" -jar dataportal-backend.jar
 else
     echo "# No CA *.pem cert files found in /opt/dataportal-backend/certs -> starting dataportal backend without own CAs"
+    echo "### JAVA_OPTS is set to $JAVA_OPTS"
     java $JAVA_OPTS -jar dataportal-backend.jar
 fi
