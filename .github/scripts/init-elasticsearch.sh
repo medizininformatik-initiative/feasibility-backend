@@ -1,33 +1,25 @@
-#!/bin/sh
+#!/bin/bash -e
 
-# Wait for Elasticsearch to start up before doing anything
-until curl -X GET "$ELASTIC_HOST/_cluster/health" | grep -q '"status":"green"\|"status":"yellow"'; do
-    echo "Waiting for Elasticsearch..."
-    sleep 5
-done
-
-ABSOLUTE_FILEPATH="${ELASTIC_FILEPATH//TAGPLACEHOLDER/$ELASTIC_GIT_TAG}$ELASTIC_FILENAME"
+ABSOLUTE_FILEPATH="${ELASTIC_FILEPATH//TAGPLACEHOLDER/$ONTOLOGY_GIT_TAG}$ELASTIC_FILENAME"
 echo "Downloading $ABSOLUTE_FILEPATH"
 response_onto_dl=$(curl --write-out "%{http_code}" -sLO "$ABSOLUTE_FILEPATH")
 
 if [ "$response_onto_dl" -ne 200 ]; then
-  echo "Could not download ontology file. Maybe the tag $ELASTIC_GIT_TAG does not exist? Error code was $response_onto_dl"
+  echo "Could not download ontology file. Maybe the tag $ONTOLOGY_GIT_TAG does not exist? Error code was $response_onto_dl"
   exit 1
 fi
 
 unzip -o "$ELASTIC_FILENAME"
 
-if [ "$OVERRIDE_EXISTING" = "true" ]; then
-  echo "(Trying to) delete existing indices"
-  curl --request DELETE "$ELASTIC_HOST/ontology"
-  curl --request DELETE "$ELASTIC_HOST/codeable_concept"
-fi
+echo "(Trying to) delete existing indices"
+curl --request DELETE "$ELASTIC_HOST/ontology"
+curl --request DELETE "$ELASTIC_HOST/codeable_concept"
 
 echo "Creating ontology index..."
 response_onto=$(curl --write-out "%{http_code}" -s --output /dev/null -XPUT -H 'Content-Type: application/json' "$ELASTIC_HOST/ontology" -d @elastic/ontology_index.json)
 echo "Creating codeable concept index..."
 response_cc=$(curl --write-out "%{http_code}" -s --output /dev/null -XPUT -H 'Content-Type: application/json' "$ELASTIC_HOST/codeable_concept" -d @elastic/codeable_concept_index.json)
-echo "Done"
+echo "Done."
 
 for FILE in elastic/*; do
   if [ -f "$FILE" ]; then
