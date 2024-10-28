@@ -1,8 +1,6 @@
 package de.numcodex.feasibility_gui_backend.terminology.persistence;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
