@@ -16,7 +16,6 @@ services:
       API_BASE_URL: "http://localhost:8091/api/"
       ALLOWED_ORIGINS: "https://localhost"
       QUERYRESULT_EXPIRY_MINUTES: 5
-      ELASTIC_SEARCH_ENABLED: "false"
       # ---- db config
       DATABASE_HOST: "dataportal-postgres"
       DATABASE_PORT: 5432
@@ -60,6 +59,10 @@ services:
       PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS: 7200
       PRIVACY_THRESHOLD_RESULTS: 0
       PRIVACY_THRESHOLD_SITES: 0
+      # ---- Elastic Search
+      ELASTIC_SEARCH_ENABLED: true
+      ELASTIC_SEARCH_HOST: dataportal-elastic:9200
+      ELASTIC_SEARCH_FILTER: context,terminology,kds_module
       # ---- logging
       LOG_LEVEL_SQL: "warn"
       LOG_LEVEL: "warn"
@@ -81,6 +84,24 @@ services:
       POSTGRES_USER: "dataportaluser"
       POSTGRES_PASSWORD: "dataportalpw"
       POSTGRES_DB: "dataportal"
+
+  dataportal-elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: dataportal-elastic
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xmx512m -Xms512m
+      node.name: es01
+      cluster.name: elasticsearch
+      xpack.security.enabled: false
 
   blaze:
     image: "samply/blaze:0.29"

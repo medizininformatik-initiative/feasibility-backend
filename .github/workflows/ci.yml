@@ -124,6 +124,12 @@ jobs:
   integration-test:
     needs: tests
     runs-on: ubuntu-22.04
+    env:
+      ONTOLOGY_GIT_TAG: v3.0.0-test.11
+      ELASTIC_HOST: http://localhost:9200
+      ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/TAGPLACEHOLDER/example/fdpg-ontology/
+      ELASTIC_FILENAME: elastic.zip
+      OVERRIDE_EXISTING: true
 
     steps:
       - name: Check out Git repository
@@ -144,7 +150,7 @@ jobs:
       - name: Download ontology files from github
         run: .github/scripts/download-and-unpack-ontology.sh
 
-      - name: Run Dataportal Backend with Database, Keycloak and Blaze
+      - name: Run Dataportal Backend with Database, Elasticsearch, Keycloak and Blaze
         run: docker compose -f .github/integration-test/docker-compose.yml up -d
 
       - name: Wait for Dataportal Backend
@@ -165,11 +171,20 @@ jobs:
       - name: Create Test User in Keycloak
         run: .github/scripts/create-keycloak-user.sh
 
+      - name: Wait for Elastic
+        run: .github/scripts/wait-for-url.sh  http://localhost:9200/_cluster/health
+
+      - name: Create indices and upload data to elastic
+        run: .github/scripts/init-elasticsearch.sh
+
       - name: Wait for Flare
         run: .github/scripts/wait-for-url.sh  http://localhost:8092/cache/stats
 
       - name: Post Test Query
         run: .github/scripts/post-test-query.sh
+
+      - name: Post Elasticsearch Test Queries
+        run: .github/scripts/post-elastic-test-queries.sh
 
       - name: Dump docker logs on failure
         if: failure()
