@@ -63,11 +63,9 @@ class TerminologyServiceTest {
         doReturn(doesExist).when(termCodeRepository).existsTermCode(any(String.class), any(String.class));
         doReturn(doesExist).when(termCodeRepository).existsTermCode(any(String.class), any(String.class), any(String.class));
 
-        boolean termCodeResultWithVersion = terminologyService.isExistingTermCode("some-system", "some-code", "some-version");
-        boolean termCodeResultWithoutVersion = terminologyService.isExistingTermCode("some-system", "some-code", null);
+        boolean termCodeResult = terminologyService.isExistingTermCode("some-system", "some-code");
 
-        assertEquals(termCodeResultWithVersion, doesExist);
-        assertEquals(termCodeResultWithoutVersion, doesExist);
+        assertEquals(termCodeResult, doesExist);
     }
 
     @Test

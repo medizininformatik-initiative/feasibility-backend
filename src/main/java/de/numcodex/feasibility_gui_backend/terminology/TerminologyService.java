@@ -52,8 +52,8 @@ public class TerminologyService {
     }
   }
 
-  public boolean isExistingTermCode(String system, String code, String version) {
-    return (version == null) ? termCodeRepository.existsTermCode(system, code) : termCodeRepository.existsTermCode(system, code, version);
+  public boolean isExistingTermCode(String system, String code) {
+    return termCodeRepository.existsTermCode(system, code);
   }
 
   public static int min(int... numbers) {
