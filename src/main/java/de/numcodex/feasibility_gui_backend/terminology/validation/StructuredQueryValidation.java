@@ -87,28 +87,27 @@ public class StructuredQueryValidation {
         continue;
       }
       for (TermCode termCode : criterion.getTermCodes()) {
-        if (terminologyService.isExistingTermCode(termCode.system(), termCode.code(), termCode.version())) {
-          log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code(), termCode.version());
+        if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
+          log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
           criterion.setValidationIssues(List.of()); // empty list is expected
         } else {
-          log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
-              termCode.version());
+          log.debug("termcode invalid: {} - {}", termCode.system(), termCode.code());
           criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
         }
       }
     }
   }
 
-  private boolean containsInvalidCriteria(List<Criterion> inclusionCriteria) {
-    for (Criterion criterion : inclusionCriteria) {
+  private boolean containsInvalidCriteria(List<Criterion> criteria) {
+    for (Criterion criterion : criteria) {
       if (criterion.context() == null) {
         return true;
       }
       for (TermCode termCode : criterion.termCodes()) {
-        if (terminologyService.isExistingTermCode(termCode.system(), termCode.code(), termCode.version())) {
-          log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code(), termCode.version());
+        if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
+          log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
         } else {
-          log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
+          log.debug("termcode invalid: {} - {}", termCode.system(), termCode.code(),
               termCode.version());
           return true;
         }
