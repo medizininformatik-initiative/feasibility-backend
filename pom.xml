@@ -160,7 +160,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-client</artifactId>
-      <version>6.6.2</version>
+      <version>7.4.5</version>
       <exclusions>
         <exclusion>
           <groupId>com.google</groupId>
@@ -176,17 +176,16 @@
       <version>32.1.1-jre</version>
     </dependency>
 
-
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>6.6.2</version>
+      <version>7.4.5</version>
     </dependency>
 
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>org.hl7.fhir.utilities</artifactId>
-      <version>6.3.26</version>
+      <version>6.4.0</version>
     </dependency>
 
     <dependency>
