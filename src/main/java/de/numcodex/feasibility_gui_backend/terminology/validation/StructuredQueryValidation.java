@@ -88,10 +88,10 @@ public class StructuredQueryValidation {
       }
       for (TermCode termCode : criterion.getTermCodes()) {
         if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
-          log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code());
+          log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
           criterion.setValidationIssues(List.of()); // empty list is expected
         } else {
-          log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code());
+          log.debug("termcode invalid: {} - {}", termCode.system(), termCode.code());
           criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
         }
       }
@@ -105,9 +105,9 @@ public class StructuredQueryValidation {
       }
       for (TermCode termCode : criterion.termCodes()) {
         if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
-          log.trace("termcode ok: {} - {} - {}", termCode.system(), termCode.code());
+          log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
         } else {
-          log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(),
+          log.debug("termcode invalid: {} - {}", termCode.system(), termCode.code(),
               termCode.version());
           return true;
         }
