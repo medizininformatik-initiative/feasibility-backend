@@ -41,7 +41,7 @@ jobs:
           queries: security-and-quality
 
       - name: Run Tests
-        run: mvn -Pdownload-ontology -B verify
+        run: mvn -X -e -Pdownload-ontology -B verify
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
