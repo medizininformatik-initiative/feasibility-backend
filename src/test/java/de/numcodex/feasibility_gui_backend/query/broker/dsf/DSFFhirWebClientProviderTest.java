@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DSFFhirWebClientProviderTest {
 
     @Container
-    private GenericContainer<?> blaze = new GenericContainer<>("samply/blaze:0.27")
+    private GenericContainer<?> blaze = new GenericContainer<>("samply/blaze:0.30")
             .withExposedPorts(8080)
             .withNetwork(Network.newNetwork())
             .withReuse(true);
