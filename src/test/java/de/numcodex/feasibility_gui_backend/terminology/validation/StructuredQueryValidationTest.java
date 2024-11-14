@@ -38,7 +38,7 @@ class StructuredQueryValidationTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testIsValid_trueOnValidCriteria(boolean withExclusionCriteria) {
-        doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+        doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class));
 
         var isValid = structuredQueryValidation.isValid(createValidStructuredQuery(withExclusionCriteria));
 
@@ -48,7 +48,7 @@ class StructuredQueryValidationTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testIsValid_falseOnInvalidCriteria(boolean withExclusionCriteria) {
-        doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+        doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class));
 
         var isValid = structuredQueryValidation.isValid(createValidStructuredQuery(withExclusionCriteria));
 
@@ -68,7 +68,7 @@ class StructuredQueryValidationTest {
         boolean withExclusionCriteria = Boolean.parseBoolean(withExclusionCriteriaString);
         boolean skipValidation = Boolean.parseBoolean(skipValidationString);
         if (!skipValidation) {
-            doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+            doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class));
         }
 
         var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), skipValidation);
@@ -82,7 +82,7 @@ class StructuredQueryValidationTest {
         boolean withExclusionCriteria = Boolean.parseBoolean(withExclusionCriteriaString);
         boolean skipValidation = Boolean.parseBoolean(skipValidationString);
         if (!skipValidation) {
-            doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class), isNull());
+            doReturn(false).when(terminologyService).isExistingTermCode(any(String.class), any(String.class));
         }
 
         var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createValidStructuredQuery(withExclusionCriteria), skipValidation);

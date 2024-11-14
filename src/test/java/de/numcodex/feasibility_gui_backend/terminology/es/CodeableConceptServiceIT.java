@@ -46,7 +46,7 @@ public class CodeableConceptServiceIT {
 
   @Container
   @ServiceConnection
-  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.15.0")
+  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.16.0")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
       .withReuse(false)

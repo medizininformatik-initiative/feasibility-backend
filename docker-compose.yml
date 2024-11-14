@@ -13,6 +13,7 @@ services:
       init-elasticsearch:
         condition: service_completed_successfully
     environment:
+      JAVA_OPTS: ${DATAPORTAL_BACKEND_JAVA_OPTS}
       # ----- app
       QUERY_VALIDATION_ENABLED: ${DATAPORTAL_BACKEND_QUERY_VALIDATION_ENABLED:-true}
       CQL_TRANSLATE_ENABLED: ${DATAPORTAL_BACKEND_CQL_TRANSLATE_ENABLED:-true}
@@ -31,8 +32,8 @@ services:
       # ---- ontology
       ONTOLOGY_FILES_FOLDER_UI: ${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}
       ONTOLOGY_DB_MIGRATION_FOLDER: ${DATAPORTAL_BACKEND_ONTOLOGY_DB_MIGRATION_FOLDER:-/opt/dataportal-backend/ontology/migration}
-      MAPPINGS_FILE: ${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}/codex-term-code-mapping.json
-      CONCEPT_TREE_FILE: ${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}/codex-code-tree.json
+      MAPPINGS_FILE: ${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}/mapping_cql.json
+      CONCEPT_TREE_FILE: ${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}/mapping_tree.json
       # ---- auth
       KEYCLOAK_ENABLED: ${DATAPORTAL_BACKEND_KEYCLOAK_ENABLED:-true}
       KEYCLOAK_BASE_URL: ${DATAPORTAL_BACKEND_KEYCLOAK_BASE_URL:-http://keycloak:8080}
@@ -82,20 +83,18 @@ services:
       PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS: ${DATAPORTAL_BACKEND_PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS:-7200}
       PRIVACY_THRESHOLD_RESULTS: ${DATAPORTAL_BACKEND_PRIVACY_THRESHOLD_RESULTS:-20}
       PRIVACY_THRESHOLD_SITES: ${DATAPORTAL_BACKEND_PRIVACY_THRESHOLD_SITES:-3}
-      PRIVACY_THRESHOLD_SITES_RESULT: ${DATAPORTAL_BACKEND_PRIVACY_THRESHOLD_SITES_RESULT}
+      PRIVACY_THRESHOLD_SITES_RESULT: ${DATAPORTAL_BACKEND_PRIVACY_THRESHOLD_SITES_RESULT:-0}
       QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION: "true"
       # ---- Elastic Search
-      ELASTIC_SEARCH_ENABLED: ${DATAPORTAL_BACKEND_ELASTIC_SEARCH_ENABLED}
-      ELASTIC_SEARCH_HOST: ${DATAPORTAL_BACKEND_ELASTIC_SEARCH_HOST}
-      ELASTIC_SEARCH_FILTER: ${DATAPORTAL_BACKEND_ELASTIC_SEARCH_FILTER}
+      ELASTIC_SEARCH_ENABLED: ${DATAPORTAL_BACKEND_ELASTIC_SEARCH_ENABLED:-true}
+      ELASTIC_SEARCH_HOST: ${DATAPORTAL_BACKEND_ELASTIC_SEARCH_HOST:-dataportal-elastic}
+      ELASTIC_SEARCH_FILTER: ${DATAPORTAL_BACKEND_ELASTIC_SEARCH_FILTER:-context,terminology,kds_module}
       # ---- logging
       LOG_LEVEL_SQL: ${DATAPORTAL_BACKEND_LOG_LEVEL_SQL:-warn}
       LOG_LEVEL: ${DATAPORTAL_BACKEND_LOG_LEVEL:-warn}
     volumes:
-      - ${DATAPORTAL_BACKEND_LOCAL_CONCEPT_TREE_PATH:-./ontology/dataportal-code-tree.json}:${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}/dataportal-code-tree.json
-      - ${DATAPORTAL_BACKEND_LOCAL_TERM_CODE_MAPPING_PATH:-./ontology/dataportal-term-code-mapping.json}:${DATAPORTAL_BACKEND_ONTOLOGY_FILES_FOLDER:-/opt/dataportal-backend/ontology}/dataportal-term-code-mapping.json
-      - ${DATAPORTAL_BACKEND_DSF_SECURITY_DIR:-/dev/null}:/opt/dataportal-backend/dsf-security/
-      - ${DATAPORTAL_BACKEND_ONTOLOGY_DB_MIGRATION_FOLDER:-../ontology/migration}:/opt/dataportal-backend/ontology/migration
+      - ${DATAPORTAL_BACKEND_CERTS_PATH:-../certs}:/opt/dataportal-security
+      - ./certs:/opt/dataportal-backend/certs
 
   dataportal-postgres:
     container_name: dataportal-postgres
@@ -112,7 +111,7 @@ services:
         source: dataportal-postgres-data
         target: /var/lib/postgresql/data
   dataportal-elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
     container_name: dataportal-elastic
     ports:
       - '9200:9200'
@@ -133,22 +132,19 @@ services:
         source: dataportal-elastic-data
         target: /usr/share/elasticsearch/data
   init-elasticsearch:
-    image: curlimages/curl:8.8.0
+    image: ghcr.io/medizininformatik-initiative/dataportal-es-init:latest
     depends_on:
       dataportal-elastic:
         condition: service_healthy
     environment:
-      ELASTIC_HOST: http://dataportal-elastic:9200
-      ELASTIC_GIT_TAG: v3.0.0-alpha
-      ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/TAGPLACEHOLDER/example/fdpg-ontology/
-      ELASTIC_FILENAME: elastic.zip
-      # if set to false, existing indices are not overridden.
-      OVERRIDE_EXISTING: true
-    entrypoint: [ "sh", "-c", "/tmp/init.sh" ]
-    volumes:
-      - type: bind
-        source: ./elastic-init.sh
-        target: /tmp/init.sh
+      ES_HOST: http://dataportal-elastic
+      ES_PORT: 9200
+      ONTO_GIT_TAG: v3.0.0-develop.8
+      ONTO_REPO: https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/
+      ONTO_RELATIVE_PATH: /example/fdpg-ontology/
+      DOWNLOAD_FILENAME: elastic.zip
+      EXIT_ON_EXISTING_INDICES: false
+      FORCE_INDEX_CREATION: true
 
 volumes:
   dataportal-postgres-data:

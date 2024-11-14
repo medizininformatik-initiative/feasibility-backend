@@ -8,6 +8,7 @@ services:
     depends_on:
       - dataportal-postgres
     environment:
+      JAVA_OPTS: ""
       QUERYRESULT_PUBLIC_KEY: "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA1lWOfXzE/mUEPitNLxsDMtjERJGVhS8gP1WmuHPvjPxUOQyod4EbJcbJlkBqLqpaIs8Buy3gcbJvIPERdG1N1BSZ8NOKOtRubioKf30JwnLdZAae3vJAzRC3h42OPM3fohZCXMxbrju+KM0ZUIrLEXKEDMHQWfevCQCxeixvXVYpfXlkJIBGaWz4cDgEOiiwhU87AMzGZwjAIHvr4oTF/uHg6+C3Mdx0m8WLtygTiEixJegMb/txR+4gNVYrzpm5BwDUU7Qxy3nTUDYZLlTGeP9MBFWW+W87IHzgP+OFr3ZKMEkAPU0R1lqXFZCYcgZHGA5He2W701isnqkKIQT8ePOH43ZOXo3S34Pqw5oQ4Q2kPubp1wgZWw0VtEiZDtlwqUJ+r3CigU7NAFM5JnC/skiIBKetbWoNm1JPEfGOTrgjHD2uo82jSO8tV45LNH1EaR2+5UWSFZyDvTayLZsxsVlRFXJKgQJDI344R6lhGbLXbhqCuPzeQaHr1XGCKAtdAgMBAAE="
       # ----- app
       QUERY_VALIDATION_ENABLED: "true"
@@ -16,7 +17,6 @@ services:
       API_BASE_URL: "http://localhost:8091/api/"
       ALLOWED_ORIGINS: "https://localhost"
       QUERYRESULT_EXPIRY_MINUTES: 5
-      ELASTIC_SEARCH_ENABLED: "false"
       # ---- db config
       DATABASE_HOST: "dataportal-postgres"
       DATABASE_PORT: 5432
@@ -60,6 +60,10 @@ services:
       PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS: 7200
       PRIVACY_THRESHOLD_RESULTS: 0
       PRIVACY_THRESHOLD_SITES: 0
+      # ---- Elastic Search
+      ELASTIC_SEARCH_ENABLED: true
+      ELASTIC_SEARCH_HOST: dataportal-elastic:9200
+      ELASTIC_SEARCH_FILTER: context,terminology,kds_module
       # ---- logging
       LOG_LEVEL_SQL: "warn"
       LOG_LEVEL: "warn"
@@ -82,8 +86,26 @@ services:
       POSTGRES_PASSWORD: "dataportalpw"
       POSTGRES_DB: "dataportal"
 
+  dataportal-elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+    container_name: dataportal-elastic
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xmx512m -Xms512m
+      node.name: es01
+      cluster.name: elasticsearch
+      xpack.security.enabled: false
+
   blaze:
-    image: "samply/blaze:0.29"
+    image: "samply/blaze:0.30"
     environment:
       BASE_URL: "http://blaze:8080"
       JAVA_TOOL_OPTIONS: "-Xmx1g"
@@ -94,7 +116,7 @@ services:
       - "blaze-data:/app/data"
 
   flare:
-    image: ghcr.io/medizininformatik-initiative/flare:2.2.0
+    image: ghcr.io/medizininformatik-initiative/flare:2.3.0
     ports:
       - "8092:8080"
     environment:

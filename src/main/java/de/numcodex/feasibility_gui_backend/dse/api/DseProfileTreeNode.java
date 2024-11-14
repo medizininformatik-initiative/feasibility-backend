@@ -13,6 +13,7 @@ public record DseProfileTreeNode(
     @JsonProperty List<DseProfileTreeNode> children,
     @JsonProperty String name,
     @JsonProperty DisplayEntry display,
+    @JsonProperty FieldDisplayEntry fields,
     @JsonProperty String module,
     @JsonProperty String url,
     @JsonProperty boolean leaf,
