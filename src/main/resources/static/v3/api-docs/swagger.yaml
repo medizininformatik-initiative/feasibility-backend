@@ -1577,6 +1577,7 @@ components:
             - ProfileObservationLaboruntersuchung
         display:
           $ref: "#/components/schemas/DisplayEntry"
+
         module:
           type: string
           examples:
