@@ -117,6 +117,7 @@ public class QueryTranslatorSpringConfig {
                         entry("http://fhir.de/CodeSystem/kontaktart-de", "kontaktart"),
                         entry("http://hl7.org/fhir/sid/icd-10", "sidicd10"),
                         entry("http://fhir.de/CodeSystem/Kontaktebene", "kontaktebene"),
+                        entry("http://www.orpha.net", "orphanet"),
                         entry("fdpg.consent.combined", "fdpgcombinedconsent"),
                         entry("http://hl7.org/fhir/consent-provision-type", "provisiontype"))));
     }
