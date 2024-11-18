@@ -12,6 +12,7 @@ public record Field(
     @JsonProperty String id,
     @JsonProperty DisplayEntry display,
     @JsonProperty DisplayEntry description,
+    @JsonProperty List<String> referencedProfiles,
     @JsonProperty String type,
     @JsonProperty boolean recommended,
     @JsonProperty boolean required,
