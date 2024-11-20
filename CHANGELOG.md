@@ -13,6 +13,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 ### Security
 
+## [6.0.0] - 2024-10-21
+
+- Based on ontology **[v3.0.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.0.0)**
+
+### Added
+- Added recommended and required to dse fields
+- Added DSE profile tree field as list of values
+- Added referencedProfiles to dse profile fields
+- Update cql aliases
+- JVM options configurable in Dockerimage
+- Terminology search implemented via external elastic search service ([#307](https://github.com/medizininformatik-initiative/feasibility-backend/issues/307))
+- Endpoints to query profile data for data selection and extraction (ES) ([#321](https://github.com/medizininformatik-initiative/feasibility-backend/issues/321))
+- Endpoints to search for codeable concepts (ES) ([#324](https://github.com/medizininformatik-initiative/feasibility-backend/issues/324))
+### Changed
+- moved rest api from v3 to v4
+- codex and or feasibility references are replaced by dataportal (not in package names though)
+- openapi documentation updated to 3.1.0
+- Updated sq2cql and Ontology dependencies
+- Allow empty search
+- Change structure of dse profile and details for new translation structure
+- **breaking** Consistent naming for endpoints and filenames (kebab-case for rest endpoints, camelCase for json parameters, snake_case for elastic search variables)
+
+### Removed
+- Unused endpoints from the /terminology path
+
+### Security
+- Updated Spring Boot to 3.3.2 ([#317](https://github.com/medizininformatik-initiative/feasibility-backend/issues/317))
+
 ## [6.0.0-alpha.3] - 2024-10-21
 
 ### Changed
@@ -23,6 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - JVM options configurable in Dockerimage
+- 
 ### Changed
 - moved rest api from v3 to v4
 - codex and or feasibility references are replaced by dataportal (not in package names though)
