@@ -7,7 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @JsonSerialize(using = ValidationIssueSerializer.class)
 public enum ValidationIssue {
-  TERMCODE_CONTEXT_COMBINATION_INVALID(20001, "The combination of context and termcode(s) is not found.");
+  TERMCODE_CONTEXT_COMBINATION_INVALID(20001, "The combination of context and termcode(s) is not found."),
+  TIMERESTRICTION_INVALID(20002, "The TimeRestriction is invalid. 'beforeDate' must not be before 'afterDate'");
 
   private static final ValidationIssue[] VALUES;
 

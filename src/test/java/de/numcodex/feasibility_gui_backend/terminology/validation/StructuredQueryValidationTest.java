@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.terminology.validation;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +63,13 @@ class StructuredQueryValidationTest {
         assertFalse(isValid);
     }
 
+    @Test
+    void testIsValid_falseOnInvalidTimeRestriction() {
+        var isValid = structuredQueryValidation.isValid(createStructuredQueryWithInvalidTimeRestriction());
+
+        assertFalse(isValid);
+    }
+
     @ParameterizedTest
     @CsvSource({"true,true", "true,false", "false,true", "false,false"})
     void testAnnotateStructuredQuery_emptyIssuesOnValidCriteriaOrSkippedValidation(String withExclusionCriteriaString, String skipValidationString) {
@@ -106,6 +114,18 @@ class StructuredQueryValidationTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testAnnotateStructuredQuery_nonEmptyIssuesOnInvalidTimeRestriction(boolean skipValidation) {
+        var annotatedStructuredQuery = structuredQueryValidation.annotateStructuredQuery(createStructuredQueryWithInvalidTimeRestriction(), skipValidation);
+
+        if (skipValidation) {
+            assertTrue(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        } else {
+            assertFalse(annotatedStructuredQuery.inclusionCriteria().get(0).get(0).validationIssues().isEmpty());
+        }
+    }
+
     @NotNull
     private static StructuredQuery createValidStructuredQuery(boolean withExclusionCriteria) {
         var context = TermCode.builder()
@@ -142,6 +162,37 @@ class StructuredQueryValidationTest {
         var criterion = Criterion.builder()
             .termCodes(List.of(termCode))
             .attributeFilters(List.of())
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(criterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .build();
+    }
+
+    @NotNull
+    private static StructuredQuery createStructuredQueryWithInvalidTimeRestriction() {
+        var context = TermCode.builder()
+            .code("Laboruntersuchung")
+            .system("fdpg.mii.cds")
+            .display("Laboruntersuchung")
+            .version("1.0.0")
+            .build();
+        var termCode = TermCode.builder()
+            .code("19113-0")
+            .system("http://loinc.org")
+            .display("IgE")
+            .build();
+        var timeRestriction = TimeRestriction.builder()
+            .afterDate("1998-05-09")
+            .beforeDate("1991-06-15")
+            .build();
+        var criterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .context(context)
+            .attributeFilters(List.of())
+            .timeRestriction(timeRestriction)
             .build();
         return StructuredQuery.builder()
             .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
