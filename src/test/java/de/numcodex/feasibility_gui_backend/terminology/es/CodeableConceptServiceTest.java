@@ -143,7 +143,7 @@ class CodeableConceptServiceTest {
           )
       );
     }
-    return new SearchHitsImpl<>(totalHits, TotalHitsRelation.OFF, 10.0F, null, null, searchHitsList, null, null, null);
+    return new SearchHitsImpl<>(totalHits, TotalHitsRelation.OFF, 10.0F, null, null, null, searchHitsList, null, null, null);
   }
 
   private CodeableConceptDocument createDummyCodeableConceptDocument(String id) {
