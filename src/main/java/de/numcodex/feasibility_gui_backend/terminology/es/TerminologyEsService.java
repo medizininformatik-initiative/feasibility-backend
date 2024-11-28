@@ -1,12 +1,10 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.InlineScript;
 import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import co.elastic.clients.json.JsonData;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
@@ -121,10 +119,12 @@ public class TerminologyEsService {
     List<Query> filterTerms = new ArrayList<>();
 
     if (availability) {
-      var availabilityFilter = new RangeQuery.Builder()
-          .field("availability")
-          .gt(JsonData.of("0"))
-          .build();
+      var availabilityFilter = RangeQuery.of(r -> r
+          .number(n -> n
+              .field("availability")
+              .gt(0.0)
+          )
+      );
       filterTerms.add(availabilityFilter._toQuery());
     }
 
@@ -164,12 +164,8 @@ public class TerminologyEsService {
         .withPageable(pageRequest)
         .build();
 
-    var inlineScript = new InlineScript.Builder()
-        .source("doc['availability'].value == 0 ? _score : _score + 100")
-        .build();
-
     var availabilityScoreScript = new Script.Builder()
-        .inline(inlineScript)
+        .source("doc['availability'].value == 0 ? _score : _score + 100")
         .build();
 
     var function = FunctionScoreBuilders.scriptScore()

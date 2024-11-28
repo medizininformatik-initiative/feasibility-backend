@@ -4,14 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [UNRELEASED] - yyyy-mm-dd
+## [6.0.1-alpha.1] - 2024-11-28
 
-### Added
-### Changed
-### Deprecated
-### Removed
 ### Fixed
+- Update Sq2CQL
 ### Security
+- Update Spring Boot
+- Update Fhir R4 Structures
 
 ## [6.0.0] - 2024-10-21
 
