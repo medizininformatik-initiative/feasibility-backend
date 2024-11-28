@@ -5,8 +5,11 @@ import de.numcodex.feasibility_gui_backend.common.api.MutableCriterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.MutableStructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssue;
 import de.numcodex.feasibility_gui_backend.terminology.TerminologyService;
+
+import java.time.LocalDate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +89,10 @@ public class StructuredQueryValidation {
         criterion.setValidationIssues(List.of(ValidationIssue.TERMCODE_CONTEXT_COMBINATION_INVALID));
         continue;
       }
+      if (isTimeRestrictionInvalid(criterion.getTimeRestriction())) {
+        criterion.setValidationIssues(List.of(ValidationIssue.TIMERESTRICTION_INVALID));
+        continue;
+      }
       for (TermCode termCode : criterion.getTermCodes()) {
         if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
           log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
@@ -103,6 +110,11 @@ public class StructuredQueryValidation {
       if (criterion.context() == null) {
         return true;
       }
+      if (isTimeRestrictionInvalid(criterion.timeRestriction())) {
+        log.debug("TimeRestriction invalid. 'beforeDate' ({}) must be after 'afterDate' ({}) but is not",
+            criterion.timeRestriction().beforeDate(), criterion.timeRestriction().afterDate());
+        return true;
+      }
       for (TermCode termCode : criterion.termCodes()) {
         if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
           log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
@@ -114,5 +126,13 @@ public class StructuredQueryValidation {
       }
     }
     return false;
+  }
+
+  private boolean isTimeRestrictionInvalid(TimeRestriction timeRestriction) {
+    // If no timeRestriction is set, it is not invalid
+    if (timeRestriction == null) {
+      return false;
+    }
+    return LocalDate.parse(timeRestriction.beforeDate()).isBefore(LocalDate.parse(timeRestriction.afterDate()));
   }
 }
