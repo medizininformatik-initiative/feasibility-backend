@@ -155,6 +155,7 @@ public class DSFQueryManagerTest {
         assertEquals(1, measure.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
                         .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure"))
                 .count());
+        assertEquals(36, measure.getGroupFirstRep().getPopulationFirstRep().getId().length());
         assertEquals("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility", measureReferenceSystem);
     }
 
