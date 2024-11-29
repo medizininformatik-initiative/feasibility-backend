@@ -4,13 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [6.0.1-alpha.1] - 2024-11-28
+## [6.0.1] - 2024-11-29
 
 ### Fixed
-- Update Sq2CQL
+- Update Sq2CQL ([#401](https://github.com/medizininformatik-initiative/feasibility-backend/issues/401))
 ### Security
-- Update Spring Boot
-- Update Fhir R4 Structures
+- Update Spring Boot ([#403](https://github.com/medizininformatik-initiative/feasibility-backend/issues/403))
+- Update Fhir R4 Structures ([#405](https://github.com/medizininformatik-initiative/feasibility-backend/issues/405))
 
 ## [6.0.0] - 2024-10-21
 
