@@ -88,12 +88,12 @@
             "type": "text",
             "index": false
           },
-          "de-DE": {
+          "de": {
             "type": "text",
             "analyzer": "edge_ngram_analyzer_include_punctuation",
             "search_analyzer": "lowercase_analyzer"
           },
-          "en-US": {
+          "en": {
             "type": "text",
             "analyzer": "edge_ngram_analyzer_include_punctuation",
             "search_analyzer": "lowercase_analyzer"
