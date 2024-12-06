@@ -2,8 +2,8 @@ package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
+import de.numcodex.feasibility_gui_backend.terminology.api.CodeableConceptEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
@@ -47,17 +47,18 @@ public class CodeableConceptService {
     }
 
     var searchHitPage = findByCodeOrDisplay(keyword, filterList, PageRequest.of(page, pageSize));
-    List<TermCode> codeableConceptEntries = new ArrayList<>();
+    List<CodeableConceptEntry> codeableConceptEntries = new ArrayList<>();
 
-    searchHitPage.getSearchHits().forEach(hit -> codeableConceptEntries.add(hit.getContent().termCode()));
+    searchHitPage.getSearchHits().forEach(hit -> codeableConceptEntries.add(CodeableConceptEntry.of(hit.getContent())));
     return CcSearchResult.builder()
         .totalHits(searchHitPage.getTotalHits())
         .results(codeableConceptEntries)
         .build();
   }
 
-  public TermCode getSearchResultEntryByCode(String code) {
-    return repo.findById(code).orElseThrow(OntologyItemNotFoundException::new).termCode();
+  public CodeableConceptEntry getSearchResultEntryByCode(String code) {
+    var document = repo.findById(code).orElseThrow(OntologyItemNotFoundException::new);
+    return CodeableConceptEntry.of(document);
   }
 
   private SearchHits<CodeableConceptDocument> findByCodeOrDisplay(String keyword,
@@ -88,7 +89,7 @@ public class CodeableConceptService {
     } else {
       var mmQuery = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("termcode.display", "termcode.code^2"))
+          .fields(List.of("display.de", "display.en", "termcode.code^2"))
           .build();
 
       boolQuery = new BoolQuery.Builder()

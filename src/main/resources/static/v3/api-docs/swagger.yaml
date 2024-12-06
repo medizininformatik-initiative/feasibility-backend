@@ -889,7 +889,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TermCode"
+                $ref: "#/components/schemas/CodeableConceptEntry"
         401:
           description: Unauthorized - please login first
         403:
@@ -1391,10 +1391,8 @@ components:
     ElasticSearchResultEntry:
       type: object
       properties:
-        name:
-          type: string
-          examples:
-            - Diabetes Mellitus
+        display:
+          $ref: "#/components/schemas/DisplayEntry"
         contextualizedTermcodeHash:
           type: string
           format: uuid
@@ -1463,6 +1461,37 @@ components:
       type: string
       examples:
         - icd10
+    LocalizedValue:
+      type: object
+      properties:
+        language:
+          type: string
+          examples:
+            - de-DE
+            - en-US
+        value:
+          type: string
+          examples:
+            - localized entry
+            - lokalisierter Eintrag
+    DisplayEntry:
+      type: object
+      properties:
+        original:
+          type: string
+          examples:
+            - display entry
+        translations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocalizedValue"
+    CodeableConceptEntry:
+      type: object
+      properties:
+        termCode:
+          $ref: "#/components/schemas/TermCode"
+        display:
+          $ref: "#/components/schemas/DisplayEntry"
     CodeableConceptSearchResult:
       type: object
       properties:
@@ -1473,7 +1502,7 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/CodeableConceptEntry"
     CriteriaProfileData:
       type: object
       properties:

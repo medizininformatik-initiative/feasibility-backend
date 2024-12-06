@@ -2,7 +2,7 @@
 
 curl "$ELASTIC_HOST/_cat/indices"
 
-response=$(curl -s -w "%{http_code}" -o response_body "$ELASTIC_HOST/ontology/_doc/9c2328b0-ac4e-3d69-8f2f-d8b905875348")
+response=$(curl -s -w "%{http_code}" -o response_body "$ELASTIC_HOST/ontology/_doc/7f33051d-d44a-33f5-9297-be1e192b5d5a")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 
@@ -19,7 +19,7 @@ else
 fi
 
 
-response=$(curl -s -w "%{http_code}" -o response_body "$ELASTIC_HOST/codeable_concept/_doc/d676be36-7f34-3ea6-9838-c0c9e1ca3dcc")
+response=$(curl -s -w "%{http_code}" -o response_body "$ELASTIC_HOST/codeable_concept/_doc/a2ac3e3d-f649-3f0a-916a-74a5abc3a361")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 
@@ -76,7 +76,7 @@ else
     exit 1
 fi
 
-response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/codeable-concept/entry/d676be36-7f34-3ea6-9838-c0c9e1ca3dcc")
+response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/codeable-concept/entry/a2ac3e3d-f649-3f0a-916a-74a5abc3a361")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 

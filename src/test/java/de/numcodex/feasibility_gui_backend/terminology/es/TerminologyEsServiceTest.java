@@ -77,7 +77,7 @@ public class TerminologyEsServiceTest {
     assertThat(searchResultEntry).isNotNull();
     assertThat(searchResultEntry.id()).isEqualTo(id);
     assertThat(searchResultEntry.terminology()).isEqualTo(dummyOntologyListItem.terminology());
-    assertThat(searchResultEntry.name()).isEqualTo(dummyOntologyListItem.name());
+    assertThat(searchResultEntry.display().original()).isEqualTo(dummyOntologyListItem.display().original());
     assertThat(searchResultEntry.kdsModule()).isEqualTo(dummyOntologyListItem.kdsModule());
     assertThat(searchResultEntry.availability()).isEqualTo(dummyOntologyListItem.availability());
     assertThat(searchResultEntry.context()).isEqualTo(dummyOntologyListItem.context().code());
@@ -185,7 +185,7 @@ public class TerminologyEsServiceTest {
     assertThat(ontologyItemRelationsDocument.relatedTerms()).isEqualTo(dummyOntologyItem.relatedTerms());
     assertThat(ontologyItemRelationsDocument.children()).isEqualTo(dummyOntologyItem.children());
     assertThat(ontologyItemRelationsDocument.parents()).isEqualTo(dummyOntologyItem.parents());
-    assertThat(ontologyItemRelationsDocument.translations()).isEqualTo(dummyOntologyItem.translations());
+    assertThat(ontologyItemRelationsDocument.display()).isEqualTo(dummyOntologyItem.display());
   }
 
   @Test
@@ -200,7 +200,7 @@ public class TerminologyEsServiceTest {
 
     return OntologyListItemDocument.builder()
         .id(id)
-        .name("Some Name")
+        .display(createDummyDisplay())
         .availability(1)
         .context(termCode)
         .terminology("Some Terminology")
@@ -209,32 +209,31 @@ public class TerminologyEsServiceTest {
         .build();
   }
 
+  private Display createDummyDisplay() {
+    return Display.builder()
+        .original("Some Name")
+        .deDe("Some German Name")
+        .enUs("Some English Name")
+        .build();
+  }
+
   private OntologyItemDocument createDummyOntologyItem(String id) {
     TermCode termCode = createDummyTermCode();
-    Collection<Translation> translations = List.of(createDummyTranslation(), createDummyTranslation(), createDummyTranslation());
     Collection<Relative> parents = List.of(createDummyRelative(), createDummyRelative());
     Collection<Relative> children = List.of(createDummyRelative(), createDummyRelative(), createDummyRelative(), createDummyRelative());
     Collection<Relative> relatedTerms = List.of(createDummyRelative(), createDummyRelative());
 
     return OntologyItemDocument.builder()
         .id(id)
-        .name("Some Name")
+        .display(createDummyDisplay())
         .availability(1)
         .context(termCode)
         .terminology("Some Terminology")
         .termcode("Some Termcode")
         .kdsModule("Some KDS Module")
-        .translations(translations)
         .parents(parents)
         .children(children)
         .relatedTerms(relatedTerms)
-        .build();
-  }
-
-  private Translation createDummyTranslation() {
-    return Translation.builder()
-        .lang("de")
-        .value("Lorem Ipsum")
         .build();
   }
 
