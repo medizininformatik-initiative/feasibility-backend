@@ -89,7 +89,7 @@ public class CodeableConceptService {
     } else {
       var mmQuery = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("display.de-DE", "display.en-US", "termcode.code^2"))
+          .fields(List.of("display.de", "display.en", "termcode.code^2"))
           .build();
 
       boolQuery = new BoolQuery.Builder()
