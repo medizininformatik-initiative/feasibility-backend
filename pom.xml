@@ -12,7 +12,7 @@
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>DataportalBackend</artifactId>
-  <version>6.0.2</version>
+  <version>6.0.3</version>
 
   <name>Dataportal Backend</name>
   <description>Backend of the Dataportal</description>
@@ -423,7 +423,7 @@
                   <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology</url>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/${ontology-tag}/</url>
                   <fromFile>backend.zip</fromFile>
                   <toDir>${ontoDirectory.download}</toDir>
                 </configuration>
@@ -435,7 +435,7 @@
                   <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/raw/${ontology-tag}/example/fdpg-ontology</url>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/${ontology-tag}/</url>
                   <fromFile>mapping.zip</fromFile>
                   <toDir>${ontoDirectory.download}</toDir>
                 </configuration>
