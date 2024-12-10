@@ -291,8 +291,9 @@ class DSFQueryManager implements QueryManager {
                                 .setCode(CODE_SYSTEM_MEASURE_SCORING_VALUE_COHORT)))
                 .addLibrary(createCanonicalUUIDUrn(libraryId));
 
-        measure.addGroup().addPopulation()
-                .setCode(new CodeableConcept()
+        var population = measure.addGroup().addPopulation();
+        population.setId(UUID.randomUUID().toString());
+        population.setCode(new CodeableConcept()
                         .addCoding(new Coding()
                                 .setSystem(CODE_SYSTEM_MEASURE_POPULATION)
                                 .setCode(CODE_SYSTEM_MEASURE_POPULATION_VALUE_INITIAL_POPULATION)))
