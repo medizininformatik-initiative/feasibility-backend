@@ -157,7 +157,7 @@ class TerminologyServiceTest {
 
     private UiProfile createUiProfile() throws JsonProcessingException {
         var uiProfile = new UiProfile();
-        uiProfile.setId(1);
+        uiProfile.setId(1L);
         uiProfile.setName("example");
         uiProfile.setUiProfile(jsonUtil.writeValueAsString(
             de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder()
@@ -170,7 +170,7 @@ class TerminologyServiceTest {
 
     private TermCode createTermCode() {
         TermCode termCode = new TermCode();
-        termCode.setId(1);
+        termCode.setId(1L);
         termCode.setCode("LL2191-6");
         termCode.setSystem("http://loinc.org");
         termCode.setVersion("1.0.0");
@@ -180,7 +180,7 @@ class TerminologyServiceTest {
 
     private Context createContext() {
         Context context = new Context();
-        context.setId(1);
+        context.setId(1L);
         context.setCode("LL2191-6");
         context.setSystem("http://loinc.org");
         context.setVersion("1.0.0");
