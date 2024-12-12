@@ -67,6 +67,14 @@ instance the backend is allowed to connect to.
 In order to run the backend using the DIRECT broker path with CQL,
 the _CQL_SERVER_BASE_URL_ environment variable needs to be set to a running instance of a CQL compatible
 FHIR server.
+Timeouts can be configured via the following variables:
+
+| EnvVar                                                | Description                                                                                                         | Example | Default  |
+|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|---------|----------|
+| BROKER_CLIENT_DIRECT_CQL_TIMEOUT_CONNECT_MS           | This is the amount of time that the initial connection attempt network operation may block without failing.         |         | 10000    |
+| BROKER_CLIENT_DIRECT_CQL_TIMEOUT_SOCKET_MS            | the amount of time that a read/write network operation may block without failing.                                   |         | 10000    |
+| BROKER_CLIENT_DIRECT_CQL_TIMEOUT_CONNECTIONREQUEST_MS | This is the amount of time that the HTTPClient connection pool may wait for an available connection before failing. |         | 10000    |
+
 
 
 ### Running the AKTIN Broker Path

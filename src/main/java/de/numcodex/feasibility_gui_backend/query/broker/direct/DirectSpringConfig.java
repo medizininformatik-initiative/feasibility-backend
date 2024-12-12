@@ -30,17 +30,23 @@ public class DirectSpringConfig {
     private final String cqlBaseUrl;
     private final String username;
     private final String password;
-    private String issuer;
-    private String clientId;
-    private String clientSecret;
+    private final String issuer;
+    private final String clientId;
+    private final String clientSecret;
+    private final int cqlConnectTimeout;
+    private final int cqlSocketTimeout;
+    private final int cqlConnectionRequestTimeout;
 
-    public DirectSpringConfig(@Value("${app.broker.direct.useCql:false}") boolean useCql,
+    public DirectSpringConfig(@Value("${app.broker.direct.cql.enabled:false}") boolean useCql,
             @Value("${app.flare.baseUrl}") String flareBaseUrl, @Value("${app.cql.baseUrl}") String cqlBaseUrl,
             @Value("${app.broker.direct.auth.basic.username}") String username,
             @Value("${app.broker.direct.auth.basic.password}") String password,
             @Value("${app.broker.direct.auth.oauth.issuer.url}") String issuer,
             @Value("${app.broker.direct.auth.oauth.client.id}") String clientId,
-            @Value("${app.broker.direct.auth.oauth.client.secret}") String clientSecret) {
+            @Value("${app.broker.direct.auth.oauth.client.secret}") String clientSecret,
+            @Value("${app.broker.direct.cql.timeout.connect}") int cqlConnectTimeout,
+            @Value("${app.broker.direct.cql.timeout.socket}") int cqlSocketTimeout,
+            @Value("${app.broker.direct.cql.timeout.connectionRequest}") int cqlConnectionRequestTimeout) {
         this.useCql = useCql;
         this.flareBaseUrl = flareBaseUrl;
         this.cqlBaseUrl = cqlBaseUrl;
@@ -49,6 +55,9 @@ public class DirectSpringConfig {
         this.issuer = issuer;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.cqlConnectTimeout = cqlConnectTimeout;
+        this.cqlSocketTimeout = cqlSocketTimeout;
+        this.cqlConnectionRequestTimeout = cqlConnectionRequestTimeout;
     }
 
     @Qualifier("direct")
@@ -67,6 +76,9 @@ public class DirectSpringConfig {
 
     @Bean
     public IGenericClient getFhirClient(FhirContext fhirContext) {
+        fhirContext.getRestfulClientFactory().setConnectTimeout(cqlConnectTimeout);
+        fhirContext.getRestfulClientFactory().setSocketTimeout(cqlSocketTimeout);
+        fhirContext.getRestfulClientFactory().setConnectionRequestTimeout(cqlConnectionRequestTimeout);
         IGenericClient iGenericClient = fhirContext.newRestfulGenericClient(cqlBaseUrl);
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
             log.info("Configure direct broker instance with basic authentication (type: cql, url: {}, username: {})",
@@ -81,6 +93,8 @@ public class DirectSpringConfig {
         } else {
             log.info("Configure direct broker instance (type: cql, url: {})", cqlBaseUrl);
         }
+        log.info("Direct broker instance timeouts are set to: Connect - {}ms, Socket - {}ms, ConnectionRequest - {}ms",
+            cqlConnectTimeout, cqlSocketTimeout, cqlConnectionRequestTimeout);
         return iGenericClient;
     }
 
