@@ -59,7 +59,7 @@ public class DirectSpringConfigIT {
   void testDirectWebClientFlare_withCredentials() throws InterruptedException {
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody("Foo"));
     directSpringConfig = new DirectSpringConfig(true, String.format("http://localhost:%s", mockWebServer.getPort()),
-        null, USERNAME, PASSWORD, null, null, null);
+        null, USERNAME, PASSWORD, null, null, null, 10000, 10000, 10000);
     var authHeaderValue = "Basic "
         + Base64.getEncoder().encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 
@@ -80,7 +80,7 @@ public class DirectSpringConfigIT {
   void testDirectWebClientFlare_withoutCredentials() throws InterruptedException {
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody("Foo"));
     directSpringConfig = new DirectSpringConfig(true, String.format("http://localhost:%s", mockWebServer.getPort()),
-        null, null, null, null, null, null);
+        null, null, null, null, null, null, 10000, 10000, 10000);
 
     WebClient webClient = directSpringConfig.directWebClientFlare();
 
@@ -114,7 +114,8 @@ public class DirectSpringConfigIT {
     });
     directSpringConfig = new DirectSpringConfig(true, null,
         String.format("http://localhost:%s", mockWebServer.getPort()), null, null,
-        String.format("http://localhost:%s/realms/test", keycloak.getFirstMappedPort()), "account", "test");
+        String.format("http://localhost:%s/realms/test", keycloak.getFirstMappedPort()), "account", "test",
+        10000, 10000, 10000);
     IGenericClient client = directSpringConfig.getFhirClient(FhirContext.forR4());
 
     client.capabilities().ofType(CapabilityStatement.class).execute();

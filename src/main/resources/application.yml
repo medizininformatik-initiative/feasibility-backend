@@ -70,8 +70,13 @@ app:
             id: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_ID:}
             secret: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_SECRET:}
       enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
-      useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
       obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
+      cql:
+        enabled: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
+        timeout:
+          connect: ${BROKER_CLIENT_DIRECT_CQL_TIMEOUT_CONNECT_MS:10000}
+          socket: ${BROKER_CLIENT_DIRECT_CQL_TIMEOUT_SOCKET_MS:10000}
+          connectionRequest: ${BROKER_CLIENT_DIRECT_CQL_TIMEOUT_CONNECTIONREQUEST_MS:10000}
     aktin:
       enabled: ${BROKER_CLIENT_AKTIN_ENABLED:false}
       broker:
