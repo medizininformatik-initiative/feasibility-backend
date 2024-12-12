@@ -55,7 +55,7 @@ public class CodeableConceptServiceIT {
       .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
 
   @BeforeAll
-  static void setUp() {
+  static void setUp() throws InterruptedException {
     ELASTICSEARCH_CONTAINER.start();
     WebClient webClient = WebClient.builder().baseUrl("http://" + ELASTICSEARCH_CONTAINER.getHttpHostAddress()).build();
     webClient.put()
@@ -71,6 +71,7 @@ public class CodeableConceptServiceIT {
         .retrieve()
         .toBodilessEntity()
         .block();
+    Thread.sleep(5000);
   }
 
   @AfterAll
