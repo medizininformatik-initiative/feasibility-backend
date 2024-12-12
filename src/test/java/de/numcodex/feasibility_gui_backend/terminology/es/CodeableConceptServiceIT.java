@@ -71,7 +71,7 @@ public class CodeableConceptServiceIT {
         .retrieve()
         .toBodilessEntity()
         .block();
-    Thread.sleep(5000);
+    Thread.sleep(1000);
   }
 
   @AfterAll
