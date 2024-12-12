@@ -71,6 +71,8 @@ public class CodeableConceptServiceIT {
         .retrieve()
         .toBodilessEntity()
         .block();
+
+    // When running in github actions without a slight delay, the data might not be complete in the elastic search container (although a blocking call is used)
     Thread.sleep(1000);
   }
 

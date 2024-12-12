@@ -102,10 +102,6 @@ public class CodeableConceptService {
         .withPageable(pageRequest)
         .build();
 
-    log.info(query.getQuery().toString());
-
-    var result = operations.search(query, CodeableConceptDocument.class);
-    log.info(result.toString());
-    return result;
+    return operations.search(query, CodeableConceptDocument.class);
   }
 }
