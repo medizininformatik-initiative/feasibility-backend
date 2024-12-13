@@ -13,6 +13,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Random;
+import java.util.SplittableRandom;
+
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -42,7 +45,7 @@ class DirectSpringConfigTest {
   @Test
   void directWebClientFlare_withCredentials() {
     directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, "username", "password", null, null,
-              null);
+              null, 10000, 10000, 10000);
 
     WebClient webClient = directSpringConfig.directWebClientFlare();
 
@@ -52,7 +55,7 @@ class DirectSpringConfigTest {
 
   @Test
   void directWebClientFlare_withoutCredentials() {
-    directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(true, "http://my.flare.url", null, null, null, null, null, null, 10000, 10000, 10000);
 
     WebClient webClient = directSpringConfig.directWebClientFlare();
 
@@ -63,7 +66,7 @@ class DirectSpringConfigTest {
   @Test
   void getFhirClient_withCredentials() {
     directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", "username", "password", null, null,
-              null);
+              null, 10000, 10000, 10000);
 
     IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
 
@@ -74,7 +77,7 @@ class DirectSpringConfigTest {
 
   @Test
   void getFhirClient_withoutCredentials() {
-    directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, null, null, null, 10000, 10000, 10000);
 
     IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
 
@@ -86,7 +89,7 @@ class DirectSpringConfigTest {
   @Test
   void directBrokerClient_withOAuthCredentials() {
     directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, "http://my.oauth.url",
-            "foo", "bar");
+            "foo", "bar", 10000, 10000, 10000);
 
     IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
 
@@ -96,8 +99,26 @@ class DirectSpringConfigTest {
   }
 
   @Test
+  void directBrokerClient_customTimeoutsAreSet() {
+    SplittableRandom splittableRandom = new SplittableRandom();
+    int connectTimeout = splittableRandom.nextInt();
+    int socketTimeout = splittableRandom.nextInt();
+    int connectionRequestTimeout = splittableRandom.nextInt();
+
+    directSpringConfig = new DirectSpringConfig(true, null, "http://my.fhir.url", null, null, "http://my.oauth.url",
+        "foo", "bar", connectTimeout, socketTimeout, connectionRequestTimeout);
+
+    IGenericClient fhirClient = directSpringConfig.getFhirClient(fhirContext);
+
+    assertNotNull(fhirClient);
+    Assertions.assertThat(fhirClient.getFhirContext().getRestfulClientFactory().getConnectTimeout()).isEqualTo(connectTimeout);
+    Assertions.assertThat(fhirClient.getFhirContext().getRestfulClientFactory().getSocketTimeout()).isEqualTo(socketTimeout);
+    Assertions.assertThat(fhirClient.getFhirContext().getRestfulClientFactory().getConnectionRequestTimeout()).isEqualTo(connectionRequestTimeout);
+  }
+
+  @Test
   void directBrokerClient_useCql() {
-    directSpringConfig = new DirectSpringConfig(true, null, null, null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(true, null, null, null, null, null, null, null, 10000, 10000, 10000);
 
     BrokerClient brokerClient = directSpringConfig.directBrokerClient(webClient, false, fhirConnector, fhirHelper);
 
@@ -106,7 +127,7 @@ class DirectSpringConfigTest {
 
   @Test
   void directBrokerClient_useFlare() {
-    directSpringConfig = new DirectSpringConfig(false, null, null, null, null, null, null, null);
+    directSpringConfig = new DirectSpringConfig(false, null, null, null, null, null, null, null, 10000, 10000, 10000);
 
     BrokerClient brokerClient = directSpringConfig.directBrokerClient(webClient, false, fhirConnector, fhirHelper);
 
