@@ -129,8 +129,8 @@ public class StructuredQueryValidation {
   }
 
   private boolean isTimeRestrictionInvalid(TimeRestriction timeRestriction) {
-    // If no timeRestriction is set, it is not invalid
-    if (timeRestriction == null) {
+    // If no timeRestriction is set or only on of both dates is set, it is not invalid
+    if (timeRestriction == null || timeRestriction.beforeDate() == null || timeRestriction.afterDate() == null) {
       return false;
     }
     return LocalDate.parse(timeRestriction.beforeDate()).isBefore(LocalDate.parse(timeRestriction.afterDate()));
