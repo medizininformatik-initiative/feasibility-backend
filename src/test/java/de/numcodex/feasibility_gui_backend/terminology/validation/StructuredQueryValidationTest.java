@@ -70,6 +70,22 @@ class StructuredQueryValidationTest {
         assertFalse(isValid);
     }
 
+    @Test
+    void testIsValid_trueOnOnlyBeforeDateTimeRestriction() {
+        doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class));
+        var isValid = structuredQueryValidation.isValid(createStructuredQueryWithOnlyBeforeDate());
+
+        assertTrue(isValid);
+    }
+
+    @Test
+    void testIsValid_trueOnOnlyAfterDateTimeRestriction() {
+        doReturn(true).when(terminologyService).isExistingTermCode(any(String.class), any(String.class));
+        var isValid = structuredQueryValidation.isValid(createStructuredQueryWithOnlyAfterDate());
+
+        assertTrue(isValid);
+    }
+
     @ParameterizedTest
     @CsvSource({"true,true", "true,false", "false,true", "false,false"})
     void testAnnotateStructuredQuery_emptyIssuesOnValidCriteriaOrSkippedValidation(String withExclusionCriteriaString, String skipValidationString) {
@@ -187,6 +203,66 @@ class StructuredQueryValidationTest {
         var timeRestriction = TimeRestriction.builder()
             .afterDate("1998-05-09")
             .beforeDate("1991-06-15")
+            .build();
+        var criterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .context(context)
+            .attributeFilters(List.of())
+            .timeRestriction(timeRestriction)
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(criterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .build();
+    }
+
+    @NotNull
+    private static StructuredQuery createStructuredQueryWithOnlyBeforeDate() {
+        var context = TermCode.builder()
+            .code("Laboruntersuchung")
+            .system("fdpg.mii.cds")
+            .display("Laboruntersuchung")
+            .version("1.0.0")
+            .build();
+        var termCode = TermCode.builder()
+            .code("19113-0")
+            .system("http://loinc.org")
+            .display("IgE")
+            .build();
+        var timeRestriction = TimeRestriction.builder()
+            .beforeDate("1991-06-15")
+            .build();
+        var criterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .context(context)
+            .attributeFilters(List.of())
+            .timeRestriction(timeRestriction)
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(criterion)))
+            .exclusionCriteria(List.of())
+            .display("foo")
+            .build();
+    }
+
+    @NotNull
+    private static StructuredQuery createStructuredQueryWithOnlyAfterDate() {
+        var context = TermCode.builder()
+            .code("Laboruntersuchung")
+            .system("fdpg.mii.cds")
+            .display("Laboruntersuchung")
+            .version("1.0.0")
+            .build();
+        var termCode = TermCode.builder()
+            .code("19113-0")
+            .system("http://loinc.org")
+            .display("IgE")
+            .build();
+        var timeRestriction = TimeRestriction.builder()
+            .afterDate("1998-05-09")
             .build();
         var criterion = Criterion.builder()
             .termCodes(List.of(termCode))

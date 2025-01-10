@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled("There seems to be a concurrency issue with TerminologyServiceIT. Disable this for now until it is fixed.")
 @Tag("terminology")
 @Tag("elasticsearch")
 @Import({CodeableConceptService.class})
@@ -46,7 +45,7 @@ public class CodeableConceptServiceIT {
 
   @Container
   @ServiceConnection
-  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.16.0")
+  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.16.1")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
       .withReuse(false)
@@ -56,7 +55,7 @@ public class CodeableConceptServiceIT {
       .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
 
   @BeforeAll
-  static void setUp() {
+  static void setUp() throws InterruptedException {
     ELASTICSEARCH_CONTAINER.start();
     WebClient webClient = WebClient.builder().baseUrl("http://" + ELASTICSEARCH_CONTAINER.getHttpHostAddress()).build();
     webClient.put()
@@ -72,6 +71,9 @@ public class CodeableConceptServiceIT {
         .retrieve()
         .toBodilessEntity()
         .block();
+
+    // When running in github actions without a slight delay, the data might not be complete in the elastic search container (although a blocking call is used)
+    Thread.sleep(1000);
   }
 
   @AfterAll
