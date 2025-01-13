@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.BandwidthBuilder;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 import lombok.Getter;
@@ -62,19 +63,19 @@ public class RateLimitingService {
 
   private Bucket newSummaryResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalPollingSummary)))
+        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalPollingSummary))
         .build();
   }
 
   private Bucket newDetailedResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(Bandwidth.classic(1, Refill.intervally(1, intervalPollingDetailed)))
+        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalPollingDetailed))
         .build();
   }
 
   private Bucket newViewDetailedObfuscatedResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(Bandwidth.classic(amountDetailedObfuscated, Refill.intervally(1, intervalDetailedObfuscated)))
+        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalDetailedObfuscated))
         .build();
   }
 

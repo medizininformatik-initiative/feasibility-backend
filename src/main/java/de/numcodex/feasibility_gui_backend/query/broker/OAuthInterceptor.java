@@ -60,7 +60,8 @@ public final class OAuthInterceptor implements IClientInterceptor {
 
     private HTTPRequest getTokenRequest() throws GeneralException, IOException {
         if (tokenRequest == null) {
-            tokenRequest = new TokenRequest(getTokenUri(), clientAuth, new ClientCredentialsGrant()).toHTTPRequest();
+            tokenRequest = new TokenRequest.Builder(getTokenUri(), clientAuth, new ClientCredentialsGrant())
+                .build().toHTTPRequest();
         }
         return tokenRequest;
     }
