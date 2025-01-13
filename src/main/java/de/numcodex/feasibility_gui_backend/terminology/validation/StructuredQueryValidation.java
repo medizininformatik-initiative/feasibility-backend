@@ -119,8 +119,7 @@ public class StructuredQueryValidation {
         if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
           log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
         } else {
-          log.debug("termcode invalid: {} - {}", termCode.system(), termCode.code(),
-              termCode.version());
+          log.debug("termcode invalid: {} - {} - {}", termCode.system(), termCode.code(), termCode.version());
           return true;
         }
       }
