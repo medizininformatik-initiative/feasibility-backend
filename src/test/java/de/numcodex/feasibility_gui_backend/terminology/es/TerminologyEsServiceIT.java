@@ -169,7 +169,7 @@ public class TerminologyEsServiceIT {
   @Test
   void testGetSearchRelationsByHash_succeeds() {
     String entryId = "e2fcb288-0d08-3272-8f32-64b8f1cfe095";
-    var relations = assertDoesNotThrow(() -> terminologyEsService.getOntologyItemRelationsByHash(entryId));
+    var relations = assertDoesNotThrow(() -> terminologyEsService.getRelationEntryByHash(entryId));
     assertThat(relations).isNotNull();
     assertThat(relations.parents()).isNotNull();
     assertThat(relations.parents()).isNotEmpty();
@@ -178,6 +178,6 @@ public class TerminologyEsServiceIT {
 
   @Test
   void testGetSearchRelationsByHash_throwsOnNotFound() {
-    assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getOntologyItemRelationsByHash("invalid-id"));
+    assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getRelationEntryByHash("invalid-id"));
   }
 }

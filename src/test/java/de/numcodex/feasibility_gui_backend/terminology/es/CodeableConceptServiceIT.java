@@ -87,7 +87,7 @@ public class CodeableConceptServiceIT {
 
     assertNotNull(page);
     assertThat(page.getTotalHits()).isOne();
-    Assertions.assertEquals("A1.0", page.getResults().get(0).code());
+    Assertions.assertEquals("A1.0", page.getResults().get(0).termCode().code());
   }
 
   @Test
@@ -122,10 +122,10 @@ public class CodeableConceptServiceIT {
     var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByCode("A1.1"));
 
     assertNotNull(result);
-    Assertions.assertEquals("bar", result.display());
-    Assertions.assertEquals("A1.1", result.code());
-    Assertions.assertEquals("2012", result.version());
-    Assertions.assertEquals("another-system", result.system());
+    Assertions.assertEquals("bar", result.termCode().display());
+    Assertions.assertEquals("A1.1", result.termCode().code());
+    Assertions.assertEquals("2012", result.termCode().version());
+    Assertions.assertEquals("another-system", result.termCode().system());
   }
 
   @Test

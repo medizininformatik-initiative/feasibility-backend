@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
@@ -77,7 +78,7 @@ public class TerminologyEsServiceTest {
     assertThat(searchResultEntry).isNotNull();
     assertThat(searchResultEntry.id()).isEqualTo(id);
     assertThat(searchResultEntry.terminology()).isEqualTo(dummyOntologyListItem.terminology());
-    assertThat(searchResultEntry.name()).isEqualTo(dummyOntologyListItem.name());
+    assertThat(searchResultEntry.display().original()).isEqualTo(dummyOntologyListItem.display().original());
     assertThat(searchResultEntry.kdsModule()).isEqualTo(dummyOntologyListItem.kdsModule());
     assertThat(searchResultEntry.availability()).isEqualTo(dummyOntologyListItem.availability());
     assertThat(searchResultEntry.context()).isEqualTo(dummyOntologyListItem.context().code());
@@ -175,24 +176,24 @@ public class TerminologyEsServiceTest {
   }
 
   @Test
-  void testGetOntologyItemRelationsByHash_succeeds() {
+  void testGetRelationEntryByHash_succeeds() {
     String id = UUID.randomUUID().toString();
-    OntologyItemDocument dummyOntologyItem = createDummyOntologyItem(id);
+    var dummyOntologyItem = createDummyOntologyItem(id);
     doReturn(Optional.of(dummyOntologyItem)).when(ontologyItemEsRepository).findById(any(String.class));
 
-    var ontologyItemRelationsDocument = assertDoesNotThrow(() -> terminologyEsService.getOntologyItemRelationsByHash(id));
-    assertThat(ontologyItemRelationsDocument).isNotNull();
-    assertThat(ontologyItemRelationsDocument.relatedTerms()).isEqualTo(dummyOntologyItem.relatedTerms());
-    assertThat(ontologyItemRelationsDocument.children()).isEqualTo(dummyOntologyItem.children());
-    assertThat(ontologyItemRelationsDocument.parents()).isEqualTo(dummyOntologyItem.parents());
-    assertThat(ontologyItemRelationsDocument.translations()).isEqualTo(dummyOntologyItem.translations());
+    var relationEntry = assertDoesNotThrow(() -> terminologyEsService.getRelationEntryByHash(id));
+    assertThat(relationEntry).isNotNull();
+    assertThat(relationEntry.relatedTerms()).isEqualTo(dummyOntologyItem.relatedTerms());
+    assertThat(relationEntry.children()).isEqualTo(dummyOntologyItem.children());
+    assertThat(relationEntry.parents()).isEqualTo(dummyOntologyItem.parents());
+    assertThat(relationEntry.display()).isEqualTo(DisplayEntry.of(dummyOntologyItem.display()));
   }
 
   @Test
-  void testGetOntologyItemRelationsByHash_throwsOnNotFound() {
+  void testGetRelationEntryByHash_throwsOnNotFound() {
     doReturn(Optional.empty()).when(ontologyItemEsRepository).findById(any(String.class));
 
-    assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getOntologyItemRelationsByHash("id"));
+    assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getRelationEntryByHash("id"));
   }
 
   private OntologyListItemDocument createDummyOntologyListItem(String id) {
@@ -200,7 +201,7 @@ public class TerminologyEsServiceTest {
 
     return OntologyListItemDocument.builder()
         .id(id)
-        .name("Some Name")
+        .display(createDummyDisplay())
         .availability(1)
         .context(termCode)
         .terminology("Some Terminology")
@@ -209,32 +210,31 @@ public class TerminologyEsServiceTest {
         .build();
   }
 
+  private Display createDummyDisplay() {
+    return Display.builder()
+        .original("Some Name")
+        .deDe("Some German Name")
+        .enUs("Some English Name")
+        .build();
+  }
+
   private OntologyItemDocument createDummyOntologyItem(String id) {
     TermCode termCode = createDummyTermCode();
-    Collection<Translation> translations = List.of(createDummyTranslation(), createDummyTranslation(), createDummyTranslation());
     Collection<Relative> parents = List.of(createDummyRelative(), createDummyRelative());
     Collection<Relative> children = List.of(createDummyRelative(), createDummyRelative(), createDummyRelative(), createDummyRelative());
     Collection<Relative> relatedTerms = List.of(createDummyRelative(), createDummyRelative());
 
     return OntologyItemDocument.builder()
         .id(id)
-        .name("Some Name")
+        .display(createDummyDisplay())
         .availability(1)
         .context(termCode)
         .terminology("Some Terminology")
         .termcode("Some Termcode")
         .kdsModule("Some KDS Module")
-        .translations(translations)
         .parents(parents)
         .children(children)
         .relatedTerms(relatedTerms)
-        .build();
-  }
-
-  private Translation createDummyTranslation() {
-    return Translation.builder()
-        .lang("de")
-        .value("Lorem Ipsum")
         .build();
   }
 

@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.v4;
 
-import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
+import de.numcodex.feasibility_gui_backend.terminology.api.CodeableConceptEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.CodeableConceptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -34,7 +34,7 @@ public class CodeableConceptRestController {
   }
 
   @GetMapping(value = "/entry/{code}",  produces = MediaType.APPLICATION_JSON_VALUE)
-  public TermCode getCodeableConceptByCode(@PathVariable("code") String code) {
+  public CodeableConceptEntry getCodeableConceptByCode(@PathVariable("code") String code) {
     return codeableConceptService.getSearchResultEntryByCode(code);
   }
 }
