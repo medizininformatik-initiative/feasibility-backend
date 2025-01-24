@@ -4,11 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [6.1.0-alpha.1] - 2025-01-24
+### Added
+- Added translations to ui profiles ([#430](https://github.com/medizininformatik-initiative/feasibility-backend/issues/430))
+### Changed
+- Change display and translation structure for criteria and concepts ([#382](https://github.com/medizininformatik-initiative/feasibility-backend/issues/382))
+- Change codeable-concept/entry endpoint to take a list of ids as query param instead of just one id as path param ([#433](https://github.com/medizininformatik-initiative/feasibility-backend/issues/433))
+- Replace @MockBean annotation with @MockitoBean due to deprecation ([#434](https://github.com/medizininformatik-initiative/feasibility-backend/issues/434))
+- Replace deprecated calls to bucket4j library ([#424](https://github.com/medizininformatik-initiative/feasibility-backend/issues/424))
+- Read ids from downloaded files in integration tests to remove the need to change those each time a new ontology is used ([#428](https://github.com/medizininformatik-initiative/feasibility-backend/issues/428))
+### Removed
+- @Data Annotation removed from JPA classes ([#332](https://github.com/medizininformatik-initiative/feasibility-backend/issues/332))
+### Fixed
+- Missing Parameters for DSE profile data added in open api doc ([#431](https://github.com/medizininformatik-initiative/feasibility-backend/issues/431))
+### Security
+- Update Spring Boot to 3.4.2 ([#437](https://github.com/medizininformatik-initiative/feasibility-backend/issues/437))
+
 ## [6.0.4] - 2025-01-10
 
 ### Fixed
 - Time Restriction validation was broken when only one of beforeDate or afterDate was set ([#421](https://github.com/medizininformatik-initiative/feasibility-backend/issues/421))
-- ### Security
+### Security
 - Update Spring Boot to 3.4.1
 
 ## [6.0.3] - 2024-12-10

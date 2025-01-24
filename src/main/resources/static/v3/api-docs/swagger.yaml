@@ -758,7 +758,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ElasticSearchResultEntryWithRelations"
+                $ref: "#/components/schemas/RelationsEntry"
         401:
           description: Unauthorized - please login first
         403:
@@ -869,27 +869,29 @@ paths:
           description: Unauthorized - please login first
         403:
           description: Forbidden - insufficient access rights
-  /codeable-concept/entry/{id}:
+  /codeable-concept/entry:
     get:
       tags:
         - codeable concepts
-      summary: Search for codeable concepts by code or display. Optionally filter by value sets
-      operationId: getCodeableConceptByCode
+      summary: Retrieve Codeable Concepts by their ids
+      operationId: getCodeableConceptsByCode
       parameters:
-        - name: id
-          in: path
-          description: The id (contextualized termcode hash) of the entry that shall be retrieved
+        - name: ids
+          in: query
+          style: form
+          explode: false
+          description: The ids (contextualized termcode hash) of the entry that shall be retrieved
           required: true
           schema:
             type: string
-            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
+            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8,203e04cd-4f0a-321b-b1ad-9ec6d211e0a9
       responses:
         200:
           description: Ok, return the codeable concept
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TermCode"
+                $ref: "#/components/schemas/CodeableConceptEntry"
         401:
           description: Unauthorized - please login first
         403:
@@ -917,6 +919,16 @@ paths:
       summary: Get the profile data for the submitted ids
       description: Get profile data for all submitted ids. If a profile is not found, an error message will be supplied.
       operationId: getProfileData
+      parameters:
+        - name: ids
+          in: query
+          style: form
+          explode: false
+          description: A comma-separated list of IDs (here - mostly URLs) of the entries that shall be retrieved.
+          required: true
+          schema:
+            type: string
+            example: https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab,https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure
       responses:
         200:
           description: Success, returning profiles - may contain profiles with error messages
@@ -1317,19 +1329,6 @@ components:
           type: string
           examples:
             - translated entry
-    DisplayEntry:
-      type: object
-      required:
-        - original
-      properties:
-        original:
-          type: string
-          examples:
-            - the original entry
-        translations:
-          type: array
-          items:
-            $ref: "#/components/schemas/TranslationEntry"
     ElasticSearchResult:
       type: object
       properties:
@@ -1341,45 +1340,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ElasticSearchResultEntry"
-    ElasticSearchResultEntryWithRelations:
+    RelationsEntry:
       type: object
       properties:
-        name:
-          type: string
-          examples:
-            - Diabetes Mellitus
-        contextualizedTermcodeHash:
-          type: string
-          format: uuid
-          examples:
-            - 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
-        availability:
-          description: Not sure if we want this as numeric value, percentage or just boolean?
-          type: integer
-          minimum: 0
-          maximum: 100
-          examples:
-            - 94
-        context:
-          type: string
-          examples:
-            - Diagnosis
-        terminology:
-          type: string
-          examples:
-            - icd-10
-        termcode:
-          type: string
-          examples:
-            - E10-E14
-        kdsModule:
-          type: string
-          examples:
-            - Condition
-        translations:
-          type: array
-          items:
-            $ref: "#/components/schemas/ElasticSearchTranslationEntry"
+        display:
+          $ref: "#/components/schemas/DisplayEntry"
         parents:
           type: array
           items:
@@ -1388,14 +1353,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ElasticSearchRelationEntry"
+        relatedTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/ElasticSearchRelationEntry"
     ElasticSearchResultEntry:
       type: object
       properties:
-        name:
-          type: string
-          examples:
-            - Diabetes Mellitus
-        contextualizedTermcodeHash:
+        display:
+          $ref: "#/components/schemas/DisplayEntry"
+        id:
           type: string
           format: uuid
           examples:
@@ -1422,6 +1389,10 @@ components:
           type: string
           examples:
             - Condition
+        selectable:
+          type: boolean
+          examples:
+            - true
     ElasticSearchTranslationEntry:
       type: object
       properties:
@@ -1463,6 +1434,40 @@ components:
       type: string
       examples:
         - icd10
+    LocalizedValue:
+      type: object
+      properties:
+        language:
+          type: string
+          examples:
+            - de-DE
+            - en-US
+        value:
+          type: string
+          examples:
+            - localized entry
+            - lokalisierter Eintrag
+    DisplayEntry:
+      type: object
+      properties:
+        original:
+          type: string
+          examples:
+            - display entry
+        translations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocalizedValue"
+    CodeableConceptEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        termCode:
+          $ref: "#/components/schemas/TermCode"
+        display:
+          $ref: "#/components/schemas/DisplayEntry"
     CodeableConceptSearchResult:
       type: object
       properties:
@@ -1473,23 +1478,25 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/TermCode"
+            $ref: "#/components/schemas/CodeableConceptEntry"
     CriteriaProfileData:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        uiprofile:
-          type: array
-          items:
-            $ref: "#/components/schemas/UiProfileEntry"
+        display:
+          $ref: "#/components/schemas/DisplayEntry"
+        context:
+          $ref: "#/components/schemas/TermCode"
         termCodes:
           type: array
           items:
             $ref: "#/components/schemas/TermCode"
-        context:
-          $ref: "#/components/schemas/TermCode"
+        uiprofile:
+          type: array
+          items:
+            $ref: "#/components/schemas/UiProfileEntry"
     UiProfileEntry:
       type: object
       properties:
@@ -1577,7 +1584,6 @@ components:
             - ProfileObservationLaboruntersuchung
         display:
           $ref: "#/components/schemas/DisplayEntry"
-
         module:
           type: string
           examples:

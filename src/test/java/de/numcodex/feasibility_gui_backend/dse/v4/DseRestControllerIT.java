@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.dse.v4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.dse.DseService;
-import de.numcodex.feasibility_gui_backend.dse.api.DisplayEntry;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfile;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
 import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -43,10 +43,10 @@ class DseRestControllerIT {
   @Autowired
   private ObjectMapper jsonUtil;
 
-  @MockBean
+  @MockitoBean
   private DseService dseService;
 
-  @MockBean
+  @MockitoBean
   private RateLimitingInterceptor rateLimitingInterceptor;
 
   @Test

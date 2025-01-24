@@ -2,9 +2,10 @@ package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
+import de.numcodex.feasibility_gui_backend.terminology.es.model.Display;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
-import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +17,12 @@ import org.springframework.data.elasticsearch.core.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +57,20 @@ class CodeableConceptServiceTest {
 
     assertNotNull(result);
     assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
-    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0).termCode());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().display().original(), result.getResults().get(0).display().original());
+    assertTrue(result.getResults().get(0).display().translations().containsAll(
+            List.of(
+                LocalizedValue.builder()
+                    .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().deDe())
+                    .language("de-DE")
+                    .build(),
+                LocalizedValue.builder()
+                    .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().enUs())
+                    .language("en-US")
+                    .build())
+        )
+    );
   }
 
   @Test
@@ -68,7 +82,20 @@ class CodeableConceptServiceTest {
 
     assertNotNull(result);
     assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
-    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0).termCode());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().display().original(), result.getResults().get(0).display().original());
+    assertTrue(result.getResults().get(0).display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().enUs())
+                .language("en-US")
+                .build())
+        )
+    );
   }
 
   @Test
@@ -80,7 +107,20 @@ class CodeableConceptServiceTest {
 
     assertNotNull(result);
     assertEquals(dummySearchHitsPage.getTotalHits(), result.getTotalHits());
-    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0));
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().termCode(), result.getResults().get(0).termCode());
+    assertEquals(dummySearchHitsPage.getSearchHits().get(0).getContent().display().original(), result.getResults().get(0).display().original());
+    assertTrue(result.getResults().get(0).display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummySearchHitsPage.getSearchHits().get(0).getContent().display().enUs())
+                .language("en-US")
+                .build())
+        )
+    );
   }
 
   @Test
@@ -106,21 +146,37 @@ class CodeableConceptServiceTest {
   }
 
   @Test
-  void testGetSearchResultEntryByCode_succeeds() {
+  void testGetSearchResultsEntryByIds_succeeds() {
     CodeableConceptDocument dummyCodeableConceptDocument = createDummyCodeableConceptDocument("1");
-    doReturn(Optional.of(dummyCodeableConceptDocument)).when(repository).findById(any());
+    doReturn(List.of(dummyCodeableConceptDocument)).when(repository).findAllById(any());
 
-    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByCode("1"));
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("1")));
 
     assertNotNull(result);
-    assertEquals(dummyCodeableConceptDocument.termCode(), result);
+    assertFalse(result.isEmpty());
+    assertEquals(dummyCodeableConceptDocument.termCode(), result.get(0).termCode());
+    assertEquals(dummyCodeableConceptDocument.display().original(), result.get(0).display().original());
+    assertTrue(result.get(0).display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummyCodeableConceptDocument.display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummyCodeableConceptDocument.display().enUs())
+                .language("en-US")
+                .build()
+        )
+    ));
   }
 
   @Test
-  void testGetSearchResultEntryByCode_throwsOnNotFound() {
-    doReturn(Optional.empty()).when(repository).findById(any());
+  void testGetSearchResultsEntryByIds_emptyOnNotFound() {
+    doReturn(List.of()).when(repository).findAllById(anyList());
 
-    assertThrows(OntologyItemNotFoundException.class, () -> codeableConceptService.getSearchResultEntryByCode("foo"));
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("foo")));
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
   }
 
   private SearchHits<CodeableConceptDocument> createDummySearchHitsPage(int totalHits) {
@@ -150,7 +206,16 @@ class CodeableConceptServiceTest {
     return CodeableConceptDocument.builder()
         .id(id)
         .termCode(createDummyTermcode())
+        .display(createDummyDisplay())
         .valueSets(List.of())
+        .build();
+  }
+
+  private Display createDummyDisplay() {
+    return Display.builder()
+        .original("code-1")
+        .deDe("Code 1")
+        .enUs("Code One")
         .build();
   }
 

@@ -7,6 +7,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.RelationEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
@@ -51,6 +52,13 @@ public class TerminologyEsService {
   public EsSearchResultEntry getSearchResultEntryByHash(String hash) {
     var ontologyItem = ontologyListItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
     return EsSearchResultEntry.of(ontologyItem);
+  }
+
+  public List<EsSearchResultEntry> getSearchResultEntriesByHash(List<String> hashes) {
+    var ontologyItems = ontologyListItemEsRepository.findAllById(hashes);
+    List<EsSearchResultEntry> results = new ArrayList<>();
+    ontologyItems.forEach(oi  -> results.add(EsSearchResultEntry.of(oi)));
+    return results;
   }
 
   public List<TermFilter> getAvailableFilters() {
@@ -150,7 +158,7 @@ public class TerminologyEsService {
     } else {
       var mmQuery = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("name", "termcode^2"))
+          .fields(List.of("display.de", "display.en", "termcode^2"))
           .build();
 
       boolQuery = new BoolQuery.Builder()
@@ -185,18 +193,21 @@ public class TerminologyEsService {
         .withPageable(pageRequest)
         .build();
 
+    log.info(finalQuery.getQuery().toString());
+
     return operations.search(finalQuery, OntologyListItemDocument.class);
 
   }
 
-  public OntologyItemRelationsDocument getOntologyItemRelationsByHash(String hash) {
+  public RelationEntry getRelationEntryByHash(String hash) {
     var ontologyItem = ontologyItemEsRepository.findById(hash).orElseThrow(OntologyItemNotFoundException::new);
-    return OntologyItemRelationsDocument.builder()
-        .translations(ontologyItem.translations())
+    var ontologyItemRelationsDocument = OntologyItemRelationsDocument.builder()
+        .display(ontologyItem.display())
         .parents(ontologyItem.parents())
         .children(ontologyItem.children())
         .relatedTerms(ontologyItem.relatedTerms())
         .build();
+    return RelationEntry.of(ontologyItemRelationsDocument);
   }
 
 

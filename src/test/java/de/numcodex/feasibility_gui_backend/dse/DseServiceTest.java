@@ -3,7 +3,7 @@ package de.numcodex.feasibility_gui_backend.dse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import de.numcodex.feasibility_gui_backend.dse.api.DisplayEntry;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
 import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
 import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfile;
@@ -110,7 +110,7 @@ class DseServiceTest {
   private DseProfile createDummyDseProfile() throws JsonProcessingException {
     var dseProfile = new DseProfile();
 
-    dseProfile.setId(1);
+    dseProfile.setId(1L);
     dseProfile.setUrl("http://example.com");
     dseProfile.setEntry(objectMapper.writeValueAsString(createDummyDseProfileEntry()));
 
@@ -120,7 +120,7 @@ class DseServiceTest {
   private DseProfile createDummyDseProfileWithBogusEntry() {
     var dseProfile = new DseProfile();
 
-    dseProfile.setId(1);
+    dseProfile.setId(1L);
     dseProfile.setUrl("http://example.com");
     dseProfile.setEntry("something that can't be parsed as dse profile");
 

@@ -17,10 +17,10 @@ import org.testcontainers.images.PullPolicy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -87,7 +87,7 @@ public class CodeableConceptServiceIT {
 
     assertNotNull(page);
     assertThat(page.getTotalHits()).isOne();
-    Assertions.assertEquals("A1.0", page.getResults().get(0).code());
+    Assertions.assertEquals("A1.0", page.getResults().get(0).termCode().code());
   }
 
   @Test
@@ -118,18 +118,21 @@ public class CodeableConceptServiceIT {
   }
 
   @Test
-  void testGetSearchResultEntryByCode_succeeds() {
-    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByCode("A1.1"));
+  void testGetSearchResultsEntryByIds_succeeds() {
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("A1.1")));
 
     assertNotNull(result);
-    Assertions.assertEquals("bar", result.display());
-    Assertions.assertEquals("A1.1", result.code());
-    Assertions.assertEquals("2012", result.version());
-    Assertions.assertEquals("another-system", result.system());
+    Assertions.assertFalse(result.isEmpty());
+    Assertions.assertEquals("bar", result.get(0).termCode().display());
+    Assertions.assertEquals("A1.1", result.get(0).termCode().code());
+    Assertions.assertEquals("2012", result.get(0).termCode().version());
+    Assertions.assertEquals("another-system", result.get(0).termCode().system());
   }
 
   @Test
-  void testGetSearchResultEntryByCode_throwsOnNotFound() {
-    assertThrows(OntologyItemNotFoundException.class, () -> codeableConceptService.getSearchResultEntryByCode("something-not-found"));
+  void testGetSearchResultsEntryByIds_emptyOnNotFound() {
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("something-not-found")));
+    assertNotNull(result);
+    Assertions.assertTrue(result.isEmpty());
   }
 }

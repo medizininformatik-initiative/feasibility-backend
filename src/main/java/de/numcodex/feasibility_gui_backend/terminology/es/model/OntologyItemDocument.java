@@ -13,20 +13,19 @@ import java.util.Collection;
 @Document(indexName = "ontology")
 public record OntologyItemDocument(
     @Id String id,
-    String name,
     int availability,
     TermCode context,
     String terminology,
     String termcode,
-    @Field(name = "kds_module") String kdsModule,
-
-    @Field(type = FieldType.Nested, includeInParent = true, name = "translations")
-    Collection<Translation> translations,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "parents")
+    @Field(name = "display")
+    Display display,
+    @Field(name = "kds_module")
+    String kdsModule,
+    @Field(name = "parents")
     Collection<Relative> parents,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "children")
+    @Field(name = "children")
     Collection<Relative> children,
-    @Field(type = FieldType.Nested, includeInParent = true, name = "related_terms")
+    @Field(name = "related_terms")
     Collection<Relative> relatedTerms
 ) {
 }
