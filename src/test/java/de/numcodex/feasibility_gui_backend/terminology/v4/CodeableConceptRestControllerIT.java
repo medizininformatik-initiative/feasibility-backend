@@ -22,7 +22,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_CODEABLE_CONCEPT;
@@ -75,30 +77,39 @@ class CodeableConceptRestControllerIT {
   @Test
   @WithMockUser(roles = "DATAPORTAL_TEST_USER")
   void testGetCodeableConceptByCode_succeedsWith200() throws Exception {
-    CodeableConceptEntry dummyCodeableConceptEntry = createDummyCodeableConceptEntry();
-    doReturn(dummyCodeableConceptEntry).when(codeableConceptService).getSearchResultEntryByCode(any(String.class));
+    var id = UUID.randomUUID();
+    List<CodeableConceptEntry> dummyCodeableConceptEntries = createDummyCodeableConceptEntries(List.of(id));
+    doReturn(dummyCodeableConceptEntries).when(codeableConceptService).getSearchResultsEntryByIds(anyList());
 
-    mockMvc.perform(get(URI.create(PATH_API + PATH_CODEABLE_CONCEPT + "/entry/1")).with(csrf()))
+    mockMvc.perform(get(URI.create(PATH_API + PATH_CODEABLE_CONCEPT + "/entry")).param("ids", id.toString()).with(csrf()))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.termCode.code").value(dummyCodeableConceptEntry.termCode().code()))
-        .andExpect(jsonPath("$.termCode.system").value(dummyCodeableConceptEntry.termCode().system()))
-        .andExpect(jsonPath("$.termCode.version").value(dummyCodeableConceptEntry.termCode().version()))
-        .andExpect(jsonPath("$.termCode.display").value(dummyCodeableConceptEntry.termCode().display()));
+        .andExpect(jsonPath("$.[0].termCode.code").value(dummyCodeableConceptEntries.get(0).termCode().code()))
+        .andExpect(jsonPath("$.[0].termCode.system").value(dummyCodeableConceptEntries.get(0).termCode().system()))
+        .andExpect(jsonPath("$.[0].termCode.version").value(dummyCodeableConceptEntries.get(0).termCode().version()))
+        .andExpect(jsonPath("$.[0].termCode.display").value(dummyCodeableConceptEntries.get(0).termCode().display()));
   }
 
   private CcSearchResult createDummyCcSearchResult() {
+    var id = UUID.randomUUID();
     return CcSearchResult.builder()
         .totalHits(1)
-        .results(List.of(createDummyCodeableConceptEntry()))
+        .results(createDummyCodeableConceptEntries(List.of(id)))
         .build();
   }
 
-  private CodeableConceptEntry createDummyCodeableConceptEntry() {
-    return CodeableConceptEntry.builder()
-        .termCode(createDummyTermcode())
-        .display(createDummyDisplayEntry())
-        .build();
+  private List<CodeableConceptEntry> createDummyCodeableConceptEntries(List<UUID> ids) {
+    List<CodeableConceptEntry> dummyCodeableConceptEntries = new ArrayList<>();
+    for (UUID id : ids) {
+      dummyCodeableConceptEntries.add(
+          CodeableConceptEntry.builder()
+              .id(id.toString())
+              .termCode(createDummyTermcode())
+              .display(createDummyDisplayEntry())
+              .build()
+      );
+    }
+    return dummyCodeableConceptEntries;
   }
 
   private DisplayEntry createDummyDisplayEntry() {

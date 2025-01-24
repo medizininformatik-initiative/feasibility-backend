@@ -16,7 +16,7 @@ import java.util.List;
 @CrossOrigin
 public class CodeableConceptRestController {
 
-  private CodeableConceptService codeableConceptService;
+  private final CodeableConceptService codeableConceptService;
 
   @Autowired
   public CodeableConceptRestController(CodeableConceptService codeableConceptService) {
@@ -33,8 +33,8 @@ public class CodeableConceptRestController {
         .performCodeableConceptSearchWithRepoAndPaging(keyword, valueSets, pageSize, page);
   }
 
-  @GetMapping(value = "/entry/{code}",  produces = MediaType.APPLICATION_JSON_VALUE)
-  public CodeableConceptEntry getCodeableConceptByCode(@PathVariable("code") String code) {
-    return codeableConceptService.getSearchResultEntryByCode(code);
+  @GetMapping(value = "/entry",  produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<CodeableConceptEntry> getCodeableConceptsByCode(@RequestParam List<String> ids) {
+    return codeableConceptService.getSearchResultsEntryByIds(ids);
   }
 }

@@ -20,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -117,18 +118,21 @@ public class CodeableConceptServiceIT {
   }
 
   @Test
-  void testGetSearchResultEntryByCode_succeeds() {
-    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByCode("A1.1"));
+  void testGetSearchResultsEntryByIds_succeeds() {
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("A1.1")));
 
     assertNotNull(result);
-    Assertions.assertEquals("bar", result.termCode().display());
-    Assertions.assertEquals("A1.1", result.termCode().code());
-    Assertions.assertEquals("2012", result.termCode().version());
-    Assertions.assertEquals("another-system", result.termCode().system());
+    Assertions.assertFalse(result.isEmpty());
+    Assertions.assertEquals("bar", result.get(0).termCode().display());
+    Assertions.assertEquals("A1.1", result.get(0).termCode().code());
+    Assertions.assertEquals("2012", result.get(0).termCode().version());
+    Assertions.assertEquals("another-system", result.get(0).termCode().system());
   }
 
   @Test
-  void testGetSearchResultEntryByCode_throwsOnNotFound() {
-    assertThrows(OntologyItemNotFoundException.class, () -> codeableConceptService.getSearchResultEntryByCode("something-not-found"));
+  void testGetSearchResultsEntryByIds_emptyOnNotFound() {
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("something-not-found")));
+    assertNotNull(result);
+    Assertions.assertTrue(result.isEmpty());
   }
 }

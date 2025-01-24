@@ -869,20 +869,22 @@ paths:
           description: Unauthorized - please login first
         403:
           description: Forbidden - insufficient access rights
-  /codeable-concept/entry/{id}:
+  /codeable-concept/entry:
     get:
       tags:
         - codeable concepts
-      summary: Search for codeable concepts by code or display. Optionally filter by value sets
-      operationId: getCodeableConceptByCode
+      summary: Retrieve Codeable Concepts by their ids
+      operationId: getCodeableConceptsByCode
       parameters:
-        - name: id
-          in: path
-          description: The id (contextualized termcode hash) of the entry that shall be retrieved
+        - name: ids
+          in: query
+          style: form
+          explode: false
+          description: The ids (contextualized termcode hash) of the entry that shall be retrieved
           required: true
           schema:
             type: string
-            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8
+            example: 203e04cd-4f0a-321b-b1ad-9ec6d211e0a8,203e04cd-4f0a-321b-b1ad-9ec6d211e0a9
       responses:
         200:
           description: Ok, return the codeable concept
@@ -1459,6 +1461,9 @@ components:
     CodeableConceptEntry:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         termCode:
           $ref: "#/components/schemas/TermCode"
         display:

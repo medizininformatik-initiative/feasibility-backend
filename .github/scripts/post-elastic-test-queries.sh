@@ -95,12 +95,12 @@ else
     exit 1
 fi
 
-response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/codeable-concept/entry/$cc_example_id")
+response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/codeable-concept/entry?ids=$cc_example_id")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 
 if [ "$http_code" -eq 200 ]; then
-    if echo "$json_body" | jq -e '.termCode.code and .termCode.code != ""' | grep -q true; then
+    if echo "$json_body" | jq -e '.[0].termCode.code and .[0].termCode.code != ""' | grep -q true; then
         echo "OK response with non-empty array on get cc by id"
     else
         echo "Empty or nonexistent response on get cc by id"
