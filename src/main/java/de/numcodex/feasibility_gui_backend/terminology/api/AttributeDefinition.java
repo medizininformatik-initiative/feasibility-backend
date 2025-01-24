@@ -3,6 +3,7 @@ package de.numcodex.feasibility_gui_backend.terminology.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,8 @@ import java.util.List;
 @Builder
 @JsonInclude(Include.NON_NULL)
 public class AttributeDefinition {
-
+    @JsonProperty(value= "display", required = true)
+    private DisplayEntry display;
     @JsonProperty(value = "type", required = true)
     private ValueDefinitonType type;
     @JsonProperty("selectableConcepts")
