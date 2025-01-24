@@ -26,6 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -61,7 +62,7 @@ public class TerminologyEsServiceIT {
       .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500));
 
   @BeforeAll
-  static void setUp() throws IOException {
+  static void setUp() throws IOException, InterruptedException {
     ELASTICSEARCH_CONTAINER.start();
     System.out.println(ELASTICSEARCH_CONTAINER.getHttpHostAddress());
     WebClient webClient = WebClient.builder().baseUrl("http://" + ELASTICSEARCH_CONTAINER.getHttpHostAddress()).build();
@@ -78,6 +79,10 @@ public class TerminologyEsServiceIT {
         .retrieve()
         .toBodilessEntity()
         .block();
+
+    // There may be a timing issue when there is no short sleep here, leading to tests failing because the data is not fully loaded
+    // Although the commands to upload the data are blocking
+    sleep(1000);
   }
 
   @AfterAll
