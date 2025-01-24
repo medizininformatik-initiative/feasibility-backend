@@ -6,7 +6,6 @@ import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.CodeableConceptEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
-import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -56,9 +55,11 @@ public class CodeableConceptService {
         .build();
   }
 
-  public CodeableConceptEntry getSearchResultEntryByCode(String code) {
-    var document = repo.findById(code).orElseThrow(OntologyItemNotFoundException::new);
-    return CodeableConceptEntry.of(document);
+  public List<CodeableConceptEntry> getSearchResultsEntryByIds(List<String> ids) {
+    var documents = repo.findAllById(ids);
+    var codeableConceptEntries = new ArrayList<CodeableConceptEntry>();
+    documents.forEach(d -> codeableConceptEntries.add(CodeableConceptEntry.of(d)));
+    return codeableConceptEntries;
   }
 
   private SearchHits<CodeableConceptDocument> findByCodeOrDisplay(String keyword,
