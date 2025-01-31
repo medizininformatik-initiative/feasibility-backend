@@ -86,7 +86,8 @@
         "properties": {
           "original": {
             "type": "text",
-            "index": false
+            "analyzer": "edge_ngram_analyzer_include_punctuation",
+            "search_analyzer": "lowercase_analyzer"
           },
           "de": {
             "type": "text",

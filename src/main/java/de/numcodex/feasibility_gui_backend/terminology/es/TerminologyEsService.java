@@ -156,13 +156,19 @@ public class TerminologyEsService {
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
     } else {
-      var mmQuery = new MultiMatchQuery.Builder()
+      var mmQueryWithTranslations = new MultiMatchQuery.Builder()
           .query(keyword)
           .fields(List.of("display.de", "display.en", "termcode^2"))
           .build();
 
+      var mmQueryWithOriginal = new MultiMatchQuery.Builder()
+          .query(keyword)
+          .fields(List.of("display.original", "termcode^2"))
+          .build();
+
       boolQuery = new BoolQuery.Builder()
-          .must(List.of(mmQuery._toQuery()))
+          .should(List.of(mmQueryWithTranslations._toQuery(), mmQueryWithOriginal._toQuery()))
+          .minimumShouldMatch("1")
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
     }

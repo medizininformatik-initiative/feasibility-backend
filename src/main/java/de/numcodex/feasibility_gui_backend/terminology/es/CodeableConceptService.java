@@ -80,29 +80,50 @@ public class CodeableConceptService {
       });
     }
 
-    BoolQuery boolQuery;
+    BoolQuery outerBoolQuery;
 
     if (keyword.isEmpty()) {
-      boolQuery = new BoolQuery.Builder()
+      outerBoolQuery = new BoolQuery.Builder()
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
 
     } else {
-      var mmQuery = new MultiMatchQuery.Builder()
+      // First the "upper" part of the query, when translations are present
+      var mustMultiMatchQueryWithTranslations = new MultiMatchQuery.Builder()
           .query(keyword)
           .fields(List.of("display.de", "display.en", "termcode.code^2"))
           .build();
 
-      boolQuery = new BoolQuery.Builder()
-          .must(List.of(mmQuery._toQuery()))
+      var innerBoolQueryMatchTranslations = new BoolQuery.Builder()
+          .must(List.of(mustMultiMatchQueryWithTranslations._toQuery()))
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+
+
+      // The "lower" part that will only be considered when the translations are empty
+      var mustMultiMatchQueryWithOriginal = new MultiMatchQuery.Builder()
+          .query(keyword)
+          .fields(List.of("display.original", "termcode.code^2"))
+          .build();
+
+      var innerBoolQueryMatchOriginal = new BoolQuery.Builder()
+          .must(List.of(mustMultiMatchQueryWithOriginal._toQuery()))
+          .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .build();
+
+      // Combine both parts in the top level bool query
+      outerBoolQuery = new BoolQuery.Builder()
+          .should(List.of(innerBoolQueryMatchTranslations._toQuery(), innerBoolQueryMatchOriginal._toQuery()))
+          .minimumShouldMatch("1")
           .build();
     }
 
     var query = new NativeQueryBuilder()
-        .withQuery(boolQuery._toQuery())
+        .withQuery(outerBoolQuery._toQuery())
         .withPageable(pageRequest)
         .build();
+
+    log.info(query.getQuery().toString());
 
     return operations.search(query, CodeableConceptDocument.class);
   }
