@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [6.0.5] - 2025-02-03
+
+### Changed
+- Update sq2cql to 0.7.0 ([#444](https://github.com/medizininformatik-initiative/feasibility-backend/issues/444))
+### Security
+- Update Spring Boot to 3.4.2
+
 ## [6.0.4] - 2025-01-10
 
 ### Fixed
 - Time Restriction validation was broken when only one of beforeDate or afterDate was set ([#421](https://github.com/medizininformatik-initiative/feasibility-backend/issues/421))
-- ### Security
+### Security
 - Update Spring Boot to 3.4.1
 
 ## [6.0.3] - 2024-12-10
