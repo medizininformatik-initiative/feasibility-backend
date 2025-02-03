@@ -1493,10 +1493,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TermCode"
-        uiprofile:
-          type: array
-          items:
-            $ref: "#/components/schemas/UiProfileEntry"
+        uiProfile:
+          $ref: "#/components/schemas/UiProfileEntry"
     UiProfileEntry:
       type: object
       properties:
