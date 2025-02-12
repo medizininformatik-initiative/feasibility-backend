@@ -206,7 +206,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>0.7.0</version>
+      <version>0.8.0-alpha.1</version>
     </dependency>
 
     <dependency>
