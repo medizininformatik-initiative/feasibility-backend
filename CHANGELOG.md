@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [6.1.0-alpha.2] - 2025-02-12
+
+### Changed
+- Update sq2cql to 0.8.0-alpha.1 ([#450](https://github.com/medizininformatik-initiative/feasibility-backend/issues/450))
+- Search in original display text if no translations are found ([#446](https://github.com/medizininformatik-initiative/feasibility-backend/issues/446))
+
+## [6.0.5] - 2025-02-03
+
+### Changed
+- Update sq2cql to 0.7.0 ([#444](https://github.com/medizininformatik-initiative/feasibility-backend/issues/444))
+### Security
+- Update Spring Boot to 3.4.2
+
 ## [6.1.0-alpha.1] - 2025-01-24
+
 ### Added
 - Added translations to ui profiles ([#430](https://github.com/medizininformatik-initiative/feasibility-backend/issues/430))
 ### Changed
