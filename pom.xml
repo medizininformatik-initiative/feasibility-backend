@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v3.0.2-alpha.2</ontology-tag>
+    <ontology-tag>v3.0.2-alpha.5</ontology-tag>
   </properties>
 
   <dependencies>
@@ -423,7 +423,7 @@
                   <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/${ontology-tag}/</url>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/${ontology-tag}</url>
                   <fromFile>backend.zip</fromFile>
                   <toDir>${ontoDirectory.download}</toDir>
                 </configuration>
@@ -435,7 +435,7 @@
                   <goal>download-single</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/${ontology-tag}/</url>
+                  <url>https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/${ontology-tag}</url>
                   <fromFile>mapping.zip</fromFile>
                   <toDir>${ontoDirectory.download}</toDir>
                 </configuration>
