@@ -17,7 +17,7 @@ public class RateLimitingErrorAttributes extends DefaultErrorAttributes {
         String originalErrorMessage = super.getMessage(webRequest, null);
 
         try {
-            return Map.of("issue", List.of(FeasibilityIssue.valueOf(Integer.parseInt(originalErrorMessage))));
+            return Map.of("issues", List.of(FeasibilityIssue.valueOf(Integer.parseInt(originalErrorMessage))));
         } catch (IllegalArgumentException e) {
             return super.getErrorAttributes(webRequest, options);
         }
