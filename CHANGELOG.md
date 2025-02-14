@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [6.1.0] - 2025-02-14
 
-- Based on ontology **[v3.0.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.1.0)**
+- Based on ontology **[v3.1.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.1.0)**
 
 ### Added
 - Added translations to ui profiles ([#430](https://github.com/medizininformatik-initiative/feasibility-backend/issues/430))
