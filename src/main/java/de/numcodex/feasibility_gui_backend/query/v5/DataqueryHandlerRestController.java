@@ -34,7 +34,7 @@ Rest Interface for the UI to send and receive dataqueries from the backend.
 @Slf4j
 @CrossOrigin(origins = "${cors.allowedOrigins}", exposedHeaders = "Location")
 public class DataqueryHandlerRestController {
-
+  private final static String API_VERSION = "v5";
   private final DataqueryHandler dataqueryHandler;
   private final StructuredQueryValidation structuredQueryValidation;
   private final String apiBaseUrl;
@@ -67,7 +67,7 @@ public class DataqueryHandlerRestController {
         : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
 
     var uriString = uriBuilder.replacePath("")
-        .pathSegment("api", "v5", "query", "data", String.valueOf(dataqueryId))
+        .pathSegment("api", API_VERSION, "query", "data", String.valueOf(dataqueryId))
         .build()
         .toUriString();
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -160,10 +160,11 @@ public class DataqueryHandlerRestController {
   @GetMapping(path = "")
   public ResponseEntity<Object> getDataqueries(
       @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
+      @RequestParam(value = "include-temporary", required = false, defaultValue = "false") boolean includeTemporary,
       Principal principal) {
 
     try {
-      var dataqueries = dataqueryHandler.getDataqueriesByAuthor(principal.getName());
+      var dataqueries = dataqueryHandler.getDataqueriesByAuthor(principal.getName(), includeTemporary);
       var ret = new ArrayList<Dataquery>();
       dataqueries.forEach(dq -> {
         ret.add(
@@ -181,6 +182,7 @@ public class DataqueryHandlerRestController {
                     .exists(dq.content().dataExtraction() != null)
                     .isValid(true) // TODO: Add validation for that
                     .build())
+                .expiresAt(dq.expiresAt())
                 .build()
         );
       });
@@ -192,10 +194,11 @@ public class DataqueryHandlerRestController {
 
   @GetMapping(path = "/by-user/{userId}")
   public ResponseEntity<Object> getDataqueriesByUserId(@PathVariable(value = "userId") String userId,
-      @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation) {
+     @RequestParam(value = "include-temporary", required = false, defaultValue = "false") boolean includeTemporary,
+     @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation) {
 
     try {
-      var dataqueries = dataqueryHandler.getDataqueriesByAuthor(userId);
+      var dataqueries = dataqueryHandler.getDataqueriesByAuthor(userId, includeTemporary);
       var ret = new ArrayList<Dataquery>();
       dataqueries.forEach(dq -> {
         ret.add(
@@ -213,6 +216,7 @@ public class DataqueryHandlerRestController {
                     .exists(dq.content().dataExtraction() != null)
                     .isValid(true) // TODO: Add validation for that
                     .build())
+                .expiresAt(dq.expiresAt())
                 .build()
         );
       });
@@ -220,6 +224,35 @@ public class DataqueryHandlerRestController {
     } catch (DataqueryException e) {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @PostMapping(path = "/by-user/{userId}")
+  public ResponseEntity<Object> storeDataqueryForUser(@RequestBody Dataquery dataquery,
+                                                      @PathVariable(value = "userId") String userId,
+                                                      @RequestParam(value = "ttl") String ttlDuration,
+                                                      @Context HttpServletRequest httpServletRequest) {
+
+    Long dataqueryId;
+    try {
+      dataqueryId = dataqueryHandler.storeExpiringDataquery(dataquery, userId, ttlDuration);
+    } catch (DataqueryException e) {
+      log.error("Error while storing dataquery", e);
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (DataqueryStorageFullException e) {
+      return new ResponseEntity<>("storage exceeded", HttpStatus.FORBIDDEN);
+    }
+
+    UriComponentsBuilder uriBuilder = (apiBaseUrl != null && !apiBaseUrl.isEmpty())
+        ? ServletUriComponentsBuilder.fromUriString(apiBaseUrl)
+        : ServletUriComponentsBuilder.fromRequestUri(httpServletRequest);
+
+    var uriString = uriBuilder.replacePath("")
+        .pathSegment("api", API_VERSION, "query", "data", String.valueOf(dataqueryId))
+        .build()
+        .toUriString();
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.add(HttpHeaders.LOCATION, uriString);
+    return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
   }
 
   @PutMapping(path = "/{dataqueryId}")

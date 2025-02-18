@@ -42,13 +42,13 @@ public class QueryTranslatorSpringConfig {
     @Value("${app.conceptTreeFile}")
     private String conceptTreeFile;
 
-    @Value("${app.flare.baseUrl}")
+    @Value("${app.flare.baseUrl:}")
     private String flareBaseUrl;
 
-    @Value("${app.cqlTranslationEnabled}")
+    @Value("${app.cqlTranslationEnabled:true}")
     private boolean cqlTranslationEnabled;
 
-    @Value("${app.fhirTranslationEnabled}")
+    @Value("${app.fhirTranslationEnabled:true}")
     private boolean fhirTranslationEnabled;
 
     private final ApplicationContext appContext;

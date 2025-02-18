@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,7 +24,6 @@ import java.net.URI;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,7 +38,9 @@ class DataqueryHandlerTest {
     public static final String LABEL = "some-label";
     public static final String COMMENT = "some-comment";
     public static final String TIME_STRING = "1969-07-20 20:17:40.0";
+    public static final String EXPIRY_STRING = "2063-04-05 20:17:40.0";
     private static final int MAX_QUERIES_PER_USER = 5;
+    public static final String DURATION = "PT10M";
 
     @Spy
     private ObjectMapper jsonUtil = new ObjectMapper();
@@ -120,10 +123,13 @@ class DataqueryHandlerTest {
     @DisplayName("storeDataquery() -> error in json serialization throws an exception")
     void storeDataquery_throwsOnJsonSerializationError() throws JsonProcessingException {
         var dataquery = createDataquery();
-        doThrow(JsonProcessingException.class).when(jsonUtil).writeValueAsString(any(Crtdl.class));
-
         var dataqueryHandler = createDataqueryHandler();
-        assertThrows(DataqueryException.class, () -> dataqueryHandler.storeDataquery(dataquery, CREATOR));
+
+        try (MockedStatic<de.numcodex.feasibility_gui_backend.query.persistence.Dataquery> mockedStaticDataquery
+                 = mockStatic(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class)) {
+            mockedStaticDataquery.when(() -> de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(any(Dataquery.class))).thenThrow(JsonProcessingException.class);
+            assertThrows(DataqueryException.class, () -> dataqueryHandler.storeDataquery(dataquery, CREATOR));
+        }
     }
 
     @Test
@@ -234,15 +240,16 @@ class DataqueryHandlerTest {
         }
     }
 
-    @Test
+    @ParameterizedTest
     @DisplayName("getDataqueriesByAuthor() -> succeeds")
-    void getDataqueriesByAuthor_succeedsWithEntry() throws JsonProcessingException {
+    @ValueSource(strings = { "true", "false" })
+    void getDataqueriesByAuthor_succeedsWithEntry(boolean includeTemporary) throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
         var dataqueryEntity = createDataqueryEntity();
 
-        doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class));
+        doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class), anyBoolean());
 
-        List<Dataquery> dataqueries = assertDoesNotThrow(() -> dataqueryHandler.getDataqueriesByAuthor(CREATOR));
+        List<Dataquery> dataqueries = assertDoesNotThrow(() -> dataqueryHandler.getDataqueriesByAuthor(CREATOR, includeTemporary));
 
         assertNotNull(dataqueries);
         assertEquals(1, dataqueries.size());
@@ -255,7 +262,7 @@ class DataqueryHandlerTest {
     void getDataqueriesByAuthor_succeedsWithEmptyList() throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
 
-        doReturn(List.of()).when(dataqueryRepository).findAllByCreatedBy(any(String.class));
+        doReturn(List.of()).when(dataqueryRepository).findAllByCreatedBy(any(String.class), anyBoolean());
 
         List<Dataquery> dataqueries = assertDoesNotThrow(() -> dataqueryHandler.getDataqueriesByAuthor(CREATOR));
 
@@ -263,16 +270,19 @@ class DataqueryHandlerTest {
         assertEquals(0, dataqueries.size());
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = { "true", "false" })
     @DisplayName("getDataqueriesByAuthor() -> throws on json error")
-    void getDataqueriesByAuthor_throwsOnJsonException() throws JsonProcessingException {
+    void getDataqueriesByAuthor_throwsOnJsonException(boolean includeTemporary) throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
         var dataqueryEntity = createDataqueryEntity();
 
-        doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class));
-        doThrow(JsonProcessingException.class).when(jsonUtil).readValue(any(String.class), any(Class.class));
+        try (MockedStatic<Dataquery> mockedStaticDataquery = mockStatic(Dataquery.class)) {
+            mockedStaticDataquery.when(() -> Dataquery.of(any(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class))).thenThrow(JsonProcessingException.class);
+            doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class), anyBoolean());
+            assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueriesByAuthor(CREATOR, includeTemporary));
+        }
 
-        assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueriesByAuthor(CREATOR));
     }
 
     @Test
@@ -301,7 +311,7 @@ class DataqueryHandlerTest {
     @DisplayName("getDataquerySlotsJson() -> succeeds")
     void getDataquerySlotsJson_succeeds() throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
-        var usedSlots = new Random().nextLong();
+        var usedSlots = 7L;
 
         doReturn(usedSlots).when(dataqueryRepository).countByCreatedByWhereResultIsNotNull(any(String.class));
 
@@ -312,11 +322,10 @@ class DataqueryHandlerTest {
 
     @Test
     @DisplayName("convertApiToPersistence() -> converting a dataquery from the rest api to the format that will be stored in the database succeeds")
-    void convertApiToPersistence() throws JsonProcessingException {
+    void testDataqueryPersistenceOfDataQueryApi() throws JsonProcessingException {
         var dataQuery = createDataquery();
-        var dataqueryHandler = createDataqueryHandler();
 
-        var convertedDataquery = dataqueryHandler.convertApiToPersistence(dataQuery);
+        var convertedDataquery = de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(dataQuery);
         var convertedCrtdl = jsonUtil.readValue(convertedDataquery.getCrtdl(), Crtdl.class);
 
         assertEquals(convertedDataquery.getId(), dataQuery.id());
@@ -333,11 +342,10 @@ class DataqueryHandlerTest {
     }
 
     @Test
-    @DisplayName("convertPersistenceToApi() -> converting a dataquery from the database to the format that will be sent out via api succeeds")
-    void convertPersistenceToApi() throws JsonProcessingException {
+    @DisplayName("Dataquery.of() -> converting a dataquery from the database to the format that will be sent out via api succeeds")
+    void testDataqueryApiOfDataQueryPersistence() throws JsonProcessingException {
         var dataqueryEntity = createDataqueryEntity();
-        var dataqueryHandler = createDataqueryHandler();
-        var convertedDataquery = dataqueryHandler.convertPersistenceToApi(dataqueryEntity);
+        var convertedDataquery = Dataquery.of(dataqueryEntity);
         var originalCrtdl = jsonUtil.readValue(dataqueryEntity.getCrtdl(), Crtdl.class);
 
         assertEquals(convertedDataquery.id(), dataqueryEntity.getId());
@@ -357,6 +365,40 @@ class DataqueryHandlerTest {
             originalCrtdl.cohortDefinition().inclusionCriteria().get(0).get(0).termCodes().get(0).system());
         assertEquals(convertedDataquery.content().cohortDefinition().exclusionCriteria(), originalCrtdl.cohortDefinition().exclusionCriteria());
     }
+
+    @Test
+    @DisplayName("storeExpiringDataquery() -> trying to store a valid object with a user does not throw")
+    void storeExpiringDataquery_succeeds() throws JsonProcessingException {
+        var dataqueryHandler = createDataqueryHandler();
+        doReturn(createDataqueryEntity(false, true)).when(dataqueryRepository).save(any());
+
+        assertDoesNotThrow(() -> dataqueryHandler.storeExpiringDataquery(createDataquery(), CREATOR, DURATION));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true,true,true", "true,true,false", "true,false,true", "true,false,false",
+        "false,true,true", "false,true,false", "false,false,true"})
+    @DisplayName("storeExpiringDataquery() -> trying to store a null object with a null user throws an exception")
+    void storeExpiringDataquery_throwsOnEmptyValue(boolean emptyQuery, boolean emptyUser, boolean emptyTtl) throws JsonProcessingException {
+        var dataqueryHandler = createDataqueryHandler();
+        assertThrows(NullPointerException.class, () -> dataqueryHandler.storeExpiringDataquery(
+            emptyQuery ? null : createDataquery(),
+            emptyUser ? null : CREATOR,
+            emptyTtl ? null : DURATION)
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true", "false"})
+    @DisplayName("storeExpiringDataquery() -> trying to store an expiring dataquery when no slots are free does not throw")
+    void storeExpiringDataquery_ignoresFreeSlots(boolean withResult) throws JsonProcessingException {
+        var dataqueryHandler = createDataqueryHandler();
+        lenient().doReturn(MAX_QUERIES_PER_USER + 1L).when(dataqueryRepository).countByCreatedByWhereResultIsNotNull(any(String.class));
+        lenient().doReturn(createDataqueryEntity()).when(dataqueryRepository).save(any(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class));
+
+        assertDoesNotThrow(() -> dataqueryHandler.storeExpiringDataquery(createDataquery(withResult), CREATOR, DURATION));
+    }
+
 
     @ParameterizedTest
     @CsvSource({"true,true,true", "true,true,false", "true,false,true", "true,false,false", "false,true,true",
@@ -505,7 +547,7 @@ class DataqueryHandlerTest {
                 .build();
     }
 
-    private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity(boolean withResult) throws JsonProcessingException {
+    private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity(boolean withResult, boolean expiring) throws JsonProcessingException {
         de.numcodex.feasibility_gui_backend.query.persistence.Dataquery out = new de.numcodex.feasibility_gui_backend.query.persistence.Dataquery();
         out.setId(1L);
         out.setLabel(LABEL);
@@ -513,11 +555,16 @@ class DataqueryHandlerTest {
         out.setLastModified(Timestamp.valueOf(TIME_STRING));
         out.setCreatedBy(CREATOR);
         out.setResultSize(withResult ? 123L : null);
+        out.setExpiresAt(expiring ? Timestamp.valueOf(EXPIRY_STRING) : null);
         out.setCrtdl(jsonUtil.writeValueAsString(createCrtdl()));
         return out;
     }
 
+    private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity(boolean withResult) throws JsonProcessingException {
+        return  createDataqueryEntity(withResult, false);
+    }
+
     private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity() throws JsonProcessingException {
-        return  createDataqueryEntity(false);
+        return  createDataqueryEntity(false, false);
     }
 }

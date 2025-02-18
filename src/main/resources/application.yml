@@ -67,6 +67,7 @@ app:
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:DataportalAdmin}
   queryResultExpiry: ${QUERYRESULT_EXPIRY:PT1M}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
+  purgeExpiredQueries: ${PURGE_EXPIRED_QUERIES:0 0 * * * *}
   export:
     csv:
       delimiter: ${EXPORT_CSV_DELIMITER:;}

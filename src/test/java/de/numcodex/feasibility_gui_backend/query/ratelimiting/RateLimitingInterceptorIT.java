@@ -76,7 +76,7 @@ public class RateLimitingInterceptorIT {
   @BeforeEach
   void setupMockBehaviour() throws InvalidAuthenticationException {
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_USER"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_USER"));
     doReturn(createTestQueryResult(ResultDetail.SUMMARY)).when(queryHandlerService)
         .getQueryResult(any(Long.class), eq(ResultDetail.SUMMARY));
     doReturn(createTestQueryResult(ResultDetail.DETAILED)).when(queryHandlerService)
@@ -102,7 +102,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(isAdmin).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -130,7 +130,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -164,7 +164,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -199,7 +199,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     for (int i = 0; i < 10; ++i) {
@@ -229,7 +229,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -256,7 +256,7 @@ public class RateLimitingInterceptorIT {
     var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
