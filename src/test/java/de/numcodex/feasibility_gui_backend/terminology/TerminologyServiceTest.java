@@ -136,10 +136,10 @@ class TerminologyServiceTest {
 
         for (int i = 0; i < result.size(); i++) {
             CriteriaProfileData cpd = result.get(i);
-            assertThat(cpd.getId()).isEqualTo(ids.get(i));
-            assertThat(cpd.getContext() == null).isEqualTo(excludeContext);
-            assertThat(cpd.getTermCodes().isEmpty()).isEqualTo(excludeTermcodes);
-            assertThat(cpd.getUiProfile() == null).isEqualTo(excludeUiProfile);
+            assertThat(cpd.id()).isEqualTo(ids.get(i));
+            assertThat(cpd.context() == null).isEqualTo(excludeContext);
+            assertThat(cpd.termCodes().isEmpty()).isEqualTo(excludeTermcodes);
+            assertThat(cpd.uiProfile() == null).isEqualTo(excludeUiProfile);
         }
     }
 

@@ -47,7 +47,7 @@ access_token="$(curl -s --request POST \
   --data password=testpassword \
   --data scope=openid | jq '.access_token' | tr -d '"')"
 
-response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/terminology/entry/search?searchterm=Blutdruck")
+response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v5/terminology/entry/search?searchterm=Blutdruck")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 
@@ -63,7 +63,7 @@ else
     exit 1
 fi
 
-response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/terminology/entry/$onto_example_id")
+response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v5/terminology/entry/$onto_example_id")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 
@@ -79,7 +79,7 @@ else
     exit 1
 fi
 
-response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/codeable-concept/entry/search?searchterm=Vectorcardiogram")
+response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v5/codeable-concept/entry/search?searchterm=Vectorcardiogram")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 
@@ -95,7 +95,7 @@ else
     exit 1
 fi
 
-response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v4/codeable-concept/entry?ids=$cc_example_id")
+response=$(curl -s -w "%{http_code}" --header "Authorization: Bearer $access_token" -o response_body "http://localhost:8091/api/v5/codeable-concept/entry?ids=$cc_example_id")
 http_code="${response: -3}"
 json_body=$(cat response_body)
 

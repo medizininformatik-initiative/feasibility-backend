@@ -7,6 +7,7 @@ import de.numcodex.feasibility_gui_backend.common.api.Unit;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
+import jakarta.validation.ConstraintValidatorContext;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.validation.ConstraintValidatorContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -91,250 +91,267 @@ public class StructuredQueryValidatorTest {
 
   private StructuredQuery buildValidQuery() {
     var bodyWeightTermCode = TermCode.builder()
-            .code("27113001")
-            .system("http://snomed.info/sct")
-            .version("v1")
-            .display("Body weight (observable entity)")
-            .build();
+        .code("27113001")
+        .system("http://snomed.info/sct")
+        .version("v1")
+        .display("Body weight (observable entity)")
+        .build();
+    var contextTermCode = TermCode.builder()
+        .code("Diagnose")
+        .system("fdpg.mii.cds")
+        .version("1.0.0")
+        .display("Diagnose")
+        .build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder()
-            .afterDate("2021-01-01")
-            .beforeDate("2021-12-31")
-            .build();
+        .afterDate("2021-01-01")
+        .beforeDate("2021-12-31")
+        .build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .context(contextTermCode)
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithoutVersion() {
     var validQuery = buildValidQuery();
     return StructuredQuery.builder()
-            .inclusionCriteria(validQuery.inclusionCriteria())
-            .exclusionCriteria(validQuery.exclusionCriteria())
-            .display(validQuery.display())
-            .build();
+        .display("display-value")
+        .inclusionCriteria(validQuery.inclusionCriteria())
+        .exclusionCriteria(validQuery.exclusionCriteria())
+        .display(validQuery.display())
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithoutInclusionCriteria() {
     var validQuery = buildValidQuery();
     return StructuredQuery.builder()
-            .version(validQuery.version())
-            .exclusionCriteria(validQuery.exclusionCriteria())
-            .display(validQuery.display())
-            .build();
+        .display("display-value")
+        .version(validQuery.version())
+        .exclusionCriteria(validQuery.exclusionCriteria())
+        .display(validQuery.display())
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithEmptyInclusionCriteria() {
     var validQuery = buildValidQuery();
     return StructuredQuery.builder()
-            .version(validQuery.version())
-            .inclusionCriteria(List.of())
-            .exclusionCriteria(validQuery.exclusionCriteria())
-            .display(validQuery.display())
-            .build();
+        .display("display-value")
+        .version(validQuery.version())
+        .inclusionCriteria(List.of())
+        .exclusionCriteria(validQuery.exclusionCriteria())
+        .display(validQuery.display())
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithEmptyTermCodes() {
     var bodyWeightTermCode = TermCode.builder().build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder()
-            .afterDate("2021-01-01")
-            .beforeDate("2021-12-31")
-            .build();
+        .afterDate("2021-01-01")
+        .beforeDate("2021-12-31")
+        .build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithEmptyTermCodeCodes() {
     var bodyWeightTermCode = TermCode.builder()
-            .system("http://snomed.info/sct")
-            .version("v1")
-            .display("Body weight (observable entity)")
-            .build();
+        .system("http://snomed.info/sct")
+        .version("v1")
+        .display("Body weight (observable entity)")
+        .build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder()
-            .afterDate("2021-01-01")
-            .beforeDate("2021-12-31")
-            .build();
+        .afterDate("2021-01-01")
+        .beforeDate("2021-12-31")
+        .build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithEmptyTermCodeSystems() {
     var bodyWeightTermCode = TermCode.builder()
-            .code("27113001")
-            .version("v1")
-            .display("Body weight (observable entity)")
-            .build();
+        .code("27113001")
+        .version("v1")
+        .display("Body weight (observable entity)")
+        .build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder()
-            .afterDate("2021-01-01")
-            .beforeDate("2021-12-31")
-            .build();
+        .afterDate("2021-01-01")
+        .beforeDate("2021-12-31")
+        .build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithEmptyTermCodeDisplays() {
     var bodyWeightTermCode = TermCode.builder()
-            .code("27113001")
-            .system("http://snomed.info/sct")
-            .version("v1")
-            .build();
+        .code("27113001")
+        .system("http://snomed.info/sct")
+        .version("v1")
+        .build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder()
-            .afterDate("2021-01-01")
-            .beforeDate("2021-12-31")
-            .build();
+        .afterDate("2021-01-01")
+        .beforeDate("2021-12-31")
+        .build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithMalformedTimeRestrictions() {
     var bodyWeightTermCode = TermCode.builder()
-            .code("27113001")
-            .system("http://snomed.info/sct")
-            .version("v1")
-            .display("Body weight (observable entity)")
-            .build();
+        .code("27113001")
+        .system("http://snomed.info/sct")
+        .version("v1")
+        .display("Body weight (observable entity)")
+        .build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder()
-            .afterDate("foo")
-            .beforeDate("bar")
-            .build();
+        .afterDate("foo")
+        .beforeDate("bar")
+        .build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
   private StructuredQuery buildInvalidQueryWithTimeRestrictionsWithoutDates() {
     var bodyWeightTermCode = TermCode.builder()
-            .code("27113001")
-            .system("http://snomed.info/sct")
-            .version("v1")
-            .display("Body weight (observable entity)")
-            .build();
+        .code("27113001")
+        .system("http://snomed.info/sct")
+        .version("v1")
+        .display("Body weight (observable entity)")
+        .build();
     var kgUnit = Unit.builder()
-            .code("kg")
-            .display("kilogram")
-            .build();
+        .code("kg")
+        .display("kilogram")
+        .build();
     var bodyWeightValueFilter = ValueFilter.builder()
-            .type(QUANTITY_COMPARATOR)
-            .comparator(GREATER_EQUAL)
-            .quantityUnit(kgUnit)
-            .value(50.0)
-            .build();
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(kgUnit)
+        .value(50.0)
+        .build();
     var timeRestriction = TimeRestriction.builder().build();
     var hasBmiGreaterThanFifty = Criterion.builder()
-            .termCodes(List.of(bodyWeightTermCode))
-            .valueFilter(bodyWeightValueFilter)
-            .timeRestriction(timeRestriction)
-            .build();
+        .termCodes(List.of(bodyWeightTermCode))
+        .valueFilter(bodyWeightValueFilter)
+        .timeRestriction(timeRestriction)
+        .build();
     return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-            .build();
+        .display("display-value")
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .exclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
+        .build();
   }
 
 }

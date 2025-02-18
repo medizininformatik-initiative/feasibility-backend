@@ -10,5 +10,7 @@ public record QueryResult(
     Long queryId,
     List<QueryResultLine> resultLines
 ) {
-
+  public QueryResult {
+    resultLines = resultLines == null ? List.of() : resultLines;
+  }
 }
