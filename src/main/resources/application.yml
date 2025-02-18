@@ -67,6 +67,7 @@ app:
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:DataportalAdmin}
   queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
+  purgeExpiredQueries: ${PURGE_EXPIRED_QUERIES:0 0 * * * *}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
