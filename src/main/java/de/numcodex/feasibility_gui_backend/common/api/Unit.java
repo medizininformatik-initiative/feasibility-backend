@@ -11,5 +11,4 @@ public record Unit(
     @JsonProperty("code") String code,
     @JsonProperty("display") String display
 ) {
-
 }

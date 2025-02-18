@@ -7,6 +7,7 @@ import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.MutableCriterion;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -16,12 +17,21 @@ import java.util.List;
 @Builder
 @Data
 public class MutableStructuredQuery {
-    @JsonProperty URI version;
-    @JsonProperty("inclusionCriteria") List<List<MutableCriterion>> inclusionCriteria;
-    @JsonProperty("exclusionCriteria") List<List<MutableCriterion>> exclusionCriteria;
-    @JsonProperty("display") String display;
+    @JsonProperty
+    URI version;
 
-    public static MutableStructuredQuery createMutableStructuredQuery(StructuredQuery structuredQuery) {
+    @JsonProperty("inclusionCriteria")
+    @Builder.Default
+    List<List<MutableCriterion>> inclusionCriteria = List.of(List.of());
+
+    @JsonProperty("exclusionCriteria")
+    @Builder.Default
+    List<List<MutableCriterion>> exclusionCriteria = List.of(List.of());
+
+    @JsonProperty("display")
+    String display;
+
+    public static MutableStructuredQuery createMutableStructuredQuery(@NonNull StructuredQuery structuredQuery) {
         List<List<MutableCriterion>> mutableInclusionCriteria = new ArrayList<>();
         if (structuredQuery.inclusionCriteria() != null) {
             for (List<Criterion> outerList : structuredQuery.inclusionCriteria()) {

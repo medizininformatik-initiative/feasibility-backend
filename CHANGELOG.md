@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [UNRELEASED] - 2025-mm-dd
+
+### Changed
+- REST API changed to v5
+### Removed
+- Query Templates have been removed
+
 ## [6.2.2] - 2025-03-18
 
 - Based on ontology **[v3.2.2](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.2.2)**

@@ -23,8 +23,8 @@ public record ValueFilter(
     @JsonProperty(value = "minValue") Double minValue,
     @JsonProperty(value = "maxValue")Double maxValue
 ) {
-
     public ValueFilter {
         Objects.requireNonNull(type);
+        selectedConcepts = selectedConcepts == null ? List.of() : selectedConcepts;
     }
 }

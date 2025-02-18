@@ -7,7 +7,7 @@ import lombok.Builder;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.ALWAYS)
 @Builder
 public record Field(
     @JsonProperty String id,
@@ -19,4 +19,8 @@ public record Field(
     @JsonProperty boolean required,
     @JsonProperty List<Field> children
 ) {
+  public Field {
+    referencedProfiles = (referencedProfiles == null) ? List.of() : referencedProfiles;
+    children = (children == null) ? List.of() : children;
+  }
 }
