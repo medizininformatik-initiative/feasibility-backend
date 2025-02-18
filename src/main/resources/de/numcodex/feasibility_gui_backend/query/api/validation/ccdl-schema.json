@@ -1,0 +1,449 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medizininformatik-initiative.de/fdpg/ClinicalCohortDefinitionLanguage/v1/schema",
+  "$defs": {
+    "termCode": {
+      "type": "object",
+      "description": "The termCode defines a concept based on a coding system (i.e. LOINC). The triplet of code, system and version identify the concept.",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "system": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "display": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "system",
+        "display"
+      ],
+      "additionalProperties": false
+    },
+    "criterion": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/termCode"
+        },
+        "termCodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/termCode"
+          }
+        },
+        "valueFilter": {
+          "$ref": "#/$defs/valueFilter"
+        },
+        "attributeFilters": {
+          "$ref": "#/$defs/attributeFilters"
+        },
+        "timeRestriction": {
+          "$ref": "#/$defs/timeRestriction"
+        }
+      },
+      "required": [
+        "termCodes",
+        "context"
+      ],
+      "additionalProperties": false
+    },
+    "timeRestriction": {
+      "type": "object",
+      "description": "TimeRestirction specify the interval within the critiera has to be fullfilled. An intersection of the criterias interval with the interval defined in this timeRestriction is sufficient",
+      "properties": {
+        "afterDate": {
+          "type": "string",
+          "format": "date",
+          "description": "afterDate is the start of the date interval that further limits the resources."
+        },
+        "beforeDate": {
+          "type": "string",
+          "format": "date",
+          "description": "beforeDate is the end of the date interval that further limits the resources."
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "afterDate"
+          ]
+        },
+        {
+          "required": [
+            "beforeDate"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "title": "UCUM Unit",
+      "description": "The unit is a ucum unit (https://ucum.org/trac)",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "display": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "display"
+      ],
+      "additionalProperties": false
+    },
+    "attributeFilters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attributeFilter"
+      }
+    },
+    "valueFilter": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "concept",
+            "quantity-comparator",
+            "quantity-range"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "concept"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "type": {
+                "const": "concept"
+              },
+              "selectedConcepts": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/termCode"
+                }
+              }
+            },
+            "required": [
+              "type",
+              "selectedConcepts"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "quantity-comparator"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "type": {
+                "const": "quantity-comparator"
+              },
+              "comparator": {
+                "enum": [
+                  "gt",
+                  "ge",
+                  "lt",
+                  "le",
+                  "eq",
+                  "ne"
+                ]
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "#/$defs/unit"
+              }
+            },
+            "required": [
+              "type",
+              "comparator",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "quantity-range"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "type": {
+                "const": "quantity-range"
+              },
+              "minValue": {
+                "type": "number"
+              },
+              "maxValue": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "#/$defs/unit"
+              }
+            },
+            "required": [
+              "type",
+              "minValue",
+              "maxValue"
+            ],
+            "additionalProperties": false
+          }
+        }
+      ]
+    },
+    "attributeFilter": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "concept",
+            "quantity-comparator",
+            "quantity-range",
+            "reference"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "concept"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributeCode": {
+                "$ref": "#/$defs/termCode"
+              },
+              "type": {
+                "const": "concept"
+              },
+              "selectedConcepts": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/termCode"
+                }
+              }
+            },
+            "required": [
+              "type",
+              "selectedConcepts",
+              "attributeCode"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "quantity-comparator"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributeCode": {
+                "$ref": "#/$defs/termCode"
+              },
+              "type": {
+                "const": "quantity-comparator"
+              },
+              "comparator": {
+                "enum": [
+                  "gt",
+                  "ge",
+                  "lt",
+                  "le",
+                  "eq",
+                  "ne"
+                ]
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "#/$defs/unit"
+              }
+            },
+            "required": [
+              "type",
+              "comparator",
+              "value",
+              "attributeCode"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "quantity-range"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributeCode": {
+                "$ref": "#/$defs/termCode"
+              },
+              "type": {
+                "const": "quantity-range"
+              },
+              "minValue": {
+                "type": "number"
+              },
+              "maxValue": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "#/$defs/unit"
+              }
+            },
+            "required": [
+              "type",
+              "minValue",
+              "maxValue",
+              "attributeCode"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "reference"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributeCode": {
+                "$ref": "#/$defs/termCode"
+              },
+              "type": {
+                "const": "reference"
+              },
+              "criteria": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "attributeFilters": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/$defs/attributeFilter",
+                            "not": {
+                              "properties": {
+                                "type": {
+                                  "const": "reference"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/$defs/criterion"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type",
+              "criteria",
+              "attributeCode"
+            ],
+            "additionalProperties": false
+          }
+        }
+      ]
+    }
+  },
+  "title": "cohortDefinition",
+  "description": "Within a CCDL the inclusion and exclusion criteria are conjuncted with AND NOT",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "format": "uri"
+    },
+    "inclusionCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "description": "All elements within the array are conjuncted with an AND operator",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "description": "All elements within the array are conjuncted with an OR operator",
+        "items": {
+          "$ref": "#/$defs/criterion"
+        }
+      }
+    },
+    "exclusionCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "description": "All elements within the array are conjuncted with an OR operator",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "description": "All elements within the array are conjuncted with an AND operator",
+        "items": {
+          "$ref": "#/$defs/criterion"
+        }
+      }
+    },
+    "display": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "inclusionCriteria"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/to-be-done/schema#",
+  "$id": "http://example.com/schema/data-extraction-schema.json",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "format": "uri",
+      "description": "Version identifier with a reference to a schema definition."
+    },
+    "display": {
+      "type": "string",
+      "description": "A display string."
+    },
+    "cohortDefinition": {
+      "$ref": "ccdl-schema.json#/definitions/cohortDefinition",
+      "description": "Reference to a cohort definition in CCDL schemas."
+    },
+    "dataExtraction": {
+      "type": "object",
+      "properties": {
+        "attributeGroups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "groupReference": {
+                "type": "string",
+                "format": "uri"
+              },
+              "includeReferenceOnly": {
+                "type": "boolean"
+              },
+              "attributes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "attributeRef": {
+                      "type": "string"
+                    },
+                    "mustHave": {
+                      "type": "boolean"
+                    },
+                    "linkedGroups": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "attributeRef",
+                    "mustHave"
+                  ]
+                }
+              },
+              "filter": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "codes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "system": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "display": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "system",
+                          "display"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "start": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "end": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "groupReference",
+              "attributes",
+              "id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "attributeGroups"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "version",
+    "cohortDefinition",
+    "dataExtraction"
+  ],
+  "additionalProperties": false
+}
