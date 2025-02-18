@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -74,9 +75,7 @@ public class CodeableConceptService {
     if (!filterList.isEmpty()) {
       var fieldValues = new ArrayList<FieldValue>();
       filterList.forEach(f -> {
-        f.getSecond().forEach(s -> {
-          fieldValues.add(new FieldValue.Builder().stringValue(s).build());
-        });
+        f.getSecond().forEach(s -> fieldValues.add(new FieldValue.Builder().stringValue(s).build()));
         filterTerms.add(new TermsQuery.Builder()
             .field(f.getFirst())
             .terms(new TermsQueryField.Builder().value(fieldValues).build())
@@ -135,7 +134,7 @@ public class CodeableConceptService {
         .withPageable(pageRequest)
         .build();
 
-    log.info(query.getQuery().toString());
+    log.info(Objects.requireNonNull(query.getQuery()).toString());
 
     return operations.search(query, CodeableConceptDocument.class);
   }
