@@ -33,6 +33,14 @@ import java.util.*;
 @Slf4j
 @ConditionalOnExpression("${app.elastic.enabled}")
 public class TerminologyEsService {
+  public static final String FILTER_KEY_CRITERIA_SETS = "criteria_sets";
+  public static final String FILTER_KEY_CONTEXT_CODE = "context.code";
+  public static final String FILTER_KEY_KDS_MODULE = "kds_module";
+  public static final String FILTER_KEY_TERMINOLOGY = "terminology";
+  public static final String FIELD_NAME_DISPLAY_DE = "display.de";
+  public static final String FIELD_NAME_DISPLAY_EN = "display.en";
+  public static final String FIELD_NAME_DISPLAY_ORIGINAL = "display.original";
+  public static final String FIELD_NAME_TERMCODE_WITH_BOOST = "termcode^2";
   private ElasticsearchOperations operations;
 
   private String[] filterFields;
@@ -91,16 +99,16 @@ public class TerminologyEsService {
 
     List<Pair<String, List<String>>> filterList = new ArrayList<>();
     if (!CollectionUtils.isEmpty(criteriaSets)) {
-      filterList.add(Pair.of("criteria_sets", criteriaSets));
+      filterList.add(Pair.of(FILTER_KEY_CRITERIA_SETS, criteriaSets));
     }
     if (!CollectionUtils.isEmpty(context)) {
-      filterList.add(Pair.of("context.code", context));
+      filterList.add(Pair.of(FILTER_KEY_CONTEXT_CODE, context));
     }
     if (!CollectionUtils.isEmpty(kdsModule)) {
-      filterList.add(Pair.of("kds_module", kdsModule));
+      filterList.add(Pair.of(FILTER_KEY_KDS_MODULE, kdsModule));
     }
     if (!CollectionUtils.isEmpty(terminology)) {
-      filterList.add(Pair.of("terminology", terminology));
+      filterList.add(Pair.of(FILTER_KEY_TERMINOLOGY, terminology));
     }
 
     SearchHits<OntologyListItemDocument> searchHitPage = findByNameOrTermcode(
@@ -156,19 +164,36 @@ public class TerminologyEsService {
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
     } else {
+      var translationDeExistsQuery = new ExistsQuery.Builder()
+          .field(FIELD_NAME_DISPLAY_DE)
+          .build();
+
+      var translationEnExistsQuery = new ExistsQuery.Builder()
+          .field(FIELD_NAME_DISPLAY_EN)
+          .build();
+
       var mmQueryWithTranslations = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("display.de", "display.en", "termcode^2"))
+          .fields(List.of(FIELD_NAME_DISPLAY_DE, FIELD_NAME_DISPLAY_EN, FIELD_NAME_TERMCODE_WITH_BOOST))
+          .build();
+
+      var boolQueryWithTranslations = new BoolQuery.Builder()
+          .should(List.of(translationDeExistsQuery._toQuery(), translationEnExistsQuery._toQuery()))
+          .must(mmQueryWithTranslations._toQuery())
           .build();
 
       var mmQueryWithOriginal = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("display.original", "termcode^2"))
+          .fields(List.of(FIELD_NAME_DISPLAY_ORIGINAL, FIELD_NAME_TERMCODE_WITH_BOOST))
+          .build();
+
+      var boolQueryWithOriginal = new BoolQuery.Builder()
+          .mustNot(List.of(translationDeExistsQuery._toQuery(), translationEnExistsQuery._toQuery()))
+          .must(mmQueryWithOriginal._toQuery())
           .build();
 
       boolQuery = new BoolQuery.Builder()
-          .should(List.of(mmQueryWithTranslations._toQuery(), mmQueryWithOriginal._toQuery()))
-          .minimumShouldMatch("1")
+          .should(List.of(boolQueryWithTranslations._toQuery(), boolQueryWithOriginal._toQuery()))
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
     }
