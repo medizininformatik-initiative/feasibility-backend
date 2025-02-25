@@ -75,7 +75,7 @@ public class RateLimitingService {
 
   private Bucket newViewDetailedObfuscatedResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalDetailedObfuscated))
+        .addLimit(limit -> limit.capacity(amountDetailedObfuscated).refillIntervally(1, intervalDetailedObfuscated))
         .build();
   }
 
