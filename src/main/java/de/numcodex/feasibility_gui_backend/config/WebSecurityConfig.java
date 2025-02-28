@@ -44,7 +44,7 @@ public class WebSecurityConfig {
   public static final String PATH_FEASIBILITY = "/feasibility";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
-  public static final String PATH_CONTENT = "/content";
+  public static final String PATH_CRTDL = "/crtdl";
   public static final String PATH_SUMMARY_RESULT = "/summary-result";
   public static final String PATH_DETAILED_OBFUSCATED_RESULT = "/detailed-obfuscated-result";
   public static final String PATH_DETAILED_RESULT = "/detailed-result";

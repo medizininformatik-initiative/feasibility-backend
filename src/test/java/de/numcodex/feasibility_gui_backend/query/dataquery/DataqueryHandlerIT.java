@@ -168,13 +168,12 @@ public class DataqueryHandlerIT {
   }
 
   private Dataquery createDataquery(boolean withResult) {
-    var testDataquery = Dataquery.builder()
+    return Dataquery.builder()
         .label("test")
         .comment("test")
         .content(createCrtdl())
         .resultSize(withResult ? 123L : null)
         .build();
-    return testDataquery;
   }
 
   private Crtdl createCrtdl() {
