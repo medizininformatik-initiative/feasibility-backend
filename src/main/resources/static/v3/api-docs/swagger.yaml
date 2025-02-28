@@ -408,6 +408,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/QueryResultRateLimit"
+  /query/feasibility/quota:
+    get:
+      tags:
+        - feasibility
+      summary: get the amount of feasibility queries a user has executed during the configured intervals
+      operationId: getQuota
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryQuota"
   /query/data/query-slots:
     get:
       tags:
@@ -771,6 +784,20 @@ paths:
                     {
                         "status": "UP"
                     }
+      tags:
+        - intrinsics
+  /actuator/info:
+    get:
+      summary: Offers build information about the backend.
+      description: ''
+      operationId: ''
+      responses:
+        200:
+          description: Successful health information.
+          content:
+            application/vnd.spring-boot.actuator.v3+json:
+              schema:
+                $ref: "#/components/schemas/SystemInfo"
       tags:
         - intrinsics
 components:
@@ -1472,6 +1499,100 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/ProfileDataEntry"
+    QueryQuota:
+      type: object
+      properties:
+        soft:
+          $ref: "#/components/schemas/QueryQuotaEntry"
+        hard:
+          $ref: "#/components/schemas/QueryQuotaEntry"
+    QueryQuotaEntry:
+      type: object
+      properties:
+        intervalInMinutes:
+          type: number
+          examples:
+            - 60
+        used:
+          type: number
+          examples:
+            - 2
+        limit:
+          type: number
+          examples:
+            - 10
+    GitInfo:
+      type: object
+      properties:
+        build:
+          type: object
+          properties:
+            version:
+              type: string
+              examples:
+                - "7.0.0-SNAPSHOT"
+            time:
+              type: string
+              format: date-time
+              examples:
+                - "2025-03-03T14:49:54Z"
+        commit:
+          type: object
+          properties:
+            id:
+              type: object
+              properties:
+                full:
+                  type: string
+                  examples:
+                    -  "30491dadef17d601b6658dc4f267197061bc2a79"
+                abbrev:
+                  type: string
+                  examples:
+                    - "30491da"
+        branch:
+          type: string
+          examples:
+            - "feature/460-provide-count-of-sent-queries"
+    BuildInfo:
+      type: object
+      properties:
+        artifact:
+          type: string
+          examples:
+            - "DataportalBackend"
+        name:
+          type: string
+          example: "Dataportal Backend"
+        time:
+          type: string
+          format: date-time
+          examples:
+            - "2025-03-03T14:49:52.182Z"
+        version:
+          type: string
+          examples:
+            -  "7.0.0-SNAPSHOT"
+        group:
+          type: string
+          examples:
+            - "de.medizininformatik-initiative"
+    Terminology:
+      type: object
+      properties:
+        ontologyTag:
+          type: string
+          examples:
+            - "v3.1.0"
+    SystemInfo:
+      type: object
+      properties:
+        git:
+          $ref: "#/components/schemas/GitInfo"
+        build:
+          $ref: "#/components/schemas/BuildInfo"
+        terminology:
+          $ref: "#/components/schemas/Terminology"
   securitySchemes:
     dataportal_auth:
       type: oauth2

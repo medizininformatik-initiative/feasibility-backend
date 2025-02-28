@@ -369,7 +369,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
     public void testGetQueryQuota() throws Exception {
         doReturn(createDummyQueryQuota()).when(queryHandlerService).getSentQueryStatistics(any(String.class), anyInt(), anyInt(), anyInt(), anyInt());
 
-        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/quota")).with(csrf()))
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/quota")).with(csrf()))
             .andExpect(status().isOk());
     }
 

@@ -26,7 +26,6 @@ import java.util.Random;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @Tag("query")
@@ -196,7 +195,7 @@ class DataqueryHandlerTest {
         var dataqueryEntity = createDataqueryEntity(withResultOld);
 
         lenient().doReturn(Optional.of(dataqueryEntity)).when(dataqueryRepository).findById(any(Long.class));
-        lenient().doReturn(Long.valueOf(MAX_QUERIES_PER_USER)).when(dataqueryRepository).countByCreatedByWhereResultIsNotNull(any(String.class));
+        lenient().doReturn((long) MAX_QUERIES_PER_USER).when(dataqueryRepository).countByCreatedByWhereResultIsNotNull(any(String.class));
         lenient().doReturn(createDataqueryEntity()).when(dataqueryRepository).save(any(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class));
 
         // When the new dataquery has no result, this should never throw. It should only throw if the old had no result and the new has a result

@@ -104,7 +104,7 @@ public class DataqueryHandlerRestController {
     }
   }
 
-  @GetMapping(path = "/{dataqueryId}/crtdl")
+  @GetMapping(path = "/{dataqueryId}" + PATH_CRTDL)
   public ResponseEntity<Object> getDataqueryCrtdl(@PathVariable(value = "dataqueryId") Long dataqueryId,
                                              @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
                                              Principal principal) {

@@ -76,6 +76,7 @@ public class QueryHandlerServiceIT {
     public static final String SITE_NAME_2 = "site-name-114610";
     public static final String CREATOR = "creator-114634";
     public static final long UNKNOWN_QUERY_ID = 9999999L;
+    public static final String TIME_STRING = "1969-07-20 20:17:40.0";
 
     @Autowired
     private QueryHandlerService queryHandlerService;
