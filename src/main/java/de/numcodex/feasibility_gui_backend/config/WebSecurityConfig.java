@@ -37,6 +37,7 @@ public class WebSecurityConfig {
   public static final String KEY_SPRING_ADDONS_CONFIDENTIAL = "spring-addons-confidential";
   public static final String KEY_SPRING_ADDONS_PUBLIC = "spring-addons-public";
   public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
+  public static final String PATH_ACTUATOR_INFO = "/actuator/info";
   public static final String PATH_API = "/api/v4";
   public static final String PATH_QUERY = "/query";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
@@ -112,6 +113,7 @@ public class WebSecurityConfig {
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_DSE + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_HEALTH)).anonymous()
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_INFO)).anonymous()
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_UI)).anonymous()
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_CONFIG)).anonymous()
                     .anyRequest().authenticated()
