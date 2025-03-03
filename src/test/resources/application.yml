@@ -33,7 +33,7 @@ app:
       hard:
         create:
           amount: 5
-          intervalMinutes: 2
+          intervalMinutes: 10
       read:
         resultSummary:
           pollingIntervalSeconds: 1
