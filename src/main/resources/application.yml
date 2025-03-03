@@ -34,10 +34,11 @@ springdoc:
     url: /v3/api-docs/swagger.yaml
 management:
   endpoints:
-    enabled-by-default: false
+    access:
+      default: none
   endpoint:
     health:
-      enabled: true
+      access: unrestricted
   health:
     elasticsearch:
       enabled: ${ELASTIC_SEARCH_ENABLED:true}

@@ -4,9 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [6.1.1] - 2025-03-03
+
+### Changed
+- Management endpoint configuration updated ([#462](https://github.com/medizininformatik-initiative/feasibility-backend/issues/462))
+### Fixed
+- The search in translations/originals in the ontology was not working as intended ([#455](https://github.com/medizininformatik-initiative/feasibility-backend/issues/455))
+- The amount of allowed calls to detailed obfuscated records was not read correctly ([#457](https://github.com/medizininformatik-initiative/feasibility-backend/issues/457))
+### Security
+- Update Spring Boot to 3.4.3
+
 ## [6.1.0] - 2025-02-14
 
-- Based on ontology **[v3.0.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.1.0)**
+- Based on ontology **[v3.1.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.1.0)**
 
 ### Added
 - Added translations to ui profiles ([#430](https://github.com/medizininformatik-initiative/feasibility-backend/issues/430))

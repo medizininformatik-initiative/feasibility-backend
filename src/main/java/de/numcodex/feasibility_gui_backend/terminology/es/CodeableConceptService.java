@@ -25,6 +25,10 @@ import java.util.List;
 @Slf4j
 @ConditionalOnExpression("${app.elastic.enabled}")
 public class CodeableConceptService {
+  public static final String FIELD_NAME_DISPLAY_DE = "display.de";
+  public static final String FIELD_NAME_DISPLAY_EN = "display.en";
+  public static final String FIELD_NAME_DISPLAY_ORIGINAL = "display.original";
+  public static final String FIELD_NAME_TERMCODE_WITH_BOOST = "termcode.code^2";
   private ElasticsearchOperations operations;
 
   private CodeableConceptEsRepository repo;
@@ -88,33 +92,41 @@ public class CodeableConceptService {
           .build();
 
     } else {
-      // First the "upper" part of the query, when translations are present
-      var mustMultiMatchQueryWithTranslations = new MultiMatchQuery.Builder()
-          .query(keyword)
-          .fields(List.of("display.de", "display.en", "termcode.code^2"))
+      var translationDeExistsQuery = new ExistsQuery.Builder()
+          .field(FIELD_NAME_DISPLAY_DE)
           .build();
 
-      var innerBoolQueryMatchTranslations = new BoolQuery.Builder()
-          .must(List.of(mustMultiMatchQueryWithTranslations._toQuery()))
+      var translationEnExistsQuery = new ExistsQuery.Builder()
+          .field(FIELD_NAME_DISPLAY_EN)
+          .build();
+
+      var mmQueryWithTranslations = new MultiMatchQuery.Builder()
+          .query(keyword)
+          .fields(List.of(FIELD_NAME_DISPLAY_DE, FIELD_NAME_DISPLAY_EN, FIELD_NAME_TERMCODE_WITH_BOOST))
+          .build();
+
+      var boolQueryWithTranslations = new BoolQuery.Builder()
+          .should(List.of(translationDeExistsQuery._toQuery(), translationEnExistsQuery._toQuery()))
+          .must(List.of(mmQueryWithTranslations._toQuery()))
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
 
 
       // The "lower" part that will only be considered when the translations are empty
-      var mustMultiMatchQueryWithOriginal = new MultiMatchQuery.Builder()
+      var mmQueryWithOriginal = new MultiMatchQuery.Builder()
           .query(keyword)
-          .fields(List.of("display.original", "termcode.code^2"))
+          .fields(List.of(FIELD_NAME_DISPLAY_ORIGINAL, FIELD_NAME_TERMCODE_WITH_BOOST))
           .build();
 
-      var innerBoolQueryMatchOriginal = new BoolQuery.Builder()
-          .must(List.of(mustMultiMatchQueryWithOriginal._toQuery()))
+      var boolQueryWithOriginal = new BoolQuery.Builder()
+          .mustNot(List.of(translationDeExistsQuery._toQuery(), translationEnExistsQuery._toQuery()))
+          .must(List.of(mmQueryWithOriginal._toQuery()))
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
           .build();
 
       // Combine both parts in the top level bool query
       outerBoolQuery = new BoolQuery.Builder()
-          .should(List.of(innerBoolQueryMatchTranslations._toQuery(), innerBoolQueryMatchOriginal._toQuery()))
-          .minimumShouldMatch("1")
+          .should(List.of(boolQueryWithTranslations._toQuery(), boolQueryWithOriginal._toQuery()))
           .build();
     }
 
