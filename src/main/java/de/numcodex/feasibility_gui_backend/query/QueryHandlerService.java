@@ -6,6 +6,8 @@ import de.numcodex.feasibility_gui_backend.query.api.Query;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.*;
+import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuota;
+import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuotaEntry;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
@@ -322,5 +324,23 @@ public class QueryHandlerService {
         } else {
             throw new QueryNotFoundException();
         }
+    }
+
+    public QueryQuota getSentQueryStatistics(String userName, int softAmount, int softInterval, int hardAmount, int hardInterval) {
+        var softUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, softInterval);
+        var hardUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, hardInterval);
+
+        return QueryQuota.builder()
+            .soft(QueryQuotaEntry.builder()
+                .intervalInMinutes(softInterval)
+                .limit(softAmount)
+                .used(softUsed.intValue())
+                .build())
+            .hard(QueryQuotaEntry.builder()
+                .intervalInMinutes(hardInterval)
+                .limit(hardAmount)
+                .used(hardUsed.intValue())
+                .build())
+            .build();
     }
 }

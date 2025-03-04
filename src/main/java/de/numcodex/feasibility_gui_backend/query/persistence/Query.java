@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.persistence;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.sql.Timestamp;
@@ -19,6 +20,7 @@ public class Query {
     private Long id;
 
     @Column(name = "created_at", insertable = false, updatable = false)
+    @CreationTimestamp
     private Timestamp createdAt;
 
     @Column(name = "created_by", updatable = false)
