@@ -805,8 +805,7 @@ components:
     Dataquery:
       type: object
       required:
-        - info
-        - crtdl
+        - content
       properties:
         label:
           type: string
@@ -818,7 +817,7 @@ components:
             - this can be a longer text explaining what this query is for
         totalNumberOfResults:
           type: integer
-        crtdl:
+        content:
           type: object
           $ref: "#/components/schemas/CRTDL"
     CRTDL:
