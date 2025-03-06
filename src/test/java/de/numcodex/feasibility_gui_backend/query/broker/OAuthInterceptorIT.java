@@ -92,25 +92,19 @@ class OAuthInterceptorIT {
 
     @Test
     public void errorWhenIssuerUrlIsNull() throws InterruptedException {
-        assertThatThrownBy(() -> {
-            new OAuthInterceptor(null, "foo", "bar");
-        }).isInstanceOf(NullPointerException.class)
+        assertThatThrownBy(() -> new OAuthInterceptor(null, "foo", "bar")).isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("oauthIssuerUrl");
     }
 
     @Test
     public void errorWhenClientIdIsNull() throws InterruptedException {
-        assertThatThrownBy(() -> {
-            new OAuthInterceptor("http://foo.bar", null, "bar");
-        }).isInstanceOf(NullPointerException.class)
+        assertThatThrownBy(() -> new OAuthInterceptor("http://foo.bar", null, "bar")).isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("oauthClientId");
     }
 
     @Test
     public void errorWhenClientSecretIsNull() throws InterruptedException {
-        assertThatThrownBy(() -> {
-            new OAuthInterceptor("http://foo.bar", "foo", null);
-        }).isInstanceOf(NullPointerException.class)
+        assertThatThrownBy(() -> new OAuthInterceptor("http://foo.bar", "foo", null)).isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("oauthClientSecret");
     }
 
@@ -120,9 +114,7 @@ class OAuthInterceptorIT {
         String issuerUrl = "http://" + host + "/foo/bar";
         OAuthInterceptor interceptor = new OAuthInterceptor(issuerUrl, "foo", "bar");
 
-        assertThatThrownBy(() -> {
-            interceptor.getToken();
-        }).isInstanceOf(OAuthClientException.class)
+        assertThatThrownBy(interceptor::getToken).isInstanceOf(OAuthClientException.class)
                 .hasMessageContaining("Request for OAuth2 access token failed")
                 .has(new Condition<Throwable>(s -> s.getCause() != null && s.getCause().getMessage().contains(host),
                         "hostname in error message of cause"));
@@ -133,9 +125,7 @@ class OAuthInterceptorIT {
         String issuerUrl = "http://" + keycloak.getHost() + ":" + keycloak.getFirstMappedPort() + "/realms/test";
         OAuthInterceptor interceptor = new OAuthInterceptor(issuerUrl, "foo", "test");
 
-        assertThatThrownBy(() -> {
-            interceptor.getToken();
-        }).isInstanceOf(OAuthClientException.class)
+        assertThatThrownBy(interceptor::getToken).isInstanceOf(OAuthClientException.class)
                 .hasMessageContaining("invalid_client");
     }
 
@@ -144,9 +134,7 @@ class OAuthInterceptorIT {
         String issuerUrl = "http://" + keycloak.getHost() + ":" + keycloak.getFirstMappedPort() + "/realms/test";
         OAuthInterceptor interceptor = new OAuthInterceptor(issuerUrl, "account", "foo");
 
-        assertThatThrownBy(() -> {
-            interceptor.getToken();
-        }).isInstanceOf(OAuthClientException.class)
+        assertThatThrownBy(interceptor::getToken).isInstanceOf(OAuthClientException.class)
                 .hasMessageContaining("unauthorized_client");
     }
 }

@@ -14,7 +14,7 @@ app:
   keycloakAllowedRole: "DATAPORTAL_TEST_USER"
   keycloakPowerRole: "DATAPORTAL_TEST_POWER"
   keycloakAdminRole: "DATAPORTAL_TEST_ADMIN"
-  maxSavedQueriesPerUser: 2
+  maxSavedQueriesPerUser: 10
   broker:
     aktin:
       enabled: false
