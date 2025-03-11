@@ -147,13 +147,13 @@ public class DSFQueryManagerTest {
         assertEquals("http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest|1.0",
                 task.getInstantiatesCanonical());
         assertEquals(1, task.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
-                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request"))
+                .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request|1.0"))
                 .count());
         assertEquals(1, library.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
-                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library"))
+                .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library|1.0"))
                 .count());
         assertEquals(1, measure.getMeta().getProfile().stream().filter(p -> p.getValueAsString()
-                        .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure"))
+                .equals("http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure|1.0"))
                 .count());
         assertEquals(36, measure.getGroupFirstRep().getPopulationFirstRep().getId().length());
         assertEquals("http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility", measureReferenceSystem);
