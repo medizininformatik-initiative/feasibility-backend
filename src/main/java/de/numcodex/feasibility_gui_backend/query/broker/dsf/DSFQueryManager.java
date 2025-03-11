@@ -41,9 +41,9 @@ import static org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
 class DSFQueryManager implements QueryManager {
 
     private static final String INSTANTIATE_CANONICAL = "http://medizininformatik-initiative.de/bpe/Process/feasibilityRequest|1.0";
-    private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request";
-    private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure";
-    private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library";
+    private static final String REQUEST_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-request|1.0";
+    private static final String MEASURE_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-measure|1.0";
+    private static final String LIBRARY_PROFILE = "http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-library|1.0";
     private static final String REQUEST_URL_TASK = "Task";
     private static final String REQUEST_URL_LIBRARY = "Library";
     private static final String REQUEST_URL_MEASURE = "Measure";
