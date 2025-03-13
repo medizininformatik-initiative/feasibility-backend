@@ -30,6 +30,5 @@ from query_template qt
          left join query q on qt.query_id = q.id
          left join query_content qc on q.query_content_id = qc.id ;
 
--- Not sure if we should already delete those tables or wait for the next release to check if everything was converted as expected
--- drop table query_template;
--- drop table saved_query;
+drop table query_template;
+drop table saved_query;

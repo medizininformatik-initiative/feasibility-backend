@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import java.util.List;
 
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.ALWAYS)
 @Builder
 public record ValueFilter(
     @JsonProperty(value = "type", required = true) ValueFilterType type,

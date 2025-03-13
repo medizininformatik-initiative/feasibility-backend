@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.ALWAYS)
 @Builder
 public record DataExtraction(
     @JsonProperty long id,
