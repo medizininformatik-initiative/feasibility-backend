@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v3.1.0</ontology-tag>
+    <ontology-tag>v3.2.0-alpha.6</ontology-tag>
   </properties>
 
   <dependencies>
@@ -206,7 +206,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>1.0.0-alpha.1</version>
+      <version>1.0.0-alpha.2</version>
     </dependency>
 
     <dependency>
@@ -382,19 +382,6 @@
             <phase>verify</phase>
             <goals>
               <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>build-info</id>
-            <goals>
-              <goal>build-info</goal>
             </goals>
           </execution>
         </executions>
