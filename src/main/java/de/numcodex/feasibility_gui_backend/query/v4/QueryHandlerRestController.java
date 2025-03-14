@@ -65,13 +65,13 @@ public class QueryHandlerRestController {
   @Value("${app.privacy.quota.soft.create.amount}")
   private int quotaSoftCreateAmount;
 
-  @Value("${app.privacy.quota.soft.create.intervalminutes}")
+  @Value("${app.privacy.quota.soft.create.intervalMinutes}")
   private int quotaSoftCreateIntervalMinutes;
 
   @Value("${app.privacy.quota.hard.create.amount}")
   private int quotaHardCreateAmount;
 
-  @Value("${app.privacy.quota.hard.create.intervalminutes}")
+  @Value("${app.privacy.quota.hard.create.intervalMinutes}")
   private int quotaHardCreateIntervalMinutes;
 
   @Value("${app.privacy.threshold.sites}")
@@ -363,6 +363,16 @@ public class QueryHandlerRestController {
         .build();
 
     return new ResponseEntity<>(resultRateLimit, HttpStatus.OK);
+  }
+
+  @GetMapping("/quota")
+  public ResponseEntity<Object> getQueryCreateQuota(Authentication authentication) {
+    var sentQueryStatistics = queryHandlerService.getSentQueryStatistics(authentication.getName(),
+        quotaSoftCreateAmount,
+        quotaSoftCreateIntervalMinutes,
+        quotaHardCreateAmount,
+        quotaHardCreateIntervalMinutes);
+    return new ResponseEntity<>(sentQueryStatistics, HttpStatus.OK);
   }
 
   @GetMapping("/{id}" + WebSecurityConfig.PATH_SUMMARY_RESULT)

@@ -34,14 +34,25 @@ springdoc:
     url: /v3/api-docs/swagger.yaml
 management:
   endpoints:
+    web:
+      exposure:
+        include: "health, info"
     access:
       default: none
   endpoint:
     health:
       access: unrestricted
+    info:
+      access: unrestricted
   health:
     elasticsearch:
-      enabled: ${ELASTIC_SEARCH_ENABLED:true}
+      enabled: true
+  info:
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: full
 app:
   dseProfileTreeFile: ${DSE_PROFILE_TREE_FILE:ontology/dse/profile_tree.json}
   terminologySystemsFile: ${TERMINOLOGY_SYSTEMS_FILE:ontology/terminology_systems.json}

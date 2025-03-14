@@ -8,6 +8,8 @@ import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
+import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuota;
+import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuotaEntry;
 import de.numcodex.feasibility_gui_backend.query.api.status.ValidationIssue;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchException;
@@ -651,6 +653,15 @@ public class QueryHandlerRestControllerIT {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
+    public void testGetQueryQuota() throws Exception {
+        doReturn(createDummyQueryQuota()).when(queryHandlerService).getSentQueryStatistics(any(String.class), anyInt(), anyInt(), anyInt(), anyInt());
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + "/quota")).with(csrf()))
+            .andExpect(status().isOk());
+    }
+
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
         var termCode = TermCode.builder()
@@ -834,5 +845,25 @@ public class QueryHandlerRestControllerIT {
                 .totalNumberOfPatients(queryResultLines.stream().map(QueryResultLine::numberOfPatients).reduce(0L, Long::sum))
                 .resultLines(queryResultLines)
                 .build();
+    }
+
+    @NotNull
+    private static QueryQuota createDummyQueryQuota() {
+        return QueryQuota.builder()
+            .hard(
+                QueryQuotaEntry.builder()
+                    .used(5)
+                    .limit(10)
+                    .intervalInMinutes(100)
+                    .build()
+            )
+            .soft(
+                QueryQuotaEntry.builder()
+                    .used(20)
+                    .limit(50)
+                    .intervalInMinutes(1000)
+                    .build()
+            )
+            .build();
     }
 }

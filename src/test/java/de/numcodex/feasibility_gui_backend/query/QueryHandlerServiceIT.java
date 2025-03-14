@@ -9,6 +9,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.QueryTemplate;
 import de.numcodex.feasibility_gui_backend.query.api.SavedQuery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuota;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
@@ -22,6 +23,8 @@ import de.numcodex.feasibility_gui_backend.query.templates.QueryTemplateHandler;
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpringConfig;
 
 import java.net.URI;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
@@ -32,6 +35,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -684,6 +688,69 @@ public class QueryHandlerServiceIT {
         var queryAmount = queryHandlerService.getAmountOfSavedQueriesByUser(CREATOR);
 
         assertEquals(queryAmount, 0L);
+    }
+
+    @Test
+    @DisplayName("getSentQueryStatistics() -> succeeds with no entries")
+    public void getSentQueryStatistics_succeedsWithNoEntries(@Value("${app.privacy.quota.hard.create.intervalMinutes}") int hardIntervalMinutes,
+                                                @Value("${app.privacy.quota.soft.create.intervalMinutes}") int softIntervalMinutes,
+                                                @Value("${app.privacy.quota.hard.create.amount}") int hardLimit,
+                                                @Value("${app.privacy.quota.soft.create.amount}") int softLimit) {
+        var sentQueryStatistics =
+            assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softIntervalMinutes, hardLimit, hardIntervalMinutes));
+
+        assertThat(sentQueryStatistics).isInstanceOf(QueryQuota.class);
+        assertThat(sentQueryStatistics.hard().intervalInMinutes()).isEqualTo(hardIntervalMinutes);
+        assertThat(sentQueryStatistics.hard().used()).isEqualTo(0);
+        assertThat(sentQueryStatistics.hard().limit()).isEqualTo(hardLimit);
+        assertThat(sentQueryStatistics.soft().intervalInMinutes()).isEqualTo(softIntervalMinutes);
+        assertThat(sentQueryStatistics.soft().used()).isEqualTo(0);
+        assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit
+        );
+    }
+
+    @Test
+    @DisplayName("getSentQueryStatistics() -> succeeds with entries")
+    public void getSentQueryStatistics_succeedsWithEntries(@Value("${app.privacy.quota.hard.create.intervalMinutes}") int hardIntervalMinutes,
+                                                             @Value("${app.privacy.quota.soft.create.intervalMinutes}") int softIntervalMinutes,
+                                                             @Value("${app.privacy.quota.hard.create.amount}") int hardLimit,
+                                                             @Value("${app.privacy.quota.soft.create.amount}") int softLimit) {
+        var fakeContent = new QueryContent("{}");
+        fakeContent.setHash("a2189dffb");
+        queryContentRepository.save(fakeContent);
+        var currentQuery = new Query();
+        currentQuery.setCreatedBy(CREATOR);
+        currentQuery.setQueryContent(fakeContent);
+        queryRepository.save(currentQuery);
+
+        var queryFromAnotherUser = new Query();
+        queryFromAnotherUser.setCreatedBy("not-the-original-" + CREATOR);
+        queryFromAnotherUser.setQueryContent(fakeContent);
+        queryRepository.save(queryFromAnotherUser);
+
+        var veryOldQuery = new Query();
+        veryOldQuery.setCreatedBy(CREATOR);
+        veryOldQuery.setQueryContent(fakeContent);
+        var veryOldQueryId = queryRepository.save(veryOldQuery).getId();
+
+        var queryOnlyCountingToHardLimit = new Query();
+        queryOnlyCountingToHardLimit.setCreatedBy(CREATOR);
+        queryOnlyCountingToHardLimit.setQueryContent(fakeContent);
+        var inbetweenQueryId = queryRepository.save(queryOnlyCountingToHardLimit).getId();
+
+        queryRepository.updateCreationDate(veryOldQueryId, Timestamp.valueOf(TIME_STRING));
+        queryRepository.updateCreationDate(inbetweenQueryId, Timestamp.valueOf(LocalDateTime.now().minusMinutes(softIntervalMinutes + 1)));
+
+        var sentQueryStatistics =
+            assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softIntervalMinutes, hardLimit, hardIntervalMinutes));
+
+        assertThat(sentQueryStatistics).isInstanceOf(QueryQuota.class);
+        assertThat(sentQueryStatistics.hard().intervalInMinutes()).isEqualTo(hardIntervalMinutes);
+        assertThat(sentQueryStatistics.hard().used()).isEqualTo(2);
+        assertThat(sentQueryStatistics.hard().limit()).isEqualTo(hardLimit);
+        assertThat(sentQueryStatistics.soft().intervalInMinutes()).isEqualTo(softIntervalMinutes);
+        assertThat(sentQueryStatistics.soft().used()).isEqualTo(1);
+        assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit);
     }
 
     private StructuredQuery createValidStructuredQuery(String display) {

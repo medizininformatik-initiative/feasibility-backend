@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [6.2.0] - 2025-03-14
+
+- Based on ontology **[v3.2.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.2.0)**
+
+### Added
+- Info actuator endpoint to provide information about git parameters and ontology version ([#463](https://github.com/medizininformatik-initiative/feasibility-backend/issues/463))
+- Endpoint to query the feasibility query quota usage ([#460](https://github.com/medizininformatik-initiative/feasibility-backend/issues/460))
+- Feasibility FHIR Resource Version added to Profile URLs 
+### Changed
+- Update sq2cql to 1.0.0
+- Update ontology to 3.2.0
+### Fixed
+- Swagger and health/info endpoints can be queried when authenticated ([#473](https://github.com/medizininformatik-initiative/feasibility-backend/issues/473))
+
 ## [6.1.1] - 2025-03-03
 
 ### Changed
