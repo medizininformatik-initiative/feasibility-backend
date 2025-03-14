@@ -12,7 +12,7 @@
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>DataportalBackend</artifactId>
-  <version>6.2.0-alpha.1</version>
+  <version>6.2.0</version>
 
   <name>Dataportal Backend</name>
   <description>Backend of the Dataportal</description>
@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v3.2.0-alpha.6</ontology-tag>
+    <ontology-tag>v3.2.0</ontology-tag>
   </properties>
 
   <dependencies>
@@ -206,7 +206,7 @@
     <dependency>
       <groupId>de.medizininformatik-initiative</groupId>
       <artifactId>sq2cql</artifactId>
-      <version>1.0.0-alpha.2</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
