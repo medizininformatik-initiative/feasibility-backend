@@ -147,9 +147,7 @@ public class TerminologyEsService {
     if (!filterList.isEmpty()) {
       var fieldValues = new ArrayList<FieldValue>();
       filterList.forEach(f -> {
-        f.getSecond().forEach(s -> {
-          fieldValues.add(new FieldValue.Builder().stringValue(s).build());
-        });
+        f.getSecond().forEach(s -> fieldValues.add(new FieldValue.Builder().stringValue(s).build()));
         filterTerms.add(new TermsQuery.Builder()
                 .field(f.getFirst())
                 .terms(new TermsQueryField.Builder().value(fieldValues).build())

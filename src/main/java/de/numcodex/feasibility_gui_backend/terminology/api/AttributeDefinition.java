@@ -25,7 +25,7 @@ public class AttributeDefinition {
     @JsonProperty(value = "type", required = true)
     private ValueDefinitonType type;
     @JsonProperty("selectableConcepts")
-    private List<TermCode> selectableConcepts = new ArrayList<>();
+    private List<TermCode> selectableConcepts;
     @JsonProperty("attributeCode")
     private TermCode attributeCode;
     @JsonProperty("comparator")
@@ -33,7 +33,7 @@ public class AttributeDefinition {
     @JsonProperty("optional")
     private Boolean optional;
     @JsonProperty("allowedUnits")
-    private List<TermCode> allowedUnits = new ArrayList<>();
+    private List<TermCode> allowedUnits;
     @JsonProperty(value = "precision", required = true, defaultValue = "0")
     private double precision;
     @JsonProperty(value = "min")

@@ -7,7 +7,7 @@ import lombok.Builder;
 
 import java.sql.Timestamp;
 
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.ALWAYS)
 @Builder
 public record QueryListEntry(
     @JsonProperty long id,

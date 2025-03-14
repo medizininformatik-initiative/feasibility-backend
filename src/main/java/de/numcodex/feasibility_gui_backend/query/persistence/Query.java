@@ -31,9 +31,6 @@ public class Query {
     @ToString.Exclude
     private QueryContent queryContent;
 
-    @OneToOne(mappedBy = "query", cascade = CascadeType.ALL)
-    private SavedQuery savedQuery;
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

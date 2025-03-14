@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonInclude(Include.NON_EMPTY)
+@JsonInclude(Include.ALWAYS)
 @StructuredQueryValidation
 @Builder
 public record StructuredQuery(
