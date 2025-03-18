@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [6.2.2] - 2025-03-18
+
+- Based on ontology **[v3.2.2](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.2.2)**
+
+### Changed
+- Update ontology to 3.2.2
+
 ## [6.2.1] - 2025-03-17
 
 - Based on ontology **[v3.2.1](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.2.1)**
