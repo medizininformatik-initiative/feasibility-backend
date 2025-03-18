@@ -859,10 +859,10 @@ components:
           type: string
         comment:
           type: string
-        createdAt:
+        lastModified:
           type: string
           format: date-time
-        totalNumberOfResults:
+        resultSize:
           type: integer
         ccdl:
           type: object
@@ -871,7 +871,7 @@ components:
               type: boolean
             isValid:
               type: boolean
-        dataSelection:
+        dataExtraction:
           type: object
           properties:
             exists:

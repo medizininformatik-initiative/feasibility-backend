@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.v5;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
+import de.numcodex.feasibility_gui_backend.query.api.CrtdlSectionInfo;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
 import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryException;
 import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryHandler;
@@ -93,8 +94,15 @@ public class DataqueryHandlerRestController {
               .comment(dataquery.comment())
               .lastModified(dataquery.lastModified())
               .createdBy(dataquery.createdBy())
-              .isValid(dataquery.isValid())
               .resultSize(dataquery.resultSize())
+              .ccdl(CrtdlSectionInfo.builder()
+                  .exists(dataquery.content().cohortDefinition() != null)
+                  .isValid(skipValidation || structuredQueryValidation.isValid(dataquery.content().cohortDefinition()))
+                  .build())
+              .dataExtraction(CrtdlSectionInfo.builder()
+                  .exists(dataquery.content().dataExtraction() != null)
+                  .isValid(true) // TODO: Add validation for that
+                  .build())
               .build();
       return new ResponseEntity<>(dataqueryWithInvalidCriteria, HttpStatus.OK);
     } catch (JsonProcessingException e) {
@@ -134,30 +142,23 @@ public class DataqueryHandlerRestController {
       var dataqueries = dataqueryHandler.getDataqueriesByAuthor(principal.getName());
       var ret = new ArrayList<Dataquery>();
       dataqueries.forEach(dq -> {
-        if (skipValidation) {
-          ret.add(
-              Dataquery.builder()
-                  .id(dq.id())
-                  .label(dq.label())
-                  .comment(dq.comment())
-                  .lastModified(dq.lastModified())
-                  .createdBy(dq.createdBy())
-                  .resultSize(dq.resultSize())
-                  .build()
-          );
-        } else {
-          ret.add(
-              Dataquery.builder()
-                  .id(dq.id())
-                  .label(dq.label())
-                  .comment(dq.comment())
-                  .lastModified(dq.lastModified())
-                  .createdBy(dq.createdBy())
-                  .resultSize(dq.resultSize())
-                  .isValid(structuredQueryValidation.isValid(dq.content().cohortDefinition()))
-                  .build()
-          );
-        }
+        ret.add(
+            Dataquery.builder()
+                .id(dq.id())
+                .label(dq.label())
+                .comment(dq.comment())
+                .lastModified(dq.lastModified())
+                .resultSize(dq.resultSize())
+                .ccdl(CrtdlSectionInfo.builder()
+                    .exists(dq.content().cohortDefinition() != null)
+                    .isValid(skipValidation || structuredQueryValidation.isValid(dq.content().cohortDefinition()))
+                    .build())
+                .dataExtraction(CrtdlSectionInfo.builder()
+                    .exists(dq.content().dataExtraction() != null)
+                    .isValid(true) // TODO: Add validation for that
+                    .build())
+                .build()
+        );
       });
       return new ResponseEntity<>(ret, HttpStatus.OK);
     } catch (DataqueryException e) {
@@ -173,28 +174,23 @@ public class DataqueryHandlerRestController {
       var dataqueries = dataqueryHandler.getDataqueriesByAuthor(userId);
       var ret = new ArrayList<Dataquery>();
       dataqueries.forEach(dq -> {
-        if (skipValidation) {
-          ret.add(
-              Dataquery.builder()
-                  .id(dq.id())
-                  .label(dq.label())
-                  .comment(dq.comment())
-                  .lastModified(dq.lastModified())
-                  .createdBy(dq.createdBy())
-                  .build()
-          );
-        } else {
-          ret.add(
-              Dataquery.builder()
-                  .id(dq.id())
-                  .label(dq.label())
-                  .comment(dq.comment())
-                  .lastModified(dq.lastModified())
-                  .createdBy(dq.createdBy())
-                  .isValid(structuredQueryValidation.isValid(dq.content().cohortDefinition()))
-                  .build()
-          );
-        }
+        ret.add(
+            Dataquery.builder()
+                .id(dq.id())
+                .label(dq.label())
+                .comment(dq.comment())
+                .lastModified(dq.lastModified())
+                .createdBy(dq.createdBy())
+                .ccdl(CrtdlSectionInfo.builder()
+                    .exists(dq.content().cohortDefinition() != null)
+                    .isValid(skipValidation || structuredQueryValidation.isValid(dq.content().cohortDefinition()))
+                    .build())
+                .dataExtraction(CrtdlSectionInfo.builder()
+                    .exists(dq.content().dataExtraction() != null)
+                    .isValid(true) // TODO: Add validation for that
+                    .build())
+                .build()
+        );
       });
       return new ResponseEntity<>(ret, HttpStatus.OK);
     } catch (DataqueryException e) {

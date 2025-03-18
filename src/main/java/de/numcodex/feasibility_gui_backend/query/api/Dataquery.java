@@ -14,7 +14,8 @@ public record Dataquery(
     @JsonProperty String comment,
     @JsonProperty String lastModified,
     @JsonProperty String createdBy,
-    @JsonProperty Boolean isValid,
+    @JsonProperty CrtdlSectionInfo ccdl,
+    @JsonProperty CrtdlSectionInfo dataExtraction,
     @JsonProperty Long resultSize
 ) {
 

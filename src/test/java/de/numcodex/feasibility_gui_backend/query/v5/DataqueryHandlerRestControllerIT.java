@@ -33,6 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
@@ -301,7 +302,6 @@ public class DataqueryHandlerRestControllerIT {
                 .content(createCrtdl())
                 .label("TestLabel")
                 .comment("TestComment")
-                .isValid(true)
                 .build();
     }
 
@@ -332,9 +332,16 @@ public class DataqueryHandlerRestControllerIT {
                 .content(createCrtdl())
                 .label("TestLabel")
                 .comment("TestComment")
-                .lastModified(new Timestamp(new java.util.Date().getTime()).toString())
+                .lastModified(new Timestamp(new Date().getTime()).toString())
                 .createdBy("someone")
-                .isValid(true)
+                .ccdl(CrtdlSectionInfo.builder()
+                    .isValid(true)
+                    .exists(true)
+                    .build())
+                .dataExtraction(CrtdlSectionInfo.builder()
+                    .isValid(true)
+                    .exists(true)
+                    .build())
                 .build();
     }
 
