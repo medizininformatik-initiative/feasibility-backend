@@ -38,15 +38,18 @@ public class Dataquery {
   @Column(name = "result_size")
   private Long resultSize;
 
+  @Column(name = "expires_at")
+  private Timestamp expiresAt;
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
     Dataquery dataquery = (Dataquery) o;
-    return Objects.equals(id, dataquery.id) && Objects.equals(createdBy, dataquery.createdBy) && Objects.equals(label, dataquery.label) && Objects.equals(comment, dataquery.comment) && Objects.equals(crtdl, dataquery.crtdl) && Objects.equals(lastModified, dataquery.lastModified) && Objects.equals(resultSize, dataquery.resultSize);
+    return Objects.equals(id, dataquery.id) && Objects.equals(createdBy, dataquery.createdBy) && Objects.equals(label, dataquery.label) && Objects.equals(comment, dataquery.comment) && Objects.equals(crtdl, dataquery.crtdl) && Objects.equals(lastModified, dataquery.lastModified) && Objects.equals(resultSize, dataquery.resultSize) && Objects.equals(expiresAt, dataquery.expiresAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, createdBy, label, comment, crtdl, lastModified, resultSize);
+    return Objects.hash(id, createdBy, label, comment, crtdl, lastModified, resultSize, expiresAt);
   }
 }

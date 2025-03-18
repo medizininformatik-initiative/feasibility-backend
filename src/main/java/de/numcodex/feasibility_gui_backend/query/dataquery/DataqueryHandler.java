@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +55,31 @@ public class DataqueryHandler {
     }
   }
 
+  public Long storeExpiringDataquery(@NonNull Dataquery dataquery, @NonNull String userId, @NonNull String ttlDuration) throws DataqueryException, DataqueryStorageFullException {
+
+    var tmp = Dataquery.builder()
+        .resultSize(dataquery.resultSize())
+        .content(dataquery.content())
+        .label(dataquery.label())
+        .comment(dataquery.comment())
+        .createdBy(userId)
+        .build();
+
+    try {
+      de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataqueryEntity = convertApiToPersistence(tmp, ttlDuration);
+      dataqueryEntity = dataqueryRepository.save(dataqueryEntity);
+      return dataqueryEntity.getId();
+    } catch (JsonProcessingException e) {
+      throw new DataqueryException(e.getMessage());
+    }
+  }
+
   public Dataquery getDataqueryById(Long dataqueryId, String userId) throws DataqueryException, JsonProcessingException {
     de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataquery = dataqueryRepository.findById(dataqueryId).orElseThrow(DataqueryException::new);
     if (dataquery.getCreatedBy() == null || !dataquery.getCreatedBy().equals(userId)) {
       throw new DataqueryException();
     }
-    return convertPersistenceToApi(dataquery);
+    return Dataquery.of(dataquery);
   }
 
   public void updateDataquery(Long queryId, Dataquery dataquery, String userId) throws DataqueryException,  DataqueryStorageFullException, JsonProcessingException {
@@ -84,19 +104,30 @@ public class DataqueryHandler {
     }
   }
 
-  public List<Dataquery> getDataqueriesByAuthor(String userId) throws DataqueryException {
-    List<de.numcodex.feasibility_gui_backend.query.persistence.Dataquery> dataqueries = dataqueryRepository.findAllByCreatedBy(userId);
+  public List<Dataquery> getDataqueriesByAuthor(String userId, boolean includeTemporary) throws DataqueryException {
+    List<de.numcodex.feasibility_gui_backend.query.persistence.Dataquery> dataqueries;
+
+    if (includeTemporary) {
+      dataqueries = dataqueryRepository.findAllByCreatedBy(userId);
+    } else {
+      dataqueries = dataqueryRepository.findAllNonTemporaryByCreatedBy(userId);
+    }
+
     List<Dataquery> ret = new ArrayList<>();
 
     for (de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataquery : dataqueries) {
       try {
-        ret.add(convertPersistenceToApi(dataquery));
+        ret.add(Dataquery.of(dataquery));
       } catch (JsonProcessingException e) {
         throw new DataqueryException();
       }
     }
 
     return ret;
+  }
+
+  public List<Dataquery> getDataqueriesByAuthor(String userId) throws DataqueryException {
+    return getDataqueriesByAuthor(userId, false);
   }
 
   public void deleteDataquery(Long dataqueryId, String userId) throws DataqueryException {
@@ -117,7 +148,7 @@ public class DataqueryHandler {
         .build();
   }
 
-  public de.numcodex.feasibility_gui_backend.query.persistence.Dataquery convertApiToPersistence(de.numcodex.feasibility_gui_backend.query.api.Dataquery in) throws JsonProcessingException {
+  public de.numcodex.feasibility_gui_backend.query.persistence.Dataquery convertApiToPersistence(de.numcodex.feasibility_gui_backend.query.api.Dataquery in, String ttlDuration) throws JsonProcessingException {
     de.numcodex.feasibility_gui_backend.query.persistence.Dataquery out = new de.numcodex.feasibility_gui_backend.query.persistence.Dataquery();
     out.setId(in.id() > 0 ? in.id() : null);
     out.setLabel(in.label());
@@ -128,7 +159,15 @@ public class DataqueryHandler {
     out.setCreatedBy(in.createdBy());
     out.setResultSize(in.resultSize());
     out.setCrtdl(jsonUtil.writeValueAsString(in.content()));
+    if (ttlDuration != null) {
+      Duration duration = Duration.parse(ttlDuration);
+      out.setExpiresAt(Timestamp.valueOf(LocalDateTime.now().plusSeconds(duration.getSeconds())));
+    }
     return out;
+  }
+
+  public de.numcodex.feasibility_gui_backend.query.persistence.Dataquery convertApiToPersistence(de.numcodex.feasibility_gui_backend.query.api.Dataquery in) throws JsonProcessingException {
+    return convertApiToPersistence(in, null);
   }
 
   public de.numcodex.feasibility_gui_backend.query.api.Dataquery convertPersistenceToApi(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery in) throws JsonProcessingException {
@@ -140,6 +179,7 @@ public class DataqueryHandler {
         .resultSize(in.getResultSize())
         .lastModified(in.getLastModified() == null ? null : in.getLastModified().toString())
         .content(jsonUtil.readValue(in.getCrtdl(), Crtdl.class))
+        .expiresAt(in.getExpiresAt())
         .build();
   }
 }
