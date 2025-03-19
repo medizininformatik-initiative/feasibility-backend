@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -231,15 +233,16 @@ class DataqueryHandlerTest {
         }
     }
 
-    @Test
+    @ParameterizedTest
     @DisplayName("getDataqueriesByAuthor() -> succeeds")
-    void getDataqueriesByAuthor_succeedsWithEntry() throws JsonProcessingException {
+    @ValueSource(strings = { "true", "false" })
+    void getDataqueriesByAuthor_succeedsWithEntry(boolean includeTemporary) throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
         var dataqueryEntity = createDataqueryEntity();
 
-        doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class));
+        doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class), anyBoolean());
 
-        List<Dataquery> dataqueries = assertDoesNotThrow(() -> dataqueryHandler.getDataqueriesByAuthor(CREATOR));
+        List<Dataquery> dataqueries = assertDoesNotThrow(() -> dataqueryHandler.getDataqueriesByAuthor(CREATOR, includeTemporary));
 
         assertNotNull(dataqueries);
         assertEquals(1, dataqueries.size());
@@ -252,7 +255,7 @@ class DataqueryHandlerTest {
     void getDataqueriesByAuthor_succeedsWithEmptyList() throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
 
-        doReturn(List.of()).when(dataqueryRepository).findAllByCreatedBy(any(String.class));
+        doReturn(List.of()).when(dataqueryRepository).findAllByCreatedBy(any(String.class), anyBoolean());
 
         List<Dataquery> dataqueries = assertDoesNotThrow(() -> dataqueryHandler.getDataqueriesByAuthor(CREATOR));
 
@@ -260,16 +263,19 @@ class DataqueryHandlerTest {
         assertEquals(0, dataqueries.size());
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = { "true", "false" })
     @DisplayName("getDataqueriesByAuthor() -> throws on json error")
-    void getDataqueriesByAuthor_throwsOnJsonException() throws JsonProcessingException {
+    void getDataqueriesByAuthor_throwsOnJsonException(boolean includeTemporary) throws JsonProcessingException {
         var dataqueryHandler = createDataqueryHandler();
         var dataqueryEntity = createDataqueryEntity();
 
-        doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class));
-        doThrow(JsonProcessingException.class).when(jsonUtil).readValue(any(String.class), any(Class.class));
+        try (MockedStatic<Dataquery> mockedStaticDataquery = mockStatic(Dataquery.class)) {
+            mockedStaticDataquery.when(() -> Dataquery.of(any(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class))).thenThrow(JsonProcessingException.class);
+            doReturn(List.of(dataqueryEntity)).when(dataqueryRepository).findAllByCreatedBy(any(String.class), anyBoolean());
+            assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueriesByAuthor(CREATOR, includeTemporary));
+        }
 
-        assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueriesByAuthor(CREATOR));
     }
 
     @Test

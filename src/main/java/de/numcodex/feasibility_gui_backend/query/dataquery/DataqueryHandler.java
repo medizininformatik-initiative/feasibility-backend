@@ -107,11 +107,7 @@ public class DataqueryHandler {
   public List<Dataquery> getDataqueriesByAuthor(String userId, boolean includeTemporary) throws DataqueryException {
     List<de.numcodex.feasibility_gui_backend.query.persistence.Dataquery> dataqueries;
 
-    if (includeTemporary) {
-      dataqueries = dataqueryRepository.findAllByCreatedBy(userId);
-    } else {
-      dataqueries = dataqueryRepository.findAllNonTemporaryByCreatedBy(userId);
-    }
+    dataqueries = dataqueryRepository.findAllByCreatedBy(userId, includeTemporary);
 
     List<Dataquery> ret = new ArrayList<>();
 
