@@ -48,7 +48,7 @@ class DataqueryHandlerTest {
     private DataqueryRepository dataqueryRepository;
 
     private DataqueryHandler createDataqueryHandler() {
-        return new DataqueryHandler(jsonUtil, dataqueryRepository, MAX_QUERIES_PER_USER);
+        return new DataqueryHandler(dataqueryRepository, MAX_QUERIES_PER_USER);
     }
 
     @Test
@@ -119,10 +119,13 @@ class DataqueryHandlerTest {
     @DisplayName("storeDataquery() -> error in json serialization throws an exception")
     void storeDataquery_throwsOnJsonSerializationError() throws JsonProcessingException {
         var dataquery = createDataquery();
-        doThrow(JsonProcessingException.class).when(jsonUtil).writeValueAsString(any(Crtdl.class));
-
         var dataqueryHandler = createDataqueryHandler();
-        assertThrows(DataqueryException.class, () -> dataqueryHandler.storeDataquery(dataquery, CREATOR));
+
+        try (MockedStatic<de.numcodex.feasibility_gui_backend.query.persistence.Dataquery> mockedStaticDataquery
+                 = mockStatic(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class)) {
+            mockedStaticDataquery.when(() -> de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(any(Dataquery.class))).thenThrow(JsonProcessingException.class);
+            assertThrows(DataqueryException.class, () -> dataqueryHandler.storeDataquery(dataquery, CREATOR));
+        }
     }
 
     @Test
@@ -315,11 +318,10 @@ class DataqueryHandlerTest {
 
     @Test
     @DisplayName("convertApiToPersistence() -> converting a dataquery from the rest api to the format that will be stored in the database succeeds")
-    void convertApiToPersistence() throws JsonProcessingException {
+    void testDataqueryPersistenceOfDataQueryApi() throws JsonProcessingException {
         var dataQuery = createDataquery();
-        var dataqueryHandler = createDataqueryHandler();
 
-        var convertedDataquery = dataqueryHandler.convertApiToPersistence(dataQuery);
+        var convertedDataquery = de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(dataQuery);
         var convertedCrtdl = jsonUtil.readValue(convertedDataquery.getCrtdl(), Crtdl.class);
 
         assertEquals(convertedDataquery.getId(), dataQuery.id());
@@ -336,11 +338,10 @@ class DataqueryHandlerTest {
     }
 
     @Test
-    @DisplayName("convertPersistenceToApi() -> converting a dataquery from the database to the format that will be sent out via api succeeds")
-    void convertPersistenceToApi() throws JsonProcessingException {
+    @DisplayName("Dataquery.of() -> converting a dataquery from the database to the format that will be sent out via api succeeds")
+    void testDataqueryApiOfDataQueryPersistence() throws JsonProcessingException {
         var dataqueryEntity = createDataqueryEntity();
-        var dataqueryHandler = createDataqueryHandler();
-        var convertedDataquery = dataqueryHandler.convertPersistenceToApi(dataqueryEntity);
+        var convertedDataquery = Dataquery.of(dataqueryEntity);
         var originalCrtdl = jsonUtil.readValue(dataqueryEntity.getCrtdl(), Crtdl.class);
 
         assertEquals(convertedDataquery.id(), dataqueryEntity.getId());

@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DataqueryRepository extends JpaRepository<Dataquery, Long> {
 
-  @Query(value = "SELECT dq from Dataquery dq WHERE dq.createdBy = ?1 AND (:includeTemporary = false OR dq.expiresAt IS NULL)")
+  @Query(value = "SELECT dq from Dataquery dq WHERE dq.createdBy = ?1 AND (:includeTemporary = true OR dq.expiresAt IS NULL)")
   List<Dataquery> findAllByCreatedBy(String userId, boolean includeTemporary);
 
   @Query(value = "SELECT COUNT(*) FROM Dataquery WHERE createdBy = ?1 AND resultSize IS NOT NULL")

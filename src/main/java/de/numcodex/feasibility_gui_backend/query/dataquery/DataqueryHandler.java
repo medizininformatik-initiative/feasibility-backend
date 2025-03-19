@@ -1,8 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.dataquery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
 import de.numcodex.feasibility_gui_backend.query.api.status.SavedQuerySlots;
 import de.numcodex.feasibility_gui_backend.query.persistence.DataqueryRepository;
@@ -21,9 +19,6 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class DataqueryHandler {
-
-  @NonNull
-  private ObjectMapper jsonUtil;
 
   @NonNull
   private DataqueryRepository dataqueryRepository;
@@ -47,7 +42,7 @@ public class DataqueryHandler {
         .build();
 
     try {
-      de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataqueryEntity = convertApiToPersistence(tmp);
+      de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataqueryEntity = de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(tmp);
       dataqueryEntity = dataqueryRepository.save(dataqueryEntity);
       return dataqueryEntity.getId();
     } catch (JsonProcessingException e) {
@@ -63,10 +58,11 @@ public class DataqueryHandler {
         .label(dataquery.label())
         .comment(dataquery.comment())
         .createdBy(userId)
+        .expiresAt(Timestamp.valueOf(LocalDateTime.now().plusSeconds(Duration.parse(ttlDuration).getSeconds())))
         .build();
 
     try {
-      de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataqueryEntity = convertApiToPersistence(tmp, ttlDuration);
+      de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataqueryEntity = de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(tmp);
       dataqueryEntity = dataqueryRepository.save(dataqueryEntity);
       return dataqueryEntity.getId();
     } catch (JsonProcessingException e) {
@@ -94,7 +90,7 @@ public class DataqueryHandler {
     }
 
     if (existingDataquery.getCreatedBy().equals(userId)) {
-      var dataqueryToUpdate = convertApiToPersistence(dataquery);
+      var dataqueryToUpdate = de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.of(dataquery);
       dataqueryToUpdate.setId(existingDataquery.getId());
       dataqueryToUpdate.setCreatedBy(userId);
       dataqueryToUpdate.setLastModified(Timestamp.valueOf(LocalDateTime.now()));
@@ -141,41 +137,6 @@ public class DataqueryHandler {
     return SavedQuerySlots.builder()
         .used(queryAmount)
         .total(maxDataqueriesPerUser)
-        .build();
-  }
-
-  public de.numcodex.feasibility_gui_backend.query.persistence.Dataquery convertApiToPersistence(de.numcodex.feasibility_gui_backend.query.api.Dataquery in, String ttlDuration) throws JsonProcessingException {
-    de.numcodex.feasibility_gui_backend.query.persistence.Dataquery out = new de.numcodex.feasibility_gui_backend.query.persistence.Dataquery();
-    out.setId(in.id() > 0 ? in.id() : null);
-    out.setLabel(in.label());
-    out.setComment(in.comment());
-    if (in.lastModified() != null) {
-      out.setLastModified(Timestamp.valueOf(in.lastModified()));
-    }
-    out.setCreatedBy(in.createdBy());
-    out.setResultSize(in.resultSize());
-    out.setCrtdl(jsonUtil.writeValueAsString(in.content()));
-    if (ttlDuration != null) {
-      Duration duration = Duration.parse(ttlDuration);
-      out.setExpiresAt(Timestamp.valueOf(LocalDateTime.now().plusSeconds(duration.getSeconds())));
-    }
-    return out;
-  }
-
-  public de.numcodex.feasibility_gui_backend.query.persistence.Dataquery convertApiToPersistence(de.numcodex.feasibility_gui_backend.query.api.Dataquery in) throws JsonProcessingException {
-    return convertApiToPersistence(in, null);
-  }
-
-  public de.numcodex.feasibility_gui_backend.query.api.Dataquery convertPersistenceToApi(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery in) throws JsonProcessingException {
-    return de.numcodex.feasibility_gui_backend.query.api.Dataquery.builder()
-        .id(in.getId())
-        .label(in.getLabel())
-        .comment(in.getComment())
-        .createdBy(in.getCreatedBy())
-        .resultSize(in.getResultSize())
-        .lastModified(in.getLastModified() == null ? null : in.getLastModified().toString())
-        .content(jsonUtil.readValue(in.getCrtdl(), Crtdl.class))
-        .expiresAt(in.getExpiresAt())
         .build();
   }
 }

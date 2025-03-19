@@ -1,5 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.persistence;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Entity
 public class Dataquery {
+
+  private static ObjectMapper jsonUtil = new ObjectMapper();
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +44,21 @@ public class Dataquery {
 
   @Column(name = "expires_at")
   private Timestamp expiresAt;
+
+  public static Dataquery of(de.numcodex.feasibility_gui_backend.query.api.Dataquery in) throws JsonProcessingException {
+    var out = new de.numcodex.feasibility_gui_backend.query.persistence.Dataquery();
+    out.setId(in.id() > 0 ? in.id() : null);
+    out.setLabel(in.label());
+    out.setComment(in.comment());
+    if (in.lastModified() != null) {
+      out.setLastModified(Timestamp.valueOf(in.lastModified()));
+    }
+    out.setCreatedBy(in.createdBy());
+    out.setResultSize(in.resultSize());
+    out.setCrtdl(jsonUtil.writeValueAsString(in.content()));
+    out.setExpiresAt(in.expiresAt());
+    return out;
+  }
 
   @Override
   public boolean equals(Object o) {
