@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
-import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
-import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -39,7 +38,9 @@ class DataqueryHandlerTest {
     public static final String LABEL = "some-label";
     public static final String COMMENT = "some-comment";
     public static final String TIME_STRING = "1969-07-20 20:17:40.0";
+    public static final String EXPIRY_STRING = "2063-04-05 20:17:40.0";
     private static final int MAX_QUERIES_PER_USER = 5;
+    public static final String DURATION = "PT10M";
 
     @Spy
     private ObjectMapper jsonUtil = new ObjectMapper();
@@ -362,6 +363,40 @@ class DataqueryHandlerTest {
         assertEquals(convertedDataquery.content().cohortDefinition().exclusionCriteria(), originalCrtdl.cohortDefinition().exclusionCriteria());
     }
 
+    @Test
+    @DisplayName("storeExpiringDataquery() -> trying to store a valid object with a user does not throw")
+    void storeExpiringDataquery_succeeds() throws JsonProcessingException {
+        var dataqueryHandler = createDataqueryHandler();
+        doReturn(createDataqueryEntity(false, true)).when(dataqueryRepository).save(any());
+
+        assertDoesNotThrow(() -> dataqueryHandler.storeExpiringDataquery(createDataquery(), CREATOR, DURATION));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true,true,true", "true,true,false", "true,false,true", "true,false,false",
+        "false,true,true", "false,true,false", "false,false,true"})
+    @DisplayName("storeExpiringDataquery() -> trying to store a null object with a null user throws an exception")
+    void storeExpiringDataquery_throwsOnEmptyValue(boolean emptyQuery, boolean emptyUser, boolean emptyTtl) throws JsonProcessingException {
+        var dataqueryHandler = createDataqueryHandler();
+        assertThrows(NullPointerException.class, () -> dataqueryHandler.storeExpiringDataquery(
+            emptyQuery ? null : createDataquery(),
+            emptyUser ? null : CREATOR,
+            emptyTtl ? null : DURATION)
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true", "false"})
+    @DisplayName("storeExpiringDataquery() -> trying to store an expiring dataquery when no slots are free does not throw")
+    void storeExpiringDataquery_ignoresFreeSlots(boolean withResult) throws JsonProcessingException {
+        var dataqueryHandler = createDataqueryHandler();
+        lenient().doReturn(MAX_QUERIES_PER_USER + 1L).when(dataqueryRepository).countByCreatedByWhereResultIsNotNull(any(String.class));
+        lenient().doReturn(createDataqueryEntity()).when(dataqueryRepository).save(any(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery.class));
+
+        assertDoesNotThrow(() -> dataqueryHandler.storeExpiringDataquery(createDataquery(withResult), CREATOR, DURATION));
+    }
+
+
     private Dataquery createDataquery(boolean withResult) {
         return Dataquery.builder()
             .id(1L)
@@ -381,7 +416,37 @@ class DataqueryHandlerTest {
     private Crtdl createCrtdl() {
         return Crtdl.builder()
             .cohortDefinition(createValidStructuredQuery())
+            .dataExtraction(createValidDataExtraction())
             .display("foo")
+            .build();
+    }
+
+    private DataExtraction createValidDataExtraction() {
+        return DataExtraction.builder()
+            .attributeGroups(List.of(createValidAttributeGroup()))
+            .build();
+    }
+
+    private AttributeGroup createValidAttributeGroup() {
+        return AttributeGroup.builder()
+            .groupReference(URI.create("https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"))
+            .attributes(List.of(createValidAttribute()))
+            .filter(List.of(createValidFilter()))
+            .build();
+    }
+
+    private Filter createValidFilter() {
+        return Filter.builder()
+            .type("some-type")
+            .name("some-name")
+            .codes(List.of())
+            .build();
+    }
+
+    private Attribute createValidAttribute() {
+        return Attribute.builder()
+            .attributeRef("Condition.clinicalStatus")
+            .mustHave(false)
             .build();
     }
 
@@ -403,7 +468,7 @@ class DataqueryHandlerTest {
                 .build();
     }
 
-    private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity(boolean withResult) throws JsonProcessingException {
+    private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity(boolean withResult, boolean expiring) throws JsonProcessingException {
         de.numcodex.feasibility_gui_backend.query.persistence.Dataquery out = new de.numcodex.feasibility_gui_backend.query.persistence.Dataquery();
         out.setId(1L);
         out.setLabel(LABEL);
@@ -411,11 +476,16 @@ class DataqueryHandlerTest {
         out.setLastModified(Timestamp.valueOf(TIME_STRING));
         out.setCreatedBy(CREATOR);
         out.setResultSize(withResult ? 123L : null);
+        out.setExpiresAt(expiring ? Timestamp.valueOf(EXPIRY_STRING) : null);
         out.setCrtdl(jsonUtil.writeValueAsString(createCrtdl()));
         return out;
     }
 
+    private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity(boolean withResult) throws JsonProcessingException {
+        return  createDataqueryEntity(withResult, false);
+    }
+
     private de.numcodex.feasibility_gui_backend.query.persistence.Dataquery createDataqueryEntity() throws JsonProcessingException {
-        return  createDataqueryEntity(false);
+        return  createDataqueryEntity(false, false);
     }
 }
