@@ -24,11 +24,11 @@ public class ValueDefinition {
     @JsonProperty(value = "type", required = true)
     private ValueDefinitonType type;
     @JsonProperty("selectableConcepts")
-    private List<TermCode> selectableConcepts = new ArrayList<>();
+    private List<TermCode> selectableConcepts;
     @JsonProperty("comparator")
     private Comparator comparator;
     @JsonProperty("allowedUnits")
-    private List<Unit> allowedUnits = new ArrayList<>();
+    private List<Unit> allowedUnits;
     @JsonProperty(value = "precision", required = true, defaultValue = "0")
     private double precision;
     @JsonProperty(value = "min")
