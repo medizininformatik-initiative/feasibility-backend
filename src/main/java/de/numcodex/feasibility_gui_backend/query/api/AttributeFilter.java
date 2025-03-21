@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.ALWAYS)
 @Builder
 public record AttributeFilter(
     @JsonProperty List<Criterion> criteria,
