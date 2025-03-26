@@ -26,10 +26,9 @@ public class Coding implements Serializable {
     if (o == this) {
       return true;
     }
-    if (!(o instanceof Coding)) {
+    if (!(o instanceof Coding coding)) {
       return false;
     }
-    Coding coding = (Coding) o;
     return (this.version.equals(coding.version) && this.code.equals(coding.code) &&
         this.system.equals(coding.system));
   }

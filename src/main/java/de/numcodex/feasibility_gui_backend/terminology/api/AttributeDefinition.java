@@ -1,47 +1,32 @@
 package de.numcodex.feasibility_gui_backend.terminology.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.common.api.Comparator;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.ALWAYS)
 @Builder
-@JsonInclude(Include.NON_NULL)
-public class AttributeDefinition {
-    @JsonProperty(value= "display", required = true)
-    private DisplayEntry display;
-    @JsonProperty(value = "type", required = true)
-    private ValueDefinitonType type;
-    @JsonProperty("selectableConcepts")
-    private List<TermCode> selectableConcepts = new ArrayList<>();
-    @JsonProperty("attributeCode")
-    private TermCode attributeCode;
-    @JsonProperty("comparator")
-    private Comparator comparator;
-    @JsonProperty("optional")
-    private Boolean optional;
-    @JsonProperty("allowedUnits")
-    private List<TermCode> allowedUnits = new ArrayList<>();
-    @JsonProperty(value = "precision", required = true, defaultValue = "0")
-    private double precision;
-    @JsonProperty(value = "min")
-    private Double min;
-    @JsonProperty(value = "max")
-    private Double max;
-    @JsonProperty("referencedCriteriaSet")
-    private String referencedCriteriaSet;
-    @JsonProperty("referencedValueSet")
-    private String referencedValueSet;
+public record AttributeDefinition(
+    @JsonProperty(value = "display", required = true) DisplayEntry display,
+    @JsonProperty(value = "type", required = true) ValueDefinitonType type,
+    @JsonProperty("selectableConcepts") List<TermCode> selectableConcepts,
+    @JsonProperty("attributeCode") TermCode attributeCode,
+    @JsonProperty("comparator") Comparator comparator,
+    @JsonProperty("optional") Boolean optional,
+    @JsonProperty("allowedUnits") List<TermCode> allowedUnits,
+    @JsonProperty(value = "precision", required = true, defaultValue = "0") double precision,
+    @JsonProperty(value = "min") Double min,
+    @JsonProperty(value = "max") Double max,
+    @JsonProperty("referencedCriteriaSet") String referencedCriteriaSet,
+    @JsonProperty("referencedValueSet") String referencedValueSet
+) {
+    public AttributeDefinition {
+        selectableConcepts = (selectableConcepts == null) ? List.of() : selectableConcepts;
+        allowedUnits = (allowedUnits == null) ? List.of() : allowedUnits;
+    }
 }

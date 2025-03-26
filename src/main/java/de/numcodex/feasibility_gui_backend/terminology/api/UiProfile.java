@@ -9,22 +9,15 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.ALWAYS)
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class UiProfile {
-
-  @JsonProperty(value = "name")
-  private String name;
-
-  @JsonProperty(value = "timeRestrictionAllowed")
-  private boolean timeRestrictionAllowed;
-
-  @JsonProperty(value = "valueDefinition")
-  private AttributeDefinition valueDefinition;
-
-  @JsonProperty(value = "attributeDefinitions")
-  private List<AttributeDefinition> attributeDefinitions;
+public record UiProfile(
+    @JsonProperty("name") String name,
+    @JsonProperty("timeRestrictionAllowed") boolean timeRestrictionAllowed,
+    @JsonProperty("valueDefinition") AttributeDefinition valueDefinition,
+    @JsonProperty("attributeDefinitions") List<AttributeDefinition> attributeDefinitions
+) {
+  public UiProfile {
+    attributeDefinitions = (attributeDefinitions == null) ? List.of() : attributeDefinitions;
+  }
 }

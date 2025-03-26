@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class StructuredQueryValidation {
 
+  private final static String IGNORED_CONSENT_SYSTEM = "fdpg.consent.combined";
+
   private final TerminologyService terminologyService;
 
   @Autowired
@@ -116,6 +118,11 @@ public class StructuredQueryValidation {
         return true;
       }
       for (TermCode termCode : criterion.termCodes()) {
+        // There are some hardcoded consent termcodes in the ui that are not known in the backend. They all are in the same
+        // "system"...just skip those in validation
+        if (termCode.system().equalsIgnoreCase(IGNORED_CONSENT_SYSTEM)) {
+          continue;
+        }
         if (terminologyService.isExistingTermCode(termCode.system(), termCode.code())) {
           log.trace("termcode ok: {} - {}", termCode.system(), termCode.code());
         } else {
