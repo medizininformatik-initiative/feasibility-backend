@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(Include.NON_EMPTY)
 @Builder
 public record AttributeFilter(
     @JsonProperty List<Criterion> criteria,
@@ -30,5 +30,7 @@ public record AttributeFilter(
     public AttributeFilter {
         Objects.requireNonNull(type);
         Objects.requireNonNull(attributeCode);
+        criteria = criteria == null ? List.of() : criteria;
+        selectedConcepts = selectedConcepts == null ? List.of() : selectedConcepts;
     }
 }
