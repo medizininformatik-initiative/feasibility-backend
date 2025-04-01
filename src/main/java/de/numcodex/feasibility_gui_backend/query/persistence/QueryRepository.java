@@ -16,7 +16,7 @@ public interface QueryRepository extends JpaRepository<Query, Long> {
   Optional<String> getAuthor(Long queryId);
 
   @NativeQuery(value = "SELECT count (*) FROM query WHERE created_by = ?1 AND created_at > (current_timestamp - (?2 * interval '1 minute'))")
-  Long countQueriesByAuthorInTheLastNMinutes(String authorId, int minutes);
+  Long countQueriesByAuthorInTheLastNMinutes(String authorId, long minutes);
 
   @NativeQuery(value = "SELECT EXTRACT (EPOCH from ( SELECT (current_timestamp - created_at) from query WHERE created_by = ?1 ORDER BY created_at desc LIMIT 1 OFFSET ?2))")
   Long getAgeOfNToLastQueryInSeconds(String authorId, int offset);

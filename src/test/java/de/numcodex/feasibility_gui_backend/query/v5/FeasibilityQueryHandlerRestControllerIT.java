@@ -96,14 +96,14 @@ public class FeasibilityQueryHandlerRestControllerIT {
     @Value("${app.privacy.quota.soft.create.amount}")
     private int quotaSoftCreateAmount;
 
-    @Value("${app.privacy.quota.soft.create.intervalminutes}")
-    private int quotaSoftCreateIntervalMinutes;
+    @Value("${app.privacy.quota.soft.create.interval}")
+    private String quotaSoftCreateInterval;
 
     @Value("${app.privacy.quota.hard.create.amount}")
     private int quotaHardCreateAmount;
 
-    @Value("${app.privacy.quota.hard.create.intervalminutes}")
-    private int quotaHardCreateIntervalMinutes;
+    @Value("${app.privacy.quota.hard.create.interval}")
+    private String quotaHardCreateInterval;
 
     @Value("${app.privacy.threshold.sitesResult}")
     private long thresholdSitesResult;
@@ -175,7 +175,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(Integer.class));
+        doReturn((long)quotaSoftCreateAmount + 1).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), any(String.class));
         doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         var mvcResult = mockMvc.perform(post(URI.create(PATH)).with(csrf())
@@ -250,7 +250,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
+        doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateInterval));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
@@ -271,8 +271,8 @@ public class FeasibilityQueryHandlerRestControllerIT {
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
         doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_POWER"));
-        doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateIntervalMinutes));
-        doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateIntervalMinutes));
+        doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateInterval));
+        doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateInterval));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
         doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
@@ -367,7 +367,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetQueryQuota() throws Exception {
-        doReturn(createDummyQueryQuota()).when(queryHandlerService).getSentQueryStatistics(any(String.class), anyInt(), anyInt(), anyInt(), anyInt());
+        doReturn(createDummyQueryQuota()).when(queryHandlerService).getSentQueryStatistics(any(String.class), anyInt(), anyString(), anyInt(), anyString());
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/quota")).with(csrf()))
             .andExpect(status().isOk());
@@ -565,14 +565,14 @@ public class FeasibilityQueryHandlerRestControllerIT {
                 QueryQuotaEntry.builder()
                     .used(5)
                     .limit(10)
-                    .intervalInMinutes(100)
+                    .interval("PT100M")
                     .build()
             )
             .soft(
                 QueryQuotaEntry.builder()
                     .used(20)
                     .limit(50)
-                    .intervalInMinutes(1000)
+                    .interval("PT1000M")
                     .build()
             )
             .build();
