@@ -123,7 +123,7 @@ public class DataqueryHandlerRestController {
           .display(dataquery.content().display())
           .version(dataquery.content().version())
           .dataExtraction(dataquery.content().dataExtraction())
-          .cohortDefinition(structuredQueryValidation.annotateStructuredQuery(dataquery.content().cohortDefinition(), skipValidation))
+          .cohortDefinition(dataquery.content().cohortDefinition() == null ? null : structuredQueryValidation.annotateStructuredQuery(dataquery.content().cohortDefinition(), skipValidation))
           .build();
       return new ResponseEntity<>(crtdlWithInvalidCritiera, HttpStatus.OK);
     } catch (JsonProcessingException e) {
