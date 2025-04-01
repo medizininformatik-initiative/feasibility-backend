@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.translation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import de.numcodex.feasibility_gui_backend.query.QueryMediaType;
 import de.numcodex.sq2cql.Translator;
 import de.numcodex.sq2cql.model.Mapping;
@@ -158,6 +159,9 @@ public class QueryTranslatorSpringConfig {
     @Qualifier("translation")
     @Bean
     ObjectMapper createTranslationObjectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return mapper;
     }
 }
