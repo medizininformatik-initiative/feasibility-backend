@@ -49,10 +49,10 @@ import org.springframework.test.web.servlet.MockMvc;
     controllers = FeasibilityQueryHandlerRestController.class,
     properties = {
         "app.enableQueryValidation=true",
-        "app.privacy.quota.read.resultSummary.pollingIntervalSeconds=1",
-        "app.privacy.quota.read.detailedObfuscated.pollingIntervalSeconds=2",
+        "app.privacy.quota.read.resultSummary.pollingInterval=PT1S",
+        "app.privacy.quota.read.detailedObfuscated.pollingInterval=PT2S",
         "app.privacy.quota.read.detailedObfuscated.amount=1",
-        "app.privacy.quota.read.detailedObfuscated.intervalSeconds=3"
+        "app.privacy.quota.read.detailedObfuscated.interval=PT3S"
     }
 )
 @SuppressWarnings("NewClassNamingConvention")

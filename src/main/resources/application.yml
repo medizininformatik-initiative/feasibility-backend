@@ -65,7 +65,7 @@ app:
   keycloakAllowedRole: ${KEYCLOAK_ALLOWED_ROLE:DataportalUser}
   keycloakPowerRole: ${KEYCLOAK_POWER_ROLE:DataportalPowerUser}
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:DataportalAdmin}
-  queryResultExpiryMinutes: ${QUERYRESULT_EXPIRY_MINUTES:1}
+  queryResultExpiry: ${QUERYRESULT_EXPIRY:PT1M}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
   broker:
     mock:
@@ -102,16 +102,16 @@ app:
         password: ${DSF_PROXY_PASSWORD:}
       webservice:
         baseUrl: ${DSF_WEBSERVICE_BASE_URL}
-        readTimeout: 20000
-        connectTimeout: 2000
+        readTimeout: PT20S
+        connectTimeout: PT2S
         logRequests: ${DSF_WEBSERVICE_LOG_REQUESTS:false}
       websocket:
         url: ${DSF_WEBSOCKET_URL}
       organizationId: ${DSF_ORGANIZATION_ID}
   flare:
     baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
-    readTimeout: 20000
-    connectTimeout: 2000
+    readTimeout: PT20S
+    connectTimeout: PT2S
   cql:
     baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
   elastic:
@@ -127,18 +127,18 @@ app:
       soft:
         create:
           amount: ${PRIVACY_QUOTA_SOFT_CREATE_AMOUNT:3}
-          intervalMinutes: ${PRIVACY_QUOTA_SOFT_CREATE_INTERVALMINUTES:1}
+          interval: ${PRIVACY_QUOTA_SOFT_CREATE_INTERVAL:PT1M}
       hard:
         create:
           amount: ${PRIVACY_QUOTA_HARD_CREATE_AMOUNT:50}
-          intervalMinutes: ${PRIVACY_QUOTA_HARD_CREATE_INTERVALMINUTES:10080}
+          interval: ${PRIVACY_QUOTA_HARD_CREATE_INTERVAL:P1W}
       read:
         resultSummary:
-          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVALSECONDS:10}
+          pollingInterval: ${PRIVACY_QUOTA_READ_SUMMARY_POLLINGINTERVAL:PT10S}
         resultDetailedObfuscated:
-          pollingIntervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_POLLINGINTERVALSECONDS:10}
+          pollingInterval: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_POLLINGINTERVAL:PT10S}
           amount: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_AMOUNT:3}
-          intervalSeconds: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVALSECONDS:7200}
+          interval: ${PRIVACY_QUOTA_READ_DETAILED_OBFUSCATED_INTERVAL:PT2H}
 
 logging:
   level:

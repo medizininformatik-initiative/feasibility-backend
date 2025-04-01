@@ -62,14 +62,14 @@ public class FeasibilityQueryHandlerRestController {
   @Value("${app.privacy.quota.soft.create.amount}")
   private int quotaSoftCreateAmount;
 
-  @Value("${app.privacy.quota.soft.create.intervalMinutes}")
-  private int quotaSoftCreateIntervalMinutes;
+  @Value("${app.privacy.quota.soft.create.interval}")
+  private String quotaSoftCreateInterval;
 
   @Value("${app.privacy.quota.hard.create.amount}")
   private int quotaHardCreateAmount;
 
-  @Value("${app.privacy.quota.hard.create.intervalMinutes}")
-  private int quotaHardCreateIntervalMinutes;
+  @Value("${app.privacy.quota.hard.create.interval}")
+  private String quotaHardCreateInterval;
 
   @Value("${app.privacy.threshold.sites}")
   private int privacyThresholdSites;
@@ -116,7 +116,7 @@ public class FeasibilityQueryHandlerRestController {
     }
 
     Long amountOfQueriesByUserAndHardInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
-        userId, quotaHardCreateIntervalMinutes);
+        userId, quotaHardCreateInterval);
     if (!isPowerUser && (quotaHardCreateAmount
         <= amountOfQueriesByUserAndHardInterval)) {
       log.info(
@@ -134,10 +134,10 @@ public class FeasibilityQueryHandlerRestController {
               HttpStatus.FORBIDDEN));
     }
     Long amountOfQueriesByUserAndSoftInterval = queryHandlerService.getAmountOfQueriesByUserAndInterval(
-        userId, quotaSoftCreateIntervalMinutes);
+        userId, quotaSoftCreateInterval);
     if (quotaSoftCreateAmount <= amountOfQueriesByUserAndSoftInterval) {
       Long retryAfter = queryHandlerService.getRetryAfterTime(userId,
-          quotaSoftCreateAmount - 1, quotaSoftCreateIntervalMinutes);
+          quotaSoftCreateAmount - 1, quotaSoftCreateInterval);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.add(HttpHeaders.RETRY_AFTER, Long.toString(retryAfter));
       var issues = FeasibilityIssues.builder()
@@ -228,9 +228,9 @@ public class FeasibilityQueryHandlerRestController {
   public ResponseEntity<Object> getQueryCreateQuota(Authentication authentication) {
     var sentQueryStatistics = queryHandlerService.getSentQueryStatistics(authentication.getName(),
         quotaSoftCreateAmount,
-        quotaSoftCreateIntervalMinutes,
+        quotaSoftCreateInterval,
         quotaHardCreateAmount,
-        quotaHardCreateIntervalMinutes);
+        quotaHardCreateInterval);
     return new ResponseEntity<>(sentQueryStatistics, HttpStatus.OK);
   }
 
