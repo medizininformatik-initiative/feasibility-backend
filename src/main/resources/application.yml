@@ -67,6 +67,10 @@ app:
   keycloakAdminRole: ${KEYCLOAK_ADMIN_ROLE:DataportalAdmin}
   queryResultExpiry: ${QUERYRESULT_EXPIRY:PT1M}
   maxSavedQueriesPerUser: ${MAX_SAVED_QUERIES_PER_USER:10}
+  export:
+    csv:
+      delimiter: ${EXPORT_CSV_DELIMITER:;}
+      textwrapper: ${EXPORT_CSV_TEXTWRAPPER:"}
   broker:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}

@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
-import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
-import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -18,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.List;
@@ -45,8 +45,11 @@ class DataqueryHandlerTest {
     @Mock
     private DataqueryRepository dataqueryRepository;
 
+    @Mock
+    private DataqueryCsvExportService csvExportService;
+
     private DataqueryHandler createDataqueryHandler() {
-        return new DataqueryHandler(jsonUtil, dataqueryRepository, MAX_QUERIES_PER_USER);
+        return new DataqueryHandler(jsonUtil, dataqueryRepository, csvExportService, MAX_QUERIES_PER_USER);
     }
 
     @Test
@@ -355,6 +358,65 @@ class DataqueryHandlerTest {
         assertEquals(convertedDataquery.content().cohortDefinition().exclusionCriteria(), originalCrtdl.cohortDefinition().exclusionCriteria());
     }
 
+    @ParameterizedTest
+    @CsvSource({"true,true,true", "true,true,false", "true,false,true", "true,false,false", "false,true,true",
+        "false,true,false", "false,false,true", "false,false,false"})
+    @DisplayName("createCsvExportZipfile() -> creating a csv export succeeds")
+    void createCsvExportZipfile(String withInclusionCriteria, String withExclusionCriteria, String withDataextraction) {
+        var dataqueryHandler = createDataqueryHandler();
+        var dataquery = createDataquery(Boolean.parseBoolean(withInclusionCriteria),
+            Boolean.parseBoolean(withExclusionCriteria),
+            Boolean.parseBoolean(withDataextraction));
+
+        var byteArrayOutputStream = assertDoesNotThrow(() -> dataqueryHandler.createCsvExportZipfile(dataquery));
+        assertNotNull(byteArrayOutputStream);
+        assertInstanceOf(ByteArrayOutputStream.class, byteArrayOutputStream);
+    }
+
+    @Test
+    @DisplayName("createCsvExportZipfile() -> creating a csv export fails if no content is set")
+    void createCsvExportZipfile_throwsOnNullContent() {
+        var dataqueryHandler = createDataqueryHandler();
+        var dataqueryWithoutContent = Dataquery.builder()
+            .id(1L)
+            .label(LABEL)
+            .comment(COMMENT)
+            .createdBy(CREATOR)
+            .lastModified(TIME_STRING)
+            .build();
+
+        assertThrows(DataqueryException.class, () -> dataqueryHandler.createCsvExportZipfile(dataqueryWithoutContent));
+    }
+
+    @Test
+    @DisplayName("createCsvExportZipfile() -> creating a csv export fails if no cohort definition is set")
+    void createCsvExportZipfile_throwsOnNullCohortDefinition() {
+        var dataqueryHandler = createDataqueryHandler();
+        var dataqueryWithoutCohortDefinition = Dataquery.builder()
+            .id(1L)
+            .content(Crtdl.builder()
+                .display("foo")
+                .build())
+            .label(LABEL)
+            .comment(COMMENT)
+            .createdBy(CREATOR)
+            .lastModified(TIME_STRING)
+            .build();
+
+        assertThrows(DataqueryException.class, () -> dataqueryHandler.createCsvExportZipfile(dataqueryWithoutCohortDefinition));
+    }
+
+    private Dataquery createDataquery(boolean withInclusion, boolean withExclusion, boolean withExtraction) {
+        return Dataquery.builder()
+            .id(1L)
+            .label(LABEL)
+            .comment(COMMENT)
+            .content(createCrtdl(withInclusion, withExclusion, withExtraction))
+            .createdBy(CREATOR)
+            .lastModified(TIME_STRING)
+            .build();
+    }
+
     private Dataquery createDataquery(boolean withResult) {
         return Dataquery.builder()
             .id(1L)
@@ -371,9 +433,56 @@ class DataqueryHandlerTest {
         return createDataquery(false);
     }
 
+    private Crtdl createCrtdl(boolean withInclusion, boolean withExclusion, boolean withExtraction) {
+        return Crtdl.builder()
+            .cohortDefinition(createValidStructuredQuery(withInclusion, withExclusion))
+            .dataExtraction(withExtraction ? createValidDataExtraction() : null)
+            .display("foo")
+            .build();
+    }
+
+    private DataExtraction createValidDataExtraction() {
+        return DataExtraction.builder()
+            .attributeGroups(List.of(createAttributeGroup()))
+            .build();
+    }
+
+    private AttributeGroup createAttributeGroup() {
+        return AttributeGroup.builder()
+            .groupReference(URI.create("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"))
+            .name("testgroup")
+            .id("my-grp")
+            .attributes(List.of(
+                Attribute.builder().attributeRef("Observation.identifier").build(),
+                Attribute.builder().attributeRef("Observation.status").build(),
+                Attribute.builder().attributeRef("Observation.category").build(),
+                Attribute.builder().attributeRef("Observation.code").build(),
+                Attribute.builder().attributeRef("Observation.effective[x]").build()
+            ))
+            .build();
+    }
+
     private Crtdl createCrtdl() {
         return Crtdl.builder()
             .cohortDefinition(createValidStructuredQuery())
+            .display("foo")
+            .build();
+    }
+
+    private StructuredQuery createValidStructuredQuery(boolean withInclusion, boolean withExclusion) {
+        var termCode = TermCode.builder()
+            .code("LL2191-6")
+            .system("http://loinc.org")
+            .display("Geschlecht")
+            .build();
+        var criterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .attributeFilters(List.of())
+            .build();
+        return StructuredQuery.builder()
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(withInclusion ? List.of(List.of(criterion)) : null)
+            .exclusionCriteria(withExclusion ? List.of(List.of(criterion)) : null)
             .display("foo")
             .build();
     }
