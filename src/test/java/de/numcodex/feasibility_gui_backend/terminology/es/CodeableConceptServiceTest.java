@@ -179,6 +179,38 @@ class CodeableConceptServiceTest {
     assertTrue(result.isEmpty());
   }
 
+  @Test
+  void testGetSearchResultsEntryByTermcode_succeeds() {
+    CodeableConceptDocument dummyCodeableConceptDocument = createDummyCodeableConceptDocument("1");
+    doReturn(List.of(dummyCodeableConceptDocument)).when(repository).findAllById(any());
+
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByTermCode(createDummyTermcode()));
+
+    assertNotNull(result);
+    assertEquals(dummyCodeableConceptDocument.termCode(), result.termCode());
+    assertEquals(dummyCodeableConceptDocument.display().original(), result.display().original());
+    assertTrue(result.display().translations().containsAll(
+        List.of(
+            LocalizedValue.builder()
+                .value(dummyCodeableConceptDocument.display().deDe())
+                .language("de-DE")
+                .build(),
+            LocalizedValue.builder()
+                .value(dummyCodeableConceptDocument.display().enUs())
+                .language("en-US")
+                .build()
+        )
+    ));
+  }
+
+  @Test
+  void testGetSearchResultsEntryByTermcode_nullOnException() {
+    doReturn(List.of()).when(repository).findAllById(anyList());
+
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByTermCode(createDummyTermcode()));
+    assertNull(result);
+  }
+
   private SearchHits<CodeableConceptDocument> createDummySearchHitsPage(int totalHits) {
     var searchHitsList = new ArrayList<SearchHit<CodeableConceptDocument>>();
 
