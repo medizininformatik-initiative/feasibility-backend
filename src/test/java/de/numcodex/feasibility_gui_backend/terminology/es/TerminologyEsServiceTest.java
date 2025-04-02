@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
@@ -28,8 +29,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -90,6 +90,31 @@ public class TerminologyEsServiceTest {
     doReturn(Optional.empty()).when(ontologyListItemEsRepository).findById(any(String.class));
 
     assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getSearchResultEntryByHash("id"));
+  }
+
+  @Test
+  void testGetSearchResultEntryByCriterion() {
+    String id = UUID.randomUUID().toString();
+    OntologyListItemDocument dummyOntologyListItem = createDummyOntologyListItem(id);
+    doReturn(Optional.of(dummyOntologyListItem)).when(ontologyListItemEsRepository).findById(any(String.class));
+
+    var searchResultEntry = assertDoesNotThrow(() -> terminologyEsService.getSearchResultEntryByCriterion(createDummyCriterion(true)));
+
+    assertThat(searchResultEntry).isNotNull();
+    assertThat(searchResultEntry.id()).isEqualTo(id);
+    assertThat(searchResultEntry.terminology()).isEqualTo(dummyOntologyListItem.terminology());
+    assertThat(searchResultEntry.display().original()).isEqualTo(dummyOntologyListItem.display().original());
+    assertThat(searchResultEntry.kdsModule()).isEqualTo(dummyOntologyListItem.kdsModule());
+    assertThat(searchResultEntry.availability()).isEqualTo(dummyOntologyListItem.availability());
+    assertThat(searchResultEntry.context()).isEqualTo(dummyOntologyListItem.context().code());
+    assertThat(searchResultEntry.termcode()).isEqualTo(dummyOntologyListItem.termcode());
+  }
+
+  @Test
+  void testGetSearchResultEntryByCriterion_throwsOnNotFound() {
+    doReturn(Optional.empty()).when(ontologyListItemEsRepository).findById(any(String.class));
+
+    assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getSearchResultEntryByCriterion(createDummyCriterion(true)));
   }
 
   @Test
@@ -196,6 +221,50 @@ public class TerminologyEsServiceTest {
     assertThrows(OntologyItemNotFoundException.class, () -> terminologyEsService.getRelationEntryByHash("id"));
   }
 
+  @Test
+  void testCreateContextualizedTermcodeHash_succeeds() {
+    var expectedUuid = "f0bd4e88-6f61-36c5-9551-87976858971b";
+    var criterion = createDummyCriterion(true);
+
+    var result = assertDoesNotThrow(() -> TerminologyEsService.createContextualizedTermcodeHash(criterion));
+
+    assertThat(result).isNotNull();
+    assertEquals(expectedUuid, result);
+  }
+
+  @Test
+  void testCreateContextualizedTermcodeHash_emptyVersion() {
+    var expectedUuid = "a6597204-1552-35e9-ba23-d734998f4039";
+    var criterion = createDummyCriterion(false);
+
+    var result = assertDoesNotThrow(() -> TerminologyEsService.createContextualizedTermcodeHash(criterion));
+
+    assertThat(result).isNotNull();
+    assertEquals(expectedUuid, result);
+  }
+
+  @Test
+  void testCreateContextualizedTermcodeHash_equalInputs() {
+    var criterion1 = createDummyCriterion(true);
+    var criterion2 = createDummyCriterion(true);
+
+    var hash1 = TerminologyEsService.createContextualizedTermcodeHash(criterion1);
+    var hash2 = TerminologyEsService.createContextualizedTermcodeHash(criterion2);
+
+    assertEquals(hash1, hash2);
+  }
+
+  @Test
+  void testCreateContextualizedTermcodeHash_unequalInputs() {
+    var criterion1 = createDummyCriterion(true);
+    var criterion2 = createDummyCriterion(false);
+
+    var hash1 = TerminologyEsService.createContextualizedTermcodeHash(criterion1);
+    var hash2 = TerminologyEsService.createContextualizedTermcodeHash(criterion2);
+
+    assertNotEquals(hash1, hash2);
+  }
+
   private OntologyListItemDocument createDummyOntologyListItem(String id) {
     TermCode termCode = createDummyTermCode();
 
@@ -245,12 +314,23 @@ public class TerminologyEsServiceTest {
         .build();
   }
 
-  private TermCode createDummyTermCode() {
+  private TermCode createDummyTermCode(boolean includeVersion) {
     return TermCode.builder()
         .code("abc-123")
-        .version("2024")
+        .version(includeVersion ? "2024" : null)
         .system("some-system")
         .display("this is a dummy termcode")
+        .build();
+  }
+
+  private TermCode createDummyTermCode() {
+    return createDummyTermCode(true);
+  }
+
+  private Criterion createDummyCriterion(boolean includeVersion) {
+    return Criterion.builder()
+        .context(createDummyTermCode(includeVersion))
+        .termCodes(List.of(createDummyTermCode(includeVersion)))
         .build();
   }
 
