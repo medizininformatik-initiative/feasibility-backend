@@ -2,25 +2,39 @@ package de.numcodex.feasibility_gui_backend.query.dataquery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
-import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
+import com.opencsv.CSVWriter;
+import de.numcodex.feasibility_gui_backend.common.api.Comparator;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.status.SavedQuerySlots;
 import de.numcodex.feasibility_gui_backend.query.persistence.DataqueryRepository;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.security.Principal;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class DataqueryHandler {
 
+  public static final String[] INCLUSION_EXCLUSION_HEADERS = {"Module", "Criterion display", "Criterion system", "Criterion code", "Criterion Filter", "Time Restriction", "Conjunction"};
   @NonNull
   private ObjectMapper jsonUtil;
 
@@ -29,6 +43,15 @@ public class DataqueryHandler {
 
   @NonNull
   private Integer maxDataqueriesPerUser;
+
+  @Value("${app.export.csv.delimiter:;}")
+  private char csvDelimiter;
+
+  @Value("${app.export.csv.textwrapper:\"}")
+  private char csvTextWrapper;
+
+  private String filterCategorySeparator = " - ";
+  private String filterEntrySeparator = ", ";
 
   public Long storeDataquery(@NonNull Dataquery dataquery, @NonNull String userId) throws DataqueryException, DataqueryStorageFullException {
 
@@ -142,4 +165,134 @@ public class DataqueryHandler {
         .content(jsonUtil.readValue(in.getCrtdl(), Crtdl.class))
         .build();
   }
+
+  public ByteArrayOutputStream createCsvExportZipfile(Long dataqueryId, Principal principal) throws DataqueryException, IOException {
+    var dataquery = getDataqueryById(dataqueryId, principal.getName());
+    if (dataquery.content() == null || dataquery.content().cohortDefinition() == null) {
+      throw new DataqueryException("No ccdl part present");
+    }
+    var byteArrayOutputStream = new ByteArrayOutputStream();
+    var zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+    Map<String, String> files = new HashMap<>();
+    files.put(dataquery.label() + "_crtdl.json", jsonUtil.writeValueAsString(dataquery.content()));
+    if (dataquery.content().cohortDefinition().inclusionCriteria() == null) {
+      // Call with empty lists to just write the headers to the file
+      files.put(dataquery.label() + "_inclusion.csv", jsonToCsv(List.of(List.of())));
+    } else {
+      files.put(dataquery.label() + "_inclusion.csv", jsonToCsv(dataquery.content().cohortDefinition().inclusionCriteria()));
+    }
+    if (dataquery.content().cohortDefinition().exclusionCriteria() == null) {
+      // Call with empty lists to just write the headers to the file
+      files.put(dataquery.label() + "_exclusion.csv", jsonToCsv(List.of(List.of())));
+    } else {
+      files.put(dataquery.label() + "_exclusion.csv", jsonToCsv(dataquery.content().cohortDefinition().exclusionCriteria()));
+    }
+    files.put(dataquery.label() + "_features.csv", "foo");
+
+    for (Map.Entry<String, String> file : files.entrySet()) {
+      addFileToZip(zipOutputStream, file.getKey(), file.getValue());
+    }
+
+    zipOutputStream.close();
+    byteArrayOutputStream.close();
+    return byteArrayOutputStream;
+  }
+
+  private String jsonToCsv(List<List<Criterion>> in) throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    CSVWriter csvWriter = new CSVWriter(stringWriter,
+        csvDelimiter,
+        csvTextWrapper,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+        CSVWriter.DEFAULT_LINE_END);
+    csvWriter.writeNext(INCLUSION_EXCLUSION_HEADERS);
+
+    for (List<Criterion> criteriaList : in) {
+      for (Criterion criterion : criteriaList) {
+        String[] row = getRow(criterion);
+        csvWriter.writeNext(row);
+      }
+    }
+    csvWriter.close();
+    return stringWriter.toString();
+  }
+
+  private static String[] getRow(Criterion criterion) {
+    TermCode tc0 = criterion.termCodes().get(0);
+    String contextDisplay = criterion.context().display();
+    String termCodeDisplay = tc0.display();
+    String termCodeSystem = tc0.system();
+    String termCodeCode = tc0.code();
+    String filter = filterToString(criterion.valueFilter(), criterion.attributeFilters());
+    String timeRestriction = timeRestrictionToString(criterion.timeRestriction());
+    String conjunction = "";
+
+    return new String[]{contextDisplay, termCodeDisplay, termCodeSystem, termCodeCode, filter, timeRestriction, conjunction};
+  }
+
+  private static String timeRestrictionToString(TimeRestriction timeRestriction) {
+    if (timeRestriction == null) {
+      return "";
+    }
+    return MessageFormat.format("{0} < X < {1}",
+        timeRestriction.afterDate() == null ? "" : timeRestriction.afterDate(),
+        timeRestriction.beforeDate() == null ? "" : timeRestriction.beforeDate());
+  }
+
+  private static String filterToString(ValueFilter valueFilter, List<AttributeFilter> attributeFilters) {
+    StringBuilder builder = new StringBuilder();
+    if (valueFilter != null) {
+      builder.append(valueFilterToString(valueFilter));
+    }
+    if (attributeFilters != null) {
+      attributeFilters.forEach(af -> builder.append(attributeFilterToString(af)));
+    }
+    return builder.toString();
+  }
+
+  private static String valueFilterToString(ValueFilter valueFilter) {
+    switch (valueFilter.type()) {
+      case QUANTITY_COMPARATOR:
+        return MessageFormat.format("{0} {1}{2}",
+            translateComparator(valueFilter.comparator()),
+            valueFilter.value(),
+            valueFilter.quantityUnit() != null ? valueFilter.quantityUnit().display() : ""
+        );
+      case QUANTITY_RANGE:
+        return MessageFormat.format("{1}{0} < X < {2}{0}",
+            valueFilter.quantityUnit() != null ? valueFilter.quantityUnit().display() : "",
+            valueFilter.minValue(),
+            valueFilter.maxValue()
+            );
+      case REFERENCE:
+      case CONCEPT:
+      default:
+        return "";
+    }
+  }
+  private static String attributeFilterToString(AttributeFilter attributeFilter) {
+    return "";
+  }
+
+  private static String translateComparator(Comparator comparator) {
+    if (comparator == null) {
+      return "";
+    }
+    return switch (comparator) {
+      case LESS_THAN -> "<";
+      case GREATER_THAN -> ">";
+      case GREATER_EQUAL -> ">=";
+      case LESS_EQUAL -> "<=";
+      case EQUAL -> "=";
+      case UNEQUAL -> "!=";
+    };
+  }
+
+  private void addFileToZip(ZipOutputStream zos, String fileName, String content) throws IOException {
+    ZipEntry entry = new ZipEntry(fileName);
+    zos.putNextEntry(entry);
+    zos.write(content.getBytes());
+    zos.closeEntry();
+  }
+
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 
@@ -132,6 +133,26 @@ public class DataqueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
+
+  @GetMapping(path = "/{dataqueryId}" + PATH_CRTDL, produces = "application/zip")
+  public ResponseEntity<Object> getDataqueryCrtdlCsv(@PathVariable(value = "dataqueryId") Long dataqueryId,
+                                                     Principal principal) {
+    try {
+      var zipByteArrayOutputStream = dataqueryHandler.createCsvExportZipfile(dataqueryId, principal);
+      HttpHeaders headers = new HttpHeaders();
+      headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=multiple-files.zip");
+      headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+      return new ResponseEntity<>(zipByteArrayOutputStream.toByteArray(), HttpStatus.OK);
+    } catch (JsonProcessingException e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (DataqueryException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+
 
   @GetMapping(path = "")
   public ResponseEntity<Object> getDataqueries(
