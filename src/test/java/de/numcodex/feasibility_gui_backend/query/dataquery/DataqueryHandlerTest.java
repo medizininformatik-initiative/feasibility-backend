@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfileRepository;
 import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
@@ -45,8 +46,11 @@ class DataqueryHandlerTest {
     @Mock
     private DataqueryRepository dataqueryRepository;
 
+    @Mock
+    private DataqueryCsvExportService csvExportService;
+
     private DataqueryHandler createDataqueryHandler() {
-        return new DataqueryHandler(jsonUtil, dataqueryRepository, MAX_QUERIES_PER_USER);
+        return new DataqueryHandler(jsonUtil, dataqueryRepository, csvExportService, MAX_QUERIES_PER_USER);
     }
 
     @Test
