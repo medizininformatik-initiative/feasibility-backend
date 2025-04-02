@@ -21,6 +21,7 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpri
 
 import java.net.URI;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -286,7 +287,7 @@ public class QueryHandlerServiceIT {
 
     @Test
     public void testGetQuery_succeess() throws JsonProcessingException {
-        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
         var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
         var queryContent = new QueryContent(queryContentString);
         queryContent.setHash(queryContentHash);
@@ -299,12 +300,12 @@ public class QueryHandlerServiceIT {
 
         assertThat(queryFromDb.label()).isNull();
         assertThat(queryFromDb.comment()).isNull();
-        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery("foo").inclusionCriteria());
+        assertThat(queryFromDb.content().inclusionCriteria()).isEqualTo(createValidStructuredQuery().inclusionCriteria());
     }
 
     @Test
     public void testGetQueryContent_nullIfNotFound() throws JsonProcessingException {
-        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery("foo"));
+        var queryContentString = jsonUtil.writeValueAsString(createValidStructuredQuery());
         var queryContentHash = queryHashCalculator.calculateSerializedQueryBodyHash(queryContentString);
         var queryContent = new QueryContent(queryContentString);
         queryContent.setHash(queryContentHash);
@@ -330,8 +331,8 @@ public class QueryHandlerServiceIT {
         query.setCreatedBy(CREATOR);
         queryRepository.save(query).getId();
 
-        var count0 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, 0);
-        var count1 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, 1);
+        var count0 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, "PT0M");
+        var count1 = queryHandlerService.getAmountOfQueriesByUserAndInterval(CREATOR, "PT1M");
 
         assertThat(count0).isEqualTo(0);
         assertThat(count1).isEqualTo(1);
@@ -340,7 +341,7 @@ public class QueryHandlerServiceIT {
     @Test
     @DisplayName("getRetryAfterTime() -> return 0 on empty")
     public void getRetryAfterTime_zeroOnEmpty() {
-        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, 1000000L);
+        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, "PT1000000M");
         assertThat(retryAfterTime).isEqualTo(0L);
     }
 
@@ -350,24 +351,24 @@ public class QueryHandlerServiceIT {
         var query = new Query();
         query.setCreatedBy(CREATOR);
         queryRepository.save(query);
-        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, 1000000L);
+        Long retryAfterTime = queryHandlerService.getRetryAfterTime(CREATOR, 0, "PT1000000M");
         assertThat(retryAfterTime).isGreaterThan(0L);
     }
 
   @Test
   @DisplayName("getSentQueryStatistics() -> succeeds with no entries")
-  public void getSentQueryStatistics_succeedsWithNoEntries(@Value("${app.privacy.quota.hard.create.intervalMinutes}") int hardIntervalMinutes,
-                                                           @Value("${app.privacy.quota.soft.create.intervalMinutes}") int softIntervalMinutes,
+  public void getSentQueryStatistics_succeedsWithNoEntries(@Value("${app.privacy.quota.hard.create.interval}") String hardInterval,
+                                                           @Value("${app.privacy.quota.soft.create.interval}") String softInterval,
                                                            @Value("${app.privacy.quota.hard.create.amount}") int hardLimit,
                                                            @Value("${app.privacy.quota.soft.create.amount}") int softLimit) {
     var sentQueryStatistics =
-        assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softIntervalMinutes, hardLimit, hardIntervalMinutes));
+        assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softInterval, hardLimit, hardInterval));
 
     assertThat(sentQueryStatistics).isInstanceOf(QueryQuota.class);
-    assertThat(sentQueryStatistics.hard().intervalInMinutes()).isEqualTo(hardIntervalMinutes);
+    assertThat(sentQueryStatistics.hard().interval()).isEqualTo(hardInterval);
     assertThat(sentQueryStatistics.hard().used()).isEqualTo(0);
     assertThat(sentQueryStatistics.hard().limit()).isEqualTo(hardLimit);
-    assertThat(sentQueryStatistics.soft().intervalInMinutes()).isEqualTo(softIntervalMinutes);
+    assertThat(sentQueryStatistics.soft().interval()).isEqualTo(softInterval);
     assertThat(sentQueryStatistics.soft().used()).isEqualTo(0);
     assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit
     );
@@ -375,49 +376,54 @@ public class QueryHandlerServiceIT {
 
   @Test
   @DisplayName("getSentQueryStatistics() -> succeeds with entries")
-  public void getSentQueryStatistics_succeedsWithEntries(@Value("${app.privacy.quota.hard.create.intervalMinutes}") int hardIntervalMinutes,
-                                                         @Value("${app.privacy.quota.soft.create.intervalMinutes}") int softIntervalMinutes,
+  public void getSentQueryStatistics_succeedsWithEntries(@Value("${app.privacy.quota.hard.create.interval}") String hardInterval,
+                                                         @Value("${app.privacy.quota.soft.create.interval}") String softInterval,
                                                          @Value("${app.privacy.quota.hard.create.amount}") int hardLimit,
                                                          @Value("${app.privacy.quota.soft.create.amount}") int softLimit) {
     var fakeContent = new QueryContent("{}");
     fakeContent.setHash("a2189dffb");
     queryContentRepository.save(fakeContent);
+
+    // This query is from "right now", so it should count towards both limits
     var currentQuery = new Query();
     currentQuery.setCreatedBy(CREATOR);
     currentQuery.setQueryContent(fakeContent);
     queryRepository.save(currentQuery);
 
+    // This query is from another user and should not be included in any of the limits
     var queryFromAnotherUser = new Query();
     queryFromAnotherUser.setCreatedBy("not-the-original-" + CREATOR);
     queryFromAnotherUser.setQueryContent(fakeContent);
     queryRepository.save(queryFromAnotherUser);
 
+    // This query is very old and should not count towards any of the limits
     var veryOldQuery = new Query();
     veryOldQuery.setCreatedBy(CREATOR);
     veryOldQuery.setQueryContent(fakeContent);
     var veryOldQueryId = queryRepository.save(veryOldQuery).getId();
 
+    // This query is older than the soft limit but younger than the hard limit, so it should only count towards the hard limit
     var queryOnlyCountingToHardLimit = new Query();
     queryOnlyCountingToHardLimit.setCreatedBy(CREATOR);
     queryOnlyCountingToHardLimit.setQueryContent(fakeContent);
     var inbetweenQueryId = queryRepository.save(queryOnlyCountingToHardLimit).getId();
 
     queryRepository.updateCreationDate(veryOldQueryId, Timestamp.valueOf(TIME_STRING));
-    queryRepository.updateCreationDate(inbetweenQueryId, Timestamp.valueOf(LocalDateTime.now().minusMinutes(softIntervalMinutes + 1)));
+    queryRepository.updateCreationDate(inbetweenQueryId, Timestamp.valueOf(LocalDateTime.now().minus(Duration.parse(softInterval)).minusSeconds(5L)));
 
     var sentQueryStatistics =
-        assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softIntervalMinutes, hardLimit, hardIntervalMinutes));
+        assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softInterval, hardLimit, hardInterval));
 
     assertThat(sentQueryStatistics).isInstanceOf(QueryQuota.class);
-    assertThat(sentQueryStatistics.hard().intervalInMinutes()).isEqualTo(hardIntervalMinutes);
+    assertThat(sentQueryStatistics.hard().interval()).isEqualTo(hardInterval);
     assertThat(sentQueryStatistics.hard().used()).isEqualTo(2);
     assertThat(sentQueryStatistics.hard().limit()).isEqualTo(hardLimit);
-    assertThat(sentQueryStatistics.soft().intervalInMinutes()).isEqualTo(softIntervalMinutes);
+    assertThat(sentQueryStatistics.soft().interval()).isEqualTo(softInterval);
     assertThat(sentQueryStatistics.soft().used()).isEqualTo(1);
     assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit);
   }
 
-    private StructuredQuery createValidStructuredQuery(String display) {
+    private StructuredQuery createValidStructuredQuery() {
         var termCode = TermCode.builder()
             .code("LL2191-6")
             .system("http://loinc.org")
@@ -432,7 +438,6 @@ public class QueryHandlerServiceIT {
             .inclusionCriteria(List.of(List.of(inclusionCriterion)))
             .exclusionCriteria(List.of())
             .display("foo")
-            .display(display)
             .build();
     }
 }
