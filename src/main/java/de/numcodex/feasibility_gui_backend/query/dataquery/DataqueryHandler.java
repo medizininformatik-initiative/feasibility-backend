@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -50,8 +51,8 @@ public class DataqueryHandler {
   @Value("${app.export.csv.textwrapper:\"}")
   private char csvTextWrapper;
 
-  private String filterCategorySeparator = " - ";
-  private String filterEntrySeparator = ", ";
+  private static String filterCategorySeparator = " - ";
+  private static String filterEntrySeparator = ", ";
 
   public Long storeDataquery(@NonNull Dataquery dataquery, @NonNull String userId) throws DataqueryException, DataqueryStorageFullException {
 
@@ -245,33 +246,58 @@ public class DataqueryHandler {
       builder.append(valueFilterToString(valueFilter));
     }
     if (attributeFilters != null) {
-      attributeFilters.forEach(af -> builder.append(attributeFilterToString(af)));
+      var attributeFilterList = new ArrayList<String>();
+      attributeFilters.forEach(af -> attributeFilterList.add(attributeFilterToString(af)));
+      builder.append(attributeFilterList.stream().collect(Collectors.joining(filterCategorySeparator)));
     }
     return builder.toString();
   }
 
-  private static String valueFilterToString(ValueFilter valueFilter) {
-    switch (valueFilter.type()) {
+  private static String valueFilterToString(ValueFilter filter) {
+    String unit = filter.quantityUnit() != null ? filter.quantityUnit().display() : "";
+    switch (filter.type()) {
       case QUANTITY_COMPARATOR:
-        return MessageFormat.format("{0} {1}{2}",
-            translateComparator(valueFilter.comparator()),
-            valueFilter.value(),
-            valueFilter.quantityUnit() != null ? valueFilter.quantityUnit().display() : ""
+        return MessageFormat.format("Value {0} {1}{2}",
+            translateComparator(filter.comparator()),
+            filter.value(),
+            unit
         );
       case QUANTITY_RANGE:
         return MessageFormat.format("{1}{0} < X < {2}{0}",
-            valueFilter.quantityUnit() != null ? valueFilter.quantityUnit().display() : "",
-            valueFilter.minValue(),
-            valueFilter.maxValue()
+            unit,
+            filter.minValue(),
+            filter.maxValue()
             );
-      case REFERENCE:
       case CONCEPT:
+        return MessageFormat.format("Value {0}", filter.selectedConcepts().stream()
+            .map(TermCode::display)
+            .collect(Collectors.joining(filterEntrySeparator)));
+      case REFERENCE:
       default:
-        return "";
+        return MessageFormat.format("Filterytpe {0} currently not implemented", filter.type());
     }
   }
-  private static String attributeFilterToString(AttributeFilter attributeFilter) {
-    return "";
+
+  private static String attributeFilterToString(AttributeFilter filter) {
+    switch (filter.type()) {
+      case CONCEPT:
+        return MessageFormat.format("{0}: {1}",
+            filter.attributeCode().display(),
+            filter.selectedConcepts().stream()
+              .map(TermCode::display)
+              .collect(Collectors.joining(filterEntrySeparator)));
+      case REFERENCE:
+        return MessageFormat.format("{0}: {1}",
+            filter.attributeCode().display(),
+            filter.criteria().stream()
+                .flatMap(criterion -> criterion.termCodes().stream())
+                .map(TermCode::display)
+                .collect(Collectors.joining(filterEntrySeparator)));
+      case QUANTITY_COMPARATOR:
+      case QUANTITY_RANGE:
+      default:
+        return MessageFormat.format("Filterytpe {0} currently not implemented", filter.type());
+    }
   }
 
   private static String translateComparator(Comparator comparator) {
