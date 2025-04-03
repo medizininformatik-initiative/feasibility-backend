@@ -239,9 +239,12 @@ public class DataqueryHandler {
     if (timeRestriction == null) {
       return "";
     }
-    return MessageFormat.format("{0} < X < {1}",
-        timeRestriction.afterDate() == null ? "" : timeRestriction.afterDate(),
-        timeRestriction.beforeDate() == null ? "" : timeRestriction.beforeDate());
+    String messagePattern = timeRestriction.afterDate() != null
+        ? (timeRestriction.beforeDate() != null ? "{0} < X < {1}" : "{0} < X")
+        : (timeRestriction.beforeDate() != null ? "X < {1}" : "");
+    return MessageFormat.format(messagePattern,
+        timeRestriction.afterDate(),
+        timeRestriction.beforeDate());
   }
 
   private static String filterToString(ValueFilter valueFilter, List<AttributeFilter> attributeFilters) {
@@ -267,7 +270,10 @@ public class DataqueryHandler {
             unit
         );
       case QUANTITY_RANGE:
-        return MessageFormat.format("{1}{0} < X < {2}{0}",
+        String messagePattern = filter.minValue() != null
+            ? (filter.maxValue() != null ? "{1}{0} < Value < {2}{0}" : "{1}{0} < Value")
+            : (filter.maxValue() != null ? "Value < {2}{0}" : "");
+        return MessageFormat.format(messagePattern,
             unit,
             filter.minValue(),
             filter.maxValue()
