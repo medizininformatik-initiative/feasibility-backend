@@ -22,10 +22,7 @@ import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -208,17 +205,25 @@ public class DataqueryHandler {
         CSVWriter.DEFAULT_LINE_END);
     csvWriter.writeNext(INCLUSION_EXCLUSION_HEADERS);
 
-    for (List<Criterion> criteriaList : in) {
-      for (Criterion criterion : criteriaList) {
-        String[] row = getRow(criterion);
+    for (Iterator<List<Criterion>> outerIterator = in.iterator(); outerIterator.hasNext(); ) {
+      List<Criterion> criteriaList = outerIterator.next();
+
+      for (Iterator<Criterion> innerIterator = criteriaList.iterator(); innerIterator.hasNext(); ) {
+        Criterion criterion = innerIterator.next();
+        String[] row = getRow(criterion, getConjunction(innerIterator.hasNext(), outerIterator.hasNext()));
         csvWriter.writeNext(row);
       }
     }
+
     csvWriter.close();
     return stringWriter.toString();
   }
 
-  private static String[] getRow(Criterion criterion) {
+  private static String getConjunction(boolean innerIteratorHasNext, boolean outerIteratorHasNext) {
+    return innerIteratorHasNext ? "OR" : (outerIteratorHasNext ? "AND" : "");
+  }
+
+  private static String[] getRow(Criterion criterion, String conjunction) {
     TermCode tc0 = criterion.termCodes().get(0);
     String contextDisplay = criterion.context().display();
     String termCodeDisplay = tc0.display();
@@ -226,7 +231,6 @@ public class DataqueryHandler {
     String termCodeCode = tc0.code();
     String filter = filterToString(criterion.valueFilter(), criterion.attributeFilters());
     String timeRestriction = timeRestrictionToString(criterion.timeRestriction());
-    String conjunction = "";
 
     return new String[]{contextDisplay, termCodeDisplay, termCodeSystem, termCodeCode, filter, timeRestriction, conjunction};
   }
