@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,30 +117,30 @@ public class QueryHandlerService {
         return queryRepository.getAuthor(queryId).orElseThrow(QueryNotFoundException::new);
     }
 
-    public Long getAmountOfQueriesByUserAndInterval(String userId, int minutes) {
-        return queryRepository.countQueriesByAuthorInTheLastNMinutes(userId, minutes);
+    public Long getAmountOfQueriesByUserAndInterval(String userId, String interval) {
+        return queryRepository.countQueriesByAuthorInTheLastNMinutes(userId, Duration.parse(interval).toMinutes());
     }
 
-    public Long getRetryAfterTime(String userId, int offset, long interval) {
+    public Long getRetryAfterTime(String userId, int offset, String interval) {
         try {
-            return 60 * interval - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+            return Duration.parse(interval).toSeconds() - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
         } catch (NullPointerException e) {
             return 0L;
         }
     }
 
-  public QueryQuota getSentQueryStatistics(String userName, int softAmount, int softInterval, int hardAmount, int hardInterval) {
-    var softUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, softInterval);
-    var hardUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, hardInterval);
+  public QueryQuota getSentQueryStatistics(String userName, int softAmount, String softInterval, int hardAmount, String hardInterval) {
+    var softUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, Duration.parse(softInterval).toMinutes());
+    var hardUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, Duration.parse(hardInterval).toMinutes());
 
     return QueryQuota.builder()
         .soft(QueryQuotaEntry.builder()
-            .intervalInMinutes(softInterval)
+            .interval(softInterval)
             .limit(softAmount)
             .used(softUsed.intValue())
             .build())
         .hard(QueryQuotaEntry.builder()
-            .intervalInMinutes(hardInterval)
+            .interval(hardInterval)
             .limit(hardAmount)
             .used(hardUsed.intValue())
             .build())

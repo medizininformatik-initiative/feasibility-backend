@@ -10,7 +10,7 @@ management:
     elasticsearch:
       enabled: false
 app:
-  queryResultExpiryMinutes: 1
+  queryResultExpiry: PT1M
   keycloakAllowedRole: "DATAPORTAL_TEST_USER"
   keycloakPowerRole: "DATAPORTAL_TEST_POWER"
   keycloakAdminRole: "DATAPORTAL_TEST_ADMIN"
@@ -29,15 +29,15 @@ app:
       soft:
         create:
           amount: 3
-          intervalMinutes: 1
+          interval: PT1M
       hard:
         create:
           amount: 5
-          intervalMinutes: 10
+          interval: PT10M
       read:
         resultSummary:
-          pollingIntervalSeconds: 1
+          pollingInterval: PT1S
         resultDetailedObfuscated:
-          pollingIntervalSeconds: 1
+          pollingInterval: PT1S
           amount: 1
-          intervalSeconds: 3
+          interval: PT3S

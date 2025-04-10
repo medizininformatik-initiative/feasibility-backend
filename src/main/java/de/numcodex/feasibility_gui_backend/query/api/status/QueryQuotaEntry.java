@@ -7,7 +7,7 @@ import lombok.Builder;
 @JsonInclude()
 @Builder
 public record QueryQuotaEntry(
-    @JsonProperty("intervalInMinutes") int intervalInMinutes,
+    @JsonProperty("interval") String interval,
     @JsonProperty("used") int used,
     @JsonProperty("total") int limit
 ) {
