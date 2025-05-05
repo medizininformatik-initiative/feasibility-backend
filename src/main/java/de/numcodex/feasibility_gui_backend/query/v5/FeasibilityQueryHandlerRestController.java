@@ -30,6 +30,8 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.security.Principal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -119,9 +121,16 @@ public class FeasibilityQueryHandlerRestController {
         userId, quotaHardCreateInterval);
     if (!isPowerUser && (quotaHardCreateAmount
         <= amountOfQueriesByUserAndHardInterval)) {
+      var intervalEnd = LocalDateTime.now();
+      var intervalStart = intervalEnd.minus(Duration.parse(quotaHardCreateInterval));
       log.info(
-          "User {} exceeded hard limit and is not a power user. Blacklisting...",
-          userId);
+          "Blacklisting user {} for exceeding quota without being poweruser. Allowed: {} queries per {}. The user posted {} queries between {} and {}",
+          userId,
+          quotaHardCreateAmount,
+          quotaHardCreateInterval,
+          amountOfQueriesByUserAndHardInterval,
+          intervalStart,
+          intervalEnd);
       UserBlacklist userBlacklist = new UserBlacklist();
       userBlacklist.setUserId(userId);
       userBlacklistRepository.save(userBlacklist);
