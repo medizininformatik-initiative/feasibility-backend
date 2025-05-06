@@ -138,7 +138,7 @@ public class DataqueryCsvExportService {
 
   private String[] getRow(AttributeGroup attributeGroup, Optional<DseProfile> dseProfileOptional, DataExtraction dataExtraction, SUPPORTED_LANGUAGES lang) {
     String id = attributeGroup.id();
-    String module = getModule(attributeGroup, lang);
+    String module = getModule(dseProfileOptional, lang);
     String profileType = getProfile(dseProfileOptional, lang);
     String featureName = attributeGroup.name();
     String filter = getFilter(attributeGroup, lang);
@@ -254,8 +254,17 @@ public class DataqueryCsvExportService {
     }
   }
 
-  private static String getModule(AttributeGroup attributeGroup, SUPPORTED_LANGUAGES lang) {
-    return MultiMessageBundle.getEntry("tbdPlaceholder", lang);
+  private String getModule(Optional<DseProfile> dseProfileOptional, SUPPORTED_LANGUAGES lang) {
+    if (dseProfileOptional.isPresent()) {
+      try {
+        var dseProfile = jsonUtil.readValue(dseProfileOptional.get().getEntry(), de.numcodex.feasibility_gui_backend.dse.api.DseProfile.class);
+        return getLocalizedDisplayEntry(dseProfile.module(), lang);
+      } catch (JsonProcessingException e) {
+        throw new DataqueryCsvExportException();
+      }
+    } else {
+      throw new DataqueryCsvExportException();
+    }
   }
 
   private String[] getRow(Criterion criterion, int conjunctionGroup, SUPPORTED_LANGUAGES lang) {
