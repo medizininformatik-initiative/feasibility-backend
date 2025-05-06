@@ -14,8 +14,9 @@ public class DataquerySpringConfig {
   public DataqueryHandler createDataqueryHandler(
       @Qualifier("translation") ObjectMapper jsonUtil,
       DataqueryRepository dataqueryRepository,
+      DataqueryCsvExportService dataqueryCsvExportService,
       @Value("${app.maxSavedQueriesPerUser}") Integer maxSavedQueriesPerUser
   ) {
-    return new DataqueryHandler(jsonUtil, dataqueryRepository, maxSavedQueriesPerUser);
+    return new DataqueryHandler(jsonUtil, dataqueryRepository, dataqueryCsvExportService, maxSavedQueriesPerUser);
   }
 }

@@ -15,9 +15,13 @@ import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelp
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.Principal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.*;
 
+import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -27,14 +31,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.MimeType;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
 import static org.mockito.Mockito.*;
@@ -174,6 +180,65 @@ public class DataqueryHandlerRestControllerIT {
         doThrow(JsonProcessingException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl")).with(csrf()))
+            .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
+    public void testGetDataqueryCrtdlCsv_succeeds() throws Exception {
+        long dataqueryId = 1L;
+
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidByteArrayOutputStream()).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
+                .header(HttpHeaders.ACCEPT, "application/zip")
+                .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/zip"))
+            .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/zip"))
+            .andExpect(header().string(HttpHeaders.CONTENT_LENGTH, Matchers.not("0")));
+    }
+
+    @Test
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
+    public void testGetDataqueryCrtdlCsv_failsOnNotFound() throws Exception {
+        long dataqueryId = 1;
+
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(DataqueryException.class).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
+                .header(HttpHeaders.ACCEPT, "application/zip")
+                .with(csrf()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
+    public void testGetDataqueryCrtdlCsv_failsOnJsonError() throws Exception {
+        long dataqueryId = 1;
+
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(JsonProcessingException.class).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
+                .header(HttpHeaders.ACCEPT, "application/zip")
+                .with(csrf()))
+            .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @WithMockUser(roles = "DATAPORTAL_TEST_USER")
+    public void testGetDataqueryCrtdlCsv_failsOnIoException() throws Exception {
+        long dataqueryId = 1;
+
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(IOException.class).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
+
+        mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
+                .header(HttpHeaders.ACCEPT, "application/zip")
+                .with(csrf()))
             .andExpect(status().isInternalServerError());
     }
 
@@ -420,5 +485,21 @@ public class DataqueryHandlerRestControllerIT {
             .used(5)
             .total(10)
             .build();
+    }
+
+    private ByteArrayOutputStream createValidByteArrayOutputStream() throws IOException {
+        var byteArrayOutputStream = new ByteArrayOutputStream();
+        var zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+        Map<String, String> files = new HashMap<>();
+        files.put("foo.json", "{}");
+        for (Map.Entry<String, String> file : files.entrySet()) {
+            ZipEntry entry = new ZipEntry(file.getKey());
+            zipOutputStream.putNextEntry(entry);
+            zipOutputStream.write(file.getValue().getBytes());
+            zipOutputStream.closeEntry();
+        }
+        zipOutputStream.close();
+        byteArrayOutputStream.close();
+        return byteArrayOutputStream;
     }
 }

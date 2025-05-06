@@ -72,6 +72,9 @@ public class DataqueryHandlerIT {
   private DataqueryRepository dataqueryRepository;
 
   @MockitoBean
+  private DataqueryCsvExportService dataqueryCsvExportService;
+
+  @MockitoBean
   private StructuredQueryValidation structuredQueryValidation;
 
   @Autowired
