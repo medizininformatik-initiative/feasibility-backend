@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
-import de.numcodex.feasibility_gui_backend.dse.api.DseProfileTreeNode;
-import de.numcodex.feasibility_gui_backend.dse.api.LocalizedValue;
+import de.numcodex.feasibility_gui_backend.dse.api.*;
 import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfile;
 import de.numcodex.feasibility_gui_backend.dse.persistence.DseProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +60,7 @@ class DseServiceTest {
     assertEquals(profileTree.module(), "no-module");
     assertEquals(profileTree.url(), "no-url");
     assertEquals(profileTree.children().size(), 1);
-    assertEquals(profileTree.children().get(0).id(), "de5c2903-00aa-4d64-92e5-2161d56e3daf");
+    assertEquals(profileTree.children().get(0).id(), "de3323a2-7289-45e9-8a89-53c594f190e8");
   }
 
   @Test
@@ -132,8 +131,62 @@ class DseServiceTest {
     return de.numcodex.feasibility_gui_backend.dse.api.DseProfile.builder()
         .url("http://example.com")
         .display(createDummyDisplayEntry())
-        .fields(List.of())
-        .filters(List.of())
+        .module(createDummyDisplayEntry())
+        .fields(List.of(createDummyField()))
+        .filters(List.of(createDummyFilter()))
+        .references(List.of(createDummyReference()))
+        .build();
+  }
+
+  private Filter createDummyFilter() {
+    return Filter.builder()
+        .name("filtername")
+        .type("filtertype")
+        .uiType("filterui")
+        .valueSetUrls(List.of("http://example.com"))
+        .build();
+  }
+
+  private Field createDummyField() {
+    return Field.builder()
+        .type("fieldtype")
+        .id("fieldid")
+        .required(false)
+        .recommended(true)
+        .display(createDummyDisplayEntry())
+        .description(createDummyDisplayEntry())
+        .children(List.of())
+        .build();
+  }
+
+  private Reference createDummyReference() {
+    return Reference.builder()
+        .id("reference-id")
+        .display(createDummyDisplayEntry())
+        .description(createDummyDisplayEntry())
+        .type("reference")
+        .recommended(true)
+        .required(false)
+        .children(List.of())
+        .referencedProfiles(List.of(createDummyReferencedProfile()))
+        .build();
+  }
+
+  private ReferencedProfile createDummyReferencedProfile() {
+    return ReferencedProfile.builder()
+        .display(createDummyDisplayEntry())
+        .fields(createDummyFieldDisplayEntry())
+        .url("http://some.url")
+        .build();
+  }
+
+  private FieldDisplayEntry createDummyFieldDisplayEntry() {
+    return FieldDisplayEntry.builder()
+        .original(List.of("original-value"))
+        .translations(List.of(LocalizedValueList.builder()
+            .language("de-De")
+            .value(List.of("value-value"))
+            .build()))
         .build();
   }
 
