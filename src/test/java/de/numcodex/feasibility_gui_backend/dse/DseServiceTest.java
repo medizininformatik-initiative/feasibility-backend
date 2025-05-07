@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class DseServiceTest {
@@ -85,6 +87,19 @@ class DseServiceTest {
 
     assertNotNull(results);
     assertEquals(1, results.size());
+  }
+
+  @Test
+  void testGetProfileData_succeedsWithErrorEntryOnCaughtException() throws JsonProcessingException {
+    doThrow(DataIntegrityViolationException.class).when(dseProfileRepository).findByUrl(any(String.class));
+
+    var results = assertDoesNotThrow(() -> dseService.getProfileData(List.of("1")));
+
+    assertNotNull(results);
+    assertEquals(1, results.size());
+    assertEquals("TBD-00000", results.get(0).errorCode());
+    assertEquals("profile not found", results.get(0).errorCause());
+    assertEquals("1", results.get(0).url());
   }
 
   @Test

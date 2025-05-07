@@ -270,7 +270,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
         StructuredQuery testQuery = createValidStructuredQuery();
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_POWER"));
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_POWER"));
         doReturn((long)quotaHardCreateAmount).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaHardCreateInterval));
         doReturn((long)(quotaSoftCreateAmount - 1)).when(queryHandlerService).getAmountOfQueriesByUserAndInterval(any(String.class), eq(quotaSoftCreateInterval));
         doReturn(Mono.just(1L)).when(queryHandlerService).runQuery(any(StructuredQuery.class), eq("test"));
@@ -293,7 +293,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
     @WithMockUser(roles = {"DATAPORTAL_TEST_ADMIN"}, username = "test")
     public void testGetQueryResult_succeeds(QueryHandlerService.ResultDetail resultDetail) throws Exception {
         var requestUri = PATH + "/1";
-        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createTestQueryResult(resultDetail)).when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));
 
@@ -325,7 +325,7 @@ public class FeasibilityQueryHandlerRestControllerIT {
     @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
     public void testGetDetailedObfuscatedQueryResult_returnsIssueWhenBelowThreshold() throws Exception {
         var requestUri = PATH + "/1" +  WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
-        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_USER"));
+        doReturn(true).when(authenticationHelper).hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_USER"));
         doReturn("test").when(queryHandlerService).getAuthorId(any(Long.class));
         doReturn(createTestDetailedObfuscatedQueryResultWithTooFewResults(thresholdSitesResult))
                 .when(queryHandlerService).getQueryResult(any(Long.class), any(QueryHandlerService.ResultDetail.class));

@@ -182,7 +182,7 @@ public class DataqueryHandlerRestControllerIT {
     @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetDataqueryList_succeeds(String skipValidation) throws Exception {
         int listSize = 5;
-        doReturn(createValidApiDataqueryListToGet(listSize)).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class));
+        doReturn(createValidApiDataqueryListToGet(listSize)).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class), anyBoolean());
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "?skip-validation=" + skipValidation)).with(csrf()))
                 .andExpect(status().isOk())
@@ -193,7 +193,7 @@ public class DataqueryHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "DATAPORTAL_TEST_USER")
     public void testGetDataqueryList_500onDataqueryException() throws Exception {
-        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class));
+        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class), anyBoolean());
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "?skip-validation=true")).with(csrf()))
             .andExpect(status().isInternalServerError());
@@ -204,7 +204,7 @@ public class DataqueryHandlerRestControllerIT {
     @WithMockUser(roles = "DATAPORTAL_TEST_ADMIN")
     public void testGetDataqueryListByUser_succeeds(String skipValidation) throws Exception {
         int listSize = 5;
-        doReturn(createValidApiDataqueryListToGet(listSize)).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class));
+        doReturn(createValidApiDataqueryListToGet(listSize)).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class), anyBoolean());
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/by-user/123" + "?skip-validation=" + skipValidation)).with(csrf()))
             .andExpect(status().isOk())
@@ -215,7 +215,7 @@ public class DataqueryHandlerRestControllerIT {
     @Test
     @WithMockUser(roles = "DATAPORTAL_TEST_ADMIN")
     public void testGetDataqueryListByUser_500onDataqueryException() throws Exception {
-        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class));
+        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueriesByAuthor(any(String.class), anyBoolean());
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/by-user/123" + "?skip-validation=true")).with(csrf()))
             .andExpect(status().isInternalServerError());
