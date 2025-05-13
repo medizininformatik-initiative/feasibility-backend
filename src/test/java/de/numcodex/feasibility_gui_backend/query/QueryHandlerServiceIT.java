@@ -10,6 +10,7 @@ import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuota;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
+import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryCsvExportService;
 import de.numcodex.feasibility_gui_backend.query.dataquery.DataquerySpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryHashCalculator;
@@ -96,6 +97,9 @@ public class QueryHandlerServiceIT {
 
     @Autowired
     private QueryHashCalculator queryHashCalculator;
+
+    @MockitoBean
+    private DataqueryCsvExportService dataqueryCsvExportService;
 
     @MockitoBean
     private StructuredQueryValidation structuredQueryValidation;

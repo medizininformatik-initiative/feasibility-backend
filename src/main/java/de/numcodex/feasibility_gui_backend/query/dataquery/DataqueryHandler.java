@@ -2,8 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.dataquery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
-import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
+import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.status.SavedQuerySlots;
 import de.numcodex.feasibility_gui_backend.query.persistence.DataqueryRepository;
 import jakarta.transaction.Transactional;
@@ -11,21 +10,26 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class DataqueryHandler {
-
   @NonNull
   private ObjectMapper jsonUtil;
 
   @NonNull
   private DataqueryRepository dataqueryRepository;
+
+  @NonNull
+  private final DataqueryCsvExportService csvExportHandler;
 
   @NonNull
   private Integer maxDataqueriesPerUser;
@@ -141,5 +145,44 @@ public class DataqueryHandler {
         .lastModified(in.getLastModified() == null ? null : in.getLastModified().toString())
         .content(jsonUtil.readValue(in.getCrtdl(), Crtdl.class))
         .build();
+  }
+
+  public ByteArrayOutputStream createCsvExportZipfile(Dataquery dataquery) throws DataqueryException, IOException {
+    if (dataquery.content() == null || dataquery.content().cohortDefinition() == null) {
+      throw new DataqueryException("No ccdl part present");
+    }
+    var byteArrayOutputStream = new ByteArrayOutputStream();
+    var zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+    Map<String, String> files = new HashMap<>();
+    files.put("Datendefinition.json", jsonUtil.writeValueAsString(dataquery.content()));
+
+    for (DataqueryCsvExportService.SUPPORTED_LANGUAGES lang : DataqueryCsvExportService.SUPPORTED_LANGUAGES.values()) {
+    if (dataquery.content().cohortDefinition().inclusionCriteria() == null) {
+        // Call with empty lists to just write the headers to the file
+        files.put(MultiMessageBundle.getEntry("filenameInclusion", lang) + ".csv", csvExportHandler.jsonToCsv(List.of(List.of()), lang));
+      } else {
+        files.put(MultiMessageBundle.getEntry("filenameInclusion", lang) + ".csv", csvExportHandler.jsonToCsv(dataquery.content().cohortDefinition().inclusionCriteria(), lang));
+      }
+      if (dataquery.content().cohortDefinition().exclusionCriteria() == null) {
+        // Call with empty lists to just write the headers to the file
+        files.put(MultiMessageBundle.getEntry("filenameExclusion", lang) + ".csv", csvExportHandler.jsonToCsv(List.of(List.of()), lang));
+      } else {
+        files.put(MultiMessageBundle.getEntry("filenameExclusion", lang) + ".csv", csvExportHandler.jsonToCsv(dataquery.content().cohortDefinition().exclusionCriteria(), lang));
+      }
+      if (dataquery.content().dataExtraction() == null) {
+        // Call with empty lists to just write the headers to the file
+        files.put(MultiMessageBundle.getEntry("filenameFeatures", lang) + ".csv", csvExportHandler.jsonToCsv(DataExtraction.builder().build(), lang));
+      } else {
+        files.put(MultiMessageBundle.getEntry("filenameFeatures", lang) + ".csv", csvExportHandler.jsonToCsv(dataquery.content().dataExtraction(), lang));
+      }
+    }
+
+    for (Map.Entry<String, String> file : files.entrySet()) {
+      csvExportHandler.addFileToZip(zipOutputStream, file.getKey(), file.getValue());
+    }
+
+    zipOutputStream.close();
+    byteArrayOutputStream.close();
+    return byteArrayOutputStream;
   }
 }

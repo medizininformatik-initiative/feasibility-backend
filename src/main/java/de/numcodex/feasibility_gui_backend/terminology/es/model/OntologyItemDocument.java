@@ -14,6 +14,8 @@ public record OntologyItemDocument(
     @Id String id,
     int availability,
     TermCode context,
+    @Field(name = "termcodes")
+    Collection<TermCode> termCodes,
     String terminology,
     String termcode,
     @Field(name = "display")

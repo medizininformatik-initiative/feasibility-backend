@@ -226,9 +226,15 @@ paths:
       tags:
         - dataquery
       summary: Read dataquery CRTDL by ID
-      description: Returns only the CRTDL part of a dataquery
+      description: Returns only the CRTDL part of a dataquery or alternatively a zip file containing the crtdl json and csv files
       operationId: getDataQueryCRTDLById
       parameters:
+        - name: Accept
+          in: header
+          description: Specify the desired format
+          schema:
+            type: string
+            enum: [application/json, application/zip]
         - name: queryId
           in: path
           description: ID of query to return
@@ -250,6 +256,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CRTDL"
+            application/zip:
+              schema:
+                type: string
+                format: binary
         401:
           description: Unauthorized - please login first
         403:

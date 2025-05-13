@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.numcodex.feasibility_gui_backend.query.api.Crtdl;
 import de.numcodex.feasibility_gui_backend.query.api.CrtdlSectionInfo;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
+import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryCsvExportException;
 import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryException;
 import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryHandler;
 import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryStorageFullException;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 
@@ -132,6 +134,28 @@ public class DataqueryHandlerRestController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
+
+  @GetMapping(path = "/{dataqueryId}" + PATH_CRTDL, produces = "application/zip")
+  public ResponseEntity<Object> getDataqueryCrtdlCsv(@PathVariable(value = "dataqueryId") Long dataqueryId,
+                                                     Principal principal) {
+    try {
+      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, principal.getName());
+      var zipByteArrayOutputStream = dataqueryHandler.createCsvExportZipfile(dataquery);
+      HttpHeaders headers = new HttpHeaders();
+      String headerValue = "attachment; filename=" + dataquery.label().toUpperCase() +  "_dataquery.zip";
+      headers.add(HttpHeaders.CONTENT_DISPOSITION, headerValue);
+      headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+      return new ResponseEntity<>(zipByteArrayOutputStream.toByteArray(), HttpStatus.OK);
+    } catch (IOException e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (DataqueryException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (DataqueryCsvExportException e) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+  }
+
+
 
   @GetMapping(path = "")
   public ResponseEntity<Object> getDataqueries(

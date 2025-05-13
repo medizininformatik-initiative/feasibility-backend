@@ -62,6 +62,9 @@ public class StructuredQueryValidation {
    * @return the structuredQuery with issue annotation
    */
   public boolean isValid(StructuredQuery structuredQuery) {
+    if (structuredQuery == null) {
+      return false;
+    }
     if (structuredQuery.inclusionCriteria() != null) {
       for (List<Criterion> inclusionCriteria : structuredQuery.inclusionCriteria()) {
         if (containsInvalidCriteria(inclusionCriteria)) {
