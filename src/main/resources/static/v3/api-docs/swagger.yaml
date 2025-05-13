@@ -64,14 +64,13 @@ paths:
       description: This returns a list with basic information about the queries. Id, label (if present) and creation date. Basically for all parameters I'm not sure if we need them (at least right away)
       operationId: getDataQueryList
       parameters:
-        - name: filter
+        - name: include-temporary
           in: query
-          description: filters query...either for those with linked feasibility and or results? Or by name?
+          description: if set to true, queries spawned from other users are contained
           required: false
           schema:
-            type: string
-            enum:
-              - feasibility
+            type: boolean
+            default: false
         - name: skip-validation
           in: query
           description: If true, do not validate the query and do not include a list of invalid terms. TODO - maybe invert this?
@@ -94,6 +93,41 @@ paths:
         - dataportal_auth:
             - user
   /query/data/by-user/{userId}:
+    post:
+      tags:
+        - dataquery
+      summary: Spawn a query for another user
+      operationId: createDataqueryForUser
+      parameters:
+        - name: ttl
+          in: query
+          description: How long until the query gets deleted (ISO 8601 Duration)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Dataquery
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Dataquery"
+        required: true
+    responses:
+      201:
+        description: Dataquery successfully stored
+        headers:
+          Location:
+            description: Path to the result of your newly created dataquery
+            schema:
+              type: string
+              format: url
+      401:
+        description: Unauthorized - please login first
+      403:
+        description: Storage exceeded
+    security:
+      - dataportal_auth:
+          - admin
     get:
       tags:
         - dataquery
@@ -106,6 +140,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: include-temporary
+          in: query
+          description: if set to true, queries spawned from other users are contained
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: skip-validation
           in: query
           description: If true, do not validate the query and do not include a list of invalid terms. TODO - maybe invert this?

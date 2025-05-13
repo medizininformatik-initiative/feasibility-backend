@@ -9,10 +9,7 @@ import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
-import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryException;
-import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryHandler;
-import de.numcodex.feasibility_gui_backend.query.dataquery.DataquerySpringConfig;
-import de.numcodex.feasibility_gui_backend.query.dataquery.DataqueryStorageFullException;
+import de.numcodex.feasibility_gui_backend.query.dataquery.*;
 import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatchSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.DataqueryRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultServiceSpringConfig;
@@ -68,6 +65,9 @@ class DataqueryMaintenanceIT {
 
   @MockitoBean
   private StructuredQueryValidation structuredQueryValidation;
+
+  @MockitoBean
+  private DataqueryCsvExportService dataqueryCsvExportService;
 
   @Autowired
   @Qualifier("translation")
