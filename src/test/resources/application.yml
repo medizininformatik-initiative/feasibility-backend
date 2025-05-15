@@ -6,14 +6,40 @@ security:
     use-keycloak: false
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: "health, info"
+    access:
+      default: none
+  endpoint:
+    health:
+      access: unrestricted
+    info:
+      access: unrestricted
   health:
     elasticsearch:
-      enabled: false
+      enabled: true
+  info:
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: full
 app:
+  dseProfileTreeFile: ontology/dse/profile_tree.json
+  terminologySystemsFile: ontology/terminology_systems.json
+  mappingsFile: ontology/mapping_cql.json
+  conceptTreeFile: ontology/mapping_tree.json
+  fhirTranslationEnabled: false
+  cqlTranslationEnabled: true
+  apiBaseUrl: /api/v5
+  enableQueryValidation: true
+  purgeExpiredQueries: 0 0 * * * *
   queryResultExpiry: PT1M
-  keycloakAllowedRole: "DATAPORTAL_TEST_USER"
-  keycloakPowerRole: "DATAPORTAL_TEST_POWER"
-  keycloakAdminRole: "DATAPORTAL_TEST_ADMIN"
+  keycloakAllowedRole: "ROLE_DATAPORTAL_TEST_USER"
+  keycloakPowerRole: "ROLE_DATAPORTAL_TEST_POWER"
+  keycloakAdminRole: "ROLE_DATAPORTAL_TEST_ADMIN"
   maxSavedQueriesPerUser: 10
   broker:
     aktin:
@@ -41,3 +67,5 @@ app:
           pollingInterval: PT1S
           amount: 1
           interval: PT3S
+cors:
+  allowedOrigins: "*"

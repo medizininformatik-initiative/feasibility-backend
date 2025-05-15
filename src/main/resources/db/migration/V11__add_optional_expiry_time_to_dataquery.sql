@@ -1,0 +1,1 @@
+ALTER TABLE dataquery ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP;
