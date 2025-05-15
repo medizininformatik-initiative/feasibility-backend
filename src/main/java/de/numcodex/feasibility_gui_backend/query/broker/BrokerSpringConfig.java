@@ -20,16 +20,16 @@ import org.springframework.context.annotation.Lazy;
 @Slf4j
 public class BrokerSpringConfig {
 
-  @Value("${app.broker.mock.enabled:false}")
+  @Value("${app.broker.mock.enabled}")
   private boolean mockClientEnabled;
 
-  @Value("${app.broker.direct.enabled:false}")
+  @Value("${app.broker.direct.enabled}")
   private boolean directClientEnabled;
 
-  @Value("${app.broker.aktin.enabled:false}")
+  @Value("${app.broker.aktin.enabled}")
   private boolean aktinClientEnabled;
 
-  @Value("${app.broker.dsf.enabled:false}")
+  @Value("${app.broker.dsf.enabled}")
   private boolean dsfClientEnabled;
 
   private final ApplicationContext ctx;

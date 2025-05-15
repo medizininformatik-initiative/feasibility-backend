@@ -16,13 +16,13 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class ResultServiceSpringConfig {
 
-  @Value("${app.broker.aktin.enabled:false}")
+  @Value("${app.broker.aktin.enabled}")
   private boolean aktinEnabled;
 
-  @Value("${app.broker.aktin.broker.baseUrl:}")
+  @Value("${app.broker.aktin.broker.baseUrl}")
   private String brokerBaseUrl;
 
-  @Value("${app.broker.aktin.broker.apiKey:}")
+  @Value("${app.broker.aktin.broker.apiKey}")
   private String brokerApiKey;
 
   @Bean
