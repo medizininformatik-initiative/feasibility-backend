@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 @ConditionalOnExpression("${app.elastic.enabled}")
 public class Config extends ElasticsearchConfiguration {
   
-  @Value("${app.elastic.host}")
+  @Value("${app.elastic.host:localhost:9200}")
   private String elasticHost;
   
   @Override
