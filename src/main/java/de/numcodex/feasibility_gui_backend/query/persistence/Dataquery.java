@@ -18,7 +18,7 @@ import java.util.Objects;
 @Entity
 public class Dataquery {
 
-  private static ObjectMapper jsonUtil = new ObjectMapper();
+  private static ObjectMapper jsonUtil = new ObjectMapper().findAndRegisterModules();
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

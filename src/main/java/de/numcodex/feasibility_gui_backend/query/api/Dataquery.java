@@ -23,7 +23,7 @@ public record Dataquery(
     @JsonProperty Long resultSize,
     @JsonProperty Timestamp expiresAt
 ) {
-  private static ObjectMapper jsonUtil = new ObjectMapper();
+  private static ObjectMapper jsonUtil = new ObjectMapper().findAndRegisterModules();
 
   public static Dataquery of(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery in) throws JsonProcessingException {
     return Dataquery.builder()
