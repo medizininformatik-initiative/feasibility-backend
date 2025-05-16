@@ -2,7 +2,7 @@ package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.api.status.FeasibilityIssue;
-import de.numcodex.feasibility_gui_backend.query.v4.QueryHandlerRestController;
+import de.numcodex.feasibility_gui_backend.query.v5.FeasibilityQueryHandlerRestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,14 +136,14 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
 
     if (request.getRequestURI()
         .endsWith(WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT) && response.containsHeader(
-            QueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY)) {
+        FeasibilityQueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY)) {
       var authentication = SecurityContextHolder.getContext()
           .getAuthentication();
       var detailedObfuscatedResultTokenBucket = rateLimitingService.resolveViewDetailedObfuscatedBucket(
           authentication.getName());
       detailedObfuscatedResultTokenBucket.addTokens(1);
       response.setHeader(
-          QueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY,
+          FeasibilityQueryHandlerRestController.HEADER_X_DETAILED_OBFUSCATED_RESULT_WAS_EMPTY,
           null);
     }
   }

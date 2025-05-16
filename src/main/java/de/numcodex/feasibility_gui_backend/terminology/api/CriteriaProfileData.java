@@ -6,25 +6,44 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.List;
+import java.util.Objects;
 
-@Data
 @Builder
-@JsonInclude(Include.NON_NULL)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class CriteriaProfileData {
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("display")
-    private DisplayEntry display;
-    @JsonProperty("context")
-    private TermCode context;
-    @JsonProperty("termCodes")
-    @EqualsAndHashCode.Include
-    private List<TermCode> termCodes;
-    @JsonProperty("uiProfile")
-    private UiProfile uiProfile;
+@JsonInclude(Include.ALWAYS)
+public record CriteriaProfileData(
+    @JsonProperty("id") String id,
+    @JsonProperty("display") DisplayEntry display,
+    @JsonProperty("context") TermCode context,
+    @JsonProperty("termCodes") List<TermCode> termCodes,
+    @JsonProperty("uiProfile") UiProfile uiProfile
+) {
+    public CriteriaProfileData {
+        termCodes = termCodes == null ? List.of() : termCodes;
+    }
+
+    public CriteriaProfileData addDisplay(DisplayEntry newDisplay) {
+        return CriteriaProfileData.builder()
+            .id(id)
+            .display(newDisplay)
+            .context(context)
+            .termCodes(termCodes)
+            .uiProfile(uiProfile)
+            .build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CriteriaProfileData that = (CriteriaProfileData) o;
+        return Objects.equals(termCodes, that.termCodes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(termCodes);
+    }
+
 }

@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.CodeableConceptEsRepository;
-import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.elasticsearch.DataElasticsearchTest;
@@ -20,8 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -45,7 +44,7 @@ public class CodeableConceptServiceIT {
 
   @Container
   @ServiceConnection
-  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.16.1")
+  public static ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.17.3")
       .withEnv("discovery.type", "single-node")
       .withEnv("xpack.security.enabled", "false")
       .withReuse(false)
@@ -119,7 +118,7 @@ public class CodeableConceptServiceIT {
 
   @Test
   void testGetSearchResultsEntryByIds_succeeds() {
-    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("A1.1")));
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("ff98eecf-9e2c-35e7-b39b-45d4e29aee2e")));
 
     assertNotNull(result);
     Assertions.assertFalse(result.isEmpty());
@@ -134,5 +133,31 @@ public class CodeableConceptServiceIT {
     var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultsEntryByIds(List.of("something-not-found")));
     assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testGetSearchResultsEntryByTermcode_succeeds() {
+    var tc = createTermCode();
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByTermCode(tc));
+
+    assertNotNull(result);
+    Assertions.assertNotNull(result.display());
+    Assertions.assertEquals(tc.code(), result.termCode().code());
+    Assertions.assertEquals(tc.system(), result.termCode().system());
+    Assertions.assertEquals(tc.version(), result.termCode().version());
+  }
+
+  @Test
+  void testGetSearchResultsEntryByTermcode_nullOnNotFound() {
+    var result = assertDoesNotThrow(() -> codeableConceptService.getSearchResultEntryByTermCode(TermCode.builder().build()));
+    Assertions.assertNull(result);
+  }
+
+  private TermCode createTermCode() {
+    return TermCode.builder()
+        .code("A2.0")
+        .system("some-system")
+        .version("2023")
+        .build();
   }
 }

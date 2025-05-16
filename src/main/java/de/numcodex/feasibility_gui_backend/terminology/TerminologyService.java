@@ -112,9 +112,12 @@ public class TerminologyService {
   public List<CriteriaProfileData> addDisplayDataToCriteriaProfileData(List<CriteriaProfileData> criteriaProfileData, List<EsSearchResultEntry> displayData) {
     var result = new ArrayList<CriteriaProfileData>();
     for (CriteriaProfileData cpd : criteriaProfileData) {
-      var searchResultEntry = displayData.stream().filter(dd -> cpd.getId().equals(dd.id())).findFirst().orElse(null);
-      cpd.setDisplay(searchResultEntry ==  null ? null : searchResultEntry.display());
-      result.add(cpd);
+      var searchResultEntry = displayData.stream().filter(dd -> cpd.id().equals(dd.id())).findFirst().orElse(null);
+      if (searchResultEntry == null) {
+        result.add(cpd);
+      } else {
+        result.add(cpd.addDisplay(searchResultEntry.display()));
+      }
     }
     return result;
   }

@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [7.0.0] - 2025-05-16
+
+- Based on ontology **[v3.6.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.6.0)**
+
+### Added
+- Dataqueries are introduced ([#374](https://github.com/medizininformatik-initiative/feasibility-backend/issues/374))
+- CSV Export for dataqueries ([#487](https://github.com/medizininformatik-initiative/feasibility-backend/issues/487))
+- Dataqueries can be created for users (from an admin role) ([#419](https://github.com/medizininformatik-initiative/feasibility-backend/issues/419))
+### Changed
+- REST API changed to v5 ([#374](https://github.com/medizininformatik-initiative/feasibility-backend/issues/374))
+- Configurable variables dealing with time intervals have their format changed to ISO 8601 Durations ([#477](https://github.com/medizininformatik-initiative/feasibility-backend/issues/477))
+- Log output when blacklisting a user has been improved ([#499](https://github.com/medizininformatik-initiative/feasibility-backend/issues/499))
+- DSE Profile representation has changed ([#496](https://github.com/medizininformatik-initiative/feasibility-backend/issues/496))
+### Removed
+- Query Templates have been removed ([#374](https://github.com/medizininformatik-initiative/feasibility-backend/issues/374))
+- Availability update script has been moved to [FHIR Ontology Generator](https://github.com/medizininformatik-initiative/fhir-ontology-generator/) ([#480](https://github.com/medizininformatik-initiative/feasibility-backend/issues/480))
+### Security
+- Spring boot was updated to 3.4.5
+- Dependency updates ([#507](https://github.com/medizininformatik-initiative/feasibility-backend/issues/507))
+
+## [7.0.0-alpha.1] - 2025-04-07
+
+### Changed
+- REST API changed to v5
+### Removed
+- Query Templates have been removed
+
 ## [6.2.2] - 2025-03-18
 
 - Based on ontology **[v3.2.2](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.2.2)**

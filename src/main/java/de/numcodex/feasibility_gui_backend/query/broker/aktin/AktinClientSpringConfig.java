@@ -22,10 +22,10 @@ import java.net.http.WebSocket.Builder;
 @Configuration
 public class AktinClientSpringConfig {
 
-    @Value("${app.broker.aktin.broker.baseUrl}")
+    @Value("${app.broker.aktin.broker.baseUrl:}")
     private String brokerBaseUrl;
 
-    @Value("${app.broker.aktin.broker.apiKey}")
+    @Value("${app.broker.aktin.broker.apiKey:}")
     private String brokerApiKey;
 
     @Qualifier("aktin")

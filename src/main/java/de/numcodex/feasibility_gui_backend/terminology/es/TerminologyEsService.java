@@ -5,6 +5,8 @@ import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import de.numcodex.feasibility_gui_backend.common.api.Criterion;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.RelationEntry;
@@ -21,12 +23,16 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.*;
 
 @Service
@@ -41,6 +47,7 @@ public class TerminologyEsService {
   public static final String FIELD_NAME_DISPLAY_EN = "display.en";
   public static final String FIELD_NAME_DISPLAY_ORIGINAL = "display.original";
   public static final String FIELD_NAME_TERMCODE_WITH_BOOST = "termcode^2";
+  private static final UUID NAMESPACE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   private ElasticsearchOperations operations;
 
   private String[] filterFields;
@@ -55,6 +62,11 @@ public class TerminologyEsService {
     this.operations = operations;
     this.ontologyItemEsRepository = ontologyItemEsRepository;
     this.ontologyListItemEsRepository = ontologyListItemEsRepository;
+  }
+
+  public EsSearchResultEntry getSearchResultEntryByCriterion(Criterion criterion) {
+    var contextualizedTermcodeHash = createContextualizedTermcodeHash(criterion);
+    return getSearchResultEntryByHash(contextualizedTermcodeHash);
   }
 
   public EsSearchResultEntry getSearchResultEntryByHash(String hash) {
@@ -147,9 +159,7 @@ public class TerminologyEsService {
     if (!filterList.isEmpty()) {
       var fieldValues = new ArrayList<FieldValue>();
       filterList.forEach(f -> {
-        f.getSecond().forEach(s -> {
-          fieldValues.add(new FieldValue.Builder().stringValue(s).build());
-        });
+        f.getSecond().forEach(s -> fieldValues.add(new FieldValue.Builder().stringValue(s).build()));
         filterTerms.add(new TermsQuery.Builder()
                 .field(f.getFirst())
                 .terms(new TermsQueryField.Builder().value(fieldValues).build())
@@ -266,5 +276,27 @@ public class TerminologyEsService {
         .type("selectable-concept")
         .values(termFilterValues)
         .build();
+  }
+
+  public static String createContextualizedTermcodeHash(Criterion criterion) {
+    String contextualizedTermcode = MessageFormat.format("{0}{1}{2}{3}{4}",
+        criterion.context().system(),
+        criterion.context().code(),
+        (criterion.context().version() == null || criterion.context().version().isBlank()) ? "" : criterion.context().version(),
+        criterion.termCodes().get(0).system(),
+        criterion.termCodes().get(0).code()
+    );
+    return createUuidV3(NAMESPACE_UUID, contextualizedTermcode).toString();
+  }
+
+  public static UUID createUuidV3(UUID namespace, String subject) {
+    final byte[] nameBytes = subject.getBytes(StandardCharsets.UTF_8);
+
+    ByteBuffer buffer = ByteBuffer.allocate(nameBytes.length + 16);
+    buffer.putLong(namespace.getMostSignificantBits());
+    buffer.putLong(namespace.getLeastSignificantBits());
+    buffer.put(nameBytes);
+
+    return UUID.nameUUIDFromBytes(buffer.array());
   }
 }

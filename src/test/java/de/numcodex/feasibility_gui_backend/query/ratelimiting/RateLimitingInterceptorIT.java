@@ -1,6 +1,6 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
-import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.PATH_API;
+import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,7 +18,7 @@ import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.validation.StructuredQueryValidatorSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
-import de.numcodex.feasibility_gui_backend.query.v4.QueryHandlerRestController;
+import de.numcodex.feasibility_gui_backend.query.v5.FeasibilityQueryHandlerRestController;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 
 import java.net.URI;
@@ -46,13 +46,13 @@ import org.springframework.test.web.servlet.MockMvc;
     RateLimitingServiceSpringConfig.class
 })
 @WebMvcTest(
-    controllers = QueryHandlerRestController.class,
+    controllers = FeasibilityQueryHandlerRestController.class,
     properties = {
         "app.enableQueryValidation=true",
-        "app.privacy.quota.read.resultSummary.pollingIntervalSeconds=1",
-        "app.privacy.quota.read.detailedObfuscated.pollingIntervalSeconds=2",
+        "app.privacy.quota.read.resultSummary.pollingInterval=PT1S",
+        "app.privacy.quota.read.detailedObfuscated.pollingInterval=PT2S",
         "app.privacy.quota.read.detailedObfuscated.amount=1",
-        "app.privacy.quota.read.detailedObfuscated.intervalSeconds=3"
+        "app.privacy.quota.read.detailedObfuscated.interval=PT3S"
     }
 )
 @SuppressWarnings("NewClassNamingConvention")
@@ -76,7 +76,7 @@ public class RateLimitingInterceptorIT {
   @BeforeEach
   void setupMockBehaviour() throws InvalidAuthenticationException {
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_USER"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_USER"));
     doReturn(createTestQueryResult(ResultDetail.SUMMARY)).when(queryHandlerService)
         .getQueryResult(any(Long.class), eq(ResultDetail.SUMMARY));
     doReturn(createTestQueryResult(ResultDetail.DETAILED)).when(queryHandlerService)
@@ -89,7 +89,7 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_SucceedsOnFirstCall(ResultDetail resultDetail) throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = PATH_API + "/query/1";
+    var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1";
     boolean isAdmin = false;
 
     switch (resultDetail) {
@@ -102,7 +102,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(isAdmin).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -118,7 +118,7 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_FailsOnImmediateSecondCall(ResultDetail resultDetail) throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = PATH_API + "/query/1";
+    var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1";
 
     switch (resultDetail) {
       case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
@@ -130,7 +130,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -152,7 +152,7 @@ public class RateLimitingInterceptorIT {
   @EnumSource
   public void testGetResult_SucceedsOnDelayedSecondCall(ResultDetail resultDetail) throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = PATH_API + "/query/1";
+    var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1";
 
     switch (resultDetail) {
       case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
@@ -164,7 +164,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -178,7 +178,7 @@ public class RateLimitingInterceptorIT {
 
     mockMvc
         .perform(
-            get(URI.create(PATH_API + "/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
+            get(URI.create(PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
                 .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
@@ -190,7 +190,7 @@ public class RateLimitingInterceptorIT {
       throws Exception {
 
     var authorName = UUID.randomUUID().toString();
-    var requestUri = PATH_API + "/query/1";
+    var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1";
 
     switch (resultDetail) {
       case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
@@ -199,7 +199,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(true).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     for (int i = 0; i < 10; ++i) {
@@ -217,7 +217,7 @@ public class RateLimitingInterceptorIT {
   public void testGetResult_SucceedsOnImmediateSecondCallAsOtherUser(ResultDetail resultDetail)
       throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = PATH_API + "/query/1";
+    var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1";
 
     switch (resultDetail) {
       case SUMMARY -> requestUri = requestUri + WebSecurityConfig.PATH_SUMMARY_RESULT;
@@ -229,7 +229,7 @@ public class RateLimitingInterceptorIT {
     }
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc
@@ -244,7 +244,7 @@ public class RateLimitingInterceptorIT {
 
     mockMvc
         .perform(
-            get(URI.create(PATH_API + "/query/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
+            get(URI.create(PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1" + WebSecurityConfig.PATH_SUMMARY_RESULT)).with(csrf())
                 .with(user(authorName).password("pass").roles("DATAPORTAL_TEST_USER"))
         )
         .andExpect(status().isOk());
@@ -253,10 +253,10 @@ public class RateLimitingInterceptorIT {
   @Test
   public void testGetDetailedObfuscatedResult_FailsOnLimitExceedingCall() throws Exception {
     var authorName = UUID.randomUUID().toString();
-    var requestUri = PATH_API + "/query/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
+    var requestUri = PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/1" + WebSecurityConfig.PATH_DETAILED_OBFUSCATED_RESULT;
 
     doReturn(false).when(authenticationHelper)
-        .hasAuthority(any(Authentication.class), eq("DATAPORTAL_TEST_ADMIN"));
+        .hasAuthority(any(Authentication.class), eq("ROLE_DATAPORTAL_TEST_ADMIN"));
     doReturn(authorName).when(queryHandlerService).getAuthorId(any(Long.class));
 
     mockMvc

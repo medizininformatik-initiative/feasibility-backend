@@ -38,17 +38,17 @@ public class WebSecurityConfig {
   public static final String KEY_SPRING_ADDONS_PUBLIC = "spring-addons-public";
   public static final String PATH_ACTUATOR_HEALTH = "/actuator/health";
   public static final String PATH_ACTUATOR_INFO = "/actuator/info";
-  public static final String PATH_API = "/api/v4";
+  public static final String PATH_API = "/api/v5";
   public static final String PATH_QUERY = "/query";
+  public static final String PATH_DATA = "/data";
+  public static final String PATH_FEASIBILITY = "/feasibility";
   public static final String PATH_ID_MATCHER = "/{id:\\d+}";
   public static final String PATH_USER_ID_MATCHER = "/by-user/{id:[\\w-]+}";
-  public static final String PATH_SAVED = "/saved";
-  public static final String PATH_CONTENT = "/content";
+  public static final String PATH_CRTDL = "/crtdl";
   public static final String PATH_SUMMARY_RESULT = "/summary-result";
   public static final String PATH_DETAILED_OBFUSCATED_RESULT = "/detailed-obfuscated-result";
   public static final String PATH_DETAILED_RESULT = "/detailed-result";
   public static final String PATH_TERMINOLOGY = "/terminology";
-  public static final String PATH_TEMPLATE = "/template";
   public static final String PATH_DSE = "/dse";
   public static final String PATH_CODEABLE_CONCEPT = "/codeable-concept";
   public static final String PATH_SWAGGER_UI = "/swagger-ui/**";
@@ -103,12 +103,11 @@ public class WebSecurityConfig {
 
     http.authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_TERMINOLOGY + "/**")).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY)).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_SAVED)).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_ID_MATCHER + PATH_DETAILED_RESULT)).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE)).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_TEMPLATE + "/*")).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_DATA)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_DATA + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_DATA + "/*")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_FEASIBILITY)).hasAuthority(keycloakAllowedRole)
+                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_FEASIBILITY + PATH_ID_MATCHER + PATH_DETAILED_RESULT)).hasAuthority(keycloakAdminRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_DSE + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
                     .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)

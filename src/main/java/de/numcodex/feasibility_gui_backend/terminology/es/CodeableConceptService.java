@@ -2,6 +2,7 @@ package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.CcSearchResult;
 import de.numcodex.feasibility_gui_backend.terminology.api.CodeableConceptEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.CodeableConceptDocument;
@@ -18,8 +19,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -29,6 +35,7 @@ public class CodeableConceptService {
   public static final String FIELD_NAME_DISPLAY_EN = "display.en";
   public static final String FIELD_NAME_DISPLAY_ORIGINAL = "display.original";
   public static final String FIELD_NAME_TERMCODE_WITH_BOOST = "termcode.code^2";
+  private static final UUID NAMESPACE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   private ElasticsearchOperations operations;
 
   private CodeableConceptEsRepository repo;
@@ -66,6 +73,18 @@ public class CodeableConceptService {
     return codeableConceptEntries;
   }
 
+  public CodeableConceptEntry getSearchResultEntryByTermCode(TermCode termCode) {
+    String termCodeConcat = MessageFormat.format("{0}{1}",
+        termCode.code(),
+        termCode.system()
+    );
+    try {
+      return getSearchResultsEntryByIds(List.of(TerminologyEsService.createUuidV3(NAMESPACE_UUID, termCodeConcat).toString())).get(0);
+    } catch (IndexOutOfBoundsException e) {
+      return null;
+    }
+  }
+
   private SearchHits<CodeableConceptDocument> findByCodeOrDisplay(String keyword,
                                                                   List<Pair<String,List<String>>> filterList,
                                                                   PageRequest pageRequest) {
@@ -74,9 +93,7 @@ public class CodeableConceptService {
     if (!filterList.isEmpty()) {
       var fieldValues = new ArrayList<FieldValue>();
       filterList.forEach(f -> {
-        f.getSecond().forEach(s -> {
-          fieldValues.add(new FieldValue.Builder().stringValue(s).build());
-        });
+        f.getSecond().forEach(s -> fieldValues.add(new FieldValue.Builder().stringValue(s).build()));
         filterTerms.add(new TermsQuery.Builder()
             .field(f.getFirst())
             .terms(new TermsQueryField.Builder().value(fieldValues).build())
@@ -135,8 +152,9 @@ public class CodeableConceptService {
         .withPageable(pageRequest)
         .build();
 
-    log.info(query.getQuery().toString());
+    log.info(Objects.requireNonNull(query.getQuery()).toString());
 
     return operations.search(query, CodeableConceptDocument.class);
   }
+
 }

@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import java.time.Duration;
+
 
 /**
  * Spring configuration for providing a {@link DSFBrokerClient} instance.
@@ -38,10 +40,10 @@ public class DSFSpringConfig {
     private String webserviceBaseUrl;
 
     @Value("${app.broker.dsf.webservice.readTimeout}")
-    private int webserviceReadTimeout;
+    private String webserviceReadTimeout;
 
     @Value("${app.broker.dsf.webservice.connectTimeout}")
-    private int webserviceConnectTimeout;
+    private String webserviceConnectTimeout;
 
     @Value("${app.broker.dsf.webservice.logRequests}")
     private boolean logRequests;
@@ -104,8 +106,9 @@ public class DSFSpringConfig {
     FhirWebClientProvider fhirWebClientProvider(FhirContext fhirContext,
                                                 FhirSecurityContextProvider securityContextProvider,
                                                 FhirProxyContext proxyContext) {
-        return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, webserviceReadTimeout,
-                webserviceConnectTimeout, websocketUrl, securityContextProvider, proxyContext, logRequests);
+        // FhirWebserviceClientJersey.class takes int as timeout parameter, so we need to cast long to int at some point
+        return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, (int)Duration.parse(webserviceReadTimeout).toMillis(),
+            (int)Duration.parse(webserviceConnectTimeout).toMillis(), websocketUrl, securityContextProvider, proxyContext, logRequests);
     }
 
 }

@@ -12,17 +12,17 @@ public class RateLimitingServiceSpringConfig {
 
   @Bean
   public RateLimitingService createRateLimitingService(
-      @Value("${app.privacy.quota.read.resultSummary.pollingIntervalSeconds}") int pollingIntervalSecondsSummary,
-      @Value("${app.privacy.quota.read.resultDetailedObfuscated.pollingIntervalSeconds}") int pollingIntervalSecondsDetailed,
+      @Value("${app.privacy.quota.read.resultSummary.pollingInterval}") String pollingIntervalSummary,
+      @Value("${app.privacy.quota.read.resultDetailedObfuscated.pollingInterval}") String pollingIntervalDetailed,
       @Value("${app.privacy.quota.read.resultDetailedObfuscated.amount}") int detailedObfuscatedAmount,
-      @Value("${app.privacy.quota.read.resultDetailedObfuscated.intervalSeconds}") int detailedObfuscatedIntervalSeconds) {
+      @Value("${app.privacy.quota.read.resultDetailedObfuscated.interval}") String detailedObfuscatedInterval) {
 
     log.info(
-        "Create RateLimitingService with interval of {} seconds for summary result endpoint, {} seconds for detailed"
-            + "obfuscated results and {} allowed requests to detailed obfuscated result per {} seconds",
-        pollingIntervalSecondsSummary, pollingIntervalSecondsDetailed, detailedObfuscatedAmount, detailedObfuscatedIntervalSeconds);
-    return new RateLimitingService(Duration.ofSeconds(pollingIntervalSecondsSummary),
-        Duration.ofSeconds(pollingIntervalSecondsDetailed),
-        detailedObfuscatedAmount, Duration.ofSeconds(detailedObfuscatedIntervalSeconds));
+        "Create RateLimitingService with interval of {} for summary result endpoint, {} for detailed"
+            + " obfuscated results and {} allowed requests to detailed obfuscated result per {}",
+        pollingIntervalSummary, pollingIntervalDetailed, detailedObfuscatedAmount, detailedObfuscatedInterval);
+    return new RateLimitingService(Duration.parse(pollingIntervalSummary),
+        Duration.parse(pollingIntervalDetailed),
+        detailedObfuscatedAmount, Duration.parse(detailedObfuscatedInterval));
   }
 }
