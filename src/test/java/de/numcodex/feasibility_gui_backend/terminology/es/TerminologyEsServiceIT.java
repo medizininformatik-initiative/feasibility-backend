@@ -1,7 +1,7 @@
 package de.numcodex.feasibility_gui_backend.terminology.es;
 
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
-import de.numcodex.feasibility_gui_backend.terminology.es.model.Relative;
+import de.numcodex.feasibility_gui_backend.terminology.api.RelativeEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.TermFilter;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
@@ -178,7 +178,7 @@ public class TerminologyEsServiceIT {
     assertThat(relations).isNotNull();
     assertThat(relations.parents()).isNotNull();
     assertThat(relations.parents()).isNotEmpty();
-    assertThat(relations.parents().stream().toList().get(0)).isInstanceOf(Relative.class);
+    assertThat(relations.parents().stream().toList().get(0)).isInstanceOf(RelativeEntry.class);
   }
 
   @Test

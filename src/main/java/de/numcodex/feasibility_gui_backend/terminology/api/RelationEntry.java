@@ -6,21 +6,22 @@ import de.numcodex.feasibility_gui_backend.terminology.es.model.Relative;
 import lombok.Builder;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Builder
 public record RelationEntry(
     DisplayEntry display,
-    Collection<Relative> parents,
-    Collection<Relative> children,
-    Collection<Relative> relatedTerms
+    Collection<RelativeEntry> parents,
+    Collection<RelativeEntry> children,
+    Collection<RelativeEntry> relatedTerms
 ) {
 
   public static RelationEntry of(OntologyItemRelationsDocument document) {
     return RelationEntry.builder()
         .display(DisplayEntry.of(document.display()))
-        .parents(document.parents())
-        .children(document.children())
-        .relatedTerms(document.relatedTerms())
+        .parents(document.parents().stream().map(RelativeEntry::of).collect(Collectors.toList()))
+        .children(document.children().stream().map(RelativeEntry::of).collect(Collectors.toList()))
+        .relatedTerms(document.relatedTerms().stream().map(RelativeEntry::of).collect(Collectors.toList()))
         .build();
   }
 }
