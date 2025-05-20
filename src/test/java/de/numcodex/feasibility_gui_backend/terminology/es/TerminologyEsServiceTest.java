@@ -5,6 +5,7 @@ import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
+import de.numcodex.feasibility_gui_backend.terminology.api.RelativeEntry;
 import de.numcodex.feasibility_gui_backend.terminology.es.model.*;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemEsRepository;
 import de.numcodex.feasibility_gui_backend.terminology.es.repository.OntologyItemNotFoundException;
@@ -26,6 +27,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -208,9 +210,9 @@ public class TerminologyEsServiceTest {
 
     var relationEntry = assertDoesNotThrow(() -> terminologyEsService.getRelationEntryByHash(id));
     assertThat(relationEntry).isNotNull();
-    assertThat(relationEntry.relatedTerms()).isEqualTo(dummyOntologyItem.relatedTerms());
-    assertThat(relationEntry.children()).isEqualTo(dummyOntologyItem.children());
-    assertThat(relationEntry.parents()).isEqualTo(dummyOntologyItem.parents());
+    assertThat(relationEntry.relatedTerms()).isEqualTo(dummyOntologyItem.relatedTerms().stream().map(RelativeEntry::of).collect(Collectors.toList()));
+    assertThat(relationEntry.children()).isEqualTo(dummyOntologyItem.children().stream().map(RelativeEntry::of).collect(Collectors.toList()));
+    assertThat(relationEntry.parents()).isEqualTo(dummyOntologyItem.parents().stream().map(RelativeEntry::of).collect(Collectors.toList()));
     assertThat(relationEntry.display()).isEqualTo(DisplayEntry.of(dummyOntologyItem.display()));
   }
 
@@ -310,7 +312,7 @@ public class TerminologyEsServiceTest {
   private Relative createDummyRelative() {
     return Relative.builder()
         .contextualizedTermcodeHash(UUID.randomUUID().toString())
-        .name("some-random-name")
+        .display(createDummyDisplay())
         .build();
   }
 

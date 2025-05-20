@@ -162,11 +162,17 @@ public class TerminologyRestControllerIT {
         mockMvc.perform(get(URI.create(PATH_API + PATH_TERMINOLOGY + "/entry/abc/relations")).with(csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.children[0].contextualizedTermcodeHash").value(dummyRelationEntry.children().stream().toList().get(0).contextualizedTermcodeHash()))
-            .andExpect(jsonPath("$.children[0].name").value(dummyRelationEntry.children().stream().toList().get(0).name()))
+            .andExpect(jsonPath("$.children[0].display.original").value(dummyRelationEntry.children().stream().toList().get(0).display().original()))
+            .andExpect(jsonPath("$.children[0].display.translations[0].value").value(dummyRelationEntry.children().stream().toList().get(0).display().translations().get(0).value()))
+            .andExpect(jsonPath("$.children[0].display.translations[1].value").value(dummyRelationEntry.children().stream().toList().get(0).display().translations().get(1).value()))
             .andExpect(jsonPath("$.parents[0].contextualizedTermcodeHash").value(dummyRelationEntry.parents().stream().toList().get(0).contextualizedTermcodeHash()))
-            .andExpect(jsonPath("$.parents[0].name").value(dummyRelationEntry.parents().stream().toList().get(0).name()))
+            .andExpect(jsonPath("$.parents[0].display.original").value(dummyRelationEntry.parents().stream().toList().get(0).display().original()))
+            .andExpect(jsonPath("$.parents[0].display.translations[0].value").value(dummyRelationEntry.parents().stream().toList().get(0).display().translations().get(0).value()))
+            .andExpect(jsonPath("$.parents[0].display.translations[1].value").value(dummyRelationEntry.parents().stream().toList().get(0).display().translations().get(1).value()))
             .andExpect(jsonPath("$.relatedTerms[0].contextualizedTermcodeHash").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).contextualizedTermcodeHash()))
-            .andExpect(jsonPath("$.relatedTerms[0].name").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).name()));
+            .andExpect(jsonPath("$.relatedTerms[0].display.original").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).display().original()))
+            .andExpect(jsonPath("$.relatedTerms[0].display.translations[0].value").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).display().translations().get(0).value()))
+            .andExpect(jsonPath("$.relatedTerms[0].display.translations[1].value").value(dummyRelationEntry.relatedTerms().stream().toList().get(0).display().translations().get(1).value()));
     }
 
     @Test
@@ -311,7 +317,7 @@ public class TerminologyRestControllerIT {
     private Relative createDummyRelative() {
         return Relative.builder()
             .contextualizedTermcodeHash(UUID.randomUUID().toString())
-            .name("some-random-name")
+            .display(createDummyDisplay())
             .build();
     }
 

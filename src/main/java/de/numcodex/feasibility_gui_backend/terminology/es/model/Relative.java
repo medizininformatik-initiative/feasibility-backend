@@ -5,7 +5,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 
 @Builder
 public record Relative(
-    String name,
+    Display display,
     @Field(name = "contextualized_termcode_hash")
     String contextualizedTermcodeHash
 ) {
