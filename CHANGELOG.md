@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [7.0.1] - 2025-05-20
+
+### Fixed
+- Parent/Child relations for terminology entries are correctly returned with translations ([#461](https://github.com/medizininformatik-initiative/feasibility-backend/issues/461))
+
 ## [7.0.0] - 2025-05-16
 
 - Based on ontology **[v3.6.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.6.0)**
