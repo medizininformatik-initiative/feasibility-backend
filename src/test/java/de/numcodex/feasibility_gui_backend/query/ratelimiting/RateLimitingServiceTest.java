@@ -1,6 +1,7 @@
 package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import io.github.bucket4j.Bucket;
+
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.threeten.extra.PeriodDuration;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("query")
@@ -15,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class RateLimitingServiceTest {
 
-  private final Duration intervalPollingSummary = Duration.ofSeconds(1);
-  private final Duration intervalPollingDetailed = Duration.ofSeconds(1);
+  private final PeriodDuration intervalPollingSummary = PeriodDuration.of(Duration.ofSeconds(1));
+  private final PeriodDuration intervalPollingDetailed = PeriodDuration.of(Duration.ofSeconds(1));
   private final int amountDetailedObfuscated = 2;
-  private final Duration intervalDetailedObfuscated = Duration.ofSeconds(2);
+  private final PeriodDuration intervalDetailedObfuscated = PeriodDuration.of(Duration.ofSeconds(2));
 
   private RateLimitingService rateLimitingService;
 
@@ -50,13 +53,13 @@ public class RateLimitingServiceTest {
     Bucket bucketSomeoneSummary = rateLimitingService.resolveSummaryResultBucket("someone");
     assertTrue(bucketSomeoneSummary.tryConsume(1));
     assertFalse(bucketSomeoneSummary.tryConsume(1));
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(intervalPollingSummary));
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(intervalPollingSummary.getDuration()));
     assertTrue(bucketSomeoneSummary.tryConsume(1));
 
     Bucket bucketSomeoneDetailed = rateLimitingService.resolveDetailedObfuscatedResultBucket("someone");
     assertTrue(bucketSomeoneDetailed.tryConsume(1));
     assertFalse(bucketSomeoneDetailed.tryConsume(1));
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(intervalPollingSummary));
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(intervalPollingSummary.getDuration()));
     assertTrue(bucketSomeoneDetailed.tryConsume(1));
   }
 }

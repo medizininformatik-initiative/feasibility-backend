@@ -6,7 +6,6 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import de.numcodex.feasibility_gui_backend.query.persistence.BrokerClientType;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.ResultType;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aktin.broker.client2.BrokerAdmin2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.extra.PeriodDuration;
 
 /**
  * Stores results of queries volatile.
@@ -42,12 +42,12 @@ public class ResultService {
    * @param resultExpiry the duration after which a result shouldn't be
    *                     available anymore
    */
-  public ResultService(Duration resultExpiry, BrokerAdmin2 aktinBrokerClient,
-      QueryDispatchRepository queryDispatchRepository) {
+  public ResultService(PeriodDuration resultExpiry, BrokerAdmin2 aktinBrokerClient,
+                       QueryDispatchRepository queryDispatchRepository) {
     this.queryDispatchRepository = queryDispatchRepository;
     this.aktinBrokerClient = aktinBrokerClient;
     this.queryResultCache = Caffeine.newBuilder()
-        .expireAfterWrite(resultExpiry)
+        .expireAfterWrite(resultExpiry.getDuration())
         .removalListener((key, value, cause) -> onRemoval(key, cause))
         .build();
   }

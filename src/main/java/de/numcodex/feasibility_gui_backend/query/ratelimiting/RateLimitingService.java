@@ -2,8 +2,8 @@ package de.numcodex.feasibility_gui_backend.query.ratelimiting;
 
 import io.github.bucket4j.Bucket;
 import lombok.Getter;
+import org.threeten.extra.PeriodDuration;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,9 +18,9 @@ public class RateLimitingService {
   private final Map<String, Bucket> detailedResultRetrievalCache = new ConcurrentHashMap<>();
   private final Map<String, Bucket> detailedViewObfuscatedResultRetrievalCache = new ConcurrentHashMap<>();
 
-  private final Duration intervalPollingSummary;
-  private final Duration intervalPollingDetailed;
-  private final Duration intervalDetailedObfuscated;
+  private final PeriodDuration intervalPollingSummary;
+  private final PeriodDuration intervalPollingDetailed;
+  private final PeriodDuration intervalDetailedObfuscated;
   @Getter
   private final int amountDetailedObfuscated;
 
@@ -35,7 +35,7 @@ public class RateLimitingService {
    * @param amountDetailedObfuscated the amount of times a user can request detailed obfuscated results
    * @param intervalDetailedObfuscated the timespan after which a users access is "forgotten"
    */
-  public RateLimitingService(Duration intervalPollingSummary, Duration intervalPollingDetailed, int amountDetailedObfuscated, Duration intervalDetailedObfuscated) {
+  public RateLimitingService(PeriodDuration intervalPollingSummary, PeriodDuration intervalPollingDetailed, int amountDetailedObfuscated, PeriodDuration intervalDetailedObfuscated) {
     this.intervalPollingSummary = intervalPollingSummary;
     this.intervalPollingDetailed = intervalPollingDetailed;
     this.amountDetailedObfuscated = amountDetailedObfuscated;
@@ -60,19 +60,19 @@ public class RateLimitingService {
 
   private Bucket newSummaryResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalPollingSummary))
+        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalPollingSummary.getDuration()))
         .build();
   }
 
   private Bucket newDetailedResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalPollingDetailed))
+        .addLimit(limit -> limit.capacity(1).refillIntervally(1, intervalPollingDetailed.getDuration()))
         .build();
   }
 
   private Bucket newViewDetailedObfuscatedResultBucket(String userId) {
     return Bucket.builder()
-        .addLimit(limit -> limit.capacity(amountDetailedObfuscated).refillIntervally(1, intervalDetailedObfuscated))
+        .addLimit(limit -> limit.capacity(amountDetailedObfuscated).refillIntervally(1, intervalDetailedObfuscated.getDuration()))
         .build();
   }
 
