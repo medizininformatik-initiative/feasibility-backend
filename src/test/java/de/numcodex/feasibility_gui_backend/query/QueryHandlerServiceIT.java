@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.numcodex.feasibility_gui_backend.common.api.Criterion;
 import de.numcodex.feasibility_gui_backend.common.api.TermCode;
+import de.numcodex.feasibility_gui_backend.common.api.Unit;
 import de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail;
 import de.numcodex.feasibility_gui_backend.query.api.QueryResultLine;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
+import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
 import de.numcodex.feasibility_gui_backend.query.api.status.QueryQuota;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryCollectSpringConfig;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -41,9 +44,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.threeten.extra.PeriodDuration;
 
+import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
 import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED;
 import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED;
 import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.SUMMARY;
+import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.ERROR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 @DataJpaTest(
         properties = {
-                "app.cqlTranslationEnabled=false",
+                "app.cqlTranslationEnabled=true",
                 "app.fhirTranslationEnabled=false",
                 "app.broker.mock.enabled=true",
                 "app.broker.direct.enabled=false",
@@ -110,10 +115,7 @@ public class QueryHandlerServiceIT {
 
     @Test
     public void testRunQuery() {
-        var testStructuredQuery = StructuredQuery.builder()
-                .inclusionCriteria(List.of(List.of()))
-                .exclusionCriteria(List.of(List.of()))
-                .build();
+        var testStructuredQuery = createValidStructuredQuery();
 
         queryHandlerService.runQuery(testStructuredQuery, "test").block();
 
@@ -374,8 +376,7 @@ public class QueryHandlerServiceIT {
     assertThat(sentQueryStatistics.hard().limit()).isEqualTo(hardLimit);
     assertThat(sentQueryStatistics.soft().interval()).isEqualTo(softInterval);
     assertThat(sentQueryStatistics.soft().used()).isEqualTo(0);
-    assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit
-    );
+    assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit);
   }
 
   @Test
@@ -427,21 +428,45 @@ public class QueryHandlerServiceIT {
     assertThat(sentQueryStatistics.soft().limit()).isEqualTo(softLimit);
   }
 
-    private StructuredQuery createValidStructuredQuery() {
-        var termCode = TermCode.builder()
-            .code("LL2191-6")
-            .system("http://loinc.org")
-            .display("Geschlecht")
-            .build();
-        var inclusionCriterion = Criterion.builder()
-            .termCodes(List.of(termCode))
-            .attributeFilters(List.of())
-            .build();
-        return StructuredQuery.builder()
-            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-            .inclusionCriteria(List.of(List.of(inclusionCriterion)))
-            .exclusionCriteria(List.of())
-            .display("foo")
-            .build();
-    }
+  @Test
+  @DisplayName("translateQueryToCql() -> succeeds")
+  public void translateQueryToCql_succeeds() {
+    var cql = assertDoesNotThrow(() -> queryHandlerService.translateQueryToCql(createValidStructuredQuery()));
+
+    assertThat(cql).isInstanceOf(String.class);
+    AssertionsForClassTypes.assertThat(cql).containsIgnoringCase("Context Patient");
+  }
+
+  private StructuredQuery createValidStructuredQuery() {
+    var termCode = TermCode.builder()
+        .code("424144002")
+        .system("http://snomed.info/sct")
+        .display("Gegenwärtiges chronologisches Alter")
+        .build();
+    var context = TermCode.builder()
+        .code("Patient")
+        .system("fdpg.mii.cds")
+        .version("1.0.0")
+        .display("Patient")
+        .build();
+    var unit = Unit.builder()
+        .code("a")
+        .display("a")
+        .build();
+    var valueFilter = ValueFilter.builder()
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(unit)
+        .value(50.0)
+        .build();
+    var criterion = Criterion.builder()
+        .termCodes(List.of(termCode))
+        .context(context)
+        .valueFilter(valueFilter)
+        .build();
+    return StructuredQuery.builder()
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(criterion)))
+        .build();
+  }
 }
