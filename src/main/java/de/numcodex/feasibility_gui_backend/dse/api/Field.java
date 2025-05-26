@@ -13,7 +13,6 @@ public record Field(
     @JsonProperty String id,
     @JsonProperty DisplayEntry display,
     @JsonProperty DisplayEntry description,
-    @JsonProperty String type,
     @JsonProperty boolean recommended,
     @JsonProperty boolean required,
     @JsonProperty List<Field> children

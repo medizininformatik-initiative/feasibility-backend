@@ -2,7 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+
+## [7.1.0] - 2025-05-26
+
+- Based on ontology **[v3.7.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.7.0)**
+
+### Changed
+- Update ontology to 3.7.0
+### Security
+- Spring boot was updated to 3.5.0
+
+### Added
 
 ## [7.0.1] - 2025-05-20
 

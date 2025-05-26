@@ -164,7 +164,6 @@ class DseServiceTest {
 
   private Field createDummyField() {
     return Field.builder()
-        .type("fieldtype")
         .id("fieldid")
         .required(false)
         .recommended(true)
