@@ -3,7 +3,6 @@ package de.numcodex.feasibility_gui_backend.query.result;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import java.net.URI;
 import java.net.http.WebSocket.Builder;
-import java.time.Duration;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aktin.broker.client2.AuthFilter;
@@ -11,6 +10,7 @@ import org.aktin.broker.client2.BrokerAdmin2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.threeten.extra.PeriodDuration;
 
 @Configuration
 @Slf4j
@@ -37,7 +37,7 @@ public class ResultServiceSpringConfig {
     }
 
     log.info("Create ResultService with result TTL of {}", resultExpiry);
-    return new ResultService(Duration.parse(resultExpiry), client, queryDispatchRepository);
+    return new ResultService(PeriodDuration.parse(resultExpiry), client, queryDispatchRepository);
   }
 
   @AllArgsConstructor

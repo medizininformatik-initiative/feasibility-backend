@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [7.1.1] - 2025-05-27
+
+- Based on ontology **[v3.7.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.7.0)**
+
+### Fixed
+- Durations with larger timeunits than days are now correctly parsed ([#519](https://github.com/medizininformatik-initiative/feasibility-backend/issues/519))
+
 ## [7.1.0] - 2025-05-26
 
 - Based on ontology **[v3.7.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.7.0)**

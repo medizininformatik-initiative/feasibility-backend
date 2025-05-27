@@ -22,7 +22,6 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslatorSpri
 
 import java.net.URI;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,6 +39,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.threeten.extra.PeriodDuration;
 
 import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED;
 import static de.numcodex.feasibility_gui_backend.query.QueryHandlerService.ResultDetail.DETAILED_OBFUSCATED;
@@ -413,7 +413,7 @@ public class QueryHandlerServiceIT {
     var inbetweenQueryId = queryRepository.save(queryOnlyCountingToHardLimit).getId();
 
     queryRepository.updateCreationDate(veryOldQueryId, Timestamp.valueOf(TIME_STRING));
-    queryRepository.updateCreationDate(inbetweenQueryId, Timestamp.valueOf(LocalDateTime.now().minus(Duration.parse(softInterval)).minusSeconds(5L)));
+    queryRepository.updateCreationDate(inbetweenQueryId, Timestamp.valueOf(LocalDateTime.now().minus(PeriodDuration.parse(softInterval)).minusSeconds(5L)));
 
     var sentQueryStatistics =
         assertDoesNotThrow(() -> queryHandlerService.getSentQueryStatistics(CREATOR, softLimit, softInterval, hardLimit, hardInterval));

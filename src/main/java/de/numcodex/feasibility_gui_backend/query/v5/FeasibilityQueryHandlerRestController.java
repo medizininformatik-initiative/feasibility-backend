@@ -26,11 +26,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.threeten.extra.PeriodDuration;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.security.Principal;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -122,7 +122,7 @@ public class FeasibilityQueryHandlerRestController {
     if (!isPowerUser && (quotaHardCreateAmount
         <= amountOfQueriesByUserAndHardInterval)) {
       var intervalEnd = LocalDateTime.now();
-      var intervalStart = intervalEnd.minus(Duration.parse(quotaHardCreateInterval));
+      var intervalStart = intervalEnd.minus(PeriodDuration.parse(quotaHardCreateInterval));
       log.info(
           "Blacklisting user {} for exceeding quota without being poweruser. Allowed: {} queries per {}. The user posted {} queries between {} and {}",
           userId,
