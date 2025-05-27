@@ -9,11 +9,11 @@ import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.threeten.extra.PeriodDuration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.zip.ZipOutputStream;
@@ -66,7 +66,7 @@ public class DataqueryHandler {
         .label(dataquery.label())
         .comment(dataquery.comment())
         .createdBy(userId)
-        .expiresAt(Timestamp.valueOf(LocalDateTime.now().plusSeconds(Duration.parse(ttlDuration).getSeconds())))
+        .expiresAt(Timestamp.valueOf(LocalDateTime.now().plusSeconds(PeriodDuration.parse(ttlDuration).getDuration().getSeconds())))
         .build();
 
     try {

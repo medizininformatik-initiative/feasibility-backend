@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryDispatchRepository;
 import java.net.URI;
 import java.time.Duration;
+
 import org.aktin.broker.client2.BrokerAdmin2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.threeten.extra.PeriodDuration;
 
 @Tag("query")
 @Tag("result")
@@ -27,7 +29,7 @@ class ResultServiceTest {
   public static final long QUERY_ID_1 = 1L;
   public static final long QUERY_ID_2 = 2L;
 
-  private final Duration expiryTime = Duration.ofSeconds(1);
+  private final PeriodDuration expiryTime = PeriodDuration.of(Duration.ofSeconds(1));
 
   private ResultService resultService;
 
@@ -77,7 +79,7 @@ class ResultServiceTest {
                     .result(0L)
                     .build()
     );
-    Thread.sleep(expiryTime.plusMillis(250).toMillis());
+    Thread.sleep(expiryTime.getDuration().plusMillis(250).toMillis());
 
     var resultLines = resultService.findSuccessfulByQuery(QUERY_ID);
 

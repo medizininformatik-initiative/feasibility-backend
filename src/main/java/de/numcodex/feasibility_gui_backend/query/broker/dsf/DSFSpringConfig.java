@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-
-import java.time.Duration;
+import org.threeten.extra.PeriodDuration;
 
 
 /**
@@ -107,8 +106,8 @@ public class DSFSpringConfig {
                                                 FhirSecurityContextProvider securityContextProvider,
                                                 FhirProxyContext proxyContext) {
         // FhirWebserviceClientJersey.class takes int as timeout parameter, so we need to cast long to int at some point
-        return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, (int)Duration.parse(webserviceReadTimeout).toMillis(),
-            (int)Duration.parse(webserviceConnectTimeout).toMillis(), websocketUrl, securityContextProvider, proxyContext, logRequests);
+        return new DSFFhirWebClientProvider(fhirContext, webserviceBaseUrl, (int) PeriodDuration.parse(webserviceReadTimeout).getDuration().toMillis(),
+            (int)PeriodDuration.parse(webserviceConnectTimeout).getDuration().toMillis(), websocketUrl, securityContextProvider, proxyContext, logRequests);
     }
 
 }

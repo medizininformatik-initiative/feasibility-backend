@@ -17,9 +17,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.threeten.extra.PeriodDuration;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,20 +119,20 @@ public class QueryHandlerService {
     }
 
     public Long getAmountOfQueriesByUserAndInterval(String userId, String interval) {
-        return queryRepository.countQueriesByAuthorInTheLastNMinutes(userId, Duration.parse(interval).toMinutes());
+        return queryRepository.countQueriesByAuthorInTheLastNMinutes(userId, PeriodDuration.parse(interval).getDuration().toMinutes());
     }
 
     public Long getRetryAfterTime(String userId, int offset, String interval) {
         try {
-            return Duration.parse(interval).toSeconds() - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
+            return PeriodDuration.parse(interval).getDuration().getSeconds() - queryRepository.getAgeOfNToLastQueryInSeconds(userId, offset) + 1;
         } catch (NullPointerException e) {
             return 0L;
         }
     }
 
   public QueryQuota getSentQueryStatistics(String userName, int softAmount, String softInterval, int hardAmount, String hardInterval) {
-    var softUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, Duration.parse(softInterval).toMinutes());
-    var hardUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, Duration.parse(hardInterval).toMinutes());
+    var softUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, PeriodDuration.parse(softInterval).getDuration().toMinutes());
+    var hardUsed = queryRepository.countQueriesByAuthorInTheLastNMinutes(userName, PeriodDuration.parse(hardInterval).getDuration().toMinutes());
 
     return QueryQuota.builder()
         .soft(QueryQuotaEntry.builder()
