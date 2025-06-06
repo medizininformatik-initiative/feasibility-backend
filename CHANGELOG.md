@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [7.1.2] - 2025-06-06
+
+- Based on ontology **[v3.7.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.7.0)**
+
+### Fixed
+- Dataqueries can be read by admin users ([#524](https://github.com/medizininformatik-initiative/feasibility-backend/issues/524))
+
 ## [7.1.1] - 2025-05-27
 
 - Based on ontology **[v3.7.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.7.0)**
