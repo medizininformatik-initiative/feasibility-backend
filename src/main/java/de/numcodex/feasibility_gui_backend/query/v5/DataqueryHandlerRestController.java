@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -78,10 +79,10 @@ public class DataqueryHandlerRestController {
   @GetMapping(path = "/{dataqueryId}")
   public ResponseEntity<Object> getDataquery(@PathVariable(value = "dataqueryId") Long dataqueryId,
                                                  @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
-      Principal principal) {
+      Authentication authentication) {
 
     try {
-      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, principal.getName());
+      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, authentication);
       var dataqueryWithInvalidCriteria = Dataquery.builder()
               .id(dataquery.id())
               .content(
@@ -117,10 +118,10 @@ public class DataqueryHandlerRestController {
   @GetMapping(path = "/{dataqueryId}" + PATH_CRTDL)
   public ResponseEntity<Object> getDataqueryCrtdl(@PathVariable(value = "dataqueryId") Long dataqueryId,
                                              @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation,
-                                             Principal principal) {
+                                             Authentication authentication) {
 
     try {
-      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, principal.getName());
+      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, authentication);
       var crtdlWithInvalidCritiera = Crtdl.builder()
           .display(dataquery.content().display())
           .version(dataquery.content().version())
@@ -137,9 +138,9 @@ public class DataqueryHandlerRestController {
 
   @GetMapping(path = "/{dataqueryId}" + PATH_CRTDL, produces = "application/zip")
   public ResponseEntity<Object> getDataqueryCrtdlCsv(@PathVariable(value = "dataqueryId") Long dataqueryId,
-                                                     Principal principal) {
+                                                     Authentication authentication) {
     try {
-      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, principal.getName());
+      var dataquery = dataqueryHandler.getDataqueryById(dataqueryId, authentication);
       var zipByteArrayOutputStream = dataqueryHandler.createCsvExportZipfile(dataquery);
       HttpHeaders headers = new HttpHeaders();
       String headerValue = "attachment; filename=" + dataquery.label().toUpperCase() +  "_dataquery.zip";

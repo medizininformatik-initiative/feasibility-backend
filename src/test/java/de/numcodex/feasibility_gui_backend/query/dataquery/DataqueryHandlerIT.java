@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -91,25 +93,29 @@ public class DataqueryHandlerIT {
   }
 
   @Test
+  @WithMockUser(username = CREATOR, roles = {"DATAPORTAL_USER"})
   public void testGetDataquery() throws JsonProcessingException {
     var dataqueryEntity = createDataqueryEntity(false);
     var dataqueryId = dataqueryRepository.save(dataqueryEntity).getId();
+    var auth = SecurityContextHolder.getContext().getAuthentication();
 
-    var loadedDataquery = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(dataqueryId, dataqueryEntity.getCreatedBy()));
+    var loadedDataquery = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(dataqueryId, auth));
 
     assertThat(loadedDataquery).isNotNull();
     assertThat(jsonUtil.writeValueAsString(loadedDataquery.content())).isEqualTo(dataqueryEntity.getCrtdl());
   }
 
   @Test
+  @WithMockUser(username = CREATOR, roles = {"DATAPORTAL_USER"})
   public void testUpdateDataquery() throws JsonProcessingException, DataqueryStorageFullException, DataqueryException {
     var dataquery = createDataquery(false);
     var dataqueryWithResult = createDataquery(true);
+    var auth = SecurityContextHolder.getContext().getAuthentication();
 
     var dataqueryId = dataqueryHandler.storeDataquery(dataquery, CREATOR);
-    var loadedDataqueryOld = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(dataqueryId, CREATOR));
+    var loadedDataqueryOld = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(dataqueryId, auth));
     dataqueryHandler.updateDataquery(dataqueryId, dataqueryWithResult, CREATOR);
-    var loadedDataqueryUpdated = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(dataqueryId, CREATOR));
+    var loadedDataqueryUpdated = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(dataqueryId, auth));
 
     assertThat(loadedDataqueryUpdated).isNotNull();
     assertThat(loadedDataqueryUpdated.resultSize()).isEqualTo(dataqueryWithResult.resultSize());

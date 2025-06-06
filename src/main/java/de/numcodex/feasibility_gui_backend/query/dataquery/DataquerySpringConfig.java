@@ -15,8 +15,9 @@ public class DataquerySpringConfig {
       @Qualifier("translation") ObjectMapper jsonUtil,
       DataqueryRepository dataqueryRepository,
       DataqueryCsvExportService dataqueryCsvExportService,
-      @Value("${app.maxSavedQueriesPerUser}") Integer maxSavedQueriesPerUser
+      @Value("${app.maxSavedQueriesPerUser}") Integer maxSavedQueriesPerUser,
+      @Value("${app.keycloakAdminRole}") String keycloakAdminRole
   ) {
-    return new DataqueryHandler(jsonUtil, dataqueryRepository, dataqueryCsvExportService, maxSavedQueriesPerUser);
+    return new DataqueryHandler(jsonUtil, dataqueryRepository, dataqueryCsvExportService, maxSavedQueriesPerUser, keycloakAdminRole);
   }
 }

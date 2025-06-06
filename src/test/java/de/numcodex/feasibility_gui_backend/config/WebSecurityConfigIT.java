@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -148,7 +149,7 @@ class WebSecurityConfigIT {
   @Test
   @WithMockUser(username = "user", roles = "DATAPORTAL_TEST_USER")
   void getDataquery_authenticatedAllowed() throws Exception {
-    doReturn(createDataquery(false)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+    doReturn(createDataquery(false)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
 
     mockMvc.perform(get(URI.create("/api/v5/query/data/1")).with(csrf()))
         .andExpect(status().isOk());
@@ -156,7 +157,7 @@ class WebSecurityConfigIT {
 
   @Test
   void getDataquery_unauthenticatedDenied() throws Exception {
-    doReturn(createDataquery(false)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+    doReturn(createDataquery(false)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
     mockMvc.perform(get(URI.create("/api/v5/query/data/1")).with(csrf()))
         .andExpect(status().isUnauthorized());
   }
@@ -164,7 +165,7 @@ class WebSecurityConfigIT {
   @Test
   @WithMockUser(username = "user", roles = "DATAPORTAL_TEST_ADMIN")
   void getDataquery_adminAccessAllowed() throws Exception {
-    doReturn(createDataquery(false)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+    doReturn(createDataquery(false)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
     mockMvc.perform(get(URI.create("/api/v5/query/data/1")).with(csrf()))
         .andExpect(status().isOk());
   }

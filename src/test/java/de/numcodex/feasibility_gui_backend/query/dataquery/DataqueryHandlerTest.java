@@ -7,6 +7,7 @@ import de.numcodex.feasibility_gui_backend.common.api.TermCode;
 import de.numcodex.feasibility_gui_backend.query.api.*;
 import de.numcodex.feasibility_gui_backend.query.api.Dataquery;
 import de.numcodex.feasibility_gui_backend.query.persistence.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -16,12 +17,20 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +49,7 @@ class DataqueryHandlerTest {
     public static final String TIME_STRING = "1969-07-20 20:17:40.0";
     public static final String EXPIRY_STRING = "2063-04-05 20:17:40.0";
     private static final int MAX_QUERIES_PER_USER = 5;
+    private static final String KEYCLOAK_ADMIN_ROLE = "ROLE_DATAPORTAL_TEST_ADMIN";
     public static final String DURATION = "PT10M";
 
     @Spy
@@ -52,7 +62,23 @@ class DataqueryHandlerTest {
     private DataqueryCsvExportService csvExportService;
 
     private DataqueryHandler createDataqueryHandler() {
-        return new DataqueryHandler(jsonUtil, dataqueryRepository, csvExportService, MAX_QUERIES_PER_USER);
+        return new DataqueryHandler(jsonUtil, dataqueryRepository, csvExportService, MAX_QUERIES_PER_USER, KEYCLOAK_ADMIN_ROLE);
+    }
+
+    void setMockAuth(String userName, List<String> roles) {
+        Authentication mockAuth = Mockito.mock(Authentication.class);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (String role : roles) {
+            authorities.add(new SimpleGrantedAuthority(role));
+        }
+        lenient().doReturn(userName).when(mockAuth).getName();
+        lenient().doReturn(authorities).when(mockAuth).getAuthorities();
+        SecurityContextHolder.getContext().setAuthentication(mockAuth);
+    }
+
+    @AfterEach
+    void clearContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -135,11 +161,13 @@ class DataqueryHandlerTest {
     @Test
     @DisplayName("getDataqueryById() -> retrieving a single dataquery by its id succeeds")
     void getDataqueryById_succeeds() throws JsonProcessingException {
+        setMockAuth(CREATOR, List.of("DATAPORTAL_USER"));
         var dataqueryHandler = createDataqueryHandler();
         var dataqueryEntity = createDataqueryEntity();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
         doReturn(Optional.of(dataqueryEntity)).when(dataqueryRepository).findById(any(Long.class));
 
-        Dataquery dataquery = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(1L, CREATOR));
+        Dataquery dataquery = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(1L, auth));
         assertNotNull(dataquery);
         assertInstanceOf(Dataquery.class, dataquery);
     }
@@ -147,20 +175,38 @@ class DataqueryHandlerTest {
     @Test
     @DisplayName("getDataqueryById() -> Throw exception if the user is not the author")
     void getDataqueryById_throwsOnWrongUser() throws JsonProcessingException {
+        setMockAuth("NOT_THE"+ CREATOR, List.of("DATAPORTAL_USER"));
         var dataqueryHandler = createDataqueryHandler();
         var dataqueryEntity = createDataqueryEntity();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
         doReturn(Optional.of(dataqueryEntity)).when(dataqueryRepository).findById(any(Long.class));
 
-        assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueryById(1L, "NOT THE " + CREATOR));
+        assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueryById(1L, auth));
+    }
+
+    @Test
+    @DisplayName("getDataqueryById() -> Succeeds for admin user")
+    void getDataqueryById_succeedsForAdmin() throws JsonProcessingException {
+        setMockAuth("NOT_THE"+ CREATOR, List.of("ROLE_DATAPORTAL_TEST_ADMIN"));
+        var dataqueryHandler = createDataqueryHandler();
+        var dataqueryEntity = createDataqueryEntity();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        doReturn(Optional.of(dataqueryEntity)).when(dataqueryRepository).findById(any(Long.class));
+
+        Dataquery dataquery = assertDoesNotThrow(() -> dataqueryHandler.getDataqueryById(1L, auth));
+        assertNotNull(dataquery);
+        assertInstanceOf(Dataquery.class, dataquery);
     }
 
     @Test
     @DisplayName("getDataqueryById() -> Throw exception if the query does not exist")
+    @WithMockUser(username = "NOT THE " + CREATOR, roles = {"DATAPORTAL_USER"})
     void getDataqueryById_throwsOnNotFound() {
         var dataqueryHandler = createDataqueryHandler();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
         doReturn(Optional.empty()).when(dataqueryRepository).findById(any(Long.class));
 
-        assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueryById(1L, CREATOR));
+        assertThrows(DataqueryException.class, () -> dataqueryHandler.getDataqueryById(1L, auth));
     }
 
     @Test
