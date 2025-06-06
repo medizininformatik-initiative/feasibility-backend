@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -117,7 +118,7 @@ public class DataqueryHandlerRestControllerIT {
         long dataqueryId = 1L;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
         doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId)).with(csrf()))
@@ -130,7 +131,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataquery_failsOnNotFound() throws Exception {
         long dataqueryId = 1;
 
-        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId)).with(csrf()))
                 .andExpect(status().isNotFound());
@@ -141,7 +142,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataquery_failsOnJsonError() throws Exception {
         long dataqueryId = 1;
 
-        doThrow(JsonProcessingException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(JsonProcessingException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId)).with(csrf()))
                 .andExpect(status().isInternalServerError());
@@ -153,7 +154,7 @@ public class DataqueryHandlerRestControllerIT {
         long dataqueryId = 1L;
         var annotatedQuery = createValidAnnotatedStructuredQuery(false);
 
-        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
         doReturn(annotatedQuery).when(structuredQueryValidation).annotateStructuredQuery(any(StructuredQuery.class), any(Boolean.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl")).with(csrf()))
@@ -166,7 +167,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataqueryCrtdl_failsOnNotFound() throws Exception {
         long dataqueryId = 1;
 
-        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(DataqueryException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl")).with(csrf()))
             .andExpect(status().isNotFound());
@@ -177,7 +178,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataqueryCrtdl_failsOnJsonError() throws Exception {
         long dataqueryId = 1;
 
-        doThrow(JsonProcessingException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doThrow(JsonProcessingException.class).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl")).with(csrf()))
             .andExpect(status().isInternalServerError());
@@ -188,7 +189,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataqueryCrtdlCsv_succeeds() throws Exception {
         long dataqueryId = 1L;
 
-        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
         doReturn(createValidByteArrayOutputStream()).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
@@ -205,7 +206,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataqueryCrtdlCsv_failsOnNotFound() throws Exception {
         long dataqueryId = 1;
 
-        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
         doThrow(DataqueryException.class).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
@@ -219,7 +220,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataqueryCrtdlCsv_failsOnJsonError() throws Exception {
         long dataqueryId = 1;
 
-        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
         doThrow(JsonProcessingException.class).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))
@@ -233,7 +234,7 @@ public class DataqueryHandlerRestControllerIT {
     public void testGetDataqueryCrtdlCsv_failsOnIoException() throws Exception {
         long dataqueryId = 1;
 
-        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(String.class));
+        doReturn(createValidApiDataqueryToGet(dataqueryId)).when(dataqueryHandler).getDataqueryById(any(Long.class), any(Authentication.class));
         doThrow(IOException.class).when(dataqueryHandler).createCsvExportZipfile(any(Dataquery.class));
 
         mockMvc.perform(get(URI.create(PATH_API + PATH_QUERY + PATH_DATA + "/" + dataqueryId + "/crtdl"))

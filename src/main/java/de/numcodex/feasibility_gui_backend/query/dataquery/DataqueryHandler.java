@@ -9,6 +9,8 @@ import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.threeten.extra.PeriodDuration;
 
 import java.io.ByteArrayOutputStream;
@@ -33,6 +35,9 @@ public class DataqueryHandler {
 
   @NonNull
   private Integer maxDataqueriesPerUser;
+
+  @NonNull
+  private String keycloakAdminRole;
 
   public Long storeDataquery(@NonNull Dataquery dataquery, @NonNull String userId) throws DataqueryException, DataqueryStorageFullException {
 
@@ -78,12 +83,13 @@ public class DataqueryHandler {
     }
   }
 
-  public Dataquery getDataqueryById(Long dataqueryId, String userId) throws DataqueryException, JsonProcessingException {
+  public Dataquery getDataqueryById(Long dataqueryId, Authentication userAuthentication) throws DataqueryException, JsonProcessingException {
     de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataquery = dataqueryRepository.findById(dataqueryId).orElseThrow(DataqueryException::new);
-    if (dataquery.getCreatedBy() == null || !dataquery.getCreatedBy().equals(userId)) {
+    if (hasAccess(dataquery, userAuthentication)) {
+      return Dataquery.of(dataquery);
+    } else {
       throw new DataqueryException();
     }
-    return Dataquery.of(dataquery);
   }
 
   public void updateDataquery(Long queryId, Dataquery dataquery, String userId) throws DataqueryException,  DataqueryStorageFullException, JsonProcessingException {
@@ -185,5 +191,16 @@ public class DataqueryHandler {
     zipOutputStream.close();
     byteArrayOutputStream.close();
     return byteArrayOutputStream;
+  }
+
+  private boolean hasAccess(de.numcodex.feasibility_gui_backend.query.persistence.Dataquery dataquery, Authentication authentication) {
+    var creator = dataquery.getCreatedBy();
+    if (creator == null || creator.isBlank()) {
+      return false;
+    }
+    var isAdmin = authentication.getAuthorities().stream()
+        .map(GrantedAuthority::getAuthority)
+        .anyMatch(role -> role.equals(keycloakAdminRole));
+    return isAdmin || creator.equals(authentication.getName());
   }
 }
