@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +21,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 
 @Configuration
@@ -58,9 +56,6 @@ public class WebSecurityConfig {
 
   @Value("${app.keycloakAdminRole}")
   private String keycloakAdminRole;
-
-  @Autowired
-  private HandlerMappingIntrospector introspector;
 
   public interface Jwt2AuthoritiesConverter extends
       Converter<Jwt, Collection<? extends GrantedAuthority>> {
@@ -102,36 +97,35 @@ public class WebSecurityConfig {
       Converter<Jwt, ? extends AbstractAuthenticationToken> authenticationConverter) throws Exception {
 
     http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_TERMINOLOGY + "/**")).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_DATA)).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_DATA + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_DATA + "/*")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_FEASIBILITY)).hasAuthority(keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_QUERY + PATH_FEASIBILITY + PATH_ID_MATCHER + PATH_DETAILED_RESULT)).hasAuthority(keycloakAdminRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_DSE + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_HEALTH)).permitAll()
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_ACTUATOR_INFO)).permitAll()
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_UI)).permitAll()
-                    .requestMatchers(new MvcRequestMatcher(introspector, PATH_SWAGGER_CONFIG)).permitAll()
-                    .anyRequest().authenticated()
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_TERMINOLOGY + "/**")).hasAuthority(keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_DATA)).hasAuthority(keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_DATA + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_DATA + "/*")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_FEASIBILITY)).hasAuthority(keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_FEASIBILITY + PATH_ID_MATCHER + PATH_DETAILED_RESULT)).hasAuthority(keycloakAdminRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_DSE + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_ACTUATOR_HEALTH)).permitAll()
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_ACTUATOR_INFO)).permitAll()
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_SWAGGER_UI)).permitAll()
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_SWAGGER_CONFIG)).permitAll()
+            .anyRequest().authenticated()
+        )
+        .oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt
+                .jwtAuthenticationConverter(authenticationConverter)
             )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                    .jwt(jwt -> jwt
-                            .jwtAuthenticationConverter(authenticationConverter)
-                    )
-            )
-            .cors(Customizer.withDefaults())
-            .anonymous(Customizer.withDefaults())
-            .sessionManagement((session) -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .requiresChannel(channel -> {
-              if (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) {
-                channel.anyRequest().requiresSecure();
-              }
-            });
+        )
+        .cors(Customizer.withDefaults())
+        .anonymous(Customizer.withDefaults())
+        .sessionManagement((session) -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+    if (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) {
+      http.redirectToHttps(Customizer.withDefaults());
+    }
     return http.build();
   }
 }
