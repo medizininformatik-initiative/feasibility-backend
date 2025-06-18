@@ -104,7 +104,7 @@ services:
       xpack.security.enabled: false
 
   blaze:
-    image: "samply/blaze:0.30"
+    image: "samply/blaze:1.0.3"
     environment:
       BASE_URL: "http://blaze:8080"
       JAVA_TOOL_OPTIONS: "-Xmx1g"
@@ -115,7 +115,7 @@ services:
       - "blaze-data:/app/data"
 
   flare:
-    image: ghcr.io/medizininformatik-initiative/flare:2.3.0
+    image: ghcr.io/medizininformatik-initiative/flare:2.5.0
     ports:
       - "8092:8080"
     environment:
@@ -135,7 +135,7 @@ services:
       - "dataportal-auth-db:/var/lib/postgresql/data"
 
   auth:
-    image: keycloak/keycloak:21.1
+    image: keycloak/keycloak:26.2
     command: ["start", "--import-realm"]
     restart: unless-stopped
     environment:
@@ -146,12 +146,14 @@ services:
       KEYCLOAK_ADMIN: "keycloakadmin"
       KEYCLOAK_ADMIN_PASSWORD: "keycloak"
       KC_HTTP_RELATIVE_PATH: "/auth"
-      KC_HOSTNAME_URL: "http://auth:8080/auth"
-      KC_HOSTNAME_ADMIN_URL: "http://auth:8080/auth/keycloakadmin"
+      KC_HOSTNAME: "http://auth:8080/auth"
+      KC_HOSTNAME_ADMIN: "http://auth:8080/keycloakadmin"
       KC_LOG_LEVEL: "info"
-      KC_PROXY: "edge"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "8083:8080"
+      - "9003:9000"
     volumes:
       - ./keycloak-init/dataportal-realm.json:/opt/keycloak/data/import/realm.json:ro
     depends_on:

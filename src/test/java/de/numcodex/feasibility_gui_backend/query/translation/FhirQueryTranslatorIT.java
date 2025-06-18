@@ -61,7 +61,7 @@ public class FhirQueryTranslatorIT {
     // Note that Flare does not come with a health endpoint. Thus, we will simply check if we get a response of any
     // kind in order to assume that the server is up rendering the container ready.
     @Container
-    private final GenericContainer<?> flare = new GenericContainer<>(DockerImageName.parse("ghcr.io/num-codex/codex-flare:0.0.8"))
+    private final GenericContainer<?> flare = new GenericContainer<>(DockerImageName.parse("ghcr.io/medizininformatik-initiative/flare:2.5.0"))
             .withExposedPorts(5000)
             .withFileSystemBind("ontology/dataportal-code-tree.json", "/opt/flare/src/query_parser/codex/codex-code-tree.json", READ_ONLY)
             .withFileSystemBind("ontology/dataportal-term-code-mapping.json", "/opt/flare/src/query_parser/codex/codex-mapping.json", READ_ONLY)
