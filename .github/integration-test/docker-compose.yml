@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   dataportal-backend:
     container_name: dataportal-backend
