@@ -52,6 +52,7 @@ handles obfuscation by adding or subtracting a random number <=5.
 | BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_ID     | Client ID to use when authenticating at OpenID Connect provider                                 | `foo_client`                          |         |
 | BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_SECRET | Client secret to use when authenticating at OpenID Connect provider                             | `verysecurepassword`                  |         |
 | BROKER_CLIENT_DIRECT_USE_CQL                  | Whether to use a CQL server or not.                                                             |                                       | `false` |
+| BROKER_CLIENT_DIRECT_TIMEOUT                  | Maximum time waiting for response from FLARE or FHIR server (ISO 8601 duration)                 | `PT24H`                               | `PT20S` |
 | BROKER_CLIENT_OBFUSCATE_RESULT_COUNT          | Whether the result counts retrieved from the direct broker shall be obfuscated                  |                                       | `false` |
 
 This is irrelevant if _BROKER_CLIENT_DIRECT_ENABLED_ is set to false.
