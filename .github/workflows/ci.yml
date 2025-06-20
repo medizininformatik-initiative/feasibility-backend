@@ -194,7 +194,7 @@ jobs:
         run: .github/scripts/load-test-data.sh
 
       - name: Wait for Keycloak
-        run: .github/scripts/wait-for-url.sh  http://localhost:8083/auth/
+        run: .github/scripts/wait-for-url.sh  http://localhost:9003/auth/health
 
       - name: Create Test User in Keycloak
         run: .github/scripts/create-keycloak-user.sh
