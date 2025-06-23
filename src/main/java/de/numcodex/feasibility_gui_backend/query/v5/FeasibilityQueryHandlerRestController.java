@@ -12,11 +12,14 @@ import de.numcodex.feasibility_gui_backend.query.persistence.UserBlacklistReposi
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelper;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.InvalidAuthenticationException;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingService;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -268,6 +271,17 @@ public class FeasibilityQueryHandlerRestController {
   public ResponseEntity<StructuredQuery> validateStructuredQuery(
       @Valid @RequestBody StructuredQuery query) {
     return new ResponseEntity<>(structuredQueryValidation.annotateStructuredQuery(query, false), HttpStatus.OK);
+  }
+
+  @PostMapping(value = "/cql", produces = "text/cql")
+  public ResponseEntity<String> sq2Cql(@Valid @RequestBody StructuredQuery query) {
+    try {
+      var cql = queryHandlerService.translateQueryToCql(query);
+      var sanitizedCql = StringEscapeUtils.escapeHtml4(cql);
+      return new ResponseEntity<>(sanitizedCql, HttpStatus.OK);
+    } catch (QueryTranslationException e) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
   }
 
   private boolean hasAccess(Long queryId, Authentication authentication) {
