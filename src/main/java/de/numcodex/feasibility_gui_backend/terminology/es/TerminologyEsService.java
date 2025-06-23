@@ -205,6 +205,7 @@ public class TerminologyEsService {
       boolQuery = new BoolQuery.Builder()
           .should(List.of(boolQueryWithTranslations._toQuery(), boolQueryWithOriginal._toQuery()))
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .minimumShouldMatch("1")
           .build();
     }
 
