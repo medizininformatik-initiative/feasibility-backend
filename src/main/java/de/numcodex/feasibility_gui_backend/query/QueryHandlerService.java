@@ -16,14 +16,12 @@ import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationExc
 import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslator;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.threeten.extra.PeriodDuration;
 import reactor.core.publisher.Mono;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
