@@ -1,11 +1,16 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import de.numcodex.feasibility_gui_backend.query.broker.BrokerClient;
+import de.numcodex.feasibility_gui_backend.query.broker.NoOpInterceptor;
 import de.numcodex.feasibility_gui_backend.query.broker.OAuthInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpRequestExecutor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +43,7 @@ public class DirectSpringConfig {
     private String issuer;
     private String clientId;
     private String clientSecret;
+    private boolean useAsyncRequestPattern;
 
     public DirectSpringConfig(@Value("${app.broker.direct.useCql:false}") boolean useCql,
             @Value("${app.flare.baseUrl:}") String flareBaseUrl, @Value("${app.cql.baseUrl:}") String cqlBaseUrl,
@@ -46,7 +52,8 @@ public class DirectSpringConfig {
             @Value("${app.broker.direct.auth.oauth.issuer.url:}") String issuer,
             @Value("${app.broker.direct.auth.oauth.client.id:}") String clientId,
             @Value("${app.broker.direct.auth.oauth.client.secret:}") String clientSecret,
-            @Value("#{T(java.time.Duration).parse('${app.broker.direct.timeout:PT20S}')}") Duration timeout) {
+            @Value("#{T(java.time.Duration).parse('${app.broker.direct.timeout:PT20S}')}") Duration timeout,
+            @Value("${app.broker.direct.cql.useAsyncRequestPattern:false}") boolean useAsyncRequestPattern) {
         this.useCql = useCql;
         this.flareBaseUrl = flareBaseUrl;
         this.cqlBaseUrl = cqlBaseUrl;
@@ -56,6 +63,7 @@ public class DirectSpringConfig {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.timeout = timeout;
+        this.useAsyncRequestPattern = useAsyncRequestPattern;
     }
 
     @Qualifier("direct")
@@ -74,24 +82,34 @@ public class DirectSpringConfig {
 
     @Bean
     public IGenericClient getFhirClient(FhirContext fhirContext) {
+        var timeoutMs = (int) Math.min(timeout.toMillis(), Integer.MAX_VALUE);
         var clientFactory = fhirContext.getRestfulClientFactory();
-        clientFactory.setSocketTimeout((int) timeout.toMillis());
         fhirContext.setRestfulClientFactory(clientFactory);
+        var httpClient = HttpClientBuilder.create()
+                .setRequestExecutor(
+                        useAsyncRequestPattern ? new AsyncRequestExecutor() : new HttpRequestExecutor())
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setSocketTimeout(timeoutMs).build())
+                .build();
+        clientFactory.setSocketTimeout(timeoutMs);
+        clientFactory.setHttpClient(httpClient);
         var client = fhirContext.newRestfulGenericClient(cqlBaseUrl);
-        if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
-            log.info("Configure direct broker instance with basic authentication"
-                    + " (type: cql, url: {}, username: {}, timeout: {})",
-                    cqlBaseUrl, username, timeout);
-            client.registerInterceptor(new BasicAuthInterceptor(username, password));
-        } else if (!isNullOrEmpty(issuer) && !isNullOrEmpty(clientId) && !isNullOrEmpty(clientSecret)) {
-            log.info("Configure direct broker instance with oauth authentication"
-                    + " (type: cql, url: {}, issuer: {}, client-id: {}, timeout: {})",
-                    cqlBaseUrl, issuer, clientId, timeout);
-            client.registerInterceptor(new OAuthInterceptor(issuer, clientId, clientSecret));
-        } else {
-            log.info("Configure direct broker instance (type: cql, url: {}, timeout: {})", cqlBaseUrl, timeout);
-        }
+        client.registerInterceptor(getAuth());
+
         return client;
+    }
+
+    private IClientInterceptor getAuth() {
+        if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
+            log.info("Configure direct broker instance with basic authentication (username: {})", username);
+            return new BasicAuthInterceptor(username, password);
+        } else if (!isNullOrEmpty(issuer) && !isNullOrEmpty(clientId) && !isNullOrEmpty(clientSecret)) {
+            log.info("Configure direct broker instance with oauth authentication (issuer: {}, client-id: {})", issuer,
+                    clientId);
+            return new OAuthInterceptor(issuer, clientId, clientSecret);
+        } else {
+            return new NoOpInterceptor();
+        }
     }
 
     @Bean
@@ -112,5 +130,4 @@ public class DirectSpringConfig {
             return clientBuilder.build();
         }
     }
-
 }
