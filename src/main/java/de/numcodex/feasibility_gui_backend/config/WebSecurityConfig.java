@@ -97,6 +97,8 @@ public class WebSecurityConfig {
       Converter<Jwt, ? extends AbstractAuthenticationToken> authenticationConverter) throws Exception {
 
     http.authorizeHttpRequests(authorize -> authorize
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_SWAGGER_CONFIG)).permitAll()
+            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_SWAGGER_UI)).permitAll()
             .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_TERMINOLOGY + "/**")).hasAuthority(keycloakAllowedRole)
             .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_DATA)).hasAuthority(keycloakAllowedRole)
             .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_QUERY + PATH_DATA + PATH_USER_ID_MATCHER)).hasAuthority(keycloakAdminRole)
@@ -108,8 +110,6 @@ public class WebSecurityConfig {
             .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_API + PATH_CODEABLE_CONCEPT + "/**")).hasAnyAuthority(keycloakAdminRole, keycloakAllowedRole)
             .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_ACTUATOR_HEALTH)).permitAll()
             .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_ACTUATOR_INFO)).permitAll()
-            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_SWAGGER_UI)).permitAll()
-            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(PATH_SWAGGER_CONFIG)).permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2
