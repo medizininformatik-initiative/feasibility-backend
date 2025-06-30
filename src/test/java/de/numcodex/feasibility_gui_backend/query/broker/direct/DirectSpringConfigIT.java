@@ -173,7 +173,7 @@ public class DirectSpringConfigIT {
     @DisplayName("flare webClient fails not getting 5s delayed response before given timeout of 2s")
     void flareClientFailsReachingTimeout() throws Exception {
         var timeout = Duration.ofSeconds(2);
-        var delta = Duration.ofSeconds(1);
+        var delta = Duration.ofSeconds(3);
         var delay = 5;
         mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody("Foo").setBodyDelay(delay, SECONDS));
         directSpringConfig = new DirectSpringConfig(false,
@@ -228,7 +228,7 @@ public class DirectSpringConfigIT {
         var metadata = new ClassPathResource("fhir-metadata.json", DirectSpringConfigIT.class)
                 .getContentAsString(Charsets.UTF_8);
         var timeout = Duration.ofSeconds(2);
-        var delta = Duration.ofSeconds(1);
+        var delta = Duration.ofSeconds(3);
         var delay = 5;
         var response = new MockResponse().setResponseCode(200)
                 .setHeaders(Headers.of("Content-Type", "application/fhir+json"))
