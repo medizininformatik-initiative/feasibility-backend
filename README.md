@@ -1,5 +1,8 @@
 # Dataportal Backend
 
+## Api Documentation
+
+The OpenAPI documentation is available at <baseurl>/api/v5/swagger-ui/index.html
 
 ## Configuration Base
 
