@@ -9,27 +9,28 @@ The OpenAPI documentation is available at <baseurl>/api/v5/swagger-ui/index.html
 | EnvVar                                  | Description                                                                                                                                                            | Example            | Default                                           |
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|---------------------------------------------------|
 | LOG_LEVEL                               | Sets the log level being used. Possible values are: `error`, `warn`, `info`, `debug` and `trace`.                                                                      |                    | `warn`                                            |
-| HIBERNATE_SHOW_SQL                      | Show the sql statements hibernate executes                                                                                                                             |                    | `false`                                           |
+| HIBERNATE_SHOW_SQL                      | Show the sql statements hibernate executes.                                                                                                                            |                    | `false`                                           |
+| LOG_LEVEL_SQL                           | The log level for hibernate.                                                                                                                                           |                    | `warn`                                            |
 | BROKER_CLIENT_MOCK_ENABLED              | Enables the mock client. Possible values are `true` and `false`.                                                                                                       |                    | `true`                                            |
 | BROKER_CLIENT_DIRECT_ENABLED            | Enables the direct client. Possible values are `true` and `false`.                                                                                                     |                    | `false`                                           |
 | BROKER_CLIENT_AKTIN_ENABLED             | Enables the aktin client. Possible values are `true` and `false`.                                                                                                      |                    | `false`                                           |
 | BROKER_CLIENT_DSF_ENABLED               | Enables the dsf client. Possible values are `true` and `false`.                                                                                                        |                    | `false`                                           |
-| KEYCLOAK_BASE_URL                       | Base URL of the keycloak instance.                                                                                                                                     |                    | `http://localhost:8080`                           |
 | KEYCLOAK_BASE_URL_ISSUER                | Base URL the keycloak instance uses in the issuer claim                                                                                                                |                    | `http://localhost:8080`                           |
 | KEYCLOAK_BASE_URL_JWK                   | Base URL for the JWK Set URI of the keycloak instance                                                                                                                  |                    | `http://localhost:8080`                           |
 | KEYCLOAK_REALM                          | Realm to be used for checking bearer tokens.                                                                                                                           |                    | `dataportal`                                      |
-| KEYCLOAK_CLIENT_ID                      | Client ID to be used for checking bearer tokens.                                                                                                                       |                    | `dataportal-webapp`                               |
-| KEYCLOAK_ALLOWED_ROLE                   | Role that has to be part of the bearer token in order for the requester to be authorized.                                                                              |                    | `DataportalUser`                                  |
+| KEYCLOAK_ALLOWED_ROLE                   | The name of the role a user needs to have basic access to the dataportal function.                                                                                     |                    | `DataportalUser`                                  |
 | KEYCLOAK_POWER_ROLE                     | Optional role that can be assigned to a user to free them from being subject to any hard limits (see _PRIVACY_QUOTA_HARD.*_ EnvVars).                                  |                    | `DataportalPowerUser`                             |
 | KEYCLOAK_ADMIN_ROLE                     | Role that gives admin rights to a user. Admins do not fall under any limits and can also see un-obfuscated site names.                                                 |                    | `DataportalAdmin`                                 |
 | SPRING_DATASOURCE_URL                   | The JDBC URL of the Postgres dataportal database.                                                                                                                      |                    | `jdbc:postgresql://dataportal-db:5432/dataportal` |
 | SPRING_DATASOURCE_USERNAME              | Username to connect to the Postgres dataportal database.                                                                                                               |                    | `dataportaluser`                                  |
 | SPRING_DATASOURCE_PASSWORD              | Password to connect to the Postgres dataportal database.                                                                                                               |                    | `dataportalpw`                                    |
-| ONTOLOGY_DB_MIGRATION_FOLDER            |                                                                                                                                                                        |                    | `ontology/migration`                              |
-| MAPPINGS_FILE                           |                                                                                                                                                                        |                    | `ontology/termCodeMapping.json`                   |
-| CONCEPT_TREE_FILE                       |                                                                                                                                                                        |                    | `ontology/conceptTree.json`                       |
-| CQL_TRANSLATE_ENABLED                   |                                                                                                                                                                        |                    | `true`                                            |
-| FHIR_TRANSLATE_ENABLED                  |                                                                                                                                                                        |                    | `false`                                           |
+| ONTOLOGY_DB_MIGRATION_FOLDER            | The folder containing SQL migration scripts used by Flyway.                                                                                                            |                    | `ontology/migration`                              |
+| MAPPINGS_FILE                           | The file containing the mappings for CQL translation.                                                                                                                  |                    | `ontology/mapping_cql.json`                       |
+| CONCEPT_TREE_FILE                       | The file containing the mapping tree for CQL translation.                                                                                                              |                    | `ontology/mapping_tree.json`                      |
+| DSE_PROFILE_TREE_FILE                   | The file containing the tree of the profiles needed for **d**ata **s**election and **e**xtraction.                                                                     |                    | `ontology/dse/profile_tree.json`                  |
+| TERMINOLOGY_SYSTEMS_FILE                | The file containing mappings between terminology system urls and "normal" names.                                                                                       |                    | `ontology/terminology_systems.json`               |
+| CQL_TRANSLATE_ENABLED                   | When set to `true`, queries will be translated to CQL in addition to the structured query representation.                                                              |                    | `true`                                            |
+| FHIR_TRANSLATE_ENABLED                  | When set to `true`, queries will be translated to fhir search in addition to the structured query representation.                                                      |                    | `false`                                           |
 | FLARE_WEBSERVICE_BASE_URL               | URL of the local FLARE webservice - needed for FHIR query translation and when running the DIRECT path                                                                 |                    | `http://localhost:5000`                           |
 | CQL_SERVER_BASE_URL                     | URL of the local FHIR server that handles CQL requests                                                                                                                 |                    | `http://cql`                                      |
 | API_BASE_URL                            | Sets the base URL of the webservice. This is necessary if the webservice is running behind a proxy server. If not filled, the API base URL is the request URL          | `https://host/api` |                                                   |
@@ -39,6 +40,9 @@ The OpenAPI documentation is available at <baseurl>/api/v5/swagger-ui/index.html
 | QUERYRESULT_DISABLE_LOG_FILE_ENCRYPTION | Disable encryption of the result log file.                                                                                                                             | `true` / `false`   |                                                   |
 | ALLOWED_ORIGINS                         | Allowed origins for cross-origin requests. This should at least cover the frontend address.                                                                            |                    | `http://localhost`                                |
 | MAX_SAVED_QUERIES_PER_USER              | How many slots does a user have to store saved queries.                                                                                                                |                    | `10`                                              |
+| EXPORT_CSV_DELIMITER                    | The delimiter used when exporting dataqueries as csv files.                                                                                                            |                    | `;`                                               |
+| EXPORT_CSV_TEXTWRAPPER                  | The wrapper char used to wrap an entry in the csv export of a dataquery.                                                                                               |                    | `"`                                               |
+| PURGE_EXPIRED_QUERIES                   | Cron expression to schedule when to check for (and delete) expired queries                                                                                             |                    | `0 0 * * * *`                                     |
 
 
 ### Running the DIRECT Path
@@ -62,20 +66,20 @@ This is irrelevant if _BROKER_CLIENT_DIRECT_ENABLED_ is set to false.
 
 #### Running the DIRECT Path with Local FLARE
 
-In order to run the backend using the DIRECT broker path with FLARE,
+To run the backend using the DIRECT broker path with FLARE,
 the _FLARE_WEBSERVICE_BASE_URL_ environment variable needs to be set to a running instance of a FLARE
 instance the backend is allowed to connect to.
 
 #### Running the DIRECT Path with Local CQL Server
 
-In order to run the backend using the DIRECT broker path with CQL,
+To run the backend using the DIRECT broker path with CQL,
 the _CQL_SERVER_BASE_URL_ environment variable needs to be set to a running instance of a CQL compatible
 FHIR server.
 
 
 ### Running the AKTIN Broker Path
 
-In order to run the backend using the AKTIN broker path, the following environment variables need to be set:
+To run the backend using the AKTIN broker path, the following environment variables need to be set:
 
 | EnvVar                | Description                                              | Example                         | Default |
 |-----------------------|----------------------------------------------------------|---------------------------------|---------|
@@ -88,7 +92,7 @@ corresponding API-key entry with `OU=admin` contained in the DN-string.
 
 ### Running the DSF Path
 
-In order to run the backend using the DSF path, the following environment variables need to be set:
+To run the backend using the DSF path, the following environment variables need to be set:
 
 | EnvVar                         | Description                                                                                                           | Example              | Default |
 |--------------------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------|---------|
@@ -105,13 +109,13 @@ In order to run the backend using the DSF path, the following environment variab
 
 ### Privacy and Obfuscation
 
-In order to prevent potentially malicious attempts to obtain critical patient data, several
-countermeasures have been implemented. Users are restricted to creating a certain amount of queries per timeframe.
+To prevent potentially malicious attempts to obtain critical patient data, several
+countermeasures have been implemented. Users are restricted to creating a certain number of queries per timeframe.
 Permanently pushing this limit will get a user blacklisted and needs manual intervention if the user shall be de-listed again.
 Moreover, retrieving detailed results for queries (including a breakdown by (obfuscated) site names) is also limited.
 
 If the number of responding sites is below the configured threshold, only the total number of results will be provided.
-If the number of total results is below threshold, no result will be provided.
+If the number of total results is below the threshold, no result will be provided.
 
 
 | EnvVar                                                 | Description                                                                                                                                            | Example | Default |
@@ -134,7 +138,7 @@ Searching the ontology/ontologies will move away from the local files towards an
 search service. For now, the configuration of that service has to be done manually. So additional steps are necessary to
 use it. (NOT YET DOCUMENTED)
 
-In order to configure the location of the external service, use the following parameters.
+To configure the location of the external service, use the following parameters.
 
 
 | EnvVar                        | Description                                     | Example            | Default                          |
@@ -155,7 +159,7 @@ have the .pem extension.
 
 ## Setting up Development
 
-In order to run this project the following steps need to be followed:
+To run this project, the following steps need to be followed:
 
 1. Add GitHub package repositories
 2. Build the project
@@ -166,11 +170,11 @@ In order to run this project the following steps need to be followed:
 
 This project uses dependencies ([sq2cql](https://github.com/medizininformatik-initiative/sq2cql)) which are not hosted on maven central but on GitHub.
 
-In order to download artifacts from GitHub package repositories, you need to add your GitHub login credentials to your central maven config file.
+To download artifacts from GitHub package repositories, you need to add your GitHub login credentials to your central maven config file.
 
-For more information take a look at this GitHub documentation about [authentication](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages#authenticating-to-github-packages).
+For more information, take a look at this GitHub documentation about [authentication](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages#authenticating-to-github-packages).
 
-In order to install the packages using maven in your own projects you need a personal GitHub access token. This [GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) shows you how to generate one.
+To install the packages using maven in your own projects, you need a personal GitHub access token. This [GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) shows you how to generate one.
 
 After that, add the following `<server>` configurations to the `<servers>` section in your local _.m2/settings.xml_. Replace `USERNAME` with your GitHub username and `TOKEN` with the previously generated personal GitHub access token. The token needs at least the scope `read:packages`.
 
@@ -221,10 +225,10 @@ One can then connect to the same database when starting the backend in an IDE.
 This backend provides a rest webservice which connects the [Dataportal GUI](https://github.com/medizininformatik-initiative/feasibility-gui)
 and the corresponding middlewares.
 
-To send a query to the backend, use the following example query:
+To send a feasibility query to the backend, use the following example query:
 
 ```
-curl --location --request POST 'http://localhost:8090/api/v3/query' \
+curl --location --request POST 'http://localhost:8090/api/v5/query/feasibility' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "version": "http://to_be_decided.com/draft-1/schema#",
@@ -254,7 +258,7 @@ curl --location --request POST 'http://localhost:8090/api/v3/query' \
 ```
 another example
 ```
-curl --location --request POST 'http://localhost:8090/api/v3/query' \
+curl --location --request POST 'http://localhost:8090/api/v5/query/feasibility' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "version": "http://to_be_decided.com/draft-1/schema#",
@@ -279,7 +283,7 @@ curl --location --request POST 'http://localhost:8090/api/v3/query' \
 The response to this call will return a location header, which links to the endpoint where the result
 for the query can be collected with one of the available sub-paths.
 For a full description of the api, please refer to the swagger documentation (either in static/v3/api-docs/swagger.yaml
-or at http://localhost:8090/swagger-ui/index.html when running)
+or at http://localhost:8090/api/v5/swagger-ui/index.html when running)
 
 
 ## Starting with Docker
