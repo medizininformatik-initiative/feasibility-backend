@@ -1,13 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query.broker.direct;
 
-import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
-import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
-import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.numcodex.feasibility_gui_backend.query.broker.QueryDefinitionNotFoundException;
@@ -15,8 +7,6 @@ import de.numcodex.feasibility_gui_backend.query.broker.QueryNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.broker.SiteNotFoundException;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
-import java.io.IOException;
-import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -32,6 +22,18 @@ import org.testcontainers.images.PullPolicy;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.IOException;
+import java.util.stream.Stream;
+
+import static de.numcodex.feasibility_gui_backend.query.QueryMediaType.CQL;
+import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 @Testcontainers
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
@@ -41,12 +43,11 @@ class DirectBrokerClientCqlIT {
     private static final int ASYNC_TIMEOUT_WAIT_MS = 2000;
     private static final Long TEST_BACKEND_QUERY_ID = 1L;
 
-    private final GenericContainer<?> blaze = new GenericContainer<>(
-        DockerImageName.parse("samply/blaze:0.30"))
-        .withImagePullPolicy(PullPolicy.alwaysPull())
-        .withExposedPorts(8080)
-        .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500))
-        .withStartupAttempts(3);
+    private final GenericContainer<?> blaze = new GenericContainer<>(DockerImageName.parse("samply/blaze:1.0.3"))
+            .withImagePullPolicy(PullPolicy.alwaysPull())
+            .withExposedPorts(8080)
+            .waitingFor(Wait.forHttp("/health").forStatusCodeMatching(c -> c >= 200 && c <= 500))
+            .withStartupAttempts(3);
 
     DirectBrokerClientCql client;
     private final FhirContext fhirContext = FhirContext.forR4();

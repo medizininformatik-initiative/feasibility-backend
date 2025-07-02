@@ -12,20 +12,20 @@ import de.numcodex.feasibility_gui_backend.query.persistence.*;
 import de.numcodex.feasibility_gui_backend.query.result.RandomSiteNameGenerator;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslator;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.threeten.extra.PeriodDuration;
 import reactor.core.publisher.Mono;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class QueryHandlerService {
 
     public enum ResultDetail {
@@ -34,22 +34,34 @@ public class QueryHandlerService {
         DETAILED
     }
 
-    @NonNull
+    public QueryHandlerService(@NonNull QueryDispatcher queryDispatcher,
+                               @NonNull QueryRepository queryRepository,
+                               @NonNull QueryContentRepository queryContentRepository,
+                               @NonNull ResultService resultService,
+                               @NonNull StructuredQueryValidation structuredQueryValidation,
+                               @NonNull @Qualifier("cql") QueryTranslator queryTranslator,
+                               @NonNull ObjectMapper jsonUtil) {
+        this.queryDispatcher = queryDispatcher;
+        this.queryRepository = queryRepository;
+        this.queryContentRepository = queryContentRepository;
+        this.resultService = resultService;
+        this.structuredQueryValidation = structuredQueryValidation;
+        this.queryTranslator = queryTranslator;
+        this.jsonUtil = jsonUtil;
+    }
+
     private final QueryDispatcher queryDispatcher;
 
-    @NonNull
     private final QueryRepository queryRepository;
 
-    @NonNull
     private final QueryContentRepository queryContentRepository;
 
-    @NonNull
     private final ResultService resultService;
 
-    @NonNull
     private final StructuredQueryValidation structuredQueryValidation;
 
-    @NonNull
+    private QueryTranslator queryTranslator;
+
     private ObjectMapper jsonUtil;
 
     public Mono<Long> runQuery(StructuredQuery structuredQuery, String userId) {
@@ -146,5 +158,9 @@ public class QueryHandlerService {
             .used(hardUsed.intValue())
             .build())
         .build();
+  }
+
+  public String translateQueryToCql(StructuredQuery structuredQuery) throws QueryTranslationException {
+        return queryTranslator.translate(structuredQuery);
   }
 }

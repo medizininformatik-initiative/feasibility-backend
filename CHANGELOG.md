@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [7.2.0] - 2025-07-02
+
+- Based on ontology **[v3.8.1](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.8.1)**
+
+### Added
+- CQL execution via direct broker can now be done asynchronously ([#530](https://github.com/medizininformatik-initiative/feasibility-backend/issues/530))
+- Timeouts for direct broker are configurable (for both flare and CQL) ([#531](https://github.com/medizininformatik-initiative/feasibility-backend/issues/531))
+- Structured queries can be translated to CQL via POST ([#516](https://github.com/medizininformatik-initiative/feasibility-backend/issues/516))
+- Formerly undocumented parameters have been added to the README ([#542](https://github.com/medizininformatik-initiative/feasibility-backend/issues/542))
+### Changed
+- Deprecated spring security methods have been replaced by current ones ([#526](https://github.com/medizininformatik-initiative/feasibility-backend/issues/526))
+- Docker images have been updated (blaze 1.0.3, keycloak 26.2, flare 2.5.0)
+- OpenAPI documentation path has been moved under the default api path ([#537](https://github.com/medizininformatik-initiative/feasibility-backend/issues/537))
+- Docker base image has been updated to eclipse-temurin:24-jre ([#542](https://github.com/medizininformatik-initiative/feasibility-backend/issues/542))
+- Direct broker configuration in application.yml has been moved to one place ([#544](https://github.com/medizininformatik-initiative/feasibility-backend/issues/544))
+### Deprecated
+### Removed
+- Unused tables and derived entities have been removed ([#359](https://github.com/medizininformatik-initiative/feasibility-backend/issues/359))
+- Unused parameters have been removed from the README and the example compose file ([#542](https://github.com/medizininformatik-initiative/feasibility-backend/issues/542))
+### Fixed
+- Searching for terminology entries while a filter is selected no longer returns false positives ([#533](https://github.com/medizininformatik-initiative/feasibility-backend/issues/533))
+- Retrieving the query list of a user by an admin account correctly contains the resultSize now (if set) ([#540](https://github.com/medizininformatik-initiative/feasibility-backend/issues/540))
+### Security
+- Updated dependencies (postgresql, opencsv)
+- Updated spring boot to 3.5.3 ([#534](https://github.com/medizininformatik-initiative/feasibility-backend/issues/534))
+
 ## [7.1.2] - 2025-06-06
 
 - Based on ontology **[v3.7.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.7.0)**

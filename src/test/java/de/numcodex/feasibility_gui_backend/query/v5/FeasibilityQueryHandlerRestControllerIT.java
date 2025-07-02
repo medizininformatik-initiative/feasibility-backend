@@ -1,4 +1,5 @@
 package de.numcodex.feasibility_gui_backend.query.v5;
+import de.numcodex.feasibility_gui_backend.common.api.Unit;
 import de.numcodex.feasibility_gui_backend.config.WebSecurityConfig;
 import de.numcodex.feasibility_gui_backend.query.api.*;
 
@@ -18,6 +19,7 @@ import de.numcodex.feasibility_gui_backend.query.ratelimiting.AuthenticationHelp
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingInterceptor;
 import de.numcodex.feasibility_gui_backend.query.ratelimiting.RateLimitingServiceSpringConfig;
 import de.numcodex.feasibility_gui_backend.query.result.ResultLine;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslationException;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 
 import java.sql.Timestamp;
@@ -45,7 +47,9 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.List;
 
+import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
 import static de.numcodex.feasibility_gui_backend.config.WebSecurityConfig.*;
+import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
 import static de.numcodex.feasibility_gui_backend.query.persistence.ResultType.SUCCESS;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
@@ -373,24 +377,62 @@ public class FeasibilityQueryHandlerRestControllerIT {
             .andExpect(status().isOk());
     }
 
+    @Test
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
+    public void testSq2Cql_succeeds() throws Exception  {
+        doReturn(createDummyCql()).when(queryHandlerService).translateQueryToCql(any(StructuredQuery.class));
+
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/cql")).with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(jsonUtil.writeValueAsString(createValidStructuredQuery())))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("text/cql;charset=UTF-8"));
+    }
+
+    @Test
+    @WithMockUser(roles = {"DATAPORTAL_TEST_USER"}, username = "test")
+    public void testSq2Cql_failsWith422() throws Exception  {
+        doThrow(QueryTranslationException.class).when(queryHandlerService).translateQueryToCql(any(StructuredQuery.class));
+
+        mockMvc.perform(post(URI.create(PATH_API + PATH_QUERY + PATH_FEASIBILITY + "/cql")).with(csrf())
+                .contentType(APPLICATION_JSON)
+                .content(jsonUtil.writeValueAsString(createValidStructuredQuery())))
+            .andExpect(status().isUnprocessableEntity());
+    }
+
     @NotNull
     private static StructuredQuery createValidStructuredQuery() {
         var termCode = TermCode.builder()
-                .code("LL2191-6")
-                .system("http://loinc.org")
-                .display("Geschlecht")
-                .build();
-        var inclusionCriterion = Criterion.builder()
-                .termCodes(List.of(termCode))
-                .attributeFilters(List.of())
-                .context(termCode)
-                .build();
+            .code("424144002")
+            .system("http://snomed.info/sct")
+            .display("Gegenwärtiges chronologisches Alter")
+            .build();
+        var context = TermCode.builder()
+            .code("Patient")
+            .system("fdpg.mii.cds")
+            .version("1.0.0")
+            .display("Patient")
+            .build();
+        var unit = Unit.builder()
+            .code("a")
+            .display("a")
+            .build();
+        var valueFilter = ValueFilter.builder()
+            .type(QUANTITY_COMPARATOR)
+            .comparator(GREATER_EQUAL)
+            .quantityUnit(unit)
+            .value(50.0)
+            .build();
+        var criterion = Criterion.builder()
+            .termCodes(List.of(termCode))
+            .context(context)
+            .valueFilter(valueFilter)
+            .build();
         return StructuredQuery.builder()
-                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-                .inclusionCriteria(List.of(List.of(inclusionCriterion)))
-                .exclusionCriteria(List.of())
-                .display("foo")
-                .build();
+            .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+            .inclusionCriteria(List.of(List.of(criterion)))
+            .exclusionCriteria(List.of())
+            .build();
     }
 
     @NotNull
@@ -576,5 +618,23 @@ public class FeasibilityQueryHandlerRestControllerIT {
                     .build()
             )
             .build();
+    }
+
+    @NotNull
+    private String createDummyCql() {
+        return """
+            library Retrieve version '1.0.0'
+            using FHIR version '4.0.0'
+            include FHIRHelpers version '4.0.0'
+            
+            context Patient
+            
+            define Criterion:
+              AgeInYears() >= 50.0
+            
+            define InInitialPopulation:
+              Criterion
+            
+            """;
     }
 }

@@ -7,7 +7,6 @@ import de.numcodex.feasibility_gui_backend.query.api.AttributeFilter;
 import de.numcodex.feasibility_gui_backend.query.api.StructuredQuery;
 import de.numcodex.feasibility_gui_backend.query.api.TimeRestriction;
 import de.numcodex.feasibility_gui_backend.query.api.ValueFilter;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,147 +19,153 @@ import java.net.URI;
 import java.util.List;
 
 import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_EQUAL;
-import static de.numcodex.feasibility_gui_backend.common.api.Comparator.GREATER_THAN;
 import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.CONCEPT;
 import static de.numcodex.feasibility_gui_backend.query.api.ValueFilterType.QUANTITY_COMPARATOR;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Tag("query")
 @Tag("translation")
-@Disabled("Until we have a version of sq2cql that actually supports translating a structured query v2.")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
-        classes = QueryTranslatorSpringConfig.class,
-        properties = {
-                "app.cqlTranslationEnabled=true",
-                "app.fhirTranslationEnabled=false",
-                "app.mappingsFile=./ontology/dataportal-term-code-mapping.json",
-                "app.conceptTreeFile=./ontology/dataportal-code-tree.json"
-        }
+    classes = QueryTranslatorSpringConfig.class,
+    properties = {
+        "app.cqlTranslationEnabled=true",
+        "app.fhirTranslationEnabled=false"
+    }
 )
 @SuppressWarnings("NewClassNamingConvention")
 public class CqlQueryTranslatorIT {
 
-    @Autowired
-    @Qualifier("cql")
-    private QueryTranslator cqlQueryTranslator;
+  @Autowired
+  @Qualifier("cql")
+  private QueryTranslator cqlQueryTranslator;
 
-    @Test
-    public void testTranslate() {
-        var bodyWeightTermCode = TermCode.builder()
-                .code("27113001")
-                .system("http://snomed.info/sct")
-                .version("v1")
-                .display("Body weight (observable entity)")
-                .build();
-        var kgUnit = Unit.builder()
-                .code("kg")
-                .display("kilogram")
-                .build();
-        var bodyWeightValueFilter = ValueFilter.builder()
-                .type(QUANTITY_COMPARATOR)
-                .comparator(GREATER_EQUAL)
-                .quantityUnit(kgUnit)
-                .value(50.0)
-                .build();
-        var hasBmiGreaterThanFifty = Criterion.builder()
-                .termCodes(List.of(bodyWeightTermCode))
-                .valueFilter(bodyWeightValueFilter)
-                .build();
-        var testQuery = StructuredQuery.builder()
-                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-                .inclusionCriteria(List.of(List.of(hasBmiGreaterThanFifty)))
-                .build();
+  @Test
+  public void testTranslate() {
+    var termCode = TermCode.builder()
+        .code("424144002")
+        .system("http://snomed.info/sct")
+        .display("Gegenwärtiges chronologisches Alter")
+        .build();
+    var context = TermCode.builder()
+        .code("Patient")
+        .system("fdpg.mii.cds")
+        .version("1.0.0")
+        .display("Patient")
+        .build();
+    var unit = Unit.builder()
+        .code("a")
+        .display("a")
+        .build();
+    var valueFilter = ValueFilter.builder()
+        .type(QUANTITY_COMPARATOR)
+        .comparator(GREATER_EQUAL)
+        .quantityUnit(unit)
+        .value(50.0)
+        .build();
+    var criterion = Criterion.builder()
+        .termCodes(List.of(termCode))
+        .context(context)
+        .valueFilter(valueFilter)
+        .build();
+    var testQuery = StructuredQuery.builder()
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(criterion)))
+        .build();
 
-        @SuppressWarnings("unused")
-        var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
-        // TODO: add assertions!
-    }
+    var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
+    assertThat(translationResult).isInstanceOf(String.class);
+    assertThat(translationResult).containsIgnoringCase("Context Patient");
+  }
 
-    @Test
-    public void testTranslate_SupportsTimeRestrictions() {
-        var dementiaTermCode = TermCode.builder()
-                .code("F00")
-                .system("http://fhir.de/CodeSystem/dimdi/icd-10-gm")
-                .display("F00")
-                .build();
-        var hasDementia = Criterion.builder()
-                .termCodes(List.of(dementiaTermCode))
-                .build();
-        var psychologicalDysfunctionTermCode = TermCode.builder()
-                .code("F09")
-                .system("http://fhir.de/CodeSystem/dimdi/icd-10-gm")
-                .display("F09")
-                .build();
-        var timeRestriction = new TimeRestriction("2021-10-09", "2021-09-09");
-        var hasPsychologicalDysfunction = Criterion.builder()
-                .termCodes(List.of(psychologicalDysfunctionTermCode))
-                .timeRestriction(timeRestriction)
-                .build();
-        var testQuery = StructuredQuery.builder()
-                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-                .inclusionCriteria(List.of(List.of(hasDementia, hasPsychologicalDysfunction)))
-                .build();
+  @Test
+  public void testTranslate_SupportsTimeRestrictions() {
+    var termCode = TermCode.builder()
+        .code("I118048")
+        .system("http://fhir.de/CodeSystem/bfarm/alpha-id")
+        .display("18-Hydroxylase-Mangel")
+        .version("2025")
+        .build();
+    var context = TermCode.builder()
+        .code("Diagnose")
+        .display("Diagnose")
+        .system("fdpg.mii.cds")
+        .version("1.0.0")
+        .build();
+    var timeRestriction = new TimeRestriction("2021-10-09", "2021-09-09");
+    var criterion = Criterion.builder()
+        .termCodes(List.of(termCode))
+        .timeRestriction(timeRestriction)
+        .context(context)
+        .build();
+    var testQuery = StructuredQuery.builder()
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(criterion)))
+        .build();
 
-        @SuppressWarnings("unused")
-        var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
-        // TODO: add assertions!
-    }
+    var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
+    assertThat(translationResult).isInstanceOf(String.class);
+    assertThat(translationResult).containsIgnoringCase("Context Patient");
+  }
 
-    @Test
-    public void testTranslate_SupportsAttributeFilters() {
-        var ageTermCode = TermCode.builder()
-                .code("30525-0")
-                .system("http://loinc.org")
-                .display("Alter")
-                .build();
-        var yearUnit = Unit.builder()
-                .code("a")
-                .display("Jahr")
-                .build();
-        var ageValueFilter = ValueFilter.builder()
-                .type(QUANTITY_COMPARATOR)
-                .comparator(GREATER_THAN)
-                .quantityUnit(yearUnit)
-                .value(18.0)
-                .build();
-        var olderThanEighteen = Criterion.builder()
-                .termCodes(List.of(ageTermCode))
-                .valueFilter(ageValueFilter)
-                .build();
-        var bodyTemperatureTermCode = TermCode.builder()
-                .code("8310-5")
-                .system("http://loinc.org")
-                .display("Körpertemperatur")
-                .build();
-        var axillaryMeasureMethod = TermCode.builder()
-                .code("LA9370-3")
-                .system("http://loinc.org")
-                .display("Axillary")
-                .build();
-        var method = TermCode.builder()
-                .code("method")
-                .system("abide")
-                .display("method")
-                .build();
-        var axillaryMeasured = AttributeFilter.builder()
-                .type(CONCEPT)
-                .selectedConcepts(List.of(axillaryMeasureMethod))
-                .attributeCode(method)
-                .build();
-        var bodyTemperatureAxillaryMeasured = Criterion.builder()
-                .termCodes(List.of(bodyTemperatureTermCode))
-                .attributeFilters(List.of(axillaryMeasured))
-                .build();
+  @Test
+  public void testTranslate_SupportsAttributeFilters() {
+    var termCode = TermCode.builder()
+        .code("IMP")
+        .system("http://terminology.hl7.org/CodeSystem/v3-ActCode")
+        .display("inpatient encounter")
+        .version("9.0.0")
+        .build();
+    var context = TermCode.builder()
+        .code("Fall")
+        .display("Fall")
+        .system("fdpg.mii.cds")
+        .version("1.0.0")
+        .build();
+    var attributeCode1 = TermCode.builder()
+        .code("Fachabteilungsschluessel")
+        .display("Fachabteilungsschluessel")
+        .system("http://hl7.org/fhir/StructureDefinition")
+        .build();
+    var attributeCode2 = TermCode.builder()
+        .code("ErweiterterFachabteilungsschluessel")
+        .display("ErweiterterFachabteilungsschluessel")
+        .system("http://hl7.org/fhir/StructureDefinition")
+        .build();
+    var concept1 = TermCode.builder()
+        .code("3400")
+        .display("Dermatologie")
+        .system("http://fhir.de/CodeSystem/dkgev/Fachabteilungsschluessel")
+        .build();
+    var concept2 = TermCode.builder()
+        .code("1500")
+        .display("Allgemeine Chirurgie")
+        .system("http://fhir.de/CodeSystem/dkgev/Fachabteilungsschluessel")
+        .build();
+    var attributeFilter1 = AttributeFilter.builder()
+        .attributeCode(attributeCode1)
+        .type(CONCEPT)
+        .selectedConcepts(List.of(concept1))
+        .build();
+    var attributeFilter2 = AttributeFilter.builder()
+        .attributeCode(attributeCode2)
+        .type(CONCEPT)
+        .selectedConcepts(List.of(concept2))
+        .build();
+    var criterion = Criterion.builder()
+        .termCodes(List.of(termCode))
+        .context(context)
+        .attributeFilters(List.of(attributeFilter1, attributeFilter2))
+        .build();
 
-        var testQuery = StructuredQuery.builder()
-                .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
-                .inclusionCriteria(List.of(List.of(olderThanEighteen)))
-                .exclusionCriteria(List.of(List.of(bodyTemperatureAxillaryMeasured)))
-                .build();
+    var testQuery = StructuredQuery.builder()
+        .version(URI.create("http://to_be_decided.com/draft-2/schema#"))
+        .inclusionCriteria(List.of(List.of(criterion)))
+        .build();
 
-        @SuppressWarnings("unused")
-        var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
-        // TODO: add assertions!
-    }
+    var translationResult = assertDoesNotThrow(() -> cqlQueryTranslator.translate(testQuery));
+    assertThat(translationResult).isInstanceOf(String.class);
+    assertThat(translationResult).containsIgnoringCase("Context Patient");
+  }
 }

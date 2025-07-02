@@ -4,7 +4,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 7.0.0
+  version: 7.2.0
 externalDocs:
   description: Check out the github repository
   url: https://github.com/medizininformatik-initiative/feasibility-backend
@@ -472,6 +472,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/QueryQuota"
+  /query/feasibility/cql:
+    post:
+      tags:
+        - feasibility
+      summary: Translate a structured query to cql
+      description: Nothing will be persisted in the backend. It simply returns the cql.
+      operationId: sq2Cql
+      parameters:
+      requestBody:
+        description: Structured query to translate
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StructuredQuery"
+        required: true
+      responses:
+        200:
+          description: Query successfully translated
+        401:
+          description: Unauthorized - please login first
+        422:
+          description: Invalid input
+      security:
+        - dataportal_auth:
+            - user
   /query/data/query-slots:
     get:
       tags:

@@ -7,6 +7,7 @@ import de.numcodex.feasibility_gui_backend.query.dispatch.QueryDispatcher;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryContentRepository;
 import de.numcodex.feasibility_gui_backend.query.persistence.QueryRepository;
 import de.numcodex.feasibility_gui_backend.query.result.ResultService;
+import de.numcodex.feasibility_gui_backend.query.translation.QueryTranslator;
 import de.numcodex.feasibility_gui_backend.terminology.validation.StructuredQueryValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +45,14 @@ class QueryHandlerServiceTest {
   @Mock
   private StructuredQueryValidation structuredQueryValidation;
 
+  @Mock
+  private QueryTranslator queryTranslator;
+
   private QueryHandlerService queryHandlerService;
 
   private QueryHandlerService createQueryHandlerService() {
     return new QueryHandlerService(queryDispatcher, queryRepository, queryContentRepository,
-        resultService, structuredQueryValidation, jsonUtil);
+        resultService, structuredQueryValidation, queryTranslator, jsonUtil);
   }
 
   @BeforeEach

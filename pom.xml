@@ -6,13 +6,13 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
   <groupId>de.medizininformatik-initiative</groupId>
   <artifactId>DataportalBackend</artifactId>
-  <version>7.1.2</version>
+  <version>7.2.0</version>
 
   <name>Dataportal Backend</name>
   <description>Backend of the Dataportal</description>
@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
     <okhttp3.version>4.10.0</okhttp3.version>
-    <ontology-tag>v3.7.0</ontology-tag>
+    <ontology-tag>v3.8.1</ontology-tag>
   </properties>
 
   <dependencies>
@@ -101,6 +101,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
+      <version>42.7.7</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -229,7 +230,7 @@
     <dependency>
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>
-      <version>5.10</version>
+      <version>5.11.1</version>
     </dependency>
 
     <dependency>

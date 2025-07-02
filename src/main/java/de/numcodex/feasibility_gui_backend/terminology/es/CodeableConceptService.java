@@ -139,6 +139,7 @@ public class CodeableConceptService {
           .mustNot(List.of(translationDeExistsQuery._toQuery(), translationEnExistsQuery._toQuery()))
           .must(List.of(mmQueryWithOriginal._toQuery()))
           .filter(filterTerms.isEmpty() ? List.of() : filterTerms)
+          .minimumShouldMatch("1")
           .build();
 
       // Combine both parts in the top level bool query

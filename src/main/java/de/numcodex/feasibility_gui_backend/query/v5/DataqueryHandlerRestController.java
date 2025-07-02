@@ -209,6 +209,7 @@ public class DataqueryHandlerRestController {
                 .comment(dq.comment())
                 .lastModified(dq.lastModified())
                 .createdBy(dq.createdBy())
+                .resultSize(dq.resultSize())
                 .ccdl(CrtdlSectionInfo.builder()
                     .exists(dq.content().cohortDefinition() != null)
                     .isValid(skipValidation || structuredQueryValidation.isValid(dq.content().cohortDefinition()))

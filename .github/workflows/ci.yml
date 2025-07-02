@@ -3,12 +3,14 @@ name: Docker
 on:
   push:
     branches:
-    - '**'
+      - master
+      - develop
     tags:
     - v[0-9]+.[0-9]+.[0-9]+**
   pull_request:
     branches:
     - master
+    - develop
 
 jobs:
 
@@ -148,7 +150,7 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     env:
-      ONTOLOGY_GIT_TAG: v3.7.0
+      ONTOLOGY_GIT_TAG: v3.8.1
       ELASTIC_HOST: http://localhost:9200
       ELASTIC_FILEPATH: https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/download/TAGPLACEHOLDER/
       ELASTIC_FILENAME: elastic.zip
@@ -192,7 +194,7 @@ jobs:
         run: .github/scripts/load-test-data.sh
 
       - name: Wait for Keycloak
-        run: .github/scripts/wait-for-url.sh  http://localhost:8083/auth/
+        run: .github/scripts/wait-for-url.sh  http://localhost:9003/auth/health
 
       - name: Create Test User in Keycloak
         run: .github/scripts/create-keycloak-user.sh
@@ -217,7 +219,7 @@ jobs:
         uses: jwalton/gh-docker-logs@v2
 
   release:
-    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'pull_request') }}
     needs:
       - tests
       - integration-test
@@ -233,7 +235,7 @@ jobs:
         prefix: 'v'
 
     - name: Report invalid version
-      if: ${{ steps.version.outputs.is_valid != 'true' }}
+      if: ${{ startsWith(github.ref, 'refs/tags/v') && steps.version.outputs.is_valid != 'true' }}
       uses: actions/github-script@v7
       with:
         script: |
@@ -283,6 +285,19 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         tags: |
-          ghcr.io/${{ steps.repo.outputs.repository }}:${{ steps.version.outputs.full_without_prefix }}
-          ${{ steps.version.outputs.is_stable == 'true' && format('ghcr.io/{0}:latest', steps.repo.outputs.repository) || null}}
+          ${{ startsWith(github.ref, 'refs/tags/v') &&
+          format('ghcr.io/{0}:{1}',
+          steps.repo.outputs.repository,
+          steps.version.outputs.full_without_prefix) ||
+          '' }}
+          ${{ startsWith(github.ref, 'refs/tags/v') &&
+          steps.version.outputs.is_stable == 'true' &&
+          format('ghcr.io/{0}:latest',
+          steps.repo.outputs.repository) ||
+          '' }}
+          ${{ github.event_name == 'pull_request' &&
+          format('ghcr.io/{0}:pr-{1}',
+          steps.repo.outputs.repository,
+          github.event.pull_request.number) ||
+          ''}}
         push: true
