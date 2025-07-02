@@ -45,8 +45,8 @@ public class DirectSpringConfig {
     private String clientSecret;
     private boolean useAsyncRequestPattern;
 
-    public DirectSpringConfig(@Value("${app.broker.direct.useCql:false}") boolean useCql,
-            @Value("${app.flare.baseUrl:}") String flareBaseUrl, @Value("${app.cql.baseUrl:}") String cqlBaseUrl,
+    public DirectSpringConfig(@Value("${app.broker.direct.cql.enabled:false}") boolean useCql,
+            @Value("${app.broker.direct.flare.baseUrl:}") String flareBaseUrl, @Value("${app.broker.direct.cql.baseUrl:}") String cqlBaseUrl,
             @Value("${app.broker.direct.auth.basic.username:}") String username,
             @Value("${app.broker.direct.auth.basic.password:}") String password,
             @Value("${app.broker.direct.auth.oauth.issuer.url:}") String issuer,

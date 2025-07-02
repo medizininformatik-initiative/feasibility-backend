@@ -76,6 +76,7 @@ app:
     mock:
       enabled: ${BROKER_CLIENT_MOCK_ENABLED:false}
     direct:
+      enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
       auth:
         basic:
           username: ${BROKER_CLIENT_DIRECT_AUTH_BASIC_USERNAME:}
@@ -86,10 +87,12 @@ app:
           client:
             id: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_ID:}
             secret: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_SECRET:}
-      enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
-      useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
       cql:
+        enabled: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
+        baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
         useAsyncRequestPattern: ${BROKER_CLIENT_DIRECT_CQL_USE_ASYNC:false}
+      flare:
+        baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
       obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
       timeout: ${BROKER_CLIENT_DIRECT_TIMEOUT:PT20S}
     aktin:
@@ -116,12 +119,6 @@ app:
       websocket:
         url: ${DSF_WEBSOCKET_URL}
       organizationId: ${DSF_ORGANIZATION_ID}
-  flare:
-    baseUrl: ${FLARE_WEBSERVICE_BASE_URL:http://localhost:5000}
-    readTimeout: PT20S
-    connectTimeout: PT2S
-  cql:
-    baseUrl: ${CQL_SERVER_BASE_URL:http://localhost:8080/fhir}
   elastic:
     enabled: ${ELASTIC_SEARCH_ENABLED:true}
     host: ${ELASTIC_SEARCH_HOST:localhost:9200}
