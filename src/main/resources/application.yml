@@ -88,6 +88,8 @@ app:
             secret: ${BROKER_CLIENT_DIRECT_AUTH_OAUTH_CLIENT_SECRET:}
       enabled: ${BROKER_CLIENT_DIRECT_ENABLED:false}
       useCql: ${BROKER_CLIENT_DIRECT_USE_CQL:false}
+      cql:
+        useAsyncRequestPattern: ${BROKER_CLIENT_DIRECT_CQL_USE_ASYNC:false}
       obfuscateResultCount: ${BROKER_CLIENT_OBFUSCATE_RESULT_COUNT:false}
       timeout: ${BROKER_CLIENT_DIRECT_TIMEOUT:PT20S}
     aktin:
