@@ -35,8 +35,13 @@ springdoc:
 management:
   endpoints:
     web:
+      cors:
+        allowed-origins: "${ALLOWED_ORIGINS:http://localhost}"
+        allowed-methods: OPTIONS, GET
+        allowed-headers: "*"
       exposure:
         include: "health, info"
+      base-path: /api/v5/actuator
     access:
       default: none
   endpoint:
