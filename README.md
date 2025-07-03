@@ -312,7 +312,7 @@ DATAPORTAL_DATABASE_PORT=<your-desired-port> docker-compose up -d
 
 ### Testing if the Container is Running Properly
 ```
-GET http://localhost:8090/actuator/health
+GET http://localhost:8090/api/v5/actuator/health
 ```
 
 Should reply with status 200 and a JSON object
