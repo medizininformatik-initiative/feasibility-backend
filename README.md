@@ -1,3 +1,5 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/medizininformatik-initiative/feasibility-backend/badge)](https://scorecard.dev/viewer/?uri=github.com/medizininformatik-initiative/feasibility-backend)
+
 # Dataportal Backend
 
 ## Api Documentation
