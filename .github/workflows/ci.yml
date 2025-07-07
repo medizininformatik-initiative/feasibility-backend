@@ -1,5 +1,7 @@
 name: Docker
 
+permissions: read-all
+
 on:
   push:
     branches:
@@ -16,6 +18,8 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -99,6 +103,9 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
     steps:
     - uses: actions/checkout@v4
 
@@ -225,6 +232,9 @@ jobs:
       - integration-test
       - security-scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
     - uses: actions/checkout@v4
 
