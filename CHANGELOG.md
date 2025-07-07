@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [7.3.0] - 2025-07-07
+
+- Based on ontology **[v3.8.1](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.8.1)**
+
+### Added
+- OpenSSF Scorecard and badges
+### Changed
+- Move management endpoints under default api path (/api/v5) ([#547](https://github.com/medizininformatik-initiative/feasibility-backend/issues/547))
+### Fixed
+- Enable CORS for management endpoints ([#547](https://github.com/medizininformatik-initiative/feasibility-backend/issues/547))
+### Security
+- Pinned workflow dependencies to specific hashes ([#549](https://github.com/medizininformatik-initiative/feasibility-backend/issues/549))
+
 ## [7.2.0] - 2025-07-02
 
 - Based on ontology **[v3.8.1](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.8.1)**
@@ -19,7 +32,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - OpenAPI documentation path has been moved under the default api path ([#537](https://github.com/medizininformatik-initiative/feasibility-backend/issues/537))
 - Docker base image has been updated to eclipse-temurin:24-jre ([#542](https://github.com/medizininformatik-initiative/feasibility-backend/issues/542))
 - Direct broker configuration in application.yml has been moved to one place ([#544](https://github.com/medizininformatik-initiative/feasibility-backend/issues/544))
-### Deprecated
 ### Removed
 - Unused tables and derived entities have been removed ([#359](https://github.com/medizininformatik-initiative/feasibility-backend/issues/359))
 - Unused parameters have been removed from the README and the example compose file ([#542](https://github.com/medizininformatik-initiative/feasibility-backend/issues/542))
@@ -52,8 +64,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Update ontology to 3.7.0
 ### Security
 - Spring boot was updated to 3.5.0
-
-### Added
 
 ## [7.0.1] - 2025-05-20
 
