@@ -11,14 +11,12 @@ public class Coding implements Serializable {
   private String code;
   private String version;
 
-  public Coding() {
-  }
-
   public Coding(String system, String code, String version) {
     requireNonNull(system);
     requireNonNull(code);
     this.system = system;
     this.code = code;
+    this.version = version;
   }
 
   @Override

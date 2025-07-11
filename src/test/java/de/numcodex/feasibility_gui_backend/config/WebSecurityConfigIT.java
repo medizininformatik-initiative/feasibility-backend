@@ -48,7 +48,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     controllers = {DataqueryHandlerRestController.class,
         TerminologyRestController.class
     }
-
 )
 class WebSecurityConfigIT {
 

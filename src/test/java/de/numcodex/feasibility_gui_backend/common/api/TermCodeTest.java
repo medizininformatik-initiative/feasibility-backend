@@ -34,5 +34,8 @@ class TermCodeTest {
 
         assertEquals(termCode1.hashCode(), termCode2.hashCode());
         assertNotEquals(termCode1.hashCode(), termCode3.hashCode());
+
+        assertNotEquals(termCode1, null);
+        assertNotEquals(termCode1, "");
     }
 }
