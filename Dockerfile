@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-jre-alpine@sha256:dbc9b392f33b2aca2c3d47de4534f3453e75d3b6dd27e08a555a47369be9b49c
+FROM eclipse-temurin:24-jre-alpine@sha256:6454f0a4794a77f156c6fb9248803d573ea2395afe67ec2ec42c1c16f31e0cdf
 
 WORKDIR /opt/dataportal-backend
 
