@@ -24,7 +24,7 @@ class AttributeDefinitionTest {
         .min(0.0)
         .max(0.0)
         .referencedCriteriaSet(null)
-        .referencedValueSet(null)
+        .referencedValueSets(null)
         .build();
 
     assertNotNull(attributeDefinition);
@@ -48,7 +48,7 @@ class AttributeDefinitionTest {
         .min(0.0)
         .max(0.0)
         .referencedCriteriaSet(null)
-        .referencedValueSet(null)
+        .referencedValueSets(null)
       .build();
 
     assertNotNull(attributeDefinition);
