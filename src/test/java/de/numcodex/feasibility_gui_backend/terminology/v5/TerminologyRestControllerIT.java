@@ -238,7 +238,7 @@ public class TerminologyRestControllerIT {
             .type(ValueDefinitonType.CONCEPT)
             .optional(false)
             .referencedCriteriaSet("http://my.reference.criteria/set")
-            .referencedValueSet("http://my.reference.value/set")
+            .referencedValueSets(List.of("http://my.reference.value/set"))
             .comparator(Comparator.EQUAL)
             .precision(1.0)
             .selectableConcepts(List.of(createTermCode()))
