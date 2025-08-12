@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [7.4.0] - 2025-08-12
+
+- Based on ontology **[v3.8.3](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.8.3)**
+
+### Added
+- Improved test coverage ([#552](https://github.com/medizininformatik-initiative/feasibility-backend/issues/552))
+### Changed
+- Update ontology to 3.8.3 ([#605](https://github.com/medizininformatik-initiative/feasibility-backend/issues/605))
+### Fixed
+- Fixed flaky test in MockBrokerClientIT ([#607](https://github.com/medizininformatik-initiative/feasibility-backend/issues/607))
+### Security
+- Updated dependencies and GitHub actions
+
 ## [7.3.0] - 2025-07-07
 
 - Based on ontology **[v3.8.1](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v3.8.1)**

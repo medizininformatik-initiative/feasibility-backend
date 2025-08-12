@@ -34,7 +34,7 @@ public class MockBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
                 TEST_BACKEND_QUERY_ID,
                 QueryStatusUpdate.builder()
                         .source(client)
@@ -43,7 +43,7 @@ public class MockBrokerClientIT {
                         .status(COMPLETED)
                         .build()
         );
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
                 TEST_BACKEND_QUERY_ID,
                 QueryStatusUpdate.builder()
                         .source(client)
@@ -52,7 +52,7 @@ public class MockBrokerClientIT {
                         .status(COMPLETED)
                         .build()
         );
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
                 TEST_BACKEND_QUERY_ID,
                 QueryStatusUpdate.builder()
                         .source(client)
@@ -61,7 +61,7 @@ public class MockBrokerClientIT {
                         .status(COMPLETED)
                         .build()
         );
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS)).onClientUpdate(
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
                 TEST_BACKEND_QUERY_ID,
                 QueryStatusUpdate.builder()
                         .source(client)

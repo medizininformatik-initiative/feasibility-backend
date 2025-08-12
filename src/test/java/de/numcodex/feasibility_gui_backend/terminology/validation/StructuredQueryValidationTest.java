@@ -36,6 +36,14 @@ class StructuredQueryValidationTest {
         structuredQueryValidation = new StructuredQueryValidation(terminologyService);
     }
 
+
+    @Test
+    void testInvalidOnNull() {
+        var isValid = structuredQueryValidation.isValid(null);
+
+        assertFalse(isValid);
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testIsValid_trueOnValidCriteria(boolean withExclusionCriteria) {

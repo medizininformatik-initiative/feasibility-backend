@@ -148,5 +148,3 @@ public class StructuredQueryV2ParserTest {
   }
 
 }
-
-

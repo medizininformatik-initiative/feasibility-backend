@@ -2,7 +2,9 @@ package de.numcodex.feasibility_gui_backend.terminology;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.numcodex.feasibility_gui_backend.common.api.DisplayEntry;
 import de.numcodex.feasibility_gui_backend.terminology.api.CriteriaProfileData;
+import de.numcodex.feasibility_gui_backend.terminology.api.EsSearchResultEntry;
 import de.numcodex.feasibility_gui_backend.terminology.persistence.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -153,6 +155,52 @@ class TerminologyServiceTest {
         assertThat(terminologySystems.size()).isEqualTo(4);
         assertThat(terminologySystems.get(0).name()).isEqualTo("loinc");
         assertThat(terminologySystems.get(2).url()).isEqualTo("http://fhir.de/CodeSystem/bfarm/ops");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"true", "false"})
+    void testAddDisplay(boolean matchingIds) throws IOException {
+        var terminologyService = createTerminologyService();
+        de.numcodex.feasibility_gui_backend.common.api.TermCode tc = de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+            .code("code")
+            .system("system")
+            .display("display")
+            .version("version")
+            .build();
+
+        CriteriaProfileData cpd = CriteriaProfileData.builder()
+            .id("id")
+            .context(de.numcodex.feasibility_gui_backend.common.api.TermCode.builder()
+                .code("code")
+                .system("system")
+                .display("display")
+                .version("version")
+                .build())
+            .termCodes(List.of(tc))
+            .uiProfile(de.numcodex.feasibility_gui_backend.terminology.api.UiProfile.builder().build())
+            .build();
+
+        EsSearchResultEntry esSearchResultEntry = EsSearchResultEntry.builder()
+            .id(matchingIds ? "id" : "differentId")
+            .display(DisplayEntry.builder().build())
+            .availability(100)
+            .context("context")
+            .terminology("terminology")
+            .termcode("termcode")
+            .kdsModule("kdsModule")
+            .selectable(true)
+            .build();
+
+        assertNull(cpd.display());
+
+        var criteriaProfileDataWithDisplayData = terminologyService.addDisplayDataToCriteriaProfileData(List.of(cpd), List.of(esSearchResultEntry));
+        assertNotNull(criteriaProfileDataWithDisplayData);
+
+        if (matchingIds) {
+            assertNotNull(criteriaProfileDataWithDisplayData.get(0).display());
+        } else {
+            assertNull(criteriaProfileDataWithDisplayData.get(0).display());
+        }
     }
 
     private UiProfile createUiProfile() throws JsonProcessingException {
