@@ -6,6 +6,10 @@ import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusListener;
 import de.numcodex.feasibility_gui_backend.query.collect.QueryStatusUpdate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.numcodex.feasibility_gui_backend.query.collect.QueryStatus.COMPLETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,43 +38,17 @@ public class MockBrokerClientIT {
         client.addQueryStatusListener(statusListener);
         client.publishQuery(brokerQueryId);
 
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
-                TEST_BACKEND_QUERY_ID,
-                QueryStatusUpdate.builder()
-                        .source(client)
-                        .brokerQueryId(brokerQueryId)
-                        .brokerSiteId("2")
-                        .status(COMPLETED)
-                        .build()
-        );
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
-                TEST_BACKEND_QUERY_ID,
-                QueryStatusUpdate.builder()
-                        .source(client)
-                        .brokerQueryId(brokerQueryId)
-                        .brokerSiteId("3")
-                        .status(COMPLETED)
-                        .build()
-        );
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
-                TEST_BACKEND_QUERY_ID,
-                QueryStatusUpdate.builder()
-                        .source(client)
-                        .brokerQueryId(brokerQueryId)
-                        .brokerSiteId("4")
-                        .status(COMPLETED)
-                        .build()
-        );
-        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).atLeastOnce()).onClientUpdate(
-                TEST_BACKEND_QUERY_ID,
-                QueryStatusUpdate.builder()
-                        .source(client)
-                        .brokerQueryId(brokerQueryId)
-                        .brokerSiteId("5")
-                        .status(COMPLETED)
-                        .build()
-        );
+        ArgumentCaptor<QueryStatusUpdate> captor = ArgumentCaptor.forClass(QueryStatusUpdate.class);
 
+        verify(statusListener, timeout(ASYNC_TIMEOUT_WAIT_MS).times(4))
+            .onClientUpdate(eq(TEST_BACKEND_QUERY_ID), captor.capture());
+
+        Set<String> completedIds = captor.getAllValues().stream()
+            .filter(update -> update.status() == COMPLETED)
+            .map(QueryStatusUpdate::brokerSiteId)
+            .collect(Collectors.toSet());
+
+        assertEquals(Set.of("2", "3", "4", "5"), completedIds);
         assertEquals(4, client.getResultSiteIds(brokerQueryId).size());
         assertTrue(client.getResultFeasibility(brokerQueryId, "2") >= 10);
         assertTrue(client.getResultFeasibility(brokerQueryId, "3") >= 10);
