@@ -26,7 +26,7 @@
   <properties>
     <java.version>17</java.version>
     <mockwebserver.version>5.5.0</mockwebserver.version>
-    <ontology-tag>v5.0.1</ontology-tag>
+    <ontology-tag>v5.1.0</ontology-tag>
     <!-- Override spring-boot-starter-parent's pinned Tomcat version to fix CVE-2026-68525
          (FORM auth incorrect authorization, fixed in 11.0.25); remove once the parent BOM catches up. -->
     <tomcat.version>11.0.25</tomcat.version>
