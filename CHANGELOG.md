@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [9.4.0] - 2026-10-19
+
+- Based on ontology **[v5.1.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v5.1.0)**
+
+### Changed
+- Update ontology to [v5.1.0](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v5.1.0) ([#1170](https://github.com/medizininformatik-initiative/dataportal-backend/issues/1170))
+### Fixed
+- Fixed CI build failing due to invalid `jakarta.xml.bind` groupId ([#1161](https://github.com/medizininformatik-initiative/dataportal-backend/issues/1161))
+### Security
+- Update dependencies and GitHub actions
+
 ## [9.3.1] - 2026-10-05
 
 - Based on ontology **[v5.0.1](https://github.com/medizininformatik-initiative/fhir-ontology-generator/releases/tag/v5.0.1)**
